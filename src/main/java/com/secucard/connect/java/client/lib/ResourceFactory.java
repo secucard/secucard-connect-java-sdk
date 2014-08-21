@@ -6,6 +6,7 @@ package com.secucard.connect.java.client.lib;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.codehaus.jackson.Version;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.codehaus.jackson.map.DeserializationConfig.Feature;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -17,10 +18,8 @@ import org.joda.time.DateTime;
 
 import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
 import com.secucard.connect.java.client.oauth.OAuthUserCredentials;
-
-//import com.secucard.connect.java.client.serialize.DateTimeDeserializer;
-//import com.secucard.connect.java.client.serialize.DateTimeSerializer;
-
+import com.secucard.connect.java.client.serialize.DateTimeDeserializer;
+import com.secucard.connect.java.client.serialize.DateTimeSerializer;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -106,13 +105,12 @@ public final class ResourceFactory {
 		mapper.disable(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS);
 		mapper.setSerializationInclusion(Inclusion.NON_NULL);
 
-		/* uncomment the code when you correctly implement DateTimeSerializer and DateTimeDeserializer class
 		SimpleModule secucoreModule = new SimpleModule("Secucore", new Version(1, 0, 0, null))
 			.addSerializer(DateTime.class, new DateTimeSerializer())
 			
-            .addDeserializer(DateTime.class, new DateTimeDeserializer());
+			.addDeserializer(DateTime.class, new DateTimeDeserializer());
 
-        mapper.registerModule(secucoreModule);*/
+		mapper.registerModule(secucoreModule);
 
 		return new CustomJacksonJsonProvider(mapper);
 	}

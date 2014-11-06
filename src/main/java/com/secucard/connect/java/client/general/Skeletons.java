@@ -3,7 +3,8 @@
  */
 package com.secucard.connect.java.client.general;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 /**
  * Represents a Skeletons model

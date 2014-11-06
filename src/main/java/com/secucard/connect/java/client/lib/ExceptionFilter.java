@@ -3,27 +3,30 @@
  */
 package com.secucard.connect.java.client.lib;
 
+import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
+import javax.ws.rs.client.ClientResponseFilter;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
+import java.io.IOException;
 import java.util.Map;
 
-import javax.ws.rs.core.Response.Status.Family;
-
-import com.sun.jersey.api.client.ClientHandlerException;
-import com.sun.jersey.api.client.ClientRequest;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.filter.ClientFilter;
 
 /**
  * Class that handle runtime exceptions and transforms them to our exceptions
  */
-public class ExceptionFilter extends ClientFilter {
+public class ExceptionFilter implements ClientResponseFilter {
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
-		try {
-			ClientResponse response = getNext().handle(cr);
-			if (response.getClientResponseStatus() == null || response.getClientResponseStatus().getFamily() != Family.SUCCESSFUL) {
+  @Override
+  public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
+/*
+	try {
+
+			if (responseContext.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
+        responseContext.getEntityStream();
+
 				Map<String, Object> errorData = response .getEntity(new GenericType<Map<String, Object>>() {});
 
 				throw new ResponseException(
@@ -37,5 +40,6 @@ public class ExceptionFilter extends ClientFilter {
 		} catch (ClientHandlerException e) {
 			throw new RequestException(e.getMessage(), e.getCause());
 		}
+*/
 	}
 }

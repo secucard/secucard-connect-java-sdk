@@ -3,7 +3,8 @@
  */
 package com.secucard.connect.java.client.oauth;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * OAuthToken model class

@@ -1,14 +1,10 @@
 package com.secucard.connect.java.client;
 
-import java.util.List;
-
 import com.secucard.connect.java.client.general.SkelentonsListModel;
-import com.secucard.connect.java.client.general.Skeletons;
 import com.secucard.connect.java.client.general.SkeletonsApi;
 import com.secucard.connect.java.client.lib.ResourceFactory;
 import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
 import com.secucard.connect.java.client.oauth.OAuthPasswordCredentials;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

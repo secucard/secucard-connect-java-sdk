@@ -1,8 +1,9 @@
 /**
  * AuthProvider.java class file
  */
-package com.secucard.connect.java.client.lib;
+package com.secucard.connect.auth;
 
+import com.secucard.connect.java.client.lib.ResourceFactory;
 import com.secucard.connect.java.client.oauth.OAuthApi;
 import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
 import com.secucard.connect.java.client.oauth.OAuthRefreshTokenCredentials;
@@ -12,7 +13,7 @@ import com.secucard.connect.java.client.oauth.OAuthUserCredentials;
 /**
  * Manages tokens based on client credentials and user credentials
  */
-public class AuthProvider {
+public class AuthProviderImpl implements AuthProvider {
 
 	private final OAuthClientCredentials clientCredentials;
 	private final OAuthUserCredentials userCredentials;
@@ -28,7 +29,7 @@ public class AuthProvider {
 	 * @param clientCredentials
 	 * @param userCredentials
 	 */
-	public AuthProvider(ResourceFactory baseApi, OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials) {
+	public AuthProviderImpl(ResourceFactory baseApi, OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials) {
 		this.clientCredentials = clientCredentials;
 		this.userCredentials = userCredentials;
 		this.oauthApi = new OAuthApi(baseApi);
@@ -66,7 +67,8 @@ public class AuthProvider {
 	 * Token getter
 	 * @return
 	 */
-	public synchronized OAuthToken getToken() {
+	@Override
+  public synchronized OAuthToken getToken() {
 		if (token == null) {
 			newToken();
 		} else if (expireTime < System.currentTimeMillis() - 30 * 1000) {

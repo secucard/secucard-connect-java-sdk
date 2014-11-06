@@ -3,9 +3,9 @@
  */
 package com.secucard.connect.java.client.lib;
 
+import javax.ws.rs.core.Response;
 import java.util.Map;
 
-import com.sun.jersey.api.client.ClientResponse.Status;
 
 /**
  * Response Exception is thrown when response error happens
@@ -14,7 +14,7 @@ public class ResponseException extends RuntimeException {
 
 	private static final long serialVersionUID = -2782593287936100771L;
 
-	private final Status status;
+	private final Response.Status status;
 
 	private final String error;
 
@@ -29,7 +29,7 @@ public class ResponseException extends RuntimeException {
 	 * @param description
 	 * @param parameters
 	 */
-	public ResponseException(Status status, String error,
+	public ResponseException(Response.Status status, String error,
 			String description, Map<String, Object> parameters) {
 		super();
 		this.status = status;
@@ -46,7 +46,7 @@ public class ResponseException extends RuntimeException {
 	/**
 	 * Getters
 	 */
-	public Status getStatus() {
+	public Response.Status getStatus() {
 		return status;
 	}
 

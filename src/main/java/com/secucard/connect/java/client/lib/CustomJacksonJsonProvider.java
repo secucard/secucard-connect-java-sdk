@@ -3,11 +3,12 @@
  */
 package com.secucard.connect.java.client.lib;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 
-import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
-import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * Custom jackson provider to accept multiple kinds of data as JSON

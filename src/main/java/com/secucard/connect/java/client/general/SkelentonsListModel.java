@@ -3,10 +3,11 @@
  */
 package com.secucard.connect.java.client.general;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.lang.reflect.Array;
 
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 
 /**

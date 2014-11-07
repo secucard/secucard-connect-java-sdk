@@ -1,5 +1,6 @@
 package com.secucard.connect;
 
+import com.secucard.connect.auth.OAuthClientCredentials;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.rest.RestConfig;
@@ -11,11 +12,14 @@ public class ClientDemo implements EventListener {
 
   public static void main(String[] args) {
 
+    OAuthClientCredentials clientCredentials = new OAuthClientCredentials(
+        "webapp", "821fc7042ec0ddf5cc70be9abaa5d6d311db04f4679ab56191038cb6f7f9cb7c");
+
     ClientConfig config = new ClientConfig(
         new RestConfig("https://core-dev10.secupay-ag.de/app.core.connector/api/v2",
-            "https://core-dev10.secupay-ag.de/app.core.connector/oauth/token"),
+            "https://core-dev10.secupay-ag.de/app.core.connector/oauth/token", clientCredentials),
         new StompConfig("dev10.secupay-ag.de", null, 61614, "/exchange/connect.api/", "guest", "guest", 0, true, true,
-            "/temp-queue/main", 30, 60, 360));
+            "/temp-queue/main", 20, 60, 360, 5));
 
     Client client = Client.create(config);
 

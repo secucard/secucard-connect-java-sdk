@@ -1,7 +1,8 @@
 package com.secucard.connect.auth;
 
-import com.secucard.connect.java.client.oauth.OAuthToken;
+
+import com.secucard.connect.model.auth.Token;
 
 public interface AuthProvider {
-  OAuthToken getToken();
+  Token getToken();
 }

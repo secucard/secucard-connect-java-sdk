@@ -35,9 +35,9 @@ public class Client {
 
   public void connect() throws ConnectException {
     try {
-      for (Channel channel : channels.values()) {
-        channel.open();
-      }
+      // first rest since it does auth
+      selectChannnel(ChannelName.REST).open();
+      selectChannnel(ChannelName.STOMP).open();
     } catch (IOException e) {
       throw new ConnectException(e);
     }
@@ -93,6 +93,7 @@ public class Client {
 
     stompChannel.setBodyMapper(new JsonBodyMapper());
     stompChannel.setPathResolver(pathResolver);
+    stompChannel.setAuthProvider(restChannel);
 
     Client client = new Client(config);
 

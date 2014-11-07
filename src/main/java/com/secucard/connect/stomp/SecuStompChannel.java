@@ -4,6 +4,7 @@ import com.secucard.connect.AbstractChannel;
 import com.secucard.connect.EventListener;
 import com.secucard.connect.QueryParams;
 import com.secucard.connect.SecuException;
+import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Event;
@@ -37,6 +38,8 @@ public class SecuStompChannel extends AbstractChannel {
   private AtomicReference<String> session = new AtomicReference<>(null);
   private EventListener eventListener;
 
+  private AuthProvider authProvider;
+
   // settings
   private final StompConfig cfg;
 
@@ -44,13 +47,16 @@ public class SecuStompChannel extends AbstractChannel {
     this.cfg = cfg;
     messages = new ConcurrentHashMap<>(50, 0.75f, 2);
     stompClient = new MyStompClient(new Config(cfg.getHost(), cfg.getPort(), cfg.getVirtualHost(), cfg.getUserId(),
-        cfg.getPassword(), cfg.getHeartbeatMs(), cfg.isUseSsl()));
+        cfg.getPassword(), cfg.getHeartbeatMs(), cfg.isUseSsl(), cfg.getSocketTimeoutSec()));
   }
 
   public void setEventListener(EventListener eventListener) {
     this.eventListener = eventListener;
   }
 
+  public void setAuthProvider(AuthProvider authProvider) {
+    this.authProvider = authProvider;
+  }
 
   public void setBodyMapper(BodyMapper bodyMapper) {
     this.bodyMapper = bodyMapper;
@@ -60,7 +66,11 @@ public class SecuStompChannel extends AbstractChannel {
   public void open() throws IOException {
     session.set(null);
     connected = false;
+
+    // todo: connecting with the configured credentials for now, switch!
     stompClient.connect();
+    stompClient.connect(authProvider.getToken().getAccessToken(), "");
+
     if (!awaitConnected()) {
       throw new IOException("Not connected");
     }
@@ -315,7 +325,8 @@ public class SecuStompChannel extends AbstractChannel {
 
     @Override
     protected void onError(Map<String, String> headers) {
-
+      // todo: handle "Bad CONNECT" message, indicates that stomp logical connection is not set up
+      eventListener.onEvent(new Event(headers.toString()));
     }
 
     @Override

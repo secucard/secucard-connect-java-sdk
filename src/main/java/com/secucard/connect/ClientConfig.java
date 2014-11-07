@@ -1,5 +1,7 @@
 package com.secucard.connect;
 
+import com.secucard.connect.auth.OAuthClientCredentials;
+import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.rest.RestConfig;
 import com.secucard.connect.stomp.StompConfig;
 

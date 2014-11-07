@@ -1,13 +1,17 @@
 package com.secucard.connect.rest;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.secucard.connect.*;
+import com.secucard.connect.AbstractChannel;
+import com.secucard.connect.EventListener;
+import com.secucard.connect.QueryParams;
+import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
-import com.secucard.connect.java.client.oauth.OAuthToken;
+import com.secucard.connect.auth.OAuthClientCredentials;
+import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.Status;
+import com.secucard.connect.model.auth.Token;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientBuilder;
@@ -16,12 +20,10 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
 
 public class RestChannel extends AbstractChannel implements AuthProvider {
-
-  private final OAuthClientCredentials clientCredentials;
   private javax.ws.rs.client.Client client;
   private GenericTypeResolver typeResolver;
   private LoginFilter loginFilter;
-  private OAuthToken token;
+  private Token token;
   private long expireTime;
   private final RestConfig cfg;
 
@@ -30,8 +32,6 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     this.client = ClientBuilder.newClient();
     client.register(JacksonJsonProvider.class);
     loginFilter = new LoginFilter(this);
-    clientCredentials = new OAuthClientCredentials("webapp",
-        "821fc7042ec0ddf5cc70be9abaa5d6d311db04f4679ab56191038cb6f7f9cb7c");
   }
 
   public void setTypeResolver(GenericTypeResolver typeResolver) {
@@ -44,35 +44,39 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public synchronized OAuthToken getToken() {
+  public synchronized Token getToken() {
     if (token == null) {
-      token = createToken("sten@beispiel.net", "secrets", null);
+      token = createToken(cfg.getClientCredentials(), null, null);
     } else if (expireTime < System.currentTimeMillis() - 30 * 1000) {
-      token = createToken(null, null, token.getRefreshToken());
+      token = createToken(cfg.getClientCredentials(), null, token.getRefreshToken());
     }
     this.expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
     return token;
   }
 
-  private OAuthToken createToken(String username, String password, String refreshToken) {
+  private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
+                            String refreshToken) {
     MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
     parameters.add("client_id", clientCredentials.getClientId());
     parameters.add("client_secret", clientCredentials.getClientSecret());
     if (refreshToken != null) {
       parameters.add("grant_type", "refresh_token");
       parameters.add("refresh_token", refreshToken);
+    } else if (userCredentials != null) {
+      parameters.add("grant_type", "appuser");
+      parameters.add("username", userCredentials.getUsername());
+      parameters.add("password", userCredentials.getPassword());
     } else {
-      parameters.add("username", username);
-      parameters.add("password", password);
+      parameters.add("grant_type", "client_credentials");
     }
     WebTarget target = client.target(cfg.getOauthUrl());
     Response response = target.request(MediaType.APPLICATION_FORM_URLENCODED).post(Entity.form(parameters));
-    return response.readEntity(OAuthToken.class);
+    return response.readEntity(Token.class);
   }
 
   @Override
   public <T extends SecuObject> ObjectList<T> findObjects(Class<T> type, QueryParams q) {
-    WebTarget target = getTarget(type, null, null);
+    WebTarget target = getTarget(type, null, null, true);
     Response response = executeRequest(target, "GET", null);
 
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
@@ -85,7 +89,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public <T extends SecuObject> T getObject(Class<T> type, String objectId) {
-    WebTarget target = getTarget(type, objectId, null);
+    WebTarget target = getTarget(type, objectId, null, true);
     Response response = executeRequest(target, "GET", null);
 
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
@@ -98,7 +102,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public <T extends SecuObject> T saveObject(T object) {
-    WebTarget target = getTarget(object.getClass(), object.getId(), null);
+    WebTarget target = getTarget(object.getClass(), object.getId(), null, true);
     Response response = executeRequest(target, object.getId() == null ? "POST" : "PUT", object);
     handleResponseNot(response, Response.Status.OK);
     return readObject(response, new GenericType<T>(object.getClass()));
@@ -106,7 +110,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public <T extends SecuObject> boolean deleteObject(Class<T> type, String objectId) {
-    WebTarget target = getTarget(type, objectId, null);
+    WebTarget target = getTarget(type, objectId, null, true);
     Response response = executeRequest(target, "DELETE", null);
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
     return Response.Status.NOT_FOUND.getStatusCode() == response.getStatus();
@@ -119,7 +123,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public <A, R> R execute(String action, String[] ids, A arg, Class<R> returnType) {
-    WebTarget target = getTarget(arg.getClass(), ids[0], action);
+    WebTarget target = getTarget(arg.getClass(), ids[0], action, true);
     Response response = executeRequest(target, "POST", null);
 
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
@@ -137,7 +141,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   // private -------------------------------------------------------------------------------------------------------------------
 
-  private <T> WebTarget getTarget(Class<T> type, String objectId, String action) {
+  private <T> WebTarget getTarget(Class<T> type, String objectId, String action, boolean secure) {
     // todo: Cache targets?
     WebTarget target = client.target(cfg.getBaseUrl()).path(pathResolver.resolve(type, '/'));
     if (objectId != null) {
@@ -146,6 +150,11 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     if (action != null) {
       target = target.path(action);
     }
+
+    if (secure) {
+      target.register(loginFilter);
+    }
+
     return target;
   }
 

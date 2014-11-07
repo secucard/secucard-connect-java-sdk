@@ -5,6 +5,7 @@ import com.secucard.connect.java.client.general.SkeletonsApi;
 import com.secucard.connect.java.client.lib.ResourceFactory;
 import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
 import com.secucard.connect.java.client.oauth.OAuthPasswordCredentials;
+import com.secucard.connect.java.client.oauth.OAuthUserCredentials;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -40,7 +41,7 @@ public class SkeletonTest
     {
     	System.out.println("test app method running");
     	OAuthClientCredentials client_cred = new OAuthClientCredentials("webapp", "821fc7042ec0ddf5cc70be9abaa5d6d311db04f4679ab56191038cb6f7f9cb7c");
-    	OAuthPasswordCredentials pass_cred = new OAuthPasswordCredentials("sten@beispiel.net", "secrets");
+    	OAuthUserCredentials pass_cred = new OAuthPasswordCredentials("sten@beispiel.net", "secrets");
     	System.out.println("credentials created");
     	ResourceFactory res = new ResourceFactory(client_cred, pass_cred);
     	System.out.println("factory created");

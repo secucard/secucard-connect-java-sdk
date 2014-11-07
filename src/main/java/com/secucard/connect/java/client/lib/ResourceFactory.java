@@ -10,13 +10,13 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.secucard.connect.auth.AuthProviderImpl;
+import com.secucard.connect.java.client.oauth.AuthProviderImpl;
+import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
+import com.secucard.connect.java.client.oauth.OAuthUserCredentials;
 import org.eclipse.jetty.util.MultiPartWriter;
 import org.glassfish.jersey.client.ClientConfig;
 import org.joda.time.DateTime;
 
-import com.secucard.connect.java.client.oauth.OAuthClientCredentials;
-import com.secucard.connect.java.client.oauth.OAuthUserCredentials;
 import com.secucard.connect.java.client.serialize.DateTimeDeserializer;
 
 import javax.ws.rs.client.Client;

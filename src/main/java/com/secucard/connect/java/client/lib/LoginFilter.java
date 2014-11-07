@@ -3,7 +3,7 @@
  */
 package com.secucard.connect.java.client.lib;
 
-import com.secucard.connect.auth.AuthProviderImpl;
+import com.secucard.connect.java.client.oauth.AuthProviderImpl;
 import org.eclipse.jetty.http.HttpHeaders;
 
 import javax.ws.rs.client.ClientRequestContext;

@@ -69,7 +69,7 @@ public class SecuStompChannel extends AbstractChannel {
 
     // todo: connecting with the configured credentials for now, switch!
     stompClient.connect();
-    stompClient.connect(authProvider.getToken().getAccessToken(), "");
+//    stompClient.connect(authProvider.getToken().getAccessToken(), "");
 
     if (!awaitConnected()) {
       throw new IOException("Not connected");

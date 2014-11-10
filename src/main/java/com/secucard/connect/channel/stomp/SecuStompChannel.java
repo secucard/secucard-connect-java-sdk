@@ -1,6 +1,6 @@
 package com.secucard.connect.channel.stomp;
 
-import com.secucard.connect.QueryParams;
+import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;

@@ -1,6 +1,6 @@
 package com.secucard.connect.channel;
 
-import com.secucard.connect.QueryParams;
+import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;

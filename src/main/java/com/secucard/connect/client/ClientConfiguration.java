@@ -59,6 +59,12 @@ public class ClientConfiguration {
         cfg.getProperty("clientSecret"));
   }
 
+  /**
+   * Load the default configuration from file default-config.properties.
+   *
+   * @return
+   * @throws IOException
+   */
   private static Properties getDefaults() throws IOException {
     Properties defaultCfg = new Properties();
     InputStream stream = ClientConfiguration.class.getClassLoader().getResourceAsStream("default-config.properties");
@@ -70,6 +76,13 @@ public class ClientConfiguration {
     return new ClientConfiguration(getDefaults());
   }
 
+  /**
+   * Create configuration from file.
+   *
+   * @param path The file path. If this path is relative (no first "/") it will be treatet a a classpath relative path.
+   * @return Configuration instance.
+   * @throws IOException If a error ocurrs.
+   */
   public static ClientConfiguration fromProperties(String path) throws IOException {
     Properties p = new Properties(getDefaults());
     if (path.startsWith("/")) {

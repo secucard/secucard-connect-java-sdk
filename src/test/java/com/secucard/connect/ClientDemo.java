@@ -2,7 +2,7 @@ package com.secucard.connect;
 
 import com.secucard.connect.client.Client;
 import com.secucard.connect.client.ClientConfiguration;
-import com.secucard.connect.client.SmartService;
+import com.secucard.connect.client.smart.SmartService;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.smart.*;
@@ -64,9 +64,7 @@ public class ClientDemo implements EventListener {
 
       System.out.println("Transaction finished: " + result);
 
-      List list = transaction.getBasket().getProductsWithText();
 
-      Thread.sleep(60000);
 
     } catch (Exception e) {
       e.printStackTrace();

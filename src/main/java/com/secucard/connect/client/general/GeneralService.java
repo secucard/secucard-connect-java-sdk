@@ -1,5 +1,7 @@
-package com.secucard.connect.client;
+package com.secucard.connect.client.general;
 
+import com.secucard.connect.client.AbstractService;
+import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 

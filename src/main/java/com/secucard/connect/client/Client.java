@@ -24,10 +24,29 @@ public class Client {
     init(id, configuration);
   }
 
+  /**
+   * Creating a client instance for accessing the API.
+   * The returned client implements just basic operations like opening and closing resources.
+   * To access business related operations obtain a service instance from this client
+   * via {@link #create(String, ClientConfiguration)} method.
+   *
+   * @param id            A unique id associated with this client.
+   * @param configuration The configuration of the client.
+   * @return The client instance.
+   */
   public static Client create(String id, ClientConfiguration configuration) {
     return new Client(id, configuration);
   }
 
+  /**
+   * Getting a new service instance from this client.
+   * The returned instance offers several business related operation.
+   * All returned services operate on the same resources of the client.
+   *
+   * @param type The actual service type.
+   * @param <T>  The service type.
+   * @return The service instance
+   */
   public <T extends AbstractService> T createService(Class<T> type) {
     T client = null;
     try {

@@ -1,7 +1,7 @@
 package com.secucard.connect.channel.rest;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.secucard.connect.QueryParams;
+import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
@@ -10,7 +10,7 @@ import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.Status;
+import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.storage.DataStorage;
 

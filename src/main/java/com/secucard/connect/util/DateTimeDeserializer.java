@@ -1,7 +1,7 @@
 /**
  * DateTimeDeserializer.java class file
  */
-package com.secucard.connect.java.client.serialize;
+package com.secucard.connect.util;
 
 import java.io.IOException;
 

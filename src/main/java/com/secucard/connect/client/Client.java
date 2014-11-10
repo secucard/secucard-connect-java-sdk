@@ -1,48 +1,134 @@
 package com.secucard.connect.client;
 
-import com.secucard.connect.model.ObjectList;
-import com.secucard.connect.model.general.skeleton.Skeleton;
-import com.secucard.connect.model.smart.Device;
-import com.secucard.connect.model.smart.Ident;
-import com.secucard.connect.model.smart.Result;
-import com.secucard.connect.model.smart.Transaction;
+import com.secucard.connect.SecuException;
+import com.secucard.connect.channel.PathResolverImpl;
+import com.secucard.connect.channel.rest.RestChannel;
+import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
+import com.secucard.connect.channel.stomp.JsonBodyMapper;
+import com.secucard.connect.channel.stomp.SecuStompChannel;
+import com.secucard.connect.event.EventListener;
+import com.secucard.connect.storage.MemoryDataStorage;
+import com.secucard.connect.storage.SimpleFileDataStorage;
 
-import java.util.List;
+import java.io.IOException;
 
 /**
- * Global client API, implementing all operations at once.
- * For DEVELOPMENT!!! purposes.
+ * Main entry to the Java Secucard Connect API.
  */
-public class Client extends BaseClient {
+public class Client {
+  protected ClientContext context;
+  private Thread heartbeatInvoker;
+  private String id;
 
-  public boolean registerDevice(Device device) {
-    return context.getStompChannel().execute("register", new String[]{device.getId()}, device, null);
+  private Client(final String id, ClientConfiguration configuration) {
+    init(id, configuration);
   }
 
-  public List<Ident> getIdents() {
-    ObjectList<Ident> idents = context.getChannnel().findObjects(Ident.class, null);
-    if (idents != null) {
-      return idents.getList();
+  public static Client create(String id, ClientConfiguration configuration) {
+    return new Client(id, configuration);
+  }
+
+  public <T extends AbstractService> T createService(Class<T> type) {
+    T client = null;
+    try {
+      client = type.newInstance();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-    return null;
+    client.setContext(context);
+    return client;
   }
 
-  public Transaction createTransaction(Transaction transaction) {
-    return context.getChannnel().saveObject(transaction);
+  public String getId() {
+    return id;
   }
 
-
-  public Result startTransaction(Transaction transaction) {
-    return context.getChannnel().execute("start", new String[]{transaction.getId(), "demo"}, transaction, Result.class);
+  public void setEventListener(EventListener eventListener) {
+    context.getStompChannel().setEventListener(eventListener);
   }
 
-  public Skeleton getSkeleton(String id){
-    return context.getChannnel().getObject(Skeleton.class, id);
+  public void connect() throws ConnectException {
+    try {
+      // first rest since it does auth
+      context.getRestChannel().open();
+      context.getStompChannel().open();
+      startHeartBeat();
+    } catch (IOException e) {
+      throw new ConnectException(e);
+    }
   }
 
-  public List<Skeleton> getSkeletons(){
-    return context.getChannnel().findObjects(Skeleton.class, null).getList();
+  public void disconnect() {
+    stopHeartBeat();
+    context.getStompChannel().close();
+    context.getRestChannel().close();
+    // todo: clear data store?
   }
 
+  protected void startHeartBeat() {
+    final int heartBeatSec = context.getConfig().getHeartBeatSec();
+    if (heartBeatSec != 0) {
+      stopHeartBeat();
+      heartbeatInvoker = new Thread() {
+        @Override
+        public void run() {
+          while (!isInterrupted()) {
+            context.getStompChannel().invoke("/ping");
+            try {
+
+              Thread.sleep(heartBeatSec * 1000);
+            } catch (InterruptedException e) {
+              break;
+            }
+          }
+        }
+      };
+      heartbeatInvoker.start();
+    }
+  }
+
+  protected void stopHeartBeat() {
+    if (heartbeatInvoker != null && heartbeatInvoker.isAlive()) {
+      heartbeatInvoker.interrupt();
+      try {
+        heartbeatInvoker.join();
+      } catch (InterruptedException e) {
+      }
+    }
+  }
+
+  private void init(String id, ClientConfiguration config) {
+    if (config == null) {
+      throw new SecuException("Configuration  must not be null.");
+    }
+    this.id = id;
+    context = new ClientContext();
+    context.setConfig(config);
+    try {
+      context.setDataStorage(new SimpleFileDataStorage("/tmp/secu.store"));
+      context.setDataStorage(new MemoryDataStorage());
+    } catch (IOException e) {
+      throw new SecuException("Error creating file storage", e);
+    }
+    context.setPathResolver(new PathResolverImpl());
+    context.setRestChannel(createRestChannel());
+    context.setStompChannel(createStompChannel());
+  }
+
+  private SecuStompChannel createStompChannel() {
+    SecuStompChannel channel = new SecuStompChannel(id, context.getConfig().getStompConfiguration());
+    channel.setBodyMapper(new JsonBodyMapper());
+    channel.setPathResolver(context.getPathResolver());
+    channel.setAuthProvider(context.getRestChannel());
+    return channel;
+  }
+
+  private RestChannel createRestChannel() {
+    RestChannel channel = new RestChannel(id, context.getConfig().getRestConfiguration());
+    channel.setPathResolver(context.getPathResolver());
+    channel.setTypeResolver(new StaticGenericTypeResolver());
+    channel.setStorage(context.getDataStorage());
+    return channel;
+  }
 
 }

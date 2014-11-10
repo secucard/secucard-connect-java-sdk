@@ -1,7 +1,8 @@
 package com.secucard.connect.channel.rest;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.secucard.connect.*;
+import com.secucard.connect.QueryParams;
+import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
 import com.secucard.connect.auth.OAuthUserCredentials;
@@ -23,15 +24,16 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   private javax.ws.rs.client.Client client;
   private GenericTypeResolver typeResolver;
   private LoginFilter loginFilter;
-  private long expireTime;
   private final Configuration cfg;
   private DataStorage storage;
+  private String id;
 
-  public RestChannel(Configuration cfg) {
+  public RestChannel(String id, Configuration cfg) {
     this.cfg = cfg;
     this.client = ClientBuilder.newClient();
     client.register(JacksonJsonProvider.class);
     loginFilter = new LoginFilter(this);
+    this.id = id;
   }
 
   public void setStorage(DataStorage storage) {
@@ -49,14 +51,16 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public synchronized Token getToken() {
-    Token token = storage.get("token");
+    Token token = storage.get("token" + id);
+    Long expireTime = storage.get("expireTime" + id);
     if (token == null) {
       token = createToken(cfg.getClientCredentials(), null, null);
-    } else if (expireTime < System.currentTimeMillis() - 30 * 1000) {
+    } else if (expireTime != null && expireTime < System.currentTimeMillis() - 30 * 1000) {
       token = createToken(cfg.getClientCredentials(), null, token.getRefreshToken());
     }
-    this.expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
-    storage.save("token", token);
+    expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
+    storage.save("token" + id, token);
+    storage.save("expireTime" + id, expireTime);
     return token;
   }
 

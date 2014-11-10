@@ -37,13 +37,14 @@ public class SecuStompChannel extends AbstractChannel {
   private boolean connected;
   private AtomicReference<String> session = new AtomicReference<>(null);
   private EventListener eventListener;
-
+  private String id;
   private AuthProvider authProvider;
 
   // settings
   private final Configuration cfg;
 
-  public SecuStompChannel(Configuration cfg) {
+  public SecuStompChannel(String id, Configuration cfg) {
+    this.id = id;
     this.cfg = cfg;
     messages = new ConcurrentHashMap<>(50, 0.75f, 2);
     stompClient = new MyStompClient(new Config(cfg.getHost(), cfg.getPort(), cfg.getVirtualHost(), cfg.getUserId(),
@@ -68,8 +69,9 @@ public class SecuStompChannel extends AbstractChannel {
     connected = false;
 
     // todo: connecting with the configured credentials for now, switch!
+    String token = authProvider.getToken().getAccessToken();
     stompClient.connect();
-//    stompClient.connect(authProvider.getToken().getAccessToken(), "");
+//    stompClient.connect(token, token);
 
     ensureConnected();
   }

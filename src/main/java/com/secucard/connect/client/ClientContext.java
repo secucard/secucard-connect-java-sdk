@@ -14,6 +14,15 @@ public class ClientContext {
   private ClientConfiguration config;
   public static final String STOMP = "stomp";
   public static final String REST = "rest";
+  private Client client;
+
+  public Client getClient() {
+    return client;
+  }
+
+  public void setClient(Client client) {
+    this.client = client;
+  }
 
   public PathResolverImpl getPathResolver() {
     return pathResolver;

@@ -72,7 +72,13 @@ public class ClientConfiguration {
 
   public static ClientConfiguration fromProperties(String path) throws IOException {
     Properties p = new Properties(getDefaults());
-    p.load(new FileInputStream(path));
+    if (path.startsWith("/")) {
+      // absolute path
+      p.load(new FileInputStream(path));
+    } else {
+      // relative path, treat as classpath relative
+      p.load(ClientConfiguration.class.getClassLoader().getResourceAsStream(path));
+    }
     return new ClientConfiguration(p);
   }
 

@@ -82,7 +82,7 @@ public class SecuStompChannel extends AbstractChannel {
 
     // todo: disable receipt ?
     try {
-      stompClient.send(cfg.getBasicDestination() + command, null, createDefaultHeaders(null));
+      stompClient.send(cfg.getBasicDestination() + command, null, createDefaultHeaders(null, false));
     } catch (Exception e) {
       throw new SecuException("Errors invoking " + command, e);
     }
@@ -246,10 +246,14 @@ public class SecuStompChannel extends AbstractChannel {
 
 
   private String createCorrelationId() {
-    return Long.toString(System.currentTimeMillis());
+    return id + Long.toString(System.currentTimeMillis());
   }
 
   private Map<String, String> createDefaultHeaders(String id) {
+    return createDefaultHeaders(id, cfg.isUseReceipt());
+  }
+
+  private Map<String, String> createDefaultHeaders(String id, boolean receipt) {
     Map<String, String> headers = StompClient.createHeader(
         "user-id", cfg.getUserId(),
         "reply-to", cfg.getReplyQueue(),
@@ -257,7 +261,7 @@ public class SecuStompChannel extends AbstractChannel {
         "persistent", "true"
     );
 
-    if (cfg.isUseReceipt()) {
+    if (receipt) {
       headers.put("receipt", id);
     }
     return headers;

@@ -1,5 +1,6 @@
 package com.secucard.connect.client.smart;
 
+import com.secucard.connect.channel.Channel;
 import com.secucard.connect.client.AbstractService;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.event.EventListener;
@@ -70,6 +71,8 @@ public class SmartService extends AbstractService {
    * @return The result data.
    */
   public Result startTransaction(Transaction transaction) {
-    return context.getChannnel().execute("start", new String[]{transaction.getId(), "demo"}, transaction, Result.class);
+    Channel channnel = context.getChannnel();
+    String[] id = {transaction.getId(), "demo"};
+    return channnel.execute("start", id, transaction, Result.class);
   }
 }

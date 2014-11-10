@@ -10,19 +10,19 @@ import com.secucard.connect.model.smart.*;
 import java.util.Arrays;
 import java.util.List;
 
-public class ClientDemo implements EventListener {
+public class ClientDemo {
 
   public static void main(String[] args) throws Exception {
 
-//    ClientConfiguration cfg = ClientConfiguration.getDefault();
-    process1(ClientConfiguration.fromProperties("config.properties"));
+    // ClientConfiguration cfg = ClientConfiguration.getDefault();
+    final ClientConfiguration cfg = ClientConfiguration.fromProperties("config.properties");
 
-//    process2(ClientConfiguration.fromProperties("config.properties"));
+    process("client1", cfg);
 
   }
 
-  private static void process1(ClientConfiguration cfg) {
-    Client client = Client.create("client1", cfg);
+  private static void process(final String id, ClientConfiguration cfg) {
+    Client client = Client.create(id, cfg);
     SmartService smartService = client.createService(SmartService.class);
 
     try {
@@ -31,13 +31,16 @@ public class ClientDemo implements EventListener {
       smartService.setEventListener(new EventListener() {
         @Override
         public void onEvent(Event event) {
-          System.out.println("Event for client 1: " + event);
+          System.out.println("Event for " + id + ": " + event);
         }
       });
 
       String deviceId = "me";
       Device device = new Device(deviceId, "cashier");
-      smartService.registerDevice(device);
+      boolean ok = smartService.registerDevice(device);
+      if (!ok) {
+        throw new RuntimeException("Error registering device.");
+      }
 
 
       // select an ident
@@ -65,51 +68,10 @@ public class ClientDemo implements EventListener {
       System.out.println("Transaction finished: " + result);
 
 
-
     } catch (Exception e) {
       e.printStackTrace();
     } finally {
       client.disconnect();
     }
-  }
-
-  private static void process2(ClientConfiguration cfg) {
-    Client client = Client.create("client2", cfg);
-    client.setEventListener(new ClientDemo());
-    SmartService smartService = client.createService(SmartService.class);
-
-    try {
-      client.connect();
-
-      Device device = new Device("me", "cashier");
-      smartService.registerDevice(device);
-
-      Basket basket = new Basket();
-      BasketInfo basketInfo = new BasketInfo(19.99f, BasketInfo.getEuro());
-      Transaction transaction = new Transaction();
-      transaction.setBasket(basket);
-      transaction.setBasketInfo(basketInfo);
-
-      List<Ident> idents = smartService.getIdents();
-
-      transaction.setIdents(Arrays.asList(new Ident("", "")));
-
-      transaction = smartService.createTransaction(transaction);
-
-      Result result = smartService.startTransaction(transaction);
-
-      System.out.println("Transaction finished: " + result);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      client.disconnect();
-    }
-  }
-
-
-  @Override
-  public void onEvent(Event event) {
-    System.out.println("Event: " + event);
   }
 }

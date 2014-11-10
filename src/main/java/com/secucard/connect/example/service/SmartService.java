@@ -1,7 +1,6 @@
 package com.secucard.connect.example.service;
 
-import com.secucard.connect.BaseClient;
-import com.secucard.connect.ClientConfig;
+import com.secucard.connect.client.BaseClient;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
@@ -13,11 +12,11 @@ import java.util.List;
 public class SmartService extends BaseClient {
 
   public boolean registerDevice(Device device) {
-    return selectChannnel(ChannelName.STOMP).execute("register", new String[]{device.getId()}, device, null);
+    return context.getStompChannel().execute("register", new String[]{device.getId()}, device, null);
   }
 
   public List<Ident> getIdents() {
-    ObjectList<Ident> idents = selectChannnel().findObjects(Ident.class, null);
+    ObjectList<Ident> idents = context.getChannnel().findObjects(Ident.class, null);
     if (idents != null) {
       return idents.getList();
     }
@@ -25,16 +24,11 @@ public class SmartService extends BaseClient {
   }
 
   public Transaction createTransaction(Transaction transaction) {
-    return selectChannnel().saveObject(transaction);
+    return context.getChannnel().saveObject(transaction);
   }
 
 
   public Result startTransaction(Transaction transaction) {
-    return selectChannnel().execute("start", new String[]{transaction.getId(), "demo"}, transaction, Result.class);
+    return context.getChannnel().execute("start", new String[]{transaction.getId(), "demo"}, transaction, Result.class);
   }
-
-  public static SmartService create(ClientConfig config) {
-    return BaseClient.create(config, SmartService.class);
-  }
-
 }

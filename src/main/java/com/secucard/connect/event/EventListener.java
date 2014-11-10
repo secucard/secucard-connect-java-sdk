@@ -1,4 +1,4 @@
-package com.secucard.connect;
+package com.secucard.connect.event;
 
 import com.secucard.connect.model.general.Event;
 

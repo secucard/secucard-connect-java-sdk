@@ -1,6 +1,6 @@
 package com.secucard.connect.example.domain;
 
-import com.secucard.connect.EventListener;
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.smart.Basket;
 import com.secucard.connect.model.smart.BasketInfo;
@@ -12,7 +12,7 @@ public class Main implements EventListener{
 
     // domain driven style API
     // domain models implement behaviour AND data
-    // looks good, pure OI, but has heavy downsides:
+    // looks good, pure Oo, but has heavy downsides:
     // no "plain" java objects,
     // models have dependencies to infrastructure and must be initialized and destroyed carefully
     // depending on the resources a model holds a model should be reused instead of destroyed (singleton)

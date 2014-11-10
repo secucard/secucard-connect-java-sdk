@@ -1,5 +1,7 @@
-package com.secucard.connect;
+package com.secucard.connect.channel;
 
+import com.secucard.connect.QueryParams;
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 
@@ -23,6 +25,8 @@ public interface Channel {
   void setEventListener(EventListener listener) throws UnsupportedOperationException;
 
   <A, R> R execute(String action, String[] id, A arg, Class<R> returnType);
+
+  void invoke(String command);
 
   void close();
 }

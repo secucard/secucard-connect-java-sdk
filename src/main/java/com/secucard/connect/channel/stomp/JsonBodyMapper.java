@@ -1,4 +1,4 @@
-package com.secucard.connect.stomp;
+package com.secucard.connect.channel.stomp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

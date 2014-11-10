@@ -1,4 +1,4 @@
-package com.secucard.connect.rest;
+package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.general.skeleton.Skeleton;

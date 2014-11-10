@@ -1,9 +1,9 @@
 package com.secucard.connect.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.BaseClient;
-import com.secucard.connect.ClientConfig;
-import com.secucard.connect.ConnectException;
+import com.secucard.connect.client.BaseClient;
+import com.secucard.connect.client.ClientConfiguration;
+import com.secucard.connect.client.ConnectException;
 import com.secucard.connect.model.SecuObject;
 
 public class Device extends SecuObject {
@@ -35,12 +35,12 @@ public class Device extends SecuObject {
   }
 
   public boolean register() {
-    return client.selectChannnel(BaseClient.ChannelName.STOMP).execute("register", new String[]{getId()}, this, null);
+    return client.getContext().getStompChannel().execute("register", new String[]{getId()}, this, null);
   }
 
-  public static Device create(ClientConfig config){
+  public static Device create(ClientConfiguration config){
     Device d = new Device();
-    d.setClient(BaseClient.create(config, BaseClient.class));
+//    d.setClient(BaseClient.create(config, BaseClient.class));
     return d;
   }
 

@@ -1,10 +1,10 @@
 package com.secucard.connect.example.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.BaseClient;
-import com.secucard.connect.ClientConfig;
-import com.secucard.connect.ConnectException;
-import com.secucard.connect.EventListener;
+import com.secucard.connect.client.BaseClient;
+import com.secucard.connect.client.ClientConfiguration;
+import com.secucard.connect.client.ConnectException;
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.smart.Basket;
 import com.secucard.connect.model.smart.BasketInfo;
@@ -50,11 +50,11 @@ public class Transaction extends SecuObject {
   }
 
   public Transaction save() {
-    return client.selectChannnel().saveObject(this);
+    return client.getContext().getChannnel().saveObject(this);
   }
 
   public Result start() {
-    return client.selectChannnel().execute("start", new String[]{getId(), "demo"}, this, Result.class);
+    return client.getContext().getChannnel().execute("start", new String[]{getId(), "demo"}, this, Result.class);
   }
 
   public BasketInfo getBasketInfo() {
@@ -122,9 +122,9 @@ public class Transaction extends SecuObject {
         '}';
   }
 
-  public static Transaction create(ClientConfig config) {
+  public static Transaction create(ClientConfiguration config) {
     Transaction d = new Transaction();
-    d.setClient(BaseClient.create(config, BaseClient.class));
+//    d.setClient(BaseClient.create(config, BaseClient.class));
     return d;
   }
 

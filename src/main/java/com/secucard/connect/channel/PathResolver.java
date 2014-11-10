@@ -1,4 +1,4 @@
-package com.secucard.connect;
+package com.secucard.connect.channel;
 
 /**
 * @author Thomas Krauß

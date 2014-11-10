@@ -1,16 +1,16 @@
-package com.secucard.connect.rest;
+package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.auth.OAuthClientCredentials;
 
-public class RestConfig {
+public class Configuration {
   private final String baseUrl;
   private final String oauthUrl;
   private final OAuthClientCredentials clientCredentials;
 
-  public RestConfig(String baseUrl, String oauthUrl, OAuthClientCredentials clientCredentials) {
+  public Configuration(String baseUrl, String oauthUrl,String clientId, String clientSecret) {
     this.baseUrl = baseUrl;
     this.oauthUrl = oauthUrl;
-    this.clientCredentials = clientCredentials;
+    this.clientCredentials = new OAuthClientCredentials(clientId, clientSecret);
   }
 
   public String getBaseUrl() {

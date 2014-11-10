@@ -1,4 +1,6 @@
-package com.secucard.connect;
+package com.secucard.connect.channel;
+
+import com.secucard.connect.SecuException;
 
 import java.lang.reflect.Field;
 import java.util.StringTokenizer;

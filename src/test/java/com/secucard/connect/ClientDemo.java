@@ -1,19 +1,25 @@
 package com.secucard.connect;
 
-import com.secucard.connect.auth.OAuthClientCredentials;
+import com.secucard.connect.client.Client;
+import com.secucard.connect.client.ClientConfiguration;
+import com.secucard.connect.client.ClientFactory;
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.smart.*;
-import com.secucard.connect.rest.RestConfig;
-import com.secucard.connect.stomp.StompConfig;
 
 import java.util.List;
 
 public class ClientDemo implements EventListener {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
 
+    ClientConfiguration cfg = ClientConfiguration.getDefault();
+//    ClientConfiguration cfg = ClientConfiguration.fromProperties(
+//        "/home/public/secu/secuconnect/secucard-connect-java-client-lib/src/test/resources/config.properties");
 
-    Client client = Client.create(null);
+    ClientFactory factory = ClientFactory.getInstance().init(cfg);
+
+    Client client = factory.create(Client.class);
 
     client.setEventListener(new ClientDemo());
 

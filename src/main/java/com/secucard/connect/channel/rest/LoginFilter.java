@@ -1,7 +1,7 @@
 /**
  * LoginFilter.java class file
  */
-package com.secucard.connect.rest;
+package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.auth.AuthProvider;
 

@@ -1,4 +1,4 @@
-package com.secucard.connect;
+package com.secucard.connect.client;
 
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.general.skeleton.Skeleton;
@@ -16,11 +16,11 @@ import java.util.List;
 public class Client extends BaseClient {
 
   public boolean registerDevice(Device device) {
-    return selectChannnel(ChannelName.STOMP).execute("register", new String[]{device.getId()}, device, null);
+    return context.getStompChannel().execute("register", new String[]{device.getId()}, device, null);
   }
 
   public List<Ident> getIdents() {
-    ObjectList<Ident> idents = selectChannnel().findObjects(Ident.class, null);
+    ObjectList<Ident> idents = context.getChannnel().findObjects(Ident.class, null);
     if (idents != null) {
       return idents.getList();
     }
@@ -28,24 +28,21 @@ public class Client extends BaseClient {
   }
 
   public Transaction createTransaction(Transaction transaction) {
-    return selectChannnel().saveObject(transaction);
+    return context.getChannnel().saveObject(transaction);
   }
 
 
   public Result startTransaction(Transaction transaction) {
-    return selectChannnel().execute("start", new String[]{transaction.getId(), "demo"}, transaction, Result.class);
+    return context.getChannnel().execute("start", new String[]{transaction.getId(), "demo"}, transaction, Result.class);
   }
 
   public Skeleton getSkeleton(String id){
-    return selectChannnel().getObject(Skeleton.class, id);
+    return context.getChannnel().getObject(Skeleton.class, id);
   }
 
   public List<Skeleton> getSkeletons(){
-    return selectChannnel().findObjects(Skeleton.class, null).getList();
+    return context.getChannnel().findObjects(Skeleton.class, null).getList();
   }
 
 
-  public static Client create(ClientConfig config) {
-    return  BaseClient.create(config, Client.class);
-  }
 }

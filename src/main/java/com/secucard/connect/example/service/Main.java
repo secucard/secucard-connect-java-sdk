@@ -1,6 +1,7 @@
 package com.secucard.connect.example.service;
 
-import com.secucard.connect.EventListener;
+import com.secucard.connect.event.EventListener;
+import com.secucard.connect.client.ClientFactory;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
@@ -17,14 +18,16 @@ public class Main implements EventListener {
     // name it service or factory or whatever - the principle is the same
 
 
-    SmartService smartService = SmartService.create(null);
+    ClientFactory factory = ClientFactory.getInstance().init(null);
 
-    GeneralService generalService = GeneralService.create(null);
+    SmartService smartService = factory.create(SmartService.class);
+
+    GeneralService generalService = factory.create(GeneralService.class);
 
     smartService.setEventListener(new Main());
 
     smartService.connect();
-    generalService.connect();
+//    generalService.connect();
 
     try {
       boolean ok = smartService.registerDevice(new Device("me", "cashier"));
@@ -47,7 +50,7 @@ public class Main implements EventListener {
 
     } finally {
       smartService.disconnect();
-      generalService.disconnect();
+//      generalService.disconnect();
     }
 
 

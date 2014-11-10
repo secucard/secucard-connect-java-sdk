@@ -1,10 +1,10 @@
-package com.secucard.connect.stomp;
+package com.secucard.connect.channel.stomp;
 
-import com.secucard.connect.AbstractChannel;
-import com.secucard.connect.EventListener;
 import com.secucard.connect.QueryParams;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
+import com.secucard.connect.channel.AbstractChannel;
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Event;
@@ -41,9 +41,9 @@ public class SecuStompChannel extends AbstractChannel {
   private AuthProvider authProvider;
 
   // settings
-  private final StompConfig cfg;
+  private final Configuration cfg;
 
-  public SecuStompChannel(StompConfig cfg) {
+  public SecuStompChannel(Configuration cfg) {
     this.cfg = cfg;
     messages = new ConcurrentHashMap<>(50, 0.75f, 2);
     stompClient = new MyStompClient(new Config(cfg.getHost(), cfg.getPort(), cfg.getVirtualHost(), cfg.getUserId(),
@@ -71,8 +71,18 @@ public class SecuStompChannel extends AbstractChannel {
     stompClient.connect();
 //    stompClient.connect(authProvider.getToken().getAccessToken(), "");
 
-    if (!awaitConnected()) {
-      throw new IOException("Not connected");
+    ensureConnected();
+  }
+
+  @Override
+  public void invoke(String command) {
+    ensureConnected();
+
+    // todo: disable receipt ?
+    try {
+      stompClient.send(cfg.getBasicDestination() + command, null, createDefaultHeaders(null));
+    } catch (Exception e) {
+      throw new SecuException("Errors invoking " + command, e);
     }
   }
 
@@ -169,7 +179,14 @@ public class SecuStompChannel extends AbstractChannel {
     stompClient.close();
   }
 
+
   // private ----------------------------------------------------------------------------------------------------------
+
+  private void ensureConnected() {
+    if (!awaitConnected()) {
+      throw new SecuException("Stomp channel not connected.");
+    }
+  }
 
   private <T extends SecuObject> Message<ObjectList<T>> readAnswerList(Class<T> type, String body) {
     try {
@@ -195,9 +212,7 @@ public class SecuStompChannel extends AbstractChannel {
     final String id = createCorrelationId();
     Map<String, String> headers = createDefaultHeaders(id);
 
-    if (!awaitConnected()) {
-      throw new SecuException("Not connected");
-    }
+    ensureConnected();
 
     String body = null;
     try {
@@ -239,6 +254,7 @@ public class SecuStompChannel extends AbstractChannel {
         "correlation-id", id,
         "persistent", "true"
     );
+
     if (cfg.isUseReceipt()) {
       headers.put("receipt", id);
     }
@@ -336,7 +352,11 @@ public class SecuStompChannel extends AbstractChannel {
   }
 
   private <T> String resolveDestination(Class<T> type, String method, String action) {
-    String path = cfg.getBaseDestination() + method + pathResolver.resolve(type, '.');
+    String dest = cfg.getBasicDestination();
+    if (!dest.endsWith("/")) {
+      dest = dest + "/";
+    }
+    String path = dest + method + pathResolver.resolve(type, '.');
     if (action != null) {
       path += "." + action;
     }

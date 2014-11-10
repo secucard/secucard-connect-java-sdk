@@ -1,4 +1,4 @@
-package com.secucard.connect.stomp;
+package com.secucard.connect.channel.stomp;
 
 import java.util.concurrent.*;
 

@@ -1,9 +1,6 @@
-package com.secucard.connect.stomp;
+package com.secucard.connect.channel.stomp;
 
-import com.secucard.connect.auth.OAuthClientCredentials;
-import com.secucard.connect.auth.OAuthUserCredentials;
-
-public class StompConfig {
+public class Configuration {
   private final String host;
   private final int port;
   private final String password;
@@ -17,12 +14,12 @@ public class StompConfig {
   private final int messagePollTimeoutSec;
   private final int maxMessageAgeSec;
   private final int socketTimeoutSec;
-  private final String baseDestination;
+  private final String basicDestination;
 
-  public StompConfig(String host, String virtualHost, int port, String baseDestination, String userId, String password,
-                     int heartbeatMs, boolean useReceipt,
-                     boolean useSsl, String replyQueue, int connectionTimeoutSec,
-                     int messagePollTimeoutSec, int maxMessageAgeSec, int socketTimeoutSec) {
+  public Configuration(String host, String virtualHost, int port,
+                       String basicDestination,
+                       String userId, String password,
+                       boolean useReceipt, boolean useSsl, String replyQueue, int connectionTimeoutSec, int messagePollTimeoutSec, int maxMessageAgeSec, int socketTimeoutSec, int heartbeatMs) {
     this.host = host;
     this.port = port;
     this.password = password;
@@ -35,7 +32,7 @@ public class StompConfig {
     this.connectionTimeoutSec = connectionTimeoutSec;
     this.messagePollTimeoutSec = messagePollTimeoutSec;
     this.maxMessageAgeSec = maxMessageAgeSec;
-    this.baseDestination = baseDestination;
+    this.basicDestination = basicDestination;
     this.socketTimeoutSec = socketTimeoutSec;
   }
 
@@ -87,8 +84,8 @@ public class StompConfig {
     return maxMessageAgeSec;
   }
 
-  public String getBaseDestination() {
-    return baseDestination;
+  public String getBasicDestination() {
+    return basicDestination;
   }
 
   public int getSocketTimeoutSec() {

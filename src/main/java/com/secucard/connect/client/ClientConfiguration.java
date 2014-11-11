@@ -17,6 +17,7 @@ public class ClientConfiguration {
   private String defaultChannel;
   private int heartBeatSec;
   private boolean stompEnabled;
+  private String storagePath;
 
   private ClientConfiguration(Properties properties) {
     try {
@@ -35,6 +36,7 @@ public class ClientConfiguration {
     }
 
     heartBeatSec = new Integer(cfg.getProperty("heartBeatSec"));
+    storagePath = cfg.getProperty("storagePath");
 
     stompConfiguration = new Configuration(
         cfg.getProperty("stomp.host"),
@@ -112,6 +114,10 @@ public class ClientConfiguration {
 
   public final String getDefaultChannel() {
     return defaultChannel;
+  }
+
+  public String getStoragePath() {
+    return storagePath;
   }
 
   public final com.secucard.connect.channel.rest.Configuration getRestConfiguration() {

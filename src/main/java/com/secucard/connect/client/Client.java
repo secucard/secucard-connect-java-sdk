@@ -125,8 +125,8 @@ public class Client {
     context = new ClientContext();
     context.setConfig(config);
     try {
-      context.setDataStorage(new SimpleFileDataStorage("/tmp/secu.store"));
-      context.setDataStorage(new MemoryDataStorage());
+      context.setDataStorage(new SimpleFileDataStorage(config.getStoragePath()));
+//      context.setDataStorage(new MemoryDataStorage());
     } catch (IOException e) {
       throw new SecuException("Error creating file storage", e);
     }

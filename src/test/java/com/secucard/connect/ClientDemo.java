@@ -27,15 +27,16 @@ public class ClientDemo {
     Client client = Client.create(id, cfg);
     SmartService smartService = client.createService(SmartService.class);
 
+    smartService.setEventListener(new EventListener() {
+      @Override
+      public void onEvent(Event event) {
+        System.out.println("Event for " + id + ": " + event);
+      }
+    });
+
     try {
       client.connect();
 
-      smartService.setEventListener(new EventListener() {
-        @Override
-        public void onEvent(Event event) {
-          System.out.println("Event for " + id + ": " + event);
-        }
-      });
 
       // in production id would be the vendor uuid,
       Device device = new Device(id);

@@ -69,11 +69,12 @@ public class SmartService extends AbstractService {
    * Starting/Exceuting a transaction.
    *
    * @param transaction The transaction data.
+   * @param type
    * @return The result data.
    */
-  public Result startTransaction(Transaction transaction) {
+  public Result startTransaction(Transaction transaction, String type) {
     Channel channnel = context.getChannnel();
-    String[] id = {transaction.getId(), "demo"};
+    String[] id = {transaction.getId(), type};
     return channnel.execute("start", id, transaction, Result.class);
   }
 }

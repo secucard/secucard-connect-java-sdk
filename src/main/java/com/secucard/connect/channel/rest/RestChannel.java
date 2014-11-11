@@ -1,7 +1,6 @@
 package com.secucard.connect.channel.rest;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
@@ -10,8 +9,9 @@ import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.model.auth.Token;
+import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.storage.DataStorage;
 
 import javax.ws.rs.ProcessingException;
@@ -88,7 +88,16 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     Invocation.Builder request = target.request(MediaType.APPLICATION_FORM_URLENCODED);
     request.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
     Response response = request.post(Entity.form(parameters));
-    return response.readEntity(Token.class);
+    response.bufferEntity();
+    if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+      String entity = response.readEntity(String.class);
+      throw new SecuException("Error authenticating client: " +  entity);
+    }
+    try {
+      return response.readEntity(Token.class);
+    } catch (Exception e) {
+      throw new SecuException("Error reading authentication data.", e);
+    }
   }
 
   @Override

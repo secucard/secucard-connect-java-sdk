@@ -65,7 +65,10 @@ public class ClientDemo {
 
       Transaction transaction = smartService.createTransaction(newTrans);
 
-      Result result = smartService.startTransaction(transaction);
+      String type = "demo"; // demo|auto|cash
+      // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
+
+      Result result = smartService.startTransaction(transaction, type);
 
       System.out.println("Transaction finished: " + result);
 

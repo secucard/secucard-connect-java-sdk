@@ -68,10 +68,9 @@ public class SecuStompChannel extends AbstractChannel {
     session.set(null);
     connected = false;
 
-    // todo: connecting with the configured credentials for now, switch!
     String token = authProvider.getToken().getAccessToken();
-    stompClient.connect();
-//    stompClient.connect(token, token);
+//    stompClient.connect();
+    stompClient.connect(token, token);
 
     ensureConnected();
   }
@@ -255,7 +254,7 @@ public class SecuStompChannel extends AbstractChannel {
 
   private Map<String, String> createDefaultHeaders(String id, boolean receipt) {
     Map<String, String> headers = StompClient.createHeader(
-        "user-id", cfg.getUserId(),
+        "user-id", authProvider.getToken().getAccessToken(),
         "reply-to", cfg.getReplyQueue(),
         "correlation-id", id,
         "persistent", "true"

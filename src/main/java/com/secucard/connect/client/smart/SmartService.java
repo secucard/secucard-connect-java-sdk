@@ -40,7 +40,8 @@ public class SmartService extends AbstractService {
    * @return True if successfully, false else.
    */
   public boolean registerDevice(Device device) {
-    return context.getStompChannel().execute("register", new String[]{device.getId()}, device, null);
+    // todo: switch to id, static just for test
+    return context.getStompChannel().execute("register", new String[]{"me"}, device, null);
   }
 
   /**

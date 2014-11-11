@@ -14,11 +14,13 @@ public class ClientDemo {
 
   public static void main(String[] args) throws Exception {
 
-    // ClientConfiguration cfg = ClientConfiguration.getDefault();
     final ClientConfiguration cfg = ClientConfiguration.fromProperties("config.properties");
+    // or use default: ClientConfiguration.getDefault();
 
-    process("client1", cfg);
+    process("device1", cfg);
 
+    // or parallel clients
+    //runThreaded(cfg);
   }
 
   private static void process(final String id, ClientConfiguration cfg) {
@@ -35,8 +37,8 @@ public class ClientDemo {
         }
       });
 
-      String deviceId = "me";
-      Device device = new Device(deviceId, "cashier");
+      // in production id would be the vendor uuid,
+      Device device = new Device(id);
       boolean ok = smartService.registerDevice(device);
       if (!ok) {
         throw new RuntimeException("Error registering device.");
@@ -59,7 +61,7 @@ public class ClientDemo {
 
       BasketInfo basketInfo = new BasketInfo(136.50f, BasketInfo.getEuro());
 
-      Transaction newTrans = new Transaction(deviceId, basketInfo, basket, selectedIdents);
+      Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
 
       Transaction transaction = smartService.createTransaction(newTrans);
 
@@ -72,6 +74,18 @@ public class ClientDemo {
       e.printStackTrace();
     } finally {
       client.disconnect();
+    }
+  }
+
+  private static void runThreaded(final ClientConfiguration cfg) {
+    for (int i = 0; i < 1; i++) {
+      final String id = "device" + i;
+      new Thread() {
+        @Override
+        public void run() {
+          process(id, cfg);
+        }
+      }.start();
     }
   }
 }

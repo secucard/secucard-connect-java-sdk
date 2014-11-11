@@ -17,6 +17,7 @@ import com.secucard.connect.storage.DataStorage;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
 
@@ -27,6 +28,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   private final Configuration cfg;
   private DataStorage storage;
   private String id;
+  private UserAgentProvider userAgentProvider;
 
   public RestChannel(String id, Configuration cfg) {
     this.cfg = cfg;
@@ -44,6 +46,9 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     this.typeResolver = typeResolver;
   }
 
+  public void setUserAgentProvider(UserAgentProvider userAgentProvider) {
+    this.userAgentProvider = userAgentProvider;
+  }
 
   @Override
   public void open() {
@@ -80,7 +85,9 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
       parameters.add("grant_type", "client_credentials");
     }
     WebTarget target = client.target(cfg.getOauthUrl());
-    Response response = target.request(MediaType.APPLICATION_FORM_URLENCODED).post(Entity.form(parameters));
+    Invocation.Builder request = target.request(MediaType.APPLICATION_FORM_URLENCODED);
+    request.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
+    Response response = request.post(Entity.form(parameters));
     return response.readEntity(Token.class);
   }
 
@@ -170,7 +177,6 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     if (secure) {
       target.register(loginFilter);
     }
-
     return target;
   }
 

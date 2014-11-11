@@ -4,6 +4,7 @@ import com.secucard.connect.SecuException;
 import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
+import com.secucard.connect.channel.rest.UserAgentProviderImpl;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.event.EventListener;
@@ -147,6 +148,7 @@ public class Client {
     channel.setPathResolver(context.getPathResolver());
     channel.setTypeResolver(new StaticGenericTypeResolver());
     channel.setStorage(context.getDataStorage());
+    channel.setUserAgentProvider(new UserAgentProviderImpl());
     return channel;
   }
 

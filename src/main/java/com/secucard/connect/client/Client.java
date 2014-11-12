@@ -1,15 +1,9 @@
 package com.secucard.connect.client;
 
 import com.secucard.connect.SecuException;
-import com.secucard.connect.channel.PathResolverImpl;
-import com.secucard.connect.channel.rest.RestChannel;
-import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
-import com.secucard.connect.channel.rest.UserAgentProviderImpl;
-import com.secucard.connect.channel.stomp.JsonBodyMapper;
-import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.storage.MemoryDataStorage;
-import com.secucard.connect.storage.SimpleFileDataStorage;
+import com.secucard.connect.service.AbstractService;
+import com.secucard.connect.service.ServiceFactory;
 
 import java.io.IOException;
 
@@ -20,6 +14,7 @@ public class Client {
   protected ClientContext context;
   private Thread heartbeatInvoker;
   private String id;
+  private ServiceFactory serviceFactory;
 
   private Client(final String id, ClientConfiguration configuration) {
     init(id, configuration);
@@ -44,19 +39,16 @@ public class Client {
    * The returned instance offers several business related operation.
    * All returned services operate on the same resources of the client.
    *
-   * @param type The actual service type.
+   * @param serviceClass The actual service type.
    * @param <T>  The service type.
-   * @return The service instance
+   * @return The service instance or null if not found.
    */
-  public <T extends AbstractService> T createService(Class<T> type) {
-    T client = null;
-    try {
-      client = type.newInstance();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    client.setContext(context);
-    return client;
+  public <T extends AbstractService> T getService(Class<T> serviceClass) {
+    return serviceFactory.getService(serviceClass);
+  }
+
+  public <T extends AbstractService> T getService(String serviceId) {
+    return serviceFactory.getService(serviceId);
   }
 
   public String getId() {
@@ -124,32 +116,7 @@ public class Client {
     this.id = id;
     context = new ClientContext();
     context.setConfig(config);
-    try {
-      context.setDataStorage(new SimpleFileDataStorage(config.getStoragePath()));
-//      context.setDataStorage(new MemoryDataStorage());
-    } catch (IOException e) {
-      throw new SecuException("Error creating file storage", e);
-    }
-    context.setPathResolver(new PathResolverImpl());
-    context.setRestChannel(createRestChannel());
-    context.setStompChannel(createStompChannel());
+    context.setClientId(id);
+    serviceFactory = new ServiceFactory(context);
   }
-
-  private SecuStompChannel createStompChannel() {
-    SecuStompChannel channel = new SecuStompChannel(id, context.getConfig().getStompConfiguration());
-    channel.setBodyMapper(new JsonBodyMapper());
-    channel.setPathResolver(context.getPathResolver());
-    channel.setAuthProvider(context.getRestChannel());
-    return channel;
-  }
-
-  private RestChannel createRestChannel() {
-    RestChannel channel = new RestChannel(id, context.getConfig().getRestConfiguration());
-    channel.setPathResolver(context.getPathResolver());
-    channel.setTypeResolver(new StaticGenericTypeResolver());
-    channel.setStorage(context.getDataStorage());
-    channel.setUserAgentProvider(new UserAgentProviderImpl());
-    return channel;
-  }
-
 }

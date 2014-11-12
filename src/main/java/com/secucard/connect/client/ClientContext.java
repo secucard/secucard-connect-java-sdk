@@ -4,32 +4,22 @@ import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.storage.DataStorage;
-import com.secucard.connect.channel.PathResolverImpl;
 
 public class ClientContext {
-  private PathResolverImpl pathResolver;
   private DataStorage dataStorage;
   private RestChannel restChannel;
   private SecuStompChannel stompChannel;
   private ClientConfiguration config;
   public static final String STOMP = "stomp";
   public static final String REST = "rest";
-  private Client client;
+  private String clientId;
 
-  public Client getClient() {
-    return client;
+  public String getClientId() {
+    return clientId;
   }
 
-  public void setClient(Client client) {
-    this.client = client;
-  }
-
-  public PathResolverImpl getPathResolver() {
-    return pathResolver;
-  }
-
-  public void setPathResolver(PathResolverImpl pathResolver) {
-    this.pathResolver = pathResolver;
+  public void setClientId(String clientId) {
+    this.clientId = clientId;
   }
 
   public DataStorage getDataStorage() {

@@ -18,6 +18,7 @@ public class ClientConfiguration {
   private int heartBeatSec;
   private boolean stompEnabled;
   private String storagePath;
+  private boolean autoConnect; // todo: not supported yet
 
   private ClientConfiguration(Properties properties) {
     try {

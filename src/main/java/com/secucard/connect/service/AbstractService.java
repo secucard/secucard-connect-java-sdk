@@ -1,5 +1,6 @@
-package com.secucard.connect.client;
+package com.secucard.connect.service;
 
+import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.event.EventListener;
 
 public abstract class AbstractService {

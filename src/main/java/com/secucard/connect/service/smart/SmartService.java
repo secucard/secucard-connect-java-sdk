@@ -1,7 +1,7 @@
-package com.secucard.connect.client.smart;
+package com.secucard.connect.service.smart;
 
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.client.AbstractService;
+import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;

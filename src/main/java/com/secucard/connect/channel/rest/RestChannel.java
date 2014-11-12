@@ -22,7 +22,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
 
 public class RestChannel extends AbstractChannel implements AuthProvider {
-  private javax.ws.rs.client.Client client;
+  private javax.ws.rs.client.Client restClient;
   private GenericTypeResolver typeResolver;
   private LoginFilter loginFilter;
   private final Configuration cfg;
@@ -32,8 +32,8 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   public RestChannel(String id, Configuration cfg) {
     this.cfg = cfg;
-    this.client = ClientBuilder.newClient();
-    client.register(JacksonJsonProvider.class);
+    this.restClient = ClientBuilder.newClient();
+    restClient.register(JacksonJsonProvider.class);
     loginFilter = new LoginFilter(this);
     this.id = id;
   }
@@ -84,7 +84,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     } else {
       parameters.add("grant_type", "client_credentials");
     }
-    WebTarget target = client.target(cfg.getOauthUrl());
+    WebTarget target = restClient.target(cfg.getOauthUrl());
     Invocation.Builder request = target.request(MediaType.APPLICATION_FORM_URLENCODED);
     request.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
     Response response = request.post(Entity.form(parameters));
@@ -162,20 +162,20 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public void invoke(String command) {
-    WebTarget target = client.target(cfg.getBaseUrl()).path(command);
+    WebTarget target = restClient.target(cfg.getBaseUrl()).path(command);
     target.request().get();
   }
 
   @Override
   public void close() {
-    client.close();
+    restClient.close();
   }
 
   // private -------------------------------------------------------------------------------------------------------------------
 
   private <T> WebTarget getTarget(Class<T> type, String objectId, String action, boolean secure) {
     // todo: Cache targets?
-    WebTarget target = client.target(cfg.getBaseUrl()).path(pathResolver.resolve(type, '/'));
+    WebTarget target = restClient.target(cfg.getBaseUrl()).path(pathResolver.resolve(type, '/'));
     if (objectId != null) {
       target = target.path(objectId);
     }

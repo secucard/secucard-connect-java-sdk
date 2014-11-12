@@ -2,7 +2,7 @@ package com.secucard.connect;
 
 import com.secucard.connect.client.Client;
 import com.secucard.connect.client.ClientConfiguration;
-import com.secucard.connect.client.smart.SmartService;
+import com.secucard.connect.service.smart.SmartService;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.smart.*;
@@ -25,7 +25,9 @@ public class ClientDemo {
 
   private static void process(final String id, ClientConfiguration cfg) {
     Client client = Client.create(id, cfg);
-    SmartService smartService = client.createService(SmartService.class);
+    SmartService smartService = client.getService(SmartService.class);
+
+    smartService = client.getService("smart"); // or get by a defined name
 
     smartService.setEventListener(new EventListener() {
       @Override

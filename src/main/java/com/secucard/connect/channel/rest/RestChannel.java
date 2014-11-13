@@ -52,6 +52,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public void open() {
+    // nothing to do
   }
 
   @Override

@@ -1,6 +1,5 @@
 package com.secucard.connect.channel.stomp;
 
-import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
@@ -9,14 +8,18 @@ import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Message;
+import com.secucard.connect.model.transport.QueryParams;
 import net.jstomplite.Config;
 import net.jstomplite.StompClient;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class SecuStompChannel extends AbstractChannel {
@@ -33,8 +36,11 @@ public class SecuStompChannel extends AbstractChannel {
 
   private MyStompClient stompClient;
   private BodyMapper bodyMapper;
-  private Map<String, StompMessage> messages;
+  private Map<String, StompMessage> messages = new ConcurrentHashMap<>(50, 0.75f, 2); // todo: check if ok
+  private Set<String> receipts = new ConcurrentSkipListSet<>();
   private boolean connected;
+  private AtomicBoolean isConnected = new AtomicBoolean(false);
+
   private AtomicReference<String> session = new AtomicReference<>(null);
   private EventListener eventListener;
   private String id;
@@ -46,7 +52,6 @@ public class SecuStompChannel extends AbstractChannel {
   public SecuStompChannel(String id, Configuration cfg) {
     this.id = id;
     this.cfg = cfg;
-    messages = new ConcurrentHashMap<>(50, 0.75f, 2);
     stompClient = new MyStompClient(new Config(cfg.getHost(), cfg.getPort(), cfg.getVirtualHost(), cfg.getUserId(),
         cfg.getPassword(), cfg.getHeartbeatMs(), cfg.isUseSsl(), cfg.getSocketTimeoutSec()));
   }
@@ -72,12 +77,12 @@ public class SecuStompChannel extends AbstractChannel {
 //    stompClient.connect();
     stompClient.connect(token, token);
 
-    ensureConnected();
+    awaitConnected();
   }
 
   @Override
   public void invoke(String command) {
-    ensureConnected();
+    awaitConnected();
 
     // todo: disable receipt ?
     try {
@@ -177,15 +182,20 @@ public class SecuStompChannel extends AbstractChannel {
 
   @Override
   public void close() {
-    stompClient.close();
+    stompClient.close(true);
   }
 
 
   // private ----------------------------------------------------------------------------------------------------------
 
-  private void ensureConnected() {
-    if (!awaitConnected()) {
-      throw new SecuException("Stomp channel not connected.");
+  public void connect(String user) {
+    if (!isConnected.get()) {
+      try {
+        stompClient.connect(user, null);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+      awaitConnected();
     }
   }
 
@@ -213,7 +223,7 @@ public class SecuStompChannel extends AbstractChannel {
     final String id = createCorrelationId();
     Map<String, String> headers = createDefaultHeaders(id);
 
-    ensureConnected();
+    awaitConnected();
 
     String body = null;
     try {
@@ -226,9 +236,8 @@ public class SecuStompChannel extends AbstractChannel {
 
       stompClient.send(dest, body, headers);
 
-      if (cfg.isUseReceipt() && awaitReceipt(id) == null) {
-        // no receipt received (in time)
-        throw new SecuException("No message receipt received or timeout before receiving");
+      if (cfg.isUseReceipt()) {
+        awaitReceipt(id);
       }
 
       body = awaitAnswer(id);
@@ -266,12 +275,14 @@ public class SecuStompChannel extends AbstractChannel {
     return headers;
   }
 
-  private boolean awaitConnected() {
-    try {
-      Boolean result = new ConnectionPollTask().get(cfg.getConnectionTimeoutSec());
-      return result != null && result;
-    } catch (ExecutionException e) {
-      return false;
+  private void awaitConnected() {
+    if (new SyncWaiter() {
+      @Override
+      public boolean stop() {
+        return isConnected.get();
+      }
+    }.wait(cfg.getConnectionTimeoutSec())) {
+      throw new RuntimeException("connection timeout");
     }
   }
 
@@ -279,8 +290,15 @@ public class SecuStompChannel extends AbstractChannel {
     return new MessagePollTask(id).get();
   }
 
-  private String awaitReceipt(String id) throws ExecutionException {
-    return awaitAnswer("rcpt#" + id);
+  private void awaitReceipt(final String id) throws ExecutionException {
+    if (new SyncWaiter() {
+      @Override
+      public boolean stop() {
+        return receipts.remove(id);
+      }
+    }.wait(cfg.getMessagePollTimeoutSec())) {
+      throw new SecuException("No message receipt received or timeout before receiving");
+    }
   }
 
   private String pullMessage(String id) {
@@ -307,9 +325,10 @@ public class SecuStompChannel extends AbstractChannel {
 
     @Override
     protected void onConnect(Map<String, String> headers) {
+      isConnected.set(true);
       String value = headers.get(HEADER_SESSION);
       if (value == null || value.isEmpty()) {
-        close();
+        close(true);
         throw new IllegalStateException("Protocol error, session id not found");
       }
       session.set(value);
@@ -318,7 +337,11 @@ public class SecuStompChannel extends AbstractChannel {
 
     @Override
     protected void onReceipt(String id) {
-      putMessage("rcpt#" + id, null);
+      if (cfg.isUseReceipt()) {
+        if (!receipts.add(id)) {
+          throw new RuntimeException("duplicate receipt, not added");
+        }
+      }
     }
 
     @Override
@@ -352,6 +375,7 @@ public class SecuStompChannel extends AbstractChannel {
 
     @Override
     protected void onDisconnect(Exception ex) {
+      isConnected.set(false);
       connected = false;
     }
   }
@@ -423,5 +447,28 @@ public class SecuStompChannel extends AbstractChannel {
       } while (!Thread.currentThread().isInterrupted());
       return Boolean.FALSE;
     }
+  }
+
+  private abstract class SyncWaiter {
+    boolean wait(int timeoutSec) {
+      return wait(timeoutSec, 100);
+    }
+
+    boolean wait(int timeoutSec, int sleepMs) {
+      long maxWait = System.currentTimeMillis() + timeoutSec * 1000;
+      while (System.currentTimeMillis() < maxWait) {
+        if (stop()) {
+          return false;
+        }
+        try {
+          Thread.sleep(sleepMs);
+        } catch (InterruptedException e) {
+          break;
+        }
+      }
+      return true;
+    }
+
+    public abstract boolean stop();
   }
 }

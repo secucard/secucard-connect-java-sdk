@@ -86,21 +86,27 @@ public class ClientConfiguration {
    * @throws IOException If a error ocurrs.
    */
   public static ClientConfiguration fromProperties(String path) throws IOException {
-    Properties p = new Properties(getDefaults());
+    InputStream inputStream;
     if (path.startsWith("/")) {
       // absolute path
-      p.load(new FileInputStream(path));
+      inputStream = new FileInputStream(path);
     } else {
       // relative path, treat as classpath relative
-      p.load(ClientConfiguration.class.getClassLoader().getResourceAsStream(path));
+      inputStream = ClientConfiguration.class.getClassLoader().getResourceAsStream(path);
     }
-    return new ClientConfiguration(p);
+    return fromStream(inputStream);
   }
 
   public static ClientConfiguration fromJson(String path) throws IOException {
     HashMap hashMap = new ObjectMapper().readValue(new FileInputStream(path), HashMap.class);
     // todo: map to properties
     throw new UnsupportedOperationException();
+  }
+
+  public static ClientConfiguration fromStream(InputStream inputStream) throws IOException {
+    Properties p = new Properties(getDefaults());
+    p.load(inputStream);
+    return new ClientConfiguration(p);
   }
 
 

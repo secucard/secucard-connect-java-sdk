@@ -13,6 +13,7 @@ import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.storage.DataStorage;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.ClientBuilder;
@@ -20,6 +21,8 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.*;
+import java.util.List;
+import java.util.Map;
 
 public class RestChannel extends AbstractChannel implements AuthProvider {
   private javax.ws.rs.client.Client restClient;
@@ -92,7 +95,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     response.bufferEntity();
     if (response.getStatus() != Response.Status.OK.getStatusCode()) {
       String entity = response.readEntity(String.class);
-      throw new SecuException("Error authenticating client: " +  entity);
+      throw new SecuException("Error authenticating client: " + entity);
     }
     try {
       return response.readEntity(Token.class);
@@ -102,8 +105,9 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams q) {
+  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams) {
     WebTarget target = getTarget(type, null, null, true);
+    target = queryParams(target, queryParams);
     Response response = executeRequest(target, "GET", null);
 
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
@@ -113,6 +117,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
     return readObjects(response, typeResolver.getGenericType(type));
   }
+
 
   @Override
   public <T> T getObject(Class<T> type, String objectId) {
@@ -136,7 +141,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public  boolean deleteObject(Class type, String objectId) {
+  public boolean deleteObject(Class type, String objectId) {
     WebTarget target = getTarget(type, objectId, null, true);
     Response response = executeRequest(target, "DELETE", null);
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
@@ -255,6 +260,49 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     throw new SecuException("Error happened." + ex);
   }
 
+  private <T> WebTarget queryParams(WebTarget target, QueryParams queryParams) {
+
+    boolean scroll = queryParams.getScrollId() > 0;
+    if (scroll) {
+      target = target.queryParam("scroll_id", queryParams.getScrollId());
+    }
+
+    boolean scrollExpire = StringUtils.isNotBlank(queryParams.getScrollExpire());
+    if (scrollExpire) {
+      target = target.queryParam("scroll_expire", queryParams.getScrollExpire());
+    }
+
+    if (!scroll && queryParams.getCount() >= 0) {
+      target = target.queryParam("count", queryParams.getCount());
+    }
+
+    if (!scroll && !scrollExpire && queryParams.getOffset() > 0) {
+      target = target.queryParam("offset", queryParams.getOffset());
+    }
+
+    List<String> fields = queryParams.getFields();
+    if (!scroll && fields != null && fields.size() > 0) {
+      // add "," separated list of field names
+      String names = null;
+      for (String field : fields) {
+        names = names == null ? "" : names + ',';
+        names += field;
+      }
+      target = target.queryParam("fields", names);
+    }
+
+    Map<String, String> sortOrder = queryParams.getSortOrder();
+    if (!scroll && sortOrder != null) {
+      for (Map.Entry<String, String> entry : sortOrder.entrySet()) {
+        target = target.queryParam(entry.getKey(), entry.getValue());
+      }
+    }
+
+    if (StringUtils.isNotBlank(queryParams.getQuery())) {
+      target = target.queryParam("q", queryParams.getQuery());
+    }
+    return target;
+  }
 
   interface GenericTypeResolver {
     <T> GenericType<ObjectList<T>> getGenericType(Class<T> type);

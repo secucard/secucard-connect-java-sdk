@@ -26,8 +26,10 @@ public class SecuStompChannel extends StompChannelBase {
   }
 
   @Override
-  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams q) {
-    Message<ObjectList<T>> answer = invokeList(API_GET, null, null, type, type, true);
+  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams) {
+    Message<T> message = new Message<>();
+    message.setQuery(queryParams);
+    Message<ObjectList<T>> answer = invokeList(API_GET, null, message, type, type, true);
     if ("ProductNotFoundException".equalsIgnoreCase(answer.getError())) {
       return null;
     } else if (STATUS_OK.equalsIgnoreCase(answer.getStatus())) {

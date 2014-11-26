@@ -10,6 +10,7 @@ import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.client.ClientConfiguration;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.storage.MemoryDataStorage;
 import com.secucard.connect.storage.SimpleFileDataStorage;
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,12 +34,13 @@ public class ServiceFactory {
     }
 
     DataStorage dataStorage;
-    try {
+    /*try {
       dataStorage = new SimpleFileDataStorage(config.getStoragePath());
-//      context.setDataStorage(new MemoryDataStorage());
+      context.setDataStorage(dataStorage);
     } catch (IOException e) {
       throw new SecuException("Error creating file storage", e);
-    }
+    } */
+    dataStorage = new MemoryDataStorage();
     context.setDataStorage(dataStorage);
 
     PathResolverImpl pathResolver = new PathResolverImpl();

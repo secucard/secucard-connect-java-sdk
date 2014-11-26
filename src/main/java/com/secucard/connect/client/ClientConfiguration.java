@@ -46,7 +46,6 @@ public class ClientConfiguration {
         cfg.getProperty("stomp.destination"),
         cfg.getProperty("stomp.user"),
         cfg.getProperty("stomp.password"),
-        Boolean.valueOf(cfg.getProperty("stomp.receipt")),
         Boolean.valueOf(cfg.getProperty("stomp.ssl")),
         cfg.getProperty("stomp.replyQueue"),
         new Integer(cfg.getProperty("stomp.connTimeoutSec")),

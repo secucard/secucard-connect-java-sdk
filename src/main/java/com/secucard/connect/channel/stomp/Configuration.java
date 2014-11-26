@@ -6,12 +6,12 @@ public class Configuration {
   private final String password;
   private final String virtualHost;
   private final int heartbeatMs;
-  private final boolean useReceipt;
   private final boolean useSsl;
+  private final boolean autoConnect;
   private final String userId;
   private final String replyQueue;
   private final int connectionTimeoutSec;
-  private final int messagePollTimeoutSec;
+  private final int messageTimeoutSec;
   private final int maxMessageAgeSec;
   private final int socketTimeoutSec;
   private final String basicDestination;
@@ -19,21 +19,26 @@ public class Configuration {
   public Configuration(String host, String virtualHost, int port,
                        String basicDestination,
                        String userId, String password,
-                       boolean useReceipt, boolean useSsl, String replyQueue, int connectionTimeoutSec, int messagePollTimeoutSec, int maxMessageAgeSec, int socketTimeoutSec, int heartbeatMs) {
+                       boolean useSsl, String replyQueue, int connectionTimeoutSec,
+                       int messageTimeoutSec, int maxMessageAgeSec, int socketTimeoutSec, int heartbeatMs) {
     this.host = host;
     this.port = port;
     this.password = password;
     this.virtualHost = virtualHost;
     this.heartbeatMs = heartbeatMs;
-    this.useReceipt = useReceipt;
     this.useSsl = useSsl;
     this.userId = userId;
     this.replyQueue = replyQueue;
     this.connectionTimeoutSec = connectionTimeoutSec;
-    this.messagePollTimeoutSec = messagePollTimeoutSec;
+    this.messageTimeoutSec = messageTimeoutSec;
     this.maxMessageAgeSec = maxMessageAgeSec;
     this.basicDestination = basicDestination;
     this.socketTimeoutSec = socketTimeoutSec;
+    this.autoConnect = true;
+  }
+
+  public boolean isAutoConnect() {
+    return autoConnect;
   }
 
   public String getHost() {
@@ -56,11 +61,7 @@ public class Configuration {
     return heartbeatMs;
   }
 
-  public boolean isUseReceipt() {
-    return useReceipt;
-  }
-
-  public boolean isUseSsl() {
+  public boolean useSsl() {
     return useSsl;
   }
 
@@ -76,8 +77,8 @@ public class Configuration {
     return connectionTimeoutSec;
   }
 
-  public int getMessagePollTimeoutSec() {
-    return messagePollTimeoutSec;
+  public int getMessageTimeoutSec() {
+    return messageTimeoutSec;
   }
 
   public int getMaxMessageAgeSec() {

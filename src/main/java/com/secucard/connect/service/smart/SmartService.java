@@ -1,14 +1,12 @@
 package com.secucard.connect.service.smart;
 
-import com.secucard.connect.channel.Channel;
-import com.secucard.connect.service.AbstractService;
-import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
 import com.secucard.connect.model.smart.Result;
 import com.secucard.connect.model.smart.Transaction;
+import com.secucard.connect.model.transport.InvocationResult;
+import com.secucard.connect.service.AbstractService;
 
 import java.util.List;
 
@@ -16,23 +14,6 @@ import java.util.List;
  * The Smart Product operations.
  */
 public class SmartService extends AbstractService {
-  private ClientContext context;
-
-  /**
-   * Setting a listener for receiving event messages.
-   *
-   * @param eventListener
-   */
-  @Override
-  public void setEventListener(EventListener eventListener) {
-    context.getStompChannel().setEventListener(eventListener);
-  }
-
-  @Override
-  public void setContext(ClientContext context) {
-    this.context = context;
-  }
-
   /**
    * Register a device.
    *
@@ -41,16 +22,26 @@ public class SmartService extends AbstractService {
    */
   public boolean registerDevice(Device device) {
     // todo: switch to id, static just for test
-    return context.getStompChannel().execute("register", new String[]{"me"}, device, null);
+    try {
+      InvocationResult result = getStompChannel().execute("register", new String[]{"me"}, device, InvocationResult.class);
+      return Boolean.parseBoolean(result.getResult());
+    } catch (Exception e) {
+      handleException(e);
+    }
+    return false;
   }
 
   /**
    * Returns all idents in the system or null if nothing found.
    */
   public List<Ident> getIdents() {
-    ObjectList<Ident> idents = context.getChannnel().findObjects(Ident.class, null);
-    if (idents != null) {
-      return idents.getList();
+    try {
+      ObjectList<Ident> idents = getChannnel().findObjects(Ident.class, null);
+      if (idents != null) {
+        return idents.getList();
+      }
+    } catch (Exception e) {
+      handleException(e);
     }
     return null;
   }
@@ -62,7 +53,12 @@ public class SmartService extends AbstractService {
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction createTransaction(Transaction transaction) {
-    return context.getChannnel().saveObject(transaction);
+    try {
+      return getChannnel().saveObject(transaction);
+    } catch (Exception e) {
+      handleException(e);
+    }
+    return null;
   }
 
   /**
@@ -73,8 +69,12 @@ public class SmartService extends AbstractService {
    * @return The result data.
    */
   public Result startTransaction(Transaction transaction, String type) {
-    Channel channnel = context.getChannnel();
-    String[] id = {transaction.getId(), type};
-    return channnel.execute("start", id, transaction, Result.class);
+    try {
+      String[] id = {transaction.getId(), type};
+      return getChannnel().execute("start", id, transaction, Result.class);
+    } catch (Exception e) {
+      handleException(e);
+    }
+    return null;
   }
 }

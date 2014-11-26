@@ -294,7 +294,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     Map<String, String> sortOrder = queryParams.getSortOrder();
     if (!scroll && sortOrder != null) {
       for (Map.Entry<String, String> entry : sortOrder.entrySet()) {
-        target = target.queryParam(entry.getKey(), entry.getValue());
+        target = target.queryParam("sort[" + entry.getKey() + "]", entry.getValue());
       }
     }
 

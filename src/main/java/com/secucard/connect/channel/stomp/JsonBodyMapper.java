@@ -9,6 +9,7 @@ import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
 import com.secucard.connect.model.smart.Result;
 import com.secucard.connect.model.smart.Transaction;
+import com.secucard.connect.model.transport.InvocationResult;
 import com.secucard.connect.model.transport.Message;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class JsonBodyMapper implements BodyMapper {
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public <T> Message<ObjectList<T>> toMessageList(Class<T> type, String body) throws IOException {
+  public <T> Message<ObjectList<T>> toMessageList(Class type, String body) throws IOException {
     TypeReference[] refs = TYPE_2_TYPEREFS.get(type);
     if (refs == null) {
       throw new IllegalArgumentException("Unknown type " + type);
@@ -28,7 +29,7 @@ public class JsonBodyMapper implements BodyMapper {
     return objectMapper.readValue(body, refs[1]);
   }
 
-  public <T> Message<T> toMessage(Class<T> type, String body) throws IOException {
+  public <T> Message<T> toMessage(Class type, String body) throws IOException {
     TypeReference[] refs = TYPE_2_TYPEREFS.get(type);
     if (refs == null) {
       throw new IllegalArgumentException("Unknown type " + type);
@@ -47,6 +48,11 @@ public class JsonBodyMapper implements BodyMapper {
     TYPE_2_TYPEREFS.put(Skeleton.class, new TypeReference[]{
         new TypeReference<Message<Skeleton>>() {
         }, new TypeReference<Message<ObjectList<Skeleton>>>() {
+    }});
+
+    TYPE_2_TYPEREFS.put(InvocationResult.class, new TypeReference[]{
+        new TypeReference<Message<InvocationResult>>() {
+        }, new TypeReference<Message<ObjectList<InvocationResult>>>() {
     }});
 
     TYPE_2_TYPEREFS.put(Merchant.class, new TypeReference[]{

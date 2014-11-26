@@ -13,6 +13,15 @@ public class ClientContext {
   public static final String STOMP = "stomp";
   public static final String REST = "rest";
   private String clientId;
+  private ExceptionHandler exceptionHandler;
+
+  public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+    this.exceptionHandler = exceptionHandler;
+  }
+
+  public ExceptionHandler getExceptionHandler() {
+    return exceptionHandler;
+  }
 
   public String getClientId() {
     return clientId;
@@ -46,15 +55,11 @@ public class ClientContext {
     this.config = config;
   }
 
-  public Channel getChannnel() {
-    return getChannnel(config.getDefaultChannel());
-  }
-
-  public RestChannel getRestChannel() {
+  public Channel getRestChannel() {
     return restChannel;
   }
 
-  public SecuStompChannel getStompChannel() {
+  public Channel getStompChannel() {
     return stompChannel;
   }
 

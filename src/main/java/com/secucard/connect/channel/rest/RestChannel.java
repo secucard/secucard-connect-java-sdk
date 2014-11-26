@@ -52,6 +52,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public void open() {
+    // nothing to do
   }
 
   @Override
@@ -101,7 +102,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public <T extends SecuObject> ObjectList<T> findObjects(Class<T> type, QueryParams q) {
+  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams q) {
     WebTarget target = getTarget(type, null, null, true);
     Response response = executeRequest(target, "GET", null);
 
@@ -114,7 +115,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public <T extends SecuObject> T getObject(Class<T> type, String objectId) {
+  public <T> T getObject(Class<T> type, String objectId) {
     WebTarget target = getTarget(type, objectId, null, true);
     Response response = executeRequest(target, "GET", null);
 
@@ -135,7 +136,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public <T extends SecuObject> boolean deleteObject(Class<T> type, String objectId) {
+  public  boolean deleteObject(Class type, String objectId) {
     WebTarget target = getTarget(type, objectId, null, true);
     Response response = executeRequest(target, "DELETE", null);
     handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
@@ -161,7 +162,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public void invoke(String command) {
+  public void invoke(String command, boolean requestReceipt) {
     WebTarget target = restClient.target(cfg.getBaseUrl()).path(command);
     target.request().get();
   }
@@ -173,7 +174,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   // private -------------------------------------------------------------------------------------------------------------------
 
-  private <T> WebTarget getTarget(Class<T> type, String objectId, String action, boolean secure) {
+  private WebTarget getTarget(Class type, String objectId, String action, boolean secure) {
     // todo: Cache targets?
     WebTarget target = restClient.target(cfg.getBaseUrl()).path(pathResolver.resolve(type, '/'));
     if (objectId != null) {

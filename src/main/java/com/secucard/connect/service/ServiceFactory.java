@@ -6,14 +6,12 @@ import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
 import com.secucard.connect.channel.rest.UserAgentProviderImpl;
-import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.client.ClientConfiguration;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.MemoryDataStorage;
-import com.secucard.connect.storage.SimpleFileDataStorage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -21,8 +19,8 @@ import java.net.URL;
 import java.util.*;
 
 public class ServiceFactory {
-  private ServiceLoader<AbstractService> loader;
   private Map<String, String[]> names = null;
+  private Set<AbstractService> services = new HashSet<>();
 
   public ServiceFactory(ClientContext context) {
     init(context);
@@ -74,9 +72,10 @@ public class ServiceFactory {
     sc.setAuthProvider(authProvider);
     context.setStompChannel(sc);
 
-    loader = ServiceLoader.load(AbstractService.class, getClassLoader());
+    ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
     for (AbstractService service : loader) {
       service.setContext(context);
+      services.add(service);
     }
 
     getService("*"); // fetch service ids
@@ -98,7 +97,8 @@ public class ServiceFactory {
   }
 
   public <T> T getService(Class<T> serviceClass) {
-    for (AbstractService service : loader) {
+
+    for (AbstractService service : services) {
       if (service.getClass().equals(serviceClass)) {
         return (T) service;
       }

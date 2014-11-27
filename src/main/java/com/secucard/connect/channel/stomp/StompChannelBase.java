@@ -51,7 +51,7 @@ public abstract class StompChannelBase extends AbstractChannel implements StompE
     this.id = id;
     Config stompCfg = new Config(cfg.getHost(), cfg.getPort(), cfg.getVirtualHost(), cfg.getUserId(),
         cfg.getPassword(), cfg.getHeartbeatMs(), cfg.useSsl(), cfg.getSocketTimeoutSec(),
-        cfg.getMessageTimeoutSec(), cfg.getConnectionTimeoutSec(), true);
+        cfg.getMessageTimeoutSec(), cfg.getConnectionTimeoutSec());
     stompClient = new StompClient(id, stompCfg, this);
   }
 

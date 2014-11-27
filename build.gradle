@@ -13,6 +13,5 @@ dependencies {
     compile 'joda-time:joda-time:1.6.2'
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
-    compile 'org.glassfish.jersey.core:jersey-client:2.13'
 
 }

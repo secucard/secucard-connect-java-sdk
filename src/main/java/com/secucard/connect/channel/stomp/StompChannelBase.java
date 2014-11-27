@@ -6,7 +6,7 @@ import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.client.ConnectionException;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
-import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Message;
 import net.jstomplite.*;
@@ -51,7 +51,7 @@ public abstract class StompChannelBase extends AbstractChannel implements StompE
     this.id = id;
     Config stompCfg = new Config(cfg.getHost(), cfg.getPort(), cfg.getVirtualHost(), cfg.getUserId(),
         cfg.getPassword(), cfg.getHeartbeatMs(), cfg.useSsl(), cfg.getSocketTimeoutSec(),
-        cfg.getMessageTimeoutSec(), cfg.getConnectionTimeoutSec());
+        cfg.getMessageTimeoutSec(), cfg.getConnectionTimeoutSec(), true);
     stompClient = new StompClient(id, stompCfg, this);
   }
 
@@ -128,12 +128,25 @@ public abstract class StompChannelBase extends AbstractChannel implements StompE
 
 
   protected Map<String, String> createDefaultHeaders(String id) {
-    return StompClient.createHeader(
-        "user-id", authProvider.getToken().getAccessToken(),
+    Map<String, String> header = StompClient.createHeader(
         "reply-to", configuration.getReplyQueue(),
         "correlation-id", id,
         "persistent", "true"
     );
+
+    String userId = configuration.getUserId();
+    if (authProvider != null) {
+      Token token = authProvider.getToken();
+      if (token != null) {
+        userId = token.getAccessToken();
+      }
+    }
+
+    if (userId != null) {
+      header.put("user-id", userId);
+    }
+
+    return header;
   }
 
   protected String resolveDestination(Class type, String method, String action) {

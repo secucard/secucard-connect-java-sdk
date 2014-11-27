@@ -104,7 +104,7 @@ public class ClientConfiguration {
   }
 
   public static ClientConfiguration fromStream(InputStream inputStream) throws IOException {
-    Properties p = new Properties(getDefaults());
+    Properties p = new Properties();
     p.load(inputStream);
     return new ClientConfiguration(p);
   }

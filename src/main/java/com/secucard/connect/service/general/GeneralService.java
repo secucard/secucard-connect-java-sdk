@@ -19,7 +19,7 @@ public class GeneralService extends AbstractService {
 
   public List<Skeleton> getSkeletons(QueryParams queryParams) {
     try {
-      return getRestChannel().findObjects(Skeleton.class, queryParams).getList();
+      return getStompChannel().findObjects(Skeleton.class, queryParams).getList();
     } catch (Exception e) {
       handleException(e);
       return null;

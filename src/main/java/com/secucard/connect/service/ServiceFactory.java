@@ -53,18 +53,18 @@ public class ServiceFactory {
     //todo: make switching rest impl easier
 
     // jax ws rs rest channel, comment next 7 lines in android
-    RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
-    rc.setPathResolver(pathResolver);
-    rc.setTypeResolver(new StaticGenericTypeResolver());
-    rc.setStorage(context.getDataStorage());
-    rc.setUserAgentProvider(new UserAgentProviderImpl());
-    context.setRestChannel(rc);
-    authProvider = rc;
+//    RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
+//    rc.setPathResolver(pathResolver);
+//    rc.setTypeResolver(new StaticGenericTypeResolver());
+//    rc.setStorage(context.getDataStorage());
+//    rc.setUserAgentProvider(new UserAgentProviderImpl());
+//    context.setRestChannel(rc);
+//    authProvider = rc;
 
     // for android uncomment next lines
-    //VolleyChannel vc = new VolleyChannel();
-    //context.setRestChannel(vc);
-    //authProvider = vc;
+    VolleyChannel vc = new VolleyChannel();
+    context.setRestChannel(vc);
+    authProvider = vc;
 
 
     // stomp

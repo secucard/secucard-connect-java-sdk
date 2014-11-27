@@ -7,8 +7,8 @@ import com.secucard.connect.storage.DataStorage;
 
 public class ClientContext {
   private DataStorage dataStorage;
-  private RestChannel restChannel;
-  private SecuStompChannel stompChannel;
+  private Channel restChannel;
+  private Channel stompChannel;
   private ClientConfiguration config;
   public static final String STOMP = "stomp";
   public static final String REST = "rest";
@@ -39,11 +39,11 @@ public class ClientContext {
     this.dataStorage = dataStorage;
   }
 
-  public void setRestChannel(RestChannel restChannel) {
+  public void setRestChannel(Channel restChannel) {
     this.restChannel = restChannel;
   }
 
-  public void setStompChannel(SecuStompChannel stompChannel) {
+  public void setStompChannel(Channel stompChannel) {
     this.stompChannel = stompChannel;
   }
 

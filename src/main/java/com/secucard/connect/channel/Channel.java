@@ -19,7 +19,7 @@ public interface Channel {
 
   <T> T getObject(Class<T> type, String objectId);
 
-  <T> ObjectList<T> findObjects(Class<T> type, QueryParams q);
+  <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams);
 
   <T extends SecuObject> T saveObject(T object);
 

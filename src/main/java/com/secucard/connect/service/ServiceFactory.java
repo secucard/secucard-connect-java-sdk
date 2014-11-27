@@ -1,10 +1,12 @@
 package com.secucard.connect.service;
 
 import com.secucard.connect.SecuException;
+import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
 import com.secucard.connect.channel.rest.UserAgentProviderImpl;
+import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.client.ClientConfiguration;
@@ -46,19 +48,30 @@ public class ServiceFactory {
 
     PathResolverImpl pathResolver = new PathResolverImpl();
 
-    // rest
+    AuthProvider authProvider;
+
+    //todo: make switching rest impl easier
+
+    // jax ws rs rest channel, comment next 7 lines in android
     RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
     rc.setPathResolver(pathResolver);
     rc.setTypeResolver(new StaticGenericTypeResolver());
     rc.setStorage(context.getDataStorage());
     rc.setUserAgentProvider(new UserAgentProviderImpl());
     context.setRestChannel(rc);
+    authProvider = rc;
+
+    // for android uncomment next lines
+    //VolleyChannel vc = new VolleyChannel();
+    //context.setRestChannel(vc);
+    //authProvider = vc;
+
 
     // stomp
     SecuStompChannel sc = new SecuStompChannel(context.getClientId(), config.getStompConfiguration());
     sc.setBodyMapper(new JsonBodyMapper());
     sc.setPathResolver(pathResolver);
-    sc.setAuthProvider(rc);
+    sc.setAuthProvider(authProvider);
     context.setStompChannel(sc);
 
     loader = ServiceLoader.load(AbstractService.class, getClassLoader());

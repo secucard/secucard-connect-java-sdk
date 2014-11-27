@@ -4,7 +4,10 @@ import com.secucard.connect.client.Client;
 import com.secucard.connect.client.ClientConfiguration;
 import com.secucard.connect.client.ExceptionHandler;
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
+import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.service.general.GeneralService;
 import com.secucard.connect.service.smart.SmartService;
 
 import java.util.Arrays;
@@ -41,6 +44,17 @@ public class ClientDemo {
     });
 
     client.connect();
+
+    GeneralService generalService = client.getService(GeneralService.class);
+    QueryParams queryParams = new QueryParams();
+    queryParams.setOffset(1);
+    queryParams.setCount(10);
+    queryParams.setFields("a", "b", "c");
+    queryParams.addSortOrder("a", QueryParams.SORT_ASC);
+    queryParams.addSortOrder("b", QueryParams.SORT_DESC);
+    queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
+    List<Skeleton> skeletons = generalService.getSkeletons(queryParams);
+
 
     SmartService smartService = client.getService(SmartService.class);
     // or get by a defined name:

@@ -6,6 +6,7 @@ import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
 import com.secucard.connect.channel.rest.UserAgentProviderImpl;
+import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.client.ClientConfiguration;

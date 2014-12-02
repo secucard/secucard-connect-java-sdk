@@ -22,6 +22,7 @@ public class StaticGenericTypeResolver implements RestChannel.GenericTypeResolve
     throw new IllegalArgumentException("Invalid type");
   }
 
+
   // No better (dynamic) solution found (if there is any better at all).
   // Keep in sync with the model...
 

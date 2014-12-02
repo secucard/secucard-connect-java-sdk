@@ -43,18 +43,32 @@ public class ClientDemo {
       }
     });
 
+    GeneralService generalService = client.getService(GeneralService.class);
     client.connect();
 
-    GeneralService generalService = client.getService(GeneralService.class);
     QueryParams queryParams = new QueryParams();
     queryParams.setOffset(1);
-    queryParams.setCount(10);
-    queryParams.setFields("a", "b", "c");
-    queryParams.addSortOrder("a", QueryParams.SORT_ASC);
-    queryParams.addSortOrder("b", QueryParams.SORT_DESC);
-    queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
-    List<Skeleton> skeletons = generalService.getSkeletons(queryParams);
+//    queryParams.setCount(2);
+    queryParams.setFields("a");
+//    queryParams.addSortOrder("a", QueryParams.SORT_ASC);
+//    queryParams.addSortOrder("b", QueryParams.SORT_DESC);
+//    queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
+    List<Skeleton> skeletons = generalService.getSkeletons(queryParams, new Callback<List<Skeleton>>() {
+      @Override
+      public void completed(List<Skeleton> result) {
+        System.out.println();
+      }
 
+      @Override
+      public void failed(Throwable throwable) {
+        throwable.printStackTrace();
+      }
+    });
+
+    if (true) {
+      client.disconnect();
+      return;
+    }
 
     SmartService smartService = client.getService(SmartService.class);
     // or get by a defined name:
@@ -62,15 +76,15 @@ public class ClientDemo {
 
     // in production id would be the vendor uuid,
     Device device = new Device(id);
-    boolean ok = smartService.registerDevice(device);
+    boolean ok = smartService.registerDevice(device, null);
     if (!ok) {
       throw new RuntimeException("Error registering device.");
     }
 
 
     // select an ident
-    List<Ident> availableIdents = smartService.getIdents();
-    if(availableIdents == null) {
+    List<Ident> availableIdents = smartService.getIdents(null);
+    if (availableIdents == null) {
       throw new RuntimeException("No idents found.");
     }
     Ident ident = Ident.find("smi_1", availableIdents);
@@ -89,12 +103,12 @@ public class ClientDemo {
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
 
-    Transaction transaction = smartService.createTransaction(newTrans);
+    Transaction transaction = smartService.createTransaction(newTrans, null);
 
     String type = "demo"; // demo|auto|cash
     // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
 
-    Result result = smartService.startTransaction(transaction, type);
+    Result result = smartService.startTransaction(transaction, type, null);
 
     client.disconnect();
 

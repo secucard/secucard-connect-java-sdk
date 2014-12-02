@@ -1,8 +1,6 @@
 package com.secucard.connect.client;
 
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.channel.rest.RestChannel;
-import com.secucard.connect.channel.stomp.SecuStompChannel;
 import com.secucard.connect.storage.DataStorage;
 
 public class ClientContext {

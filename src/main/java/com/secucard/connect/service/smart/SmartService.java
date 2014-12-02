@@ -1,5 +1,7 @@
 package com.secucard.connect.service.smart;
 
+import com.secucard.connect.Callback;
+import com.secucard.connect.CallbackAdapter;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
@@ -20,10 +22,20 @@ public class SmartService extends AbstractService {
    * @param device The device to register.
    * @return True if successfully, false else.
    */
-  public boolean registerDevice(Device device) {
+  public boolean registerDevice(Device device, Callback callback) {
+    CallbackAdapter<InvocationResult, Boolean> adapter = null;
+    if (callback != null) {
+      adapter = new CallbackAdapter<InvocationResult, Boolean>(callback) {
+        @Override
+        protected Boolean convert(InvocationResult object) {
+          return Boolean.parseBoolean(object.getResult());
+        }
+      };
+    }
     // todo: switch to id, static just for test
     try {
-      InvocationResult result = getStompChannel().execute("register", new String[]{"me"}, device, InvocationResult.class);
+      InvocationResult result = getStompChannel().execute("register", "me", null, device, InvocationResult.class,
+          adapter);
       return Boolean.parseBoolean(result.getResult());
     } catch (Exception e) {
       handleException(e);
@@ -34,9 +46,20 @@ public class SmartService extends AbstractService {
   /**
    * Returns all idents in the system or null if nothing found.
    */
-  public List<Ident> getIdents() {
+  public List<Ident> getIdents(Callback<List<Ident>> callback) {
+
+    CallbackAdapter<ObjectList<Ident>, List<Ident>> adapter = null;
+    if (callback != null) {
+      adapter = new CallbackAdapter<ObjectList<Ident>, List<Ident>>(callback) {
+        @Override
+        protected List<Ident> convert(ObjectList<Ident> object) {
+          return object.getList();
+        }
+      };
+    }
+
     try {
-      ObjectList<Ident> idents = getChannnel().findObjects(Ident.class, null);
+      ObjectList<Ident> idents = getChannnel().findObjects(Ident.class, null, adapter);
       if (idents != null) {
         return idents.getList();
       }
@@ -52,9 +75,9 @@ public class SmartService extends AbstractService {
    * @param transaction The transaction data to save.
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
-  public Transaction createTransaction(Transaction transaction) {
+  public Transaction createTransaction(Transaction transaction, Callback<Transaction> callback) {
     try {
-      return getChannnel().saveObject(transaction);
+      return getChannnel().saveObject(transaction, callback);
     } catch (Exception e) {
       handleException(e);
     }
@@ -68,10 +91,9 @@ public class SmartService extends AbstractService {
    * @param type
    * @return The result data.
    */
-  public Result startTransaction(Transaction transaction, String type) {
+  public Result startTransaction(Transaction transaction, String type, Callback<Result> callback) {
     try {
-      String[] id = {transaction.getId(), type};
-      return getChannnel().execute("start", id, transaction, Result.class);
+      return getChannnel().execute("start", transaction.getId(), type, transaction, Result.class, callback);
     } catch (Exception e) {
       handleException(e);
     }

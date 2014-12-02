@@ -1,6 +1,7 @@
 package com.secucard.connect.channel.rest;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
@@ -11,32 +12,28 @@ import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
-import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.storage.DataStorage;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.*;
 import javax.ws.rs.core.*;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 public class RestChannel extends AbstractChannel implements AuthProvider {
-  private javax.ws.rs.client.Client restClient;
-  private GenericTypeResolver typeResolver;
-  private LoginFilter loginFilter;
-  private final Configuration cfg;
+  protected javax.ws.rs.client.Client restClient;
+  protected GenericTypeResolver typeResolver;
+  protected LoginFilter loginFilter;
+  protected final Configuration cfg;
   private DataStorage storage;
   private String id;
-  private UserAgentProvider userAgentProvider;
+  private final boolean secure = false;
+  protected UserAgentProvider userAgentProvider;
 
   public RestChannel(String id, Configuration cfg) {
     this.cfg = cfg;
-    this.restClient = ClientBuilder.newClient();
-    restClient.register(JacksonJsonProvider.class);
     loginFilter = new LoginFilter(this);
     this.id = id;
   }
@@ -54,8 +51,22 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public void open() {
-    // nothing to do
+  public void open(Callback callback) {
+    try {
+      this.restClient = ClientBuilder.newClient();
+      restClient.register(JacksonJsonProvider.class);
+      onCompleted(callback, null);
+    } catch (Throwable e) {
+      if (callback == null) {
+        throw e;
+      }
+      onFailed(callback, e);
+    }
+  }
+
+  @Override
+  public void setEventListener(EventListener listener) {
+
   }
 
   @Override
@@ -88,196 +99,90 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     } else {
       parameters.add("grant_type", "client_credentials");
     }
-    WebTarget target = restClient.target(cfg.getOauthUrl());
-    Invocation.Builder request = target.request(MediaType.APPLICATION_FORM_URLENCODED);
-    request.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
-    Response response = request.post(Entity.form(parameters));
-    response.bufferEntity();
-    if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-      String entity = response.readEntity(String.class);
-      throw new SecuException("Error authenticating client: " + entity);
-    }
+
+    Invocation.Builder builder = restClient.target(cfg.getOauthUrl()).request(MediaType.APPLICATION_FORM_URLENCODED);
+    builder.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
+    Invocation invocation = builder.buildPost(Entity.form(parameters));
+
+    return getResponse(invocation, new GenericType<Token>(Token.class), null);
+  }
+
+  @Override
+  public String invoke(String command, Callback<String> callback) {
+    Invocation invocation = builder(null, null, secure, command).buildGet();
+    return getResponse(invocation, new GenericType<String>() {
+    }, callback);
+  }
+
+  @Override
+  public <T> T getObject(Class<T> type, String objectId, Callback<T> callback) {
+    Invocation invocation = builder(type, null, secure, objectId).buildGet();
+    return getResponse(invocation, new GenericType<T>(type), callback);
+  }
+
+  @Override
+  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
+    Invocation invocation = builder(type, queryParamsToMap(queryParams), secure).buildGet();
+    return getResponse(invocation, typeResolver.getGenericType(type), callback,
+        Response.Status.NOT_FOUND.getStatusCode());
+  }
+
+  @Override
+  public <T extends SecuObject> T saveObject(T object, Callback<T> callback) {
+    Entity<T> entity = Entity.json(object);
+    Invocation.Builder builder = builder(object.getClass(), null, secure, object.getId());
+    Invocation invocation = object.getId() == null ? builder.buildPost(entity) : builder.buildPut(entity);
+    return getResponse(invocation, new GenericType<T>(object.getClass()), callback);
+  }
+
+  @Override
+  public void deleteObject(Class type, String objectId, Callback callback) {
+    Invocation invocation = builder(type, null, secure, objectId).buildDelete();
+    getResponse(invocation, null, callback);
+  }
+
+  @Override
+  public <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType, Callback<T> callback) {
+    Entity entity = Entity.json(arg);
+    Invocation invocation = builder(arg.getClass(), null, secure, resourceId, action, strArg).buildPost(entity);
+    return getResponse(invocation, new GenericType<T>(returnType), callback);
+  }
+
+
+  @Override
+  public void close(Callback callback) {
     try {
-      return response.readEntity(Token.class);
-    } catch (Exception e) {
-      throw new SecuException("Error reading authentication data.", e);
+      restClient.close();
+      onCompleted(callback, null);
+    } catch (Throwable e) {
+      if (callback == null) {
+        throw e;
+      }
+      onFailed(callback, e);
     }
-  }
-
-  @Override
-  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams) {
-    WebTarget target = getTarget(type, null, null, true);
-    target = queryParams(target, queryParams);
-    Response response = executeRequest(target, "GET", null);
-
-    handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
-    if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {
-      return null;
-    }
-
-    return readObjects(response, typeResolver.getGenericType(type));
-  }
-
-
-  @Override
-  public <T> T getObject(Class<T> type, String objectId) {
-    WebTarget target = getTarget(type, objectId, null, true);
-    Response response = executeRequest(target, "GET", null);
-
-    handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
-    if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {
-      return null;
-    }
-
-    return readObject(response, new GenericType<T>(type));
-  }
-
-  @Override
-  public <T extends SecuObject> T saveObject(T object) {
-    WebTarget target = getTarget(object.getClass(), object.getId(), null, true);
-    Response response = executeRequest(target, object.getId() == null ? "POST" : "PUT", object);
-    handleResponseNot(response, Response.Status.OK);
-    return readObject(response, new GenericType<T>(object.getClass()));
-  }
-
-  @Override
-  public boolean deleteObject(Class type, String objectId) {
-    WebTarget target = getTarget(type, objectId, null, true);
-    Response response = executeRequest(target, "DELETE", null);
-    handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
-    return Response.Status.NOT_FOUND.getStatusCode() == response.getStatus();
-  }
-
-  @Override
-  public void setEventListener(EventListener listener) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public <A, R> R execute(String action, String[] ids, A arg, Class<R> returnType) {
-    WebTarget target = getTarget(arg.getClass(), ids[0], action, true);
-    Response response = executeRequest(target, "POST", null);
-
-    handleResponseNot(response, Response.Status.NOT_FOUND, Response.Status.OK);
-    if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {
-      return null;
-    }
-
-    return readObject(response, new GenericType<R>(returnType));
-  }
-
-  @Override
-  public void invoke(String command, boolean requestReceipt) {
-    WebTarget target = restClient.target(cfg.getBaseUrl()).path(command);
-    target.request().get();
-  }
-
-  @Override
-  public void close() {
-    restClient.close();
   }
 
   // private -------------------------------------------------------------------------------------------------------------------
 
-  private WebTarget getTarget(Class type, String objectId, String action, boolean secure) {
-    // todo: Cache targets?
-    WebTarget target = restClient.target(cfg.getBaseUrl()).path(pathResolver.resolve(type, '/'));
-    if (objectId != null) {
-      target = target.path(objectId);
-    }
-    if (action != null) {
-      target = target.path(action);
-    }
+  private MultivaluedHashMap<String, String> queryParamsToMap(QueryParams queryParams) {
+    MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
 
-    if (secure) {
-      target.register(loginFilter);
-    }
-    return target;
-  }
-
-  private <T> T readObject(Response response, GenericType<T> genericType) {
-    try {
-      return response.readEntity(genericType);
-    } catch (Exception e) {
-      throw handleException(response, e);
-    }
-  }
-
-  private <T> ObjectList<T> readObjects(Response response, GenericType<ObjectList<T>> genericType) {
-    try {
-      return response.readEntity(genericType);
-    } catch (Exception e) {
-      throw handleException(response, e);
-    }
-  }
-
-  private RuntimeException handleException(Response response, Exception cause) {
-    if (cause instanceof ProcessingException) {
-      String s = null;
-      try {
-        s = response.readEntity(String.class);
-        return new SecuException("Unexpected Response: " + s);
-      } catch (Exception e) {
-        cause = e;
-      }
-    }
-    return new SecuException("Error reading response.", cause);
-  }
-
-
-  private <T> Response executeRequest(WebTarget target, String method, T object) {
-    Response response;
-    try {
-      response = target.request(MediaType.APPLICATION_JSON).method(method, Entity.json(object));
-      response.bufferEntity();
-    } catch (Exception e) {
-      throw new SecuException("Error executing request", e);
-    }
-    return response;
-  }
-
-  private void handleResponseNot(Response response, Response.Status... stats) {
-    for (Response.Status stat : stats) {
-      if (response.getStatus() == stat.getStatusCode()) {
-        return;
-      }
-    }
-    Status status = null;
-    String error = null;
-    Exception ex = null;
-    try {
-      status = response.readEntity(Status.class);
-      error = response.readEntity(String.class);
-    } catch (Exception e) {
-      ex = e;
-    }
-
-    if (status != null || error != null) {
-      throw new SecuException("Error happened: " + (status == null ? error : status.getError() + ", "
-          + status.getErrorDetails()));
-    }
-
-    throw new SecuException("Error happened." + ex);
-  }
-
-  private <T> WebTarget queryParams(WebTarget target, QueryParams queryParams) {
-
-    boolean scroll = queryParams.getScrollId() > 0;
+    boolean scroll = queryParams.getScrollId() != null && queryParams.getScrollId() > 0;
     if (scroll) {
-      target = target.queryParam("scroll_id", queryParams.getScrollId());
+      map.putSingle("scroll_id", queryParams.getScrollId().toString());
     }
 
     boolean scrollExpire = StringUtils.isNotBlank(queryParams.getScrollExpire());
     if (scrollExpire) {
-      target = target.queryParam("scroll_expire", queryParams.getScrollExpire());
+      map.putSingle("scroll_expire", queryParams.getScrollExpire());
     }
 
-    if (!scroll && queryParams.getCount() >= 0) {
-      target = target.queryParam("count", queryParams.getCount());
+    if (!scroll && queryParams.getCount() != null && queryParams.getCount() >= 0) {
+      map.putSingle("count", queryParams.getCount().toString());
     }
 
-    if (!scroll && !scrollExpire && queryParams.getOffset() > 0) {
-      target = target.queryParam("offset", queryParams.getOffset());
+    if (!scroll && !scrollExpire && queryParams.getOffset() != null && queryParams.getOffset() > 0) {
+      map.putSingle("offset", queryParams.getOffset().toString());
     }
 
     List<String> fields = queryParams.getFields();
@@ -288,24 +193,109 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
         names = names == null ? "" : names + ',';
         names += field;
       }
-      target = target.queryParam("fields", names);
+      map.putSingle("fields", names);
     }
 
     Map<String, String> sortOrder = queryParams.getSortOrder();
     if (!scroll && sortOrder != null) {
       for (Map.Entry<String, String> entry : sortOrder.entrySet()) {
-        target = target.queryParam("sort[" + entry.getKey() + "]", entry.getValue());
+        map.putSingle("sort[" + entry.getKey() + "]", entry.getValue());
       }
     }
 
     if (StringUtils.isNotBlank(queryParams.getQuery())) {
-      target = target.queryParam("q", queryParams.getQuery());
+      map.putSingle("q", queryParams.getQuery());
     }
-    return target;
+
+    return map;
   }
 
-  interface GenericTypeResolver {
+  private <T> Invocation.Builder builder(Class<T> type, MultivaluedMap<String, String> queryParams, boolean secure,
+                                         String... pathArgs) {
+    // todo: Cache targets?
+    WebTarget target = restClient.target(cfg.getBaseUrl());
+
+    if (type != null) {
+      target = target.path(pathResolver.resolve(type, '/'));
+    }
+
+    for (String path : pathArgs) {
+      target = target.path(path);
+    }
+
+    if (queryParams != null) {
+      for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
+        target = target.queryParam(entry.getKey(), entry.getValue());
+      }
+    }
+
+    if (secure) {
+      target.register(loginFilter);
+    }
+
+    return target.request(MediaType.APPLICATION_JSON);
+  }
+
+  private <T> T getResponse(Invocation invocation, final GenericType<T> entityType, final Callback<T> callback,
+                            final Integer... ignoredStatus) {
+    T result = null;
+    if (callback == null) {
+      Future<Response> future = invocation.submit();
+      try {
+        result = readEntity(future.get(), entityType, ignoredStatus);
+      } catch (Exception e) {
+        throw translate(e);
+      }
+    } else {
+      invocation.submit(
+          new InvocationCallback<Response>() {
+            @Override
+            public void completed(Response response) {
+              T result = null;
+              try {
+                result = readEntity(response, entityType);
+              } catch (Exception e) {
+                failed(e);
+                return;
+              }
+              onCompleted(callback, result);
+            }
+
+            @Override
+            public void failed(Throwable throwable) {
+              onFailed(callback, throwable);
+            }
+          });
+    }
+    return result;
+  }
+
+
+  private <T> T readEntity(Response response, GenericType<T> entityType, Integer... ignoredStatus) {
+    for (Integer st : ignoredStatus) {
+      if (response.getStatus() == st) {
+        // ignore exception and return null
+        return null;
+      }
+    }
+
+    if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+      throw new WebApplicationException(response);
+    }
+
+    T result = null;
+    if (entityType != null) {
+      result = response.readEntity(entityType);
+    }
+    return result;
+  }
+
+
+  private SecuException translate(Throwable throwable) {
+    return new SecuException(throwable);
+  }
+
+  static interface GenericTypeResolver {
     <T> GenericType<ObjectList<T>> getGenericType(Class<T> type);
   }
-
 }

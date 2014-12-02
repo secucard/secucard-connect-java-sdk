@@ -1,5 +1,6 @@
 package com.secucard.connect.channel.rest;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.event.EventListener;
@@ -12,29 +13,15 @@ import java.io.IOException;
 
 public class VolleyChannel extends AbstractChannel implements AuthProvider {
 
+
   @Override
-  public void open() throws IOException {
+  public void open(Callback callback) throws IOException {
 
   }
 
   @Override
-  public <T> T getObject(Class<T> type, String objectId) {
-    return null;
-  }
+  public void close(Callback callback) {
 
-  @Override
-  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams) {
-    return null;
-  }
-
-  @Override
-  public <T extends SecuObject> T saveObject(T object) {
-    return null;
-  }
-
-  @Override
-  public boolean deleteObject(Class type, String objectId) {
-    return false;
   }
 
   @Override
@@ -43,18 +30,33 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public <A, R> R execute(String action, String[] id, A arg, Class<R> returnType) {
+  public String invoke(String command, Callback<String> callback) {
     return null;
   }
 
   @Override
-  public void invoke(String command, boolean requestReceipt) {
+  public <T> T getObject(Class<T> type, String objectId, Callback<T> callback) {
+    return null;
+  }
+
+  @Override
+  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
+    return null;
+  }
+
+  @Override
+  public <T extends SecuObject> T saveObject(T object, Callback<T> callback) {
+    return null;
+  }
+
+  @Override
+  public void deleteObject(Class type, String objectId, Callback callback) {
 
   }
 
   @Override
-  public void close() {
-
+  public <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType, Callback<T> callback) {
+    return null;
   }
 
   @Override

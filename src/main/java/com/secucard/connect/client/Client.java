@@ -68,8 +68,8 @@ public class Client extends AbstractService implements EventListener {
   public void connect() {
     try {
       // first rest since it does auth
-      getRestChannel().open();
-      getStompChannel().open();
+      getRestChannel().open(null);
+      getStompChannel().open(null);
       startHeartBeat();
     } catch (IOException e) {
       handleException(e);
@@ -78,8 +78,8 @@ public class Client extends AbstractService implements EventListener {
 
   public void disconnect() {
     stopHeartBeat();
-    getStompChannel().close();
-    getRestChannel().close();
+    getStompChannel().close(null);
+    getRestChannel().close(null);
     // todo: clear data store?
   }
 
@@ -109,7 +109,7 @@ public class Client extends AbstractService implements EventListener {
         public void run() {
           while (!isInterrupted()) {
             try {
-              getStompChannel().invoke("ping", false);
+              getStompChannel().invoke("ping", null);
             } catch (Exception e) {
               handleException(e);
               break;

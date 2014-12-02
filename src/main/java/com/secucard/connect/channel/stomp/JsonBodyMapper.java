@@ -21,7 +21,7 @@ public class JsonBodyMapper implements BodyMapper {
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public <T> Message<ObjectList<T>> toMessageList(Class type, String body) throws IOException {
+  public <T> Message<ObjectList<T>> toMessageList(Class<T> type, String body) throws IOException {
     TypeReference[] refs = TYPE_2_TYPEREFS.get(type);
     if (refs == null) {
       throw new IllegalArgumentException("Unknown type " + type);
@@ -29,7 +29,7 @@ public class JsonBodyMapper implements BodyMapper {
     return objectMapper.readValue(body, refs[1]);
   }
 
-  public <T> Message<T> toMessage(Class type, String body) throws IOException {
+  public <T> Message<T> toMessage(Class<T> type, String body) throws IOException {
     TypeReference[] refs = TYPE_2_TYPEREFS.get(type);
     if (refs == null) {
       throw new IllegalArgumentException("Unknown type " + type);

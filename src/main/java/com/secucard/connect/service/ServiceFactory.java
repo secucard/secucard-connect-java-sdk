@@ -7,7 +7,7 @@ import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
 import com.secucard.connect.channel.rest.UserAgentProviderImpl;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
-import com.secucard.connect.channel.stomp.SecuStompChannel;
+import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.client.ClientConfiguration;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.storage.DataStorage;
@@ -66,7 +66,7 @@ public class ServiceFactory {
 
 
     // stomp
-    SecuStompChannel sc = new SecuStompChannel(context.getClientId(), config.getStompConfiguration());
+    StompChannel sc = new StompChannel(context.getClientId(), config.getStompConfiguration());
     sc.setBodyMapper(new JsonBodyMapper());
     sc.setPathResolver(pathResolver);
     sc.setAuthProvider(authProvider);
@@ -75,14 +75,15 @@ public class ServiceFactory {
     ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
     for (AbstractService service : loader) {
       service.setContext(context);
+      // android ServiceLoader impl. doesn't cache services,
       services.add(service);
     }
 
     getService("*"); // fetch service ids
   }
 
-  public <T> T getService(String serviceId) {
-    Class serviceClass = null;
+  public <T extends AbstractService> T getService(String serviceId) {
+    Class<T> serviceClass = null;
     try {
       serviceClass = resolveServiceId(serviceId);
     } catch (Exception e) {
@@ -93,10 +94,10 @@ public class ServiceFactory {
       return null;
     }
 
-    return (T) getService(serviceClass);
+    return getService(serviceClass);
   }
 
-  public <T> T getService(Class<T> serviceClass) {
+  public <T extends AbstractService> T getService(Class<T> serviceClass) {
 
     for (AbstractService service : services) {
       if (service.getClass().equals(serviceClass)) {
@@ -106,7 +107,7 @@ public class ServiceFactory {
     return null;
   }
 
-  private Class resolveServiceId(String id) throws IOException, ClassNotFoundException {
+  private  <T extends AbstractService> Class<T> resolveServiceId(String id) throws IOException, ClassNotFoundException {
     if (names == null) {
       // lazy load names
       names = new HashMap<>();
@@ -138,7 +139,7 @@ public class ServiceFactory {
       String[] ids = entry.getValue();
       for (String s : ids) {
         if (s.equalsIgnoreCase(id)) {
-          return Class.forName(entry.getKey());
+          return (Class<T>) Class.forName(entry.getKey());
         }
       }
     }

@@ -176,7 +176,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         try {
           receipts.wait(1000);
         } catch (InterruptedException e) {
-          break;
+          // will be stopped anyway
         }
       }
       frm = receipts.remove(receipt);
@@ -211,7 +211,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         try {
           monitor.wait(1000);
         } catch (InterruptedException e) {
-          break;
+          // will be stopped anyway
         }
       }
     }
@@ -238,7 +238,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         try {
           messages.wait(1000);
         } catch (InterruptedException e) {
-          break;
+          // will be stopped anyway
         }
       }
       msg = pullMessage(id);

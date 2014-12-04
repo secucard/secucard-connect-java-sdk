@@ -31,44 +31,67 @@ public class ClientDemo {
     client.setEventListener(new EventListener() {
       @Override
       public void onEvent(Object event) {
-        System.out.println("Event: " + event);
+        System.out.println("Got event: " + event);
       }
     });
 
+    // set an optional global exception handler - all exceptions thrown by service methods end up here
+    // if not set each method throws as usual, its up to the developer to catch accordingly
+    // if callback are used all exceptions go to the failed method
     client.setExceptionHandler(new ExceptionHandler() {
       @Override
       public void handle(Exception exception) {
-        client.disconnect();
+        System.err.println("Error happened:");
         exception.printStackTrace();
+        client.disconnect();
       }
     });
 
-    GeneralService generalService = client.getService(GeneralService.class);
     client.connect();
 
-    QueryParams queryParams = new QueryParams();
-    queryParams.setOffset(1);
-//    queryParams.setCount(2);
-    queryParams.setFields("a");
-//    queryParams.addSortOrder("a", QueryParams.SORT_ASC);
-//    queryParams.addSortOrder("b", QueryParams.SORT_DESC);
-//    queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
-    List<Skeleton> skeletons = generalService.getSkeletons(queryParams, new Callback<List<Skeleton>>() {
+    // simple retrieval ------------------------------------------------------------------------------------------------
+
+    final GeneralService generalService = client.getService(GeneralService.class);
+
+    // get skeleton, without/with callback
+    Skeleton skeleton = generalService.getSkeleton("skl_60", null);
+    System.out.println("got skeleton: " + skeleton);
+
+    skeleton = generalService.getSkeleton("skl_60", new Callback<Skeleton>() {
       @Override
-      public void completed(List<Skeleton> result) {
-        System.out.println();
+      public void completed(Skeleton result) {
+        System.out.println("got skeleton: " + result);
       }
 
       @Override
       public void failed(Throwable throwable) {
+        System.err.println("Error retrieving skeleton.");
         throwable.printStackTrace();
       }
     });
 
-    if (true) {
-      client.disconnect();
-      return;
-    }
+    // find skeleton, with callback
+    QueryParams queryParams = new QueryParams();
+    queryParams.setOffset(1);
+    queryParams.setCount(2);
+    //queryParams.setFields("a"); seems not to work properly
+    queryParams.addSortOrder("a", QueryParams.SORT_ASC);
+    queryParams.addSortOrder("b", QueryParams.SORT_DESC);
+    queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
+    List<Skeleton> skeletons = generalService.getSkeletons(null, new Callback<List<Skeleton>>() {
+      @Override
+      public void completed(List<Skeleton> result) {
+        System.out.println("got skeletons: " + result);
+      }
+
+      @Override
+      public void failed(Throwable throwable) {
+        System.err.println("Error retrieving skeletons.");
+        throwable.printStackTrace();
+      }
+    });
+
+    // do a smart transaction  ----------------------------------------------------------------------------------------
 
     SmartService smartService = client.getService(SmartService.class);
     // or get by a defined name:
@@ -78,6 +101,7 @@ public class ClientDemo {
     Device device = new Device(id);
     boolean ok = smartService.registerDevice(device, null);
     if (!ok) {
+      client.disconnect();
       throw new RuntimeException("Error registering device.");
     }
 
@@ -109,10 +133,10 @@ public class ClientDemo {
     // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
 
     Result result = smartService.startTransaction(transaction, type, null);
+    System.out.println("Transaction finished: " + result);
 
     client.disconnect();
 
-    System.out.println("Transaction finished: " + result);
   }
 
   private static void runThreaded(final ClientConfiguration cfg) {

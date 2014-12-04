@@ -1,7 +1,6 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.CallbackAdapter;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
@@ -9,6 +8,7 @@ import com.secucard.connect.model.smart.Result;
 import com.secucard.connect.model.smart.Transaction;
 import com.secucard.connect.model.transport.InvocationResult;
 import com.secucard.connect.service.AbstractService;
+import com.secucard.connect.util.Converter;
 
 import java.util.List;
 
@@ -23,22 +23,19 @@ public class SmartService extends AbstractService {
    * @return True if successfully, false else.
    */
   public boolean registerDevice(Device device, Callback callback) {
-    CallbackAdapter<InvocationResult, Boolean> adapter = null;
-    if (callback != null) {
-      adapter = new CallbackAdapter<InvocationResult, Boolean>(callback) {
+    try {
+      Converter<InvocationResult, Boolean> converter = new Converter<InvocationResult, Boolean>() {
         @Override
-        protected Boolean convert(InvocationResult object) {
-          return Boolean.parseBoolean(object.getResult());
+        public Boolean convert(InvocationResult value) {
+          return value == null ? Boolean.FALSE : Boolean.parseBoolean(value.getResult());
         }
       };
-    }
-    // todo: switch to id, static just for test
-    try {
+      // todo: switch to id, static just for test
       InvocationResult result = getStompChannel().execute("register", "me", null, device, InvocationResult.class,
-          adapter);
-      return Boolean.parseBoolean(result.getResult());
+          getCallbackAdapter(callback, converter));
+      return converter.convert(result);
     } catch (Exception e) {
-      handleException(e);
+      handleException(e, callback);
     }
     return false;
   }
@@ -48,23 +45,18 @@ public class SmartService extends AbstractService {
    */
   public List<Ident> getIdents(Callback<List<Ident>> callback) {
 
-    CallbackAdapter<ObjectList<Ident>, List<Ident>> adapter = null;
-    if (callback != null) {
-      adapter = new CallbackAdapter<ObjectList<Ident>, List<Ident>>(callback) {
-        @Override
-        protected List<Ident> convert(ObjectList<Ident> object) {
-          return object.getList();
-        }
-      };
-    }
 
     try {
-      ObjectList<Ident> idents = getChannnel().findObjects(Ident.class, null, adapter);
-      if (idents != null) {
-        return idents.getList();
-      }
+      Converter<ObjectList<Ident>, List<Ident>> converter = new Converter<ObjectList<Ident>, List<Ident>>() {
+        @Override
+        public List<Ident> convert(ObjectList<Ident> value) {
+          return value == null ? null : value.getList();
+        }
+      };
+      ObjectList<Ident> idents = getChannnel().findObjects(Ident.class, null, getCallbackAdapter(callback, converter));
+      return converter.convert(idents);
     } catch (Exception e) {
-      handleException(e);
+      handleException(e, callback);
     }
     return null;
   }
@@ -79,7 +71,7 @@ public class SmartService extends AbstractService {
     try {
       return getChannnel().saveObject(transaction, callback);
     } catch (Exception e) {
-      handleException(e);
+      handleException(e, callback);
     }
     return null;
   }
@@ -95,7 +87,7 @@ public class SmartService extends AbstractService {
     try {
       return getChannnel().execute("start", transaction.getId(), type, transaction, Result.class, callback);
     } catch (Exception e) {
-      handleException(e);
+      handleException(e, callback);
     }
     return null;
   }

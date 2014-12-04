@@ -7,6 +7,7 @@ import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * Main entry to the Java Secucard Connect API.
@@ -17,6 +18,7 @@ public class Client extends AbstractService implements EventListener {
   private String id;
   private ServiceFactory serviceFactory;
   private EventListener targetEventListener = null;
+  private boolean stopHeartbeat;
 
   private Client(final String id, ClientConfiguration configuration) {
     init(id, configuration);
@@ -72,7 +74,7 @@ public class Client extends AbstractService implements EventListener {
       getStompChannel().open(null);
       startHeartBeat();
     } catch (IOException e) {
-      handleException(e);
+      handleException(e, null);
     }
   }
 
@@ -104,22 +106,28 @@ public class Client extends AbstractService implements EventListener {
     final int heartBeatSec = context.getConfig().getHeartBeatSec();
     if (heartBeatSec != 0) {
       stopHeartBeat();
+      stopHeartbeat = false;
       heartbeatInvoker = new Thread() {
         @Override
         public void run() {
-          while (!isInterrupted()) {
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.info("stomp heart beat started (" + heartBeatSec +"s).");
+          }
+          while (!stopHeartbeat) {
             try {
               getStompChannel().invoke("ping", null);
             } catch (Exception e) {
-              handleException(e);
+              handleException(new SecuException("Error sending heart beat message.", e), null);
               break;
             }
             try {
               Thread.sleep(heartBeatSec * 1000);
             } catch (InterruptedException e) {
-              handleException(new Exception("Stomp heart beat stopped.", e));
               break;
             }
+          }
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.info("stomp heart beat stopped");
           }
         }
       };
@@ -127,9 +135,13 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
+  public void handleConnectionStateChanged(){
+
+  }
+
   private void stopHeartBeat() {
-    if (heartbeatInvoker != null && heartbeatInvoker.isAlive()) {
-      heartbeatInvoker.interrupt();
+    if (heartbeatInvoker != null) {
+      stopHeartbeat = true;
       try {
         heartbeatInvoker.join();
       } catch (InterruptedException e) {
@@ -151,12 +163,7 @@ public class Client extends AbstractService implements EventListener {
     getStompChannel().setEventListener(this);
 
     // bubble up ex. for now todo: forward to handler
-    setExceptionHandler(new ExceptionHandler() {
-      @Override
-      public void handle(Exception exception) {
-        throw new SecuException(exception);
-      }
-    });
+    setExceptionHandler(new ThrowingExceptionHandler());
   }
 
   private void handleEvent(Object event) {
@@ -174,4 +181,10 @@ public class Client extends AbstractService implements EventListener {
   }
 
 
+  private static class ThrowingExceptionHandler implements ExceptionHandler {
+    @Override
+    public void handle(Exception exception){
+      throw new SecuException(exception);
+    }
+  }
 }

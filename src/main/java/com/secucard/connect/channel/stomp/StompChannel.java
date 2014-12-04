@@ -24,7 +24,13 @@ public class StompChannel extends StompChannelBase {
     }
 
     try {
-      stompSupport.open(null, null);
+      String login = configuration.getUserId();
+      String pwd = configuration.getPassword();
+      if (login == null || pwd == null) {
+        String token = authProvider.getToken().getAccessToken();
+        login = pwd = token;
+      }
+      stompSupport.open(login, pwd);
     } catch (Exception e) {
       if (callback == null) {
         throw e;

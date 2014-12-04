@@ -53,8 +53,8 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   @Override
   public void open(Callback callback) {
     try {
-      this.restClient = ClientBuilder.newClient();
-      restClient.register(JacksonJsonProvider.class);
+      // rest client should be initialized just on time, client is expensive
+      initClient();
       onCompleted(callback, null);
     } catch (Throwable e) {
       if (callback == null) {
@@ -64,9 +64,14 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     }
   }
 
+  private void initClient() {
+    restClient = ClientBuilder.newClient();
+    restClient.register(JacksonJsonProvider.class);
+  }
+
   @Override
   public void setEventListener(EventListener listener) {
-
+    throw new UnsupportedOperationException("Rest channel doesn't support listener.");
   }
 
   @Override

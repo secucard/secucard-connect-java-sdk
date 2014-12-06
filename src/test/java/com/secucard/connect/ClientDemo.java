@@ -8,7 +8,9 @@ import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.general.GeneralService;
-import com.secucard.connect.service.smart.SmartService;
+import com.secucard.connect.service.smart.DeviceService;
+import com.secucard.connect.service.smart.IdentService;
+import com.secucard.connect.service.smart.TransactionService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -93,21 +95,21 @@ public class ClientDemo {
 
     // do a smart transaction  ----------------------------------------------------------------------------------------
 
-    SmartService smartService = client.getService(SmartService.class);
-    // or get by a defined name:
-    // SmartService smartService = client.getService("smart");
+    // get services by class or by id, getting by class is typesafe
+    TransactionService transactionService = client.getService("smart.transactions");
+    IdentService identService = client.getService("smart/idents");
+    DeviceService deviceService = client.getService(DeviceService.class);
 
     // in production id would be the vendor uuid,
     Device device = new Device(id);
-    boolean ok = smartService.registerDevice(device, null);
+    boolean ok = deviceService.registerDevice(device, null);
     if (!ok) {
       client.disconnect();
       throw new RuntimeException("Error registering device.");
     }
 
-
     // select an ident
-    List<Ident> availableIdents = smartService.getIdents(null);
+    List<Ident> availableIdents = identService.getIdents(null);
     if (availableIdents == null) {
       throw new RuntimeException("No idents found.");
     }
@@ -127,12 +129,12 @@ public class ClientDemo {
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
 
-    Transaction transaction = smartService.createTransaction(newTrans, null);
+    Transaction transaction = transactionService.createTransaction(newTrans, null);
 
     String type = "demo"; // demo|auto|cash
     // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
 
-    Result result = smartService.startTransaction(transaction, type, null);
+    Result result = transactionService.startTransaction(transaction, type, null);
     System.out.println("Transaction finished: " + result);
 
     client.disconnect();

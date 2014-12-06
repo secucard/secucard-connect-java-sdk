@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public interface Channel {
 
-  void open(Callback callback) throws IOException;
+  void open(Callback<?> callback) throws IOException;
 
   void setEventListener(EventListener listener);
 
@@ -25,10 +25,10 @@ public interface Channel {
 
   <T extends SecuObject> T saveObject(T object, Callback<T> callback);
 
-  void deleteObject(Class type, String objectId, Callback callback);
+  void deleteObject(Class type, String objectId, Callback<?> callback);
 
   <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType, Callback<T> callback);
 
-  void close(Callback callback);
+  void close(Callback<?> callback);
 
 }

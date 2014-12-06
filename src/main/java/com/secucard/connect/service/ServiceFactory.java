@@ -1,10 +1,10 @@
 package com.secucard.connect.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
-import com.secucard.connect.channel.rest.StaticGenericTypeResolver;
 import com.secucard.connect.channel.rest.UserAgentProviderImpl;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
@@ -53,7 +53,7 @@ public class ServiceFactory {
     // jax ws rs rest channel, comment next 7 lines in android
     RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
     rc.setPathResolver(pathResolver);
-    rc.setTypeResolver(new StaticGenericTypeResolver());
+    rc.setJsonMapper(new ObjectMapper());
     rc.setStorage(context.getDataStorage());
     rc.setUserAgentProvider(new UserAgentProviderImpl());
     context.setRestChannel(rc);

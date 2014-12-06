@@ -1,6 +1,7 @@
 package com.secucard.connect.channel.rest;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
@@ -13,24 +14,27 @@ import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.util.jackson.DynamicTypeReference;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.*;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
 public class RestChannel extends AbstractChannel implements AuthProvider {
   protected javax.ws.rs.client.Client restClient;
-  protected GenericTypeResolver typeResolver;
   protected LoginFilter loginFilter;
   protected final Configuration cfg;
   private DataStorage storage;
   private String id;
   private final boolean secure = false;
   protected UserAgentProvider userAgentProvider;
+  private ObjectMapper jsonMapper = new ObjectMapper();
 
   public RestChannel(String id, Configuration cfg) {
     this.cfg = cfg;
@@ -42,12 +46,12 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     this.storage = storage;
   }
 
-  public void setTypeResolver(GenericTypeResolver typeResolver) {
-    this.typeResolver = typeResolver;
-  }
-
   public void setUserAgentProvider(UserAgentProvider userAgentProvider) {
     this.userAgentProvider = userAgentProvider;
+  }
+
+  public void setJsonMapper(ObjectMapper jsonMapper) {
+    this.jsonMapper = jsonMapper;
   }
 
   @Override
@@ -66,7 +70,6 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   private void initClient() {
     restClient = ClientBuilder.newClient();
-    restClient.register(JacksonJsonProvider.class);
   }
 
   @Override
@@ -109,26 +112,25 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     builder.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
     Invocation invocation = builder.buildPost(Entity.form(parameters));
 
-    return getResponse(invocation, new GenericType<Token>(Token.class), null);
+    return getResponse(invocation, new DynamicTypeReference(Token.class), null);
   }
 
   @Override
   public String invoke(String command, Callback<String> callback) {
     Invocation invocation = builder(null, null, secure, command).buildGet();
-    return getResponse(invocation, new GenericType<String>() {
-    }, callback);
+    return getResponse(invocation, new DynamicTypeReference(String.class), callback);
   }
 
   @Override
   public <T> T getObject(Class<T> type, String objectId, Callback<T> callback) {
     Invocation invocation = builder(type, null, secure, objectId).buildGet();
-    return getResponse(invocation, new GenericType<T>(type), callback);
+    return getResponse(invocation, new DynamicTypeReference(type), callback);
   }
 
   @Override
   public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
     Invocation invocation = builder(type, queryParamsToMap(queryParams), secure).buildGet();
-    return getResponse(invocation, typeResolver.getGenericType(type), callback,
+    return getResponse(invocation, new DynamicTypeReference(ObjectList.class, type), callback,
         Response.Status.NOT_FOUND.getStatusCode());
   }
 
@@ -137,11 +139,11 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     Entity<T> entity = Entity.json(object);
     Invocation.Builder builder = builder(object.getClass(), null, secure, object.getId());
     Invocation invocation = object.getId() == null ? builder.buildPost(entity) : builder.buildPut(entity);
-    return getResponse(invocation, new GenericType<T>(object.getClass()), callback);
+    return getResponse(invocation, new DynamicTypeReference(object.getClass()), callback);
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, Callback callback) {
+  public void deleteObject(Class type, String objectId, Callback<?> callback) {
     Invocation invocation = builder(type, null, secure, objectId).buildDelete();
     getResponse(invocation, null, callback);
   }
@@ -150,7 +152,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   public <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
     Invocation invocation = builder(arg.getClass(), null, secure, resourceId, action, strArg).buildPost(entity);
-    return getResponse(invocation, new GenericType<T>(returnType), callback);
+    return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 
 
@@ -241,7 +243,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     return target.request(MediaType.APPLICATION_JSON);
   }
 
-  private <T> T getResponse(Invocation invocation, final GenericType<T> entityType, final Callback<T> callback,
+  private <T> T getResponse(Invocation invocation, final TypeReference entityType, final Callback<T> callback,
                             final Integer... ignoredStatus) {
     T result = null;
     if (callback == null) {
@@ -275,8 +277,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     return result;
   }
 
-
-  private <T> T readEntity(Response response, GenericType<T> entityType, Integer... ignoredStatus) {
+  private <T> T readEntity(Response response, TypeReference entityType, Integer... ignoredStatus) throws IOException {
     for (Integer st : ignoredStatus) {
       if (response.getStatus() == st) {
         // ignore exception and return null
@@ -290,7 +291,10 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
     T result = null;
     if (entityType != null) {
-      result = response.readEntity(entityType);
+      String json = response.readEntity(String.class);
+      if (json != null) {
+        result = jsonMapper.readValue(json, entityType);
+      }
     }
     return result;
   }

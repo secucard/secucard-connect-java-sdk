@@ -1,2 +1,5 @@
-com.secucard.connect.service.smart.SmartService  #{smart,smart.transactions,smart/transactions,smart.devices,smart/devices}
+com.secucard.connect.service.smart.SmartService  #{smart}
+com.secucard.connect.service.smart.IdentService  #{smart.idents,smart/idents}
+com.secucard.connect.service.smart.TransactionService  #{smart.transactions,smart/transactions}
+com.secucard.connect.service.smart.DeviceService  #{smart.devices,smart/devices}
 com.secucard.connect.service.general.GeneralService #{general}

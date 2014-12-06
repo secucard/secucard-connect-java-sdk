@@ -22,6 +22,7 @@ import javax.ws.rs.client.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -94,23 +95,11 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
                             String refreshToken) {
-    MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
-    parameters.add("client_id", clientCredentials.getClientId());
-    parameters.add("client_secret", clientCredentials.getClientSecret());
-    if (refreshToken != null) {
-      parameters.add("grant_type", "refresh_token");
-      parameters.add("refresh_token", refreshToken);
-    } else if (userCredentials != null) {
-      parameters.add("grant_type", "appuser");
-      parameters.add("username", userCredentials.getUsername());
-      parameters.add("password", userCredentials.getPassword());
-    } else {
-      parameters.add("grant_type", "client_credentials");
-    }
+    Map<String, String> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken);
 
     Invocation.Builder builder = restClient.target(cfg.getOauthUrl()).request(MediaType.APPLICATION_FORM_URLENCODED);
     builder.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
-    Invocation invocation = builder.buildPost(Entity.form(parameters));
+    Invocation invocation = builder.buildPost(Entity.form(new MultivaluedHashMap<>(parameters)));
 
     return getResponse(invocation, new DynamicTypeReference(Token.class), null);
   }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
+import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
@@ -142,17 +143,14 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     return null;
   }
 
-  private Token createToken(OAuthClientCredentials clientCredentials) {
- /*   Map<String, String> params = new HashMap<String, String>();
-    params.put("grant_type", GRANT_TYPE_APP_USER);
-    params.put("username", clientCredentials.getClientId());
-    params.put("password", password);
-    params.put("device", device);
-    params.put("client_id", clientCredentials.getClientId());
-    params.put("client_secret", clientCredentials.getClientSecret());*/
+  private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
+                            String refreshToken, String device) {
+    Map<String, String> authParams = createAuthParams(clientCredentials, userCredentials, refreshToken);
+    authParams.put("device", device);
+
     RequestFuture<Token> future = RequestFuture.newFuture();
-    Request<Token> request = new ObjectJsonRequest<>(Request.Method.POST, configuration.getOauthUrl(), null, future, future,
-        null, false, new DynamicTypeReference(Token.class));
+    Request<Token> request = new ObjectJsonRequest<>(Request.Method.POST, configuration.getOauthUrl(), null,
+        future, future, authParams, false, new DynamicTypeReference(Token.class));
     future.setRequest(requestQueue.add(request));
 
     try {

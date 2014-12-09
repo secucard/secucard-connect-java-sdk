@@ -1,10 +1,10 @@
-package com.secucard.connect.client;
+package com.secucard.connect;
 
-import com.secucard.connect.SecuException;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -20,8 +20,13 @@ public class Client extends AbstractService implements EventListener {
   private EventListener targetEventListener = null;
   private boolean stopHeartbeat;
 
-  private Client(final String id, ClientConfiguration configuration) {
-    init(id, configuration);
+  private Client(final String id, ClientConfiguration configuration, Object runtimeContext) {
+    init(id, configuration, runtimeContext);
+  }
+
+
+  public static Client create(String id, ClientConfiguration configuration) {
+    return new Client(id, configuration, null);
   }
 
   /**
@@ -30,12 +35,13 @@ public class Client extends AbstractService implements EventListener {
    * To access business related operations obtain a service instance from this client
    * via {@link #create(String, ClientConfiguration)} method.
    *
-   * @param id            A unique id associated with this client.
-   * @param configuration The configuration of the client.
+   * @param id             A unique id associated with this client.
+   * @param configuration  The configuration of the client.
+   * @param runtimeContext Any context object needed to create services etc., accessible later on via ClientContext.
    * @return The client instance.
    */
-  public static Client create(String id, ClientConfiguration configuration) {
-    return new Client(id, configuration);
+  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext) {
+    return new Client(id, configuration, runtimeContext);
   }
 
   /**
@@ -111,7 +117,7 @@ public class Client extends AbstractService implements EventListener {
         @Override
         public void run() {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.info("stomp heart beat started (" + heartBeatSec +"s).");
+            LOG.info("stomp heart beat started (" + heartBeatSec + "s).");
           }
           while (!stopHeartbeat) {
             try {
@@ -135,7 +141,7 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
-  public void handleConnectionStateChanged(){
+  public void handleConnectionStateChanged() {
 
   }
 
@@ -149,7 +155,7 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
-  private void init(String id, ClientConfiguration config) {
+  private void init(String id, ClientConfiguration config, Object runtimeContext) {
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
@@ -157,7 +163,19 @@ public class Client extends AbstractService implements EventListener {
     context = new ClientContext();
     context.setConfig(config);
     context.setClientId(id);
-    serviceFactory = new ServiceFactory(context);
+    context.setRuntimeContext(runtimeContext);
+    String serviceFactoryName = config.getServiceFactory();
+    if (StringUtils.isNotBlank(serviceFactoryName)) {
+      try {
+        Class<?> sfc = Class.forName(serviceFactoryName);
+        serviceFactory = (ServiceFactory) sfc.newInstance();
+      } catch (Exception e) {
+        throw new SecuException("Cannnot instantiate service factory " + serviceFactoryName, e);
+      }
+    } else {
+      serviceFactory = new ServiceFactory();
+    }
+    serviceFactory.init(context);
     isConnected = false;
 
     getStompChannel().setEventListener(this);
@@ -183,7 +201,7 @@ public class Client extends AbstractService implements EventListener {
 
   private static class ThrowingExceptionHandler implements ExceptionHandler {
     @Override
-    public void handle(Exception exception){
+    public void handle(Exception exception) {
       throw new SecuException(exception);
     }
   }

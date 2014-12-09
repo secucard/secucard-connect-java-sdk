@@ -1,4 +1,4 @@
-package com.secucard.connect.client;
+package com.secucard.connect;
 
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.storage.DataStorage;
@@ -12,6 +12,7 @@ public class ClientContext {
   public static final String REST = "rest";
   private String clientId;
   private ExceptionHandler exceptionHandler;
+  private Object runtimeContext;
 
   public void setExceptionHandler(ExceptionHandler exceptionHandler) {
     this.exceptionHandler = exceptionHandler;
@@ -59,6 +60,14 @@ public class ClientContext {
 
   public Channel getStompChannel() {
     return stompChannel;
+  }
+
+  public Object getRuntimeContext() {
+    return runtimeContext;
+  }
+
+  public void setRuntimeContext(Object runtimeContext) {
+    this.runtimeContext = runtimeContext;
   }
 
   public Channel getChannnel(String name) {

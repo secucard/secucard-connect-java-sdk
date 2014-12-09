@@ -2,8 +2,8 @@ package com.secucard.connect.service;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.ExceptionHandler;
+import com.secucard.connect.ClientContext;
+import com.secucard.connect.ExceptionHandler;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
 

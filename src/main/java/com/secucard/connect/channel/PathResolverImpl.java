@@ -6,6 +6,9 @@ import com.secucard.connect.model.annotation.ProductInfo;
 import java.lang.annotation.Annotation;
 import java.util.StringTokenizer;
 
+/**
+ * PathResolver impl. which builds the path according to the ProductInfo annotation of the type.
+ */
 public class PathResolverImpl implements PathResolver {
 
   @Override

@@ -1,4 +1,4 @@
-package com.secucard.connect.client;
+package com.secucard.connect;
 
 public interface ExceptionHandler {
   public void handle(Exception exception);

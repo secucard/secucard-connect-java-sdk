@@ -1,15 +1,16 @@
 package com.secucard.connect.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.secucard.connect.ClientConfiguration;
+import com.secucard.connect.ClientContext;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
+import com.secucard.connect.channel.PathResolver;
 import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.UserAgentProviderImpl;
 import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
-import com.secucard.connect.client.ClientConfiguration;
-import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.MemoryDataStorage;
 import org.apache.commons.lang3.StringUtils;
@@ -22,16 +23,35 @@ public class ServiceFactory {
   private Map<String, String[]> names = null;
   private Set<AbstractService> services = new HashSet<>();
 
-  public ServiceFactory(ClientContext context) {
-    init(context);
-  }
-
-  private void init(ClientContext context) {
+  public void init(ClientContext context) {
     ClientConfiguration config = context.getConfig();
 
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
+
+    setUpContext(context);
+
+    ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
+    for (AbstractService service : loader) {
+      service.setContext(context);
+      // android ServiceLoader impl. doesn't cache services,
+      services.add(service);
+    }
+
+    getService("*"); // fetch service ids
+  }
+
+  /**
+   * Wiring all dependencies and setting up context needed in services.
+   * Override to implement special behaviour.
+   *
+   * @param context The client context to set up.
+   */
+  protected void setUpContext(ClientContext context) {
+    ClientConfiguration config = context.getConfig();
+
+    PathResolver pathResolver = new PathResolverImpl();
 
     DataStorage dataStorage;
     /*try {
@@ -42,44 +62,22 @@ public class ServiceFactory {
     dataStorage = new MemoryDataStorage();
     context.setDataStorage(dataStorage);
 
-    context.setDataStorage(dataStorage);
-
-    PathResolverImpl pathResolver = new PathResolverImpl();
-
-    AuthProvider authProvider;
-
-    //todo: make switching rest impl easier
-
-    // jax ws rs rest channel, comment next 7 lines in android
     RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
     rc.setPathResolver(pathResolver);
     rc.setJsonMapper(new ObjectMapper());
     rc.setStorage(context.getDataStorage());
     rc.setUserAgentProvider(new UserAgentProviderImpl());
     context.setRestChannel(rc);
-    authProvider = rc;
 
-    // for android uncomment next lines
-    //VolleyChannel vc = new VolleyChannel();
-    //context.setRestChannel(vc);
-    //authProvider = vc;
+    setUpStomp(context, rc, pathResolver);
+  }
 
-
-    // stomp
-    StompChannel sc = new StompChannel(context.getClientId(), config.getStompConfiguration());
+  protected static void setUpStomp(ClientContext context, AuthProvider authProvider, PathResolver pathResolver) {
+    StompChannel sc = new StompChannel(context.getClientId(), context.getConfig().getStompConfiguration());
     sc.setBodyMapper(new JsonBodyMapper());
     sc.setPathResolver(pathResolver);
     sc.setAuthProvider(authProvider);
     context.setStompChannel(sc);
-
-    ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
-    for (AbstractService service : loader) {
-      service.setContext(context);
-      // android ServiceLoader impl. doesn't cache services,
-      services.add(service);
-    }
-
-    getService("*"); // fetch service ids
   }
 
   public <T extends AbstractService> T getService(String serviceId) {
@@ -107,7 +105,7 @@ public class ServiceFactory {
     return null;
   }
 
-  private  <T extends AbstractService> Class<T> resolveServiceId(String id) throws IOException, ClassNotFoundException {
+  private <T extends AbstractService> Class<T> resolveServiceId(String id) throws IOException, ClassNotFoundException {
     if (names == null) {
       // lazy load names
       names = new HashMap<>();

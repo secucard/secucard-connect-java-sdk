@@ -1,13 +1,16 @@
 package com.secucard.connect.channel;
 
+/**
+ * Resolve an URL like resource path of an secucard object like Transaction or Merchant.
+ */
 public interface PathResolver {
 
   /**
-   * Returns the URL like path to use to access an object of a given type.
+   * Returns the resource path.
    *
-   * @param type
-   * @param separator The path part separator character, like '/'.
-   * @return The path as string.
+   * @param type      The type to resolve into a path.
+   * @param separator The path separator character, like '/' or '.'
+   * @return The path as a string.
    */
   String resolve(Class type, char separator);
 }

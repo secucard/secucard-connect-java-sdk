@@ -1,8 +1,5 @@
 package com.secucard.connect;
 
-import com.secucard.connect.client.Client;
-import com.secucard.connect.client.ClientConfiguration;
-import com.secucard.connect.client.ExceptionHandler;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
@@ -30,6 +27,9 @@ public class ClientDemo {
 
   private static void process(final String id, ClientConfiguration cfg) {
     final Client client = Client.create(id, cfg);
+    // Android usage (passing android.content.Context): Client.create(id, cfg, getApplication());
+    // additionally set serviceFactory=com.secucard.connect.service.AndroidServiceFactory in client configuration
+
     client.setEventListener(new EventListener() {
       @Override
       public void onEvent(Object event) {

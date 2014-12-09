@@ -4,7 +4,7 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
-import com.secucard.connect.client.ConnectionException;
+import com.secucard.connect.ConnectionException;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;

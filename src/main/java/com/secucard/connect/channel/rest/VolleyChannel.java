@@ -16,26 +16,37 @@ import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Rest channel impl. for Android usage. Utilizes com.android.volley.
+ */
 public class VolleyChannel extends AbstractChannel implements AuthProvider {
   private RequestQueue requestQueue;
+  private String id;
   private final android.content.Context context;
   protected final Configuration configuration;
   private ObjectMapper objectMapper = new ObjectMapper();
+  private DataStorage storage;
 
-  public VolleyChannel(Context context, Configuration configuration) {
+  public void setStorage(DataStorage storage) {
+    this.storage = storage;
+  }
+
+  public VolleyChannel(String id, Context context, Configuration configuration) {
+    this.id = id;
     this.context = context;
     this.configuration = configuration;
   }
 
   @Override
   public void open(Callback callback) throws IOException {
-    requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+    requestQueue = Volley.newRequestQueue(context.getApplicationContext(), new HurlStack());
   }
 
   @Override
@@ -130,16 +141,22 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
 
   @Override
   public Token getToken() {
-   /* Token token = storage.get("token" + id);
+    // todo: adapt the flow, it's the flow from java client, also not sure what the device string is or where userCredentials come from
+
+    String device = "";
+    Token token = storage.get("token" + id);
     Long expireTime = storage.get("expireTime" + id);
     if (token == null) {
-      token = createToken(configuration.getClientCredentials(), null, null);
-    } else if (expireTime != null && expireTime < System.currentTimeMillis() - 30 * 1000) {
-      token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken());
+      token = createToken(configuration.getClientCredentials(), null, null, device);
+    } else {
+      int expireTimeoutMs = 30 * 1000; // todo move to config
+      if (expireTime != null && expireTime < System.currentTimeMillis() - expireTimeoutMs) {
+        token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken(), device);
+      }
     }
     expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
     storage.save("token" + id, token);
-    storage.save("expireTime" + id, expireTime);*/
+    storage.save("expireTime" + id, expireTime);
     return null;
   }
 
@@ -178,6 +195,12 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     return new HashMap<>();
   }
 
+  /**
+   * Request which maps JSON response strings directly into Java objects.
+   * Jackson ObjectMapper will be used for this.
+   *
+   * @param <T> The actual response object type.
+   */
   private class ObjectJsonRequest<T> extends JsonRequest<T> {
     private TypeReference typeReference;
     private Map<String, String> queryParams;

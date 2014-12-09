@@ -1,4 +1,4 @@
-package com.secucard.connect.client;
+package com.secucard.connect;
 
 public class ConnectionException extends  RuntimeException {
 

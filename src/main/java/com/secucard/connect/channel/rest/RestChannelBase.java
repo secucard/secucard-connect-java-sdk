@@ -125,10 +125,6 @@ public abstract class RestChannelBase extends AbstractChannel {
       if (StringUtils.isNotBlank(gq.getDistance())) {
         map.put("geo[distance]", gq.getDistance());
       }
-
-      if (StringUtils.isNotBlank(gq.getSortOrder()) && StringUtils.isNotBlank(gq.getFieldName())) {
-        map.put("sort[_" + gq.getFieldName() + "]", gq.getSortOrder());
-      }
     }
 
     return map;

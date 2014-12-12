@@ -100,14 +100,8 @@ public abstract class RestChannelBase extends AbstractChannel {
       map.put("preset", queryParams.getPreset());
     }
 
-    // todo: check with scroll id etc.
     QueryParams.GeoQuery gq = queryParams.getGeoQuery();
     if (gq != null) {
-
-      // sort[_geometry]=asc
-      // geo[lat]=51.175214&geo[lon]=14.027788&geo[field]=geometry
-      // geo[distance]=1000m
-
       if (StringUtils.isNotBlank(gq.getFieldName())) {
         map.put("geo[field]", gq.getFieldName());
       }

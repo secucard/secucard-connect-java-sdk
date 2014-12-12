@@ -3,22 +3,20 @@ package com.secucard.connect.channel.rest;
 import android.content.Context;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
 import com.secucard.connect.auth.OAuthUserCredentials;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
-import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -232,6 +230,39 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
       return headers == null ? super.getHeaders() : headers;
+    }
+
+    @Override
+    public String getBodyContentType() {
+      if (queryParams == null) {
+        return super.getBodyContentType();
+      }
+
+      return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
+    }
+
+    @Override
+    public byte[] getBody() {
+      if (queryParams == null) {
+        return super.getBody();
+      }
+
+      if (queryParams.size() > 0) {
+        StringBuilder encodedParams = new StringBuilder();
+        String paramsEncoding = getParamsEncoding();
+        try {
+          for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
+            encodedParams.append('=');
+            encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+            encodedParams.append('&');
+          }
+          return encodedParams.toString().getBytes(paramsEncoding);
+        } catch (UnsupportedEncodingException uee) {
+          throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
+        }
+      }
+      return null;
     }
   }
 

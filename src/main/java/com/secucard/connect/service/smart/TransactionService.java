@@ -18,7 +18,7 @@ public class TransactionService extends AbstractService {
    */
   public Transaction createTransaction(Transaction transaction, Callback<Transaction> callback) {
     try {
-      return getChannnel().saveObject(transaction, callback);
+      return getChannel().saveObject(transaction, callback);
     } catch (Exception e) {
       handleException(e, callback);
     }
@@ -34,7 +34,7 @@ public class TransactionService extends AbstractService {
    */
   public Result startTransaction(Transaction transaction, String type, Callback<Result> callback) {
     try {
-      return getChannnel().execute("start", transaction.getId(), type, transaction, Result.class, callback);
+      return getChannel().execute("start", transaction.getId(), type, transaction, Result.class, callback);
     } catch (Exception e) {
       handleException(e, callback);
     }

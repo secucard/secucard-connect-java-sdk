@@ -1,19 +1,16 @@
 package com.secucard.connect.channel.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
 import com.secucard.connect.auth.OAuthUserCredentials;
-import com.secucard.connect.channel.AbstractChannel;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
-import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,36 +18,19 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-public class RestChannel extends AbstractChannel implements AuthProvider {
+public class RestChannel extends RestChannelBase implements AuthProvider {
   protected javax.ws.rs.client.Client restClient;
   protected LoginFilter loginFilter;
-  protected final Configuration cfg;
-  private DataStorage storage;
-  private String id;
   private final boolean secure = false;
-  protected UserAgentProvider userAgentProvider;
-  private ObjectMapper jsonMapper = new ObjectMapper();
 
   public RestChannel(String id, Configuration cfg) {
-    this.cfg = cfg;
+    super(cfg, id);
     loginFilter = new LoginFilter(this);
-    this.id = id;
-  }
-
-  public void setStorage(DataStorage storage) {
-    this.storage = storage;
-  }
-
-  public void setUserAgentProvider(UserAgentProvider userAgentProvider) {
-    this.userAgentProvider = userAgentProvider;
-  }
-
-  public void setJsonMapper(ObjectMapper jsonMapper) {
-    this.jsonMapper = jsonMapper;
   }
 
   @Override
@@ -72,18 +52,13 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
   }
 
   @Override
-  public void setEventListener(EventListener listener) {
-    throw new UnsupportedOperationException("Rest channel doesn't support listener.");
-  }
-
-  @Override
   public synchronized Token getToken() {
     Token token = storage.get("token" + id);
     Long expireTime = storage.get("expireTime" + id);
     if (token == null) {
-      token = createToken(cfg.getClientCredentials(), null, null);
+      token = createToken(configuration.getClientCredentials(), null, null);
     } else if (expireTime != null && expireTime < System.currentTimeMillis() - 30 * 1000) {
-      token = createToken(cfg.getClientCredentials(), null, token.getRefreshToken());
+      token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken());
     }
     expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
     storage.save("token" + id, token);
@@ -95,7 +70,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
                             String refreshToken) {
     Map<String, String> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken);
 
-    Invocation.Builder builder = restClient.target(cfg.getOauthUrl()).request(MediaType.APPLICATION_FORM_URLENCODED);
+    Invocation.Builder builder = restClient.target(configuration.getOauthUrl()).request(MediaType.APPLICATION_FORM_URLENCODED);
     builder.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
     Invocation invocation = builder.buildPost(Entity.form(new MultivaluedHashMap<>(parameters)));
 
@@ -142,6 +117,26 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 
+  public <T> T invoke(String appId, String command, Object arg, Class<T> returnType, Callback<T> callback) {
+    Entity entity = Entity.json(arg);
+
+    // todo: Cache targets?
+    WebTarget target = restClient.target(configuration.getBaseUrl());
+
+    if (appId != null) {
+      target = target.path(pathResolver.resolveAppId(appId, '/'));
+    }
+
+    target = target.path(command);
+
+    if (secure) {
+      target.register(loginFilter);
+    }
+
+    Invocation invocation = target.request(MediaType.APPLICATION_JSON).buildPost(entity);
+    return getResponse(invocation, new DynamicTypeReference(returnType), callback);
+  }
+
 
   @Override
   public void close(Callback callback) {
@@ -158,59 +153,13 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
   // private -------------------------------------------------------------------------------------------------------------------
 
-  private MultivaluedHashMap<String, String> queryParamsToMap(QueryParams queryParams) {
-    MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
-
-    boolean scroll = queryParams.getScrollId() != null && !queryParams.getScrollId().equals("");
-    if (scroll) {
-      map.putSingle("scroll_id", queryParams.getScrollId());
-    }
-
-    boolean scrollExpire = StringUtils.isNotBlank(queryParams.getScrollExpire());
-    if (scrollExpire) {
-      map.putSingle("scroll_expire", queryParams.getScrollExpire());
-    }
-
-    if (!scroll && queryParams.getCount() != null && queryParams.getCount() >= 0) {
-      map.putSingle("count", queryParams.getCount().toString());
-    }
-
-    if (!scroll && !scrollExpire && queryParams.getOffset() != null && queryParams.getOffset() > 0) {
-      map.putSingle("offset", queryParams.getOffset().toString());
-    }
-
-    List<String> fields = queryParams.getFields();
-    if (!scroll && fields != null && fields.size() > 0) {
-      // add "," separated list of field names
-      String names = null;
-      for (String field : fields) {
-        names = names == null ? "" : names + ',';
-        names += field;
-      }
-      map.putSingle("fields", names);
-    }
-
-    Map<String, String> sortOrder = queryParams.getSortOrder();
-    if (!scroll && sortOrder != null) {
-      for (Map.Entry<String, String> entry : sortOrder.entrySet()) {
-        map.putSingle("sort[" + entry.getKey() + "]", entry.getValue());
-      }
-    }
-
-    if (StringUtils.isNotBlank(queryParams.getQuery())) {
-      map.putSingle("q", queryParams.getQuery());
-    }
-
-    return map;
-  }
-
-  private <T> Invocation.Builder builder(Class<T> type, MultivaluedMap<String, String> queryParams, boolean secure,
+  private <T> Invocation.Builder builder(Class<T> type, Map<String, String> queryParams, boolean secure,
                                          String... pathArgs) {
     // todo: Cache targets?
-    WebTarget target = restClient.target(cfg.getBaseUrl());
+    WebTarget target = restClient.target(configuration.getBaseUrl());
 
     if (type != null) {
-      target = target.path(pathResolver.resolve(type, '/'));
+      target = target.path(pathResolver.resolveType(type, '/'));
     }
 
     for (String path : pathArgs) {
@@ -218,7 +167,7 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
     }
 
     if (queryParams != null) {
-      for (Map.Entry<String, List<String>> entry : queryParams.entrySet()) {
+      for (Map.Entry<String, String> entry : queryParams.entrySet()) {
         target = target.queryParam(entry.getKey(), entry.getValue());
       }
     }
@@ -278,20 +227,31 @@ public class RestChannel extends AbstractChannel implements AuthProvider {
 
     T result = null;
     if (entityType != null) {
-      String json = response.readEntity(String.class);
-      if (json != null) {
-        result = jsonMapper.readValue(json, entityType);
-      }
+      result = readEntity(response, entityType);
     }
     return result;
   }
 
-
-  private SecuException translate(Throwable throwable) {
-    return new SecuException(throwable);
+  private <T> T readEntity(Response response, TypeReference entityType) throws IOException {
+    return jsonMapper.map(response.readEntity(String.class), entityType);
   }
 
-  static interface GenericTypeResolver {
-    <T> GenericType<ObjectList<T>> getGenericType(Class<T> type);
+  private SecuException translate(Throwable throwable) {
+    Status status = null;
+    if (throwable instanceof WebApplicationException) {
+      Response response = ((WebApplicationException) throwable).getResponse();
+      try {
+        status = readEntity(response, new TypeReference<Status>() {
+        });
+      } catch (Exception e) {
+        e.printStackTrace();
+        // treat as no response
+      }
+    }
+    if (status != null) {
+      return new SecuException(status.getErrorDetails(), throwable);
+    } else {
+      return new SecuException(throwable);
+    }
   }
 }

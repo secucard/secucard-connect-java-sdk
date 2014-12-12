@@ -16,7 +16,7 @@ public class PublicMerchantService extends AbstractService {
 
     public PublicMerchant getPublicMerchant(String id, Callback<PublicMerchant> callback) {
         try {
-            return getChannnel().getObject(PublicMerchant.class, id, callback);
+            return getRestChannel().getObject(PublicMerchant.class, id, callback);
         } catch (Exception e) {
             handleException(e, callback);
         }
@@ -25,7 +25,7 @@ public class PublicMerchantService extends AbstractService {
 
     public ObjectList<PublicMerchant> getPublicMerchants(QueryParams queryParams, final Callback<ObjectList<PublicMerchant>> callback) {
         try {
-            ObjectList<PublicMerchant> objects = getRestChannel().findObjects(PublicMerchant.class, queryParams,
+            ObjectList<PublicMerchant> objects = getChannel().findObjects(PublicMerchant.class, queryParams,
                     callback);
             return objects;
         } catch (Exception e) {

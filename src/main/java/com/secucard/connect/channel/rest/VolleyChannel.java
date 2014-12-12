@@ -1,7 +1,6 @@
 package com.secucard.connect.channel.rest;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -15,20 +14,15 @@ import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
 import com.secucard.connect.auth.OAuthUserCredentials;
-import com.secucard.connect.channel.AbstractChannel;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
-import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
@@ -38,22 +32,13 @@ import java.util.Map;
 /**
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
  */
-public class VolleyChannel extends AbstractChannel implements AuthProvider {
-    protected final Configuration configuration;
+public class VolleyChannel extends RestChannelBase implements AuthProvider {
     private final android.content.Context context;
     private RequestQueue requestQueue;
-    private String id;
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private DataStorage storage;
 
     public VolleyChannel(String id, Context context, Configuration configuration) {
-        this.id = id;
+        super(configuration, id);
         this.context = context;
-        this.configuration = configuration;
-    }
-
-    public void setStorage(DataStorage storage) {
-        this.storage = storage;
     }
 
     @Override
@@ -64,11 +49,6 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     @Override
     public void close(Callback callback) {
         requestQueue.stop();
-    }
-
-    @Override
-    public void setEventListener(EventListener listener) {
-        throw new UnsupportedOperationException("Rest channel doesn't support listener.");
     }
 
     @Override
@@ -102,7 +82,7 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
         String url = buildRequestUrl(type);
         Request<ObjectList<T>> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, callback,
-                getParameterMap(queryParams), true, new DynamicTypeReference(ObjectList.class, type));
+                queryParamsToMap(queryParams), true, new DynamicTypeReference(ObjectList.class, type));
         requestQueue.add(request);
         return null;
     }
@@ -113,8 +93,8 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
         String url = buildRequestUrl(object.getClass(), objectId);
         String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+            requestBody = jsonMapper.map(object);
+        } catch (Exception e) {
             callback.failed(e);
             return null;
         }
@@ -140,8 +120,8 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
         String url = buildRequestUrl(arg.getClass(), resourceId, strArg);
         String requestBody;
         try {
-            requestBody = objectMapper.writeValueAsString(arg);
-        } catch (JsonProcessingException e) {
+            requestBody = jsonMapper.map(arg);
+        } catch (Exception e) {
             callback.failed(e);
             return null;
         }
@@ -166,7 +146,7 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
                 token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken(), device);
             }
         }
-        if(token != null) {
+        if (token != null) {
             expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
             storage.save("token" + id, token);
             storage.save("expireTime" + id, expireTime);
@@ -176,14 +156,14 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
 
     private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
                               String refreshToken, String device) {
+        //TODO: Add userCredentials from user input
         userCredentials = new OAuthUserCredentials("checkout@secucard.com", "checkout");
         Map<String, String> authParams = createAuthParams(clientCredentials, userCredentials, refreshToken);
         authParams.put("device", device);
 
-
         RequestFuture<Token> future = RequestFuture.newFuture();
-        Request<Token> request = new ObjectJsonRequest<>(Request.Method.POST, configuration.getOauthUrl(), null,
-                future, future, authParams, false, new DynamicTypeReference(Token.class));
+        Request<Token> request = new CustomPostRequest<>(configuration.getOauthUrl(), authParams,
+                future, future, new DynamicTypeReference(Token.class));
         future.setRequest(requestQueue.add(request));
 
         try {
@@ -191,7 +171,6 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
         } catch (Exception e) {
             // todo: just log error
             e.printStackTrace();
-            Log.e("ConnectJavaClient", "VolleyChannel: " + e.getMessage());
         }
         return null;
     }
@@ -200,17 +179,12 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
         //todo: add backslash check
         String url = configuration.getBaseUrl();
         if (type != null) {
-            url += "/" + pathResolver.resolve(type, '/');
+            url += "/" + pathResolver.resolveType(type, '/');
         }
         for (String pathArg : pathArgs) {
             url += "/" + pathArg;
         }
         return url;
-    }
-
-    private Map<String, String> getParameterMap(QueryParams queryParams) {
-        //todo: implement mapping
-        return new HashMap<>();
     }
 
     /**
@@ -233,9 +207,6 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
             if (secure) {
                 headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + getToken());
-            }else{
-                headers = new HashMap<>();
-                headers.put("Content-Type", "application/x-www-form-urlencoded");
             }
         }
 
@@ -258,7 +229,7 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
         protected Response<T> parseNetworkResponse(NetworkResponse response) {
             try {
                 String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-                T result = objectMapper.readValue(jsonString, typeReference);
+                T result = jsonMapper.map(jsonString, typeReference);
                 return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
             } catch (Exception e) {
                 return Response.error(new VolleyError(e));
@@ -272,16 +243,59 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
 
         @Override
         public Map<String, String> getHeaders() throws AuthFailureError {
-//            if (headers == null) {
-//                HashMap<String, String> headers = new HashMap<String, String>();
-//                headers.put("Content-Type", "application/x-www-form-urlencoded");
-//                return headers;
-//            } else {
-//                return super.getHeaders();
-//            }
             return headers == null ? super.getHeaders() : headers;
         }
     }
 
+    /**
+     * Request which maps JSON response strings directly into Java objects.
+     * Jackson ObjectMapper will be used for this.
+     *
+     * @param <T> The actual response object type.
+     */
+    private class CustomPostRequest<T> extends Request<T> {
+        private TypeReference typeReference;
+        private Response.Listener<T> listener;
+        private Map<String, String> params;
+
+        public CustomPostRequest(String url, Map<String, String> params,
+                                 Response.Listener<T> reponseListener, Response.ErrorListener errorListener, TypeReference typeReference) {
+            super(Method.POST, url, errorListener);
+            this.typeReference = typeReference;
+            this.listener = reponseListener;
+            this.params = params;
+        }
+
+        public CustomPostRequest(int method, String url, Map<String, String> params,
+                                 Response.Listener<T> responseListener, Response.ErrorListener errorListener, TypeReference typeReference) {
+            super(method, url, errorListener);
+            this.typeReference = typeReference;
+            this.listener = responseListener;
+            this.params = params;
+        }
+
+        protected Map<String, String> getParams()
+                throws com.android.volley.AuthFailureError {
+            return params == null ? super.getParams() : params;
+        }
+
+        @Override
+        protected Response<T> parseNetworkResponse(NetworkResponse response) {
+            try {
+                String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                T result = jsonMapper.map(jsonString, typeReference);
+                return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
+            } catch (Exception e) {
+                return Response.error(new VolleyError(e));
+            }
+        }
+
+        @Override
+        protected void deliverResponse(T response) {
+            // TODO Auto-generated method stub
+            listener.onResponse(response);
+        }
+
+    }
 
 }

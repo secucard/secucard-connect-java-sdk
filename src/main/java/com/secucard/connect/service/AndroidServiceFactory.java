@@ -2,8 +2,6 @@ package com.secucard.connect.service;
 
 import android.content.Context;
 import com.secucard.connect.ClientContext;
-import com.secucard.connect.channel.PathResolver;
-import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.storage.AndroidStorage;
 import com.secucard.connect.storage.DataStorage;
@@ -14,8 +12,6 @@ public class AndroidServiceFactory extends ServiceFactory {
 
     // android application context
     Context runtimeContext = (Context) context.getRuntimeContext();
-
-    PathResolver pathResolver = new PathResolverImpl();
 
     // general storage
     DataStorage dataStorage = new AndroidStorage(runtimeContext.getSharedPreferences("secuconnect",
@@ -28,11 +24,10 @@ public class AndroidServiceFactory extends ServiceFactory {
     context.setDataStorage(dataStorage);
 
     VolleyChannel vc = new VolleyChannel(context.getClientId(), runtimeContext, context.getConfig().getRestConfiguration());
-    vc.setPathResolver(pathResolver);
     vc.setStorage(authStorage);
     context.setRestChannel(vc);
 
-    setUpStomp(context, vc, pathResolver);
+    setUpStomp(context, vc);
   }
 
 }

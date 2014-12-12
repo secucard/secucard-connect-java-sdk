@@ -2,6 +2,7 @@ package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.general.merchant.PublicMerchant;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.AbstractService;
@@ -13,7 +14,7 @@ public class GeneralService extends AbstractService {
 
   public Skeleton getSkeleton(String id, Callback<Skeleton> callback) {
     try {
-      return getChannnel().getObject(Skeleton.class, id, callback);
+      return getChannel().getObject(Skeleton.class, id, callback);
     } catch (Exception e) {
       handleException(e, callback);
     }
@@ -36,6 +37,4 @@ public class GeneralService extends AbstractService {
     }
     return null;
   }
-
-
 }

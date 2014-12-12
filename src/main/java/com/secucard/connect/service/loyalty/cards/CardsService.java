@@ -14,7 +14,7 @@ public class CardsService extends AbstractService {
 
     public Card getCard(String id, Callback<Card> callback) {
         try {
-            return getChannnel().getObject(Card.class, id, callback);
+            return getRestChannel().getObject(Card.class, id, callback);
         } catch (Exception e) {
             handleException(e, callback);
         }

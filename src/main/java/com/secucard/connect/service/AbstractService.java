@@ -17,7 +17,7 @@ public abstract class AbstractService {
     this.context = context;
   }
 
-  protected Channel getChannnel() {
+  protected Channel getChannel() {
     return context.getChannnel(context.getConfig().getDefaultChannel());
   }
 

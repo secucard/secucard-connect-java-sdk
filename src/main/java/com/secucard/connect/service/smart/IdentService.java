@@ -23,7 +23,7 @@ public class IdentService extends AbstractService {
           return value == null ? null : value.getList();
         }
       };
-      ObjectList<Ident> idents = getChannnel().findObjects(Ident.class, null, getCallbackAdapter(callback, converter));
+      ObjectList<Ident> idents = getChannel().findObjects(Ident.class, null, getCallbackAdapter(callback, converter));
       return converter.convert(idents);
     } catch (Exception e) {
       handleException(e, callback);

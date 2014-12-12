@@ -32,9 +32,13 @@ public class Configuration {
     this.connectionTimeoutSec = connectionTimeoutSec;
     this.messageTimeoutSec = messageTimeoutSec;
     this.maxMessageAgeSec = maxMessageAgeSec;
-    this.basicDestination = basicDestination;
     this.socketTimeoutSec = socketTimeoutSec;
     this.autoConnect = true;
+
+    if (!basicDestination.endsWith("/")) {
+      basicDestination += "/";
+    }
+    this.basicDestination = basicDestination;
   }
 
   public boolean isAutoConnect() {

@@ -1,8 +1,7 @@
-package com.secucard.connect.client;
+package com.secucard.connect;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.secucard.connect.SecuException;
 import com.secucard.connect.channel.stomp.Configuration;
 
 import java.io.FileInputStream;
@@ -11,6 +10,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Properties;
 
+/**
+ * Configuration data of the client.
+ */
 public class ClientConfiguration {
   private com.secucard.connect.channel.rest.Configuration restConfiguration;
   private com.secucard.connect.channel.stomp.Configuration stompConfiguration;
@@ -18,7 +20,7 @@ public class ClientConfiguration {
   private int heartBeatSec;
   private boolean stompEnabled;
   private String storagePath;
-  private boolean autoConnect; // todo: not supported yet
+  private String serviceFactory;
 
   private ClientConfiguration(Properties properties) {
     try {
@@ -38,6 +40,7 @@ public class ClientConfiguration {
 
     heartBeatSec = new Integer(cfg.getProperty("heartBeatSec"));
     storagePath = cfg.getProperty("storagePath");
+    serviceFactory = cfg.getProperty("serviceFactory");
 
     stompConfiguration = new Configuration(
         cfg.getProperty("stomp.host"),
@@ -134,4 +137,7 @@ public class ClientConfiguration {
     return stompConfiguration;
   }
 
+  public String getServiceFactory() {
+    return serviceFactory;
+  }
 }

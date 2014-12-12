@@ -44,8 +44,5 @@ public abstract class DataStorage {
       super(cause);
     }
 
-    public DataStorageException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-      super(message, cause, enableSuppression, writableStackTrace);
-    }
   }
 }

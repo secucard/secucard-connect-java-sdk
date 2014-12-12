@@ -1,18 +1,27 @@
 package com.secucard.connect.channel;
 
 import com.secucard.connect.SecuException;
+import com.secucard.connect.model.annotation.ProductInfo;
 
-import java.lang.reflect.Field;
+import java.lang.annotation.Annotation;
 import java.util.StringTokenizer;
 
+/**
+ * PathResolver impl. which builds the path according to the ProductInfo annotation of the type.
+ */
 public class PathResolverImpl implements PathResolver {
 
   @Override
   public String resolve(Class type, char separator) {
     try {
-      Field object = type.getField("OBJECT");
-      String value = (String) object.get(null);
-      StringTokenizer st = new StringTokenizer(value, ".");
+      String resourceId;
+      Annotation annotation = type.getAnnotation(ProductInfo.class);
+      if (annotation == null) {
+        throw new IllegalArgumentException("Type has no metadata annotated: " + type);
+      } else {
+        resourceId = ((ProductInfo) annotation).resourceId();
+      }
+      StringTokenizer st = new StringTokenizer(resourceId, ".");
       String path = "";
       while (st.hasMoreTokens()) {
         char[] chars = st.nextToken().toCharArray();
@@ -21,7 +30,7 @@ public class PathResolverImpl implements PathResolver {
       }
       return path.substring(1);
     } catch (Exception e) {
-      throw new SecuException("Error trying to build path from OBJECT field for type " + type, e);
+      throw new SecuException("Error building path for type " + type, e);
     }
   }
 }

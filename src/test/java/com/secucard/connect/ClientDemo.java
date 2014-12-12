@@ -1,14 +1,13 @@
 package com.secucard.connect;
 
-import com.secucard.connect.client.Client;
-import com.secucard.connect.client.ClientConfiguration;
-import com.secucard.connect.client.ExceptionHandler;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.general.GeneralService;
-import com.secucard.connect.service.smart.SmartService;
+import com.secucard.connect.service.smart.DeviceService;
+import com.secucard.connect.service.smart.IdentService;
+import com.secucard.connect.service.smart.TransactionService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,49 +27,90 @@ public class ClientDemo {
 
   private static void process(final String id, ClientConfiguration cfg) {
     final Client client = Client.create(id, cfg);
+    // Android usage (passing android.content.Context): Client.create(id, cfg, getApplication());
+    // additionally set serviceFactory=com.secucard.connect.service.AndroidServiceFactory in client configuration
+
     client.setEventListener(new EventListener() {
       @Override
       public void onEvent(Object event) {
-        System.out.println("Event: " + event);
+        System.out.println("Got event: " + event);
       }
     });
 
+    // set an optional global exception handler - all exceptions thrown by service methods end up here
+    // if not set each method throws as usual, its up to the developer to catch accordingly
+    // if callback are used all exceptions go to the failed method
     client.setExceptionHandler(new ExceptionHandler() {
       @Override
       public void handle(Exception exception) {
-        client.disconnect();
+        System.err.println("Error happened:");
         exception.printStackTrace();
+        client.disconnect();
       }
     });
 
     client.connect();
 
-    GeneralService generalService = client.getService(GeneralService.class);
+    // simple retrieval ------------------------------------------------------------------------------------------------
+
+    final GeneralService generalService = client.getService(GeneralService.class);
+
+    // get skeleton, without/with callback
+    Skeleton skeleton = generalService.getSkeleton("skl_60", null);
+    System.out.println("got skeleton: " + skeleton);
+
+    skeleton = generalService.getSkeleton("skl_60", new Callback<Skeleton>() {
+      @Override
+      public void completed(Skeleton result) {
+        System.out.println("got skeleton: " + result);
+      }
+
+      @Override
+      public void failed(Throwable throwable) {
+        System.err.println("Error retrieving skeleton.");
+        throwable.printStackTrace();
+      }
+    });
+
+    // find skeleton, with callback
     QueryParams queryParams = new QueryParams();
     queryParams.setOffset(1);
-    queryParams.setCount(10);
-    queryParams.setFields("a", "b", "c");
+    queryParams.setCount(2);
+    //queryParams.setFields("a"); seems not to work properly
     queryParams.addSortOrder("a", QueryParams.SORT_ASC);
     queryParams.addSortOrder("b", QueryParams.SORT_DESC);
     queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
-    List<Skeleton> skeletons = generalService.getSkeletons(queryParams);
+    List<Skeleton> skeletons = generalService.getSkeletons(null, new Callback<List<Skeleton>>() {
+      @Override
+      public void completed(List<Skeleton> result) {
+        System.out.println("got skeletons: " + result);
+      }
 
+      @Override
+      public void failed(Throwable throwable) {
+        System.err.println("Error retrieving skeletons.");
+        throwable.printStackTrace();
+      }
+    });
 
-    SmartService smartService = client.getService(SmartService.class);
-    // or get by a defined name:
-    // SmartService smartService = client.getService("smart");
+    // do a smart transaction  ----------------------------------------------------------------------------------------
+
+    // get services by class or by id, getting by class is typesafe
+    TransactionService transactionService = client.getService("smart.transactions");
+    IdentService identService = client.getService("smart/idents");
+    DeviceService deviceService = client.getService(DeviceService.class);
 
     // in production id would be the vendor uuid,
     Device device = new Device(id);
-    boolean ok = smartService.registerDevice(device);
+    boolean ok = deviceService.registerDevice(device, null);
     if (!ok) {
+      client.disconnect();
       throw new RuntimeException("Error registering device.");
     }
 
-
     // select an ident
-    List<Ident> availableIdents = smartService.getIdents();
-    if(availableIdents == null) {
+    List<Ident> availableIdents = identService.getIdents(null);
+    if (availableIdents == null) {
       throw new RuntimeException("No idents found.");
     }
     Ident ident = Ident.find("smi_1", availableIdents);
@@ -89,16 +129,16 @@ public class ClientDemo {
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
 
-    Transaction transaction = smartService.createTransaction(newTrans);
+    Transaction transaction = transactionService.createTransaction(newTrans, null);
 
     String type = "demo"; // demo|auto|cash
     // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
 
-    Result result = smartService.startTransaction(transaction, type);
+    Result result = transactionService.startTransaction(transaction, type, null);
+    System.out.println("Transaction finished: " + result);
 
     client.disconnect();
 
-    System.out.println("Transaction finished: " + result);
   }
 
   private static void runThreaded(final ClientConfiguration cfg) {

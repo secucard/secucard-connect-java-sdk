@@ -1,12 +1,13 @@
-package com.secucard.connect.client;
+package com.secucard.connect;
 
-import com.secucard.connect.SecuException;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * Main entry to the Java Secucard Connect API.
@@ -17,9 +18,15 @@ public class Client extends AbstractService implements EventListener {
   private String id;
   private ServiceFactory serviceFactory;
   private EventListener targetEventListener = null;
+  private boolean stopHeartbeat;
 
-  private Client(final String id, ClientConfiguration configuration) {
-    init(id, configuration);
+  private Client(final String id, ClientConfiguration configuration, Object runtimeContext) {
+    init(id, configuration, runtimeContext);
+  }
+
+
+  public static Client create(String id, ClientConfiguration configuration) {
+    return new Client(id, configuration, null);
   }
 
   /**
@@ -28,12 +35,13 @@ public class Client extends AbstractService implements EventListener {
    * To access business related operations obtain a service instance from this client
    * via {@link #create(String, ClientConfiguration)} method.
    *
-   * @param id            A unique id associated with this client.
-   * @param configuration The configuration of the client.
+   * @param id             A unique id associated with this client.
+   * @param configuration  The configuration of the client.
+   * @param runtimeContext Any context object needed to create services etc., accessible later on via ClientContext.
    * @return The client instance.
    */
-  public static Client create(String id, ClientConfiguration configuration) {
-    return new Client(id, configuration);
+  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext) {
+    return new Client(id, configuration, runtimeContext);
   }
 
   /**
@@ -68,18 +76,18 @@ public class Client extends AbstractService implements EventListener {
   public void connect() {
     try {
       // first rest since it does auth
-      getRestChannel().open();
-      getStompChannel().open();
+      getRestChannel().open(null);
+      getStompChannel().open(null);
       startHeartBeat();
     } catch (IOException e) {
-      handleException(e);
+      handleException(e, null);
     }
   }
 
   public void disconnect() {
     stopHeartBeat();
-    getStompChannel().close();
-    getRestChannel().close();
+    getStompChannel().close(null);
+    getRestChannel().close(null);
     // todo: clear data store?
   }
 
@@ -104,22 +112,28 @@ public class Client extends AbstractService implements EventListener {
     final int heartBeatSec = context.getConfig().getHeartBeatSec();
     if (heartBeatSec != 0) {
       stopHeartBeat();
+      stopHeartbeat = false;
       heartbeatInvoker = new Thread() {
         @Override
         public void run() {
-          while (!isInterrupted()) {
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.info("stomp heart beat started (" + heartBeatSec + "s).");
+          }
+          while (!stopHeartbeat) {
             try {
-              getStompChannel().invoke("ping", false);
+              getStompChannel().invoke("ping", null);
             } catch (Exception e) {
-              handleException(e);
+              handleException(new SecuException("Error sending heart beat message.", e), null);
               break;
             }
             try {
               Thread.sleep(heartBeatSec * 1000);
             } catch (InterruptedException e) {
-              handleException(new Exception("Stomp heart beat stopped.", e));
               break;
             }
+          }
+          if (LOG.isLoggable(Level.INFO)) {
+            LOG.info("stomp heart beat stopped");
           }
         }
       };
@@ -127,9 +141,13 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
+  public void handleConnectionStateChanged() {
+
+  }
+
   private void stopHeartBeat() {
-    if (heartbeatInvoker != null && heartbeatInvoker.isAlive()) {
-      heartbeatInvoker.interrupt();
+    if (heartbeatInvoker != null) {
+      stopHeartbeat = true;
       try {
         heartbeatInvoker.join();
       } catch (InterruptedException e) {
@@ -137,7 +155,7 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
-  private void init(String id, ClientConfiguration config) {
+  private void init(String id, ClientConfiguration config, Object runtimeContext) {
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
@@ -145,18 +163,25 @@ public class Client extends AbstractService implements EventListener {
     context = new ClientContext();
     context.setConfig(config);
     context.setClientId(id);
-    serviceFactory = new ServiceFactory(context);
+    context.setRuntimeContext(runtimeContext);
+    String serviceFactoryName = config.getServiceFactory();
+    if (StringUtils.isNotBlank(serviceFactoryName)) {
+      try {
+        Class<?> sfc = Class.forName(serviceFactoryName);
+        serviceFactory = (ServiceFactory) sfc.newInstance();
+      } catch (Exception e) {
+        throw new SecuException("Cannnot instantiate service factory " + serviceFactoryName, e);
+      }
+    } else {
+      serviceFactory = new ServiceFactory();
+    }
+    serviceFactory.init(context);
     isConnected = false;
 
     getStompChannel().setEventListener(this);
 
     // bubble up ex. for now todo: forward to handler
-    setExceptionHandler(new ExceptionHandler() {
-      @Override
-      public void handle(Exception exception) {
-        throw new SecuException(exception);
-      }
-    });
+    setExceptionHandler(new ThrowingExceptionHandler());
   }
 
   private void handleEvent(Object event) {
@@ -174,4 +199,10 @@ public class Client extends AbstractService implements EventListener {
   }
 
 
+  private static class ThrowingExceptionHandler implements ExceptionHandler {
+    @Override
+    public void handle(Exception exception) {
+      throw new SecuException(exception);
+    }
+  }
 }

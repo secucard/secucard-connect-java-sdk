@@ -24,12 +24,12 @@ public class LocationService extends AbstractService {
      * @return True if successfully, false else.
      */
     public boolean sendLocation(Location location) {
-        try {
-            InvocationResult result = getStompChannel().execute("General.Accounts.Location", new String[]{"me"}, location, InvocationResult.class);
-            return Boolean.parseBoolean(result.getResult());
-        } catch (Exception e) {
-            handleException(e);
-        }
+//        try {
+//            InvocationResult result = getStompChannel().execute("General.Accounts.Location", new String[]{"me"}, location, InvocationResult.class);
+//            return Boolean.parseBoolean(result.getResult());
+//        } catch (Exception e) {
+//            handleException(e);
+//        }
         return false;
     }
 

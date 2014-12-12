@@ -1,5 +1,6 @@
 package com.secucard.connect.channel;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
@@ -12,41 +13,22 @@ import java.io.IOException;
  */
 public interface Channel {
 
-  /**
-   * @throws IOException
-   */
-  void open() throws IOException;
-
-  <T> T getObject(Class<T> type, String objectId);
-
-  <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams);
-
-  <T extends SecuObject> T saveObject(T object);
-
-  boolean deleteObject(Class type, String objectId);
+  void open(Callback<?> callback) throws IOException;
 
   void setEventListener(EventListener listener);
 
-  /**
-   * Executing the given action.
-   *
-   * @param action
-   * @param id
-   * @param arg
-   * @param returnType
-   * @param <A>
-   * @param <R>
-   * @return
-   */
-  <A, R> R execute(String action, String[] id, A arg, Class<R> returnType);
+  String invoke(String command, Callback<String> callback);
 
-  /**
-   * Invoke any command.
-   *
-   * @param command
-   * @param requestReceipt
-   */
-  void invoke(String command, boolean requestReceipt);
+  <T> T getObject(Class<T> type, String objectId, Callback<T> callback);
 
-  void close();
+  <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback);
+
+  <T extends SecuObject> T saveObject(T object, Callback<T> callback);
+
+  void deleteObject(Class type, String objectId, Callback<?> callback);
+
+  <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType, Callback<T> callback);
+
+  void close(Callback<?> callback);
+
 }

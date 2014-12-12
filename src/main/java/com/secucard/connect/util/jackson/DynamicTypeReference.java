@@ -11,7 +11,7 @@ import java.lang.reflect.Type;
  * without the need of using static type parameters.
  * Abusing of the original TypeReference class...
  */
-public class DynamicTypeReference extends TypeReference<Void> {
+public class DynamicTypeReference<T> extends TypeReference<Void> {
   private Type type;
 
   public DynamicTypeReference(Class type) {

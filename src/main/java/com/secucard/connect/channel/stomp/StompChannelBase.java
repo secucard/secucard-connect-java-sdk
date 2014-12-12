@@ -1,19 +1,22 @@
 package com.secucard.connect.channel.stomp;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
+import com.secucard.connect.ConnectionException;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
-import com.secucard.connect.ConnectionException;
+import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Message;
+import com.secucard.connect.util.jackson.DynamicTypeReference;
 import net.jstomplite.Config;
-import net.jstomplite.StompClient;
 import net.jstomplite.Frame;
+import net.jstomplite.StompClient;
 import net.jstomplite.StompSupport;
 
 import java.io.IOException;
@@ -25,13 +28,7 @@ public abstract class StompChannelBase extends AbstractChannel {
   protected static final String HEADER_CORRELATION_ID = "correlation-id";
   protected static final String STATUS_OK = "ok";
 
-  protected static final String API_GET = "api:get:";
-  protected static final String API_UPDATE = "api:update:";
-  protected static final String API_ADD = "api:add:";
-  protected static final String API_DELETE = "api:delete:";
-  protected static final String API_EXEC = "api:exec:";
-
-  protected BodyMapper bodyMapper;
+  protected JsonMapper objectMapper = new JsonMapper();
   private final Map<String, Frame> receipts = new HashMap<>(20);
   protected final Map<String, StompMessage> messages = new HashMap<>(20);
   private final Object monitor = new Object();
@@ -54,10 +51,6 @@ public abstract class StompChannelBase extends AbstractChannel {
 
   public void setAuthProvider(AuthProvider authProvider) {
     this.authProvider = authProvider;
-  }
-
-  public void setBodyMapper(BodyMapper bodyMapper) {
-    this.bodyMapper = bodyMapper;
   }
 
   public StompChannelBase(String id, Configuration cfg) {
@@ -134,25 +127,6 @@ public abstract class StompChannelBase extends AbstractChannel {
     }
 
     return header;
-  }
-
-  String resolveDestination(Class type, String method, String action) {
-    String dest = configuration.getBasicDestination();
-    if (!dest.endsWith("/")) {
-      dest = dest + "/";
-    }
-
-    String path = dest + method;
-
-    if (type != null) {
-      path += pathResolver.resolve(type, '.');
-    }
-
-    if (action != null) {
-      path += "." + action;
-    }
-
-    return path;
   }
 
 
@@ -262,21 +236,28 @@ public abstract class StompChannelBase extends AbstractChannel {
     return msg;
   }
 
-  protected <T> T sendMessage(String command, String action, Message message, Class type, Mapper<T> mapper,
-                              Callback<T> callback) {
-    return sendMessage(command, action, message, type, mapper, defaultStatusHandler, callback, true);
+
+  protected synchronized <T> T sendMessage(StandardDestination destinationSpec, Object arg, TypeReference returnType,
+                                           final Callback<T> callback, boolean requestReceipt) {
+    return sendMessage(destinationSpec, arg, returnType, defaultStatusHandler, callback, requestReceipt);
   }
 
-  protected synchronized <T> T sendMessage(String command, String action, Message message, Class type,
-                                           final Mapper<T> mapper, final StatusHandler statusHandler,
+  protected synchronized <T> T sendMessage(StandardDestination destinationSpec, Object arg,
+                                           final TypeReference returnType, final StatusHandler statusHandler,
                                            final Callback<T> callback, boolean requestReceipt) {
+
+    String destination = destinationSpec.toString();
+
     final String corrId = createCorrelationId();
     Map<String, String> headers = createDefaultHeaders(corrId);
     String body;
     try {
-      body = bodyMapper.map(message);
+      body = objectMapper.map(arg);
       headers.put("content-type", "application/json");
       headers.put("content-length", Integer.toString(body.getBytes("UTF-8").length));
+      if (destinationSpec instanceof AppDestination) {
+        headers.put("app-id", ((AppDestination) destinationSpec).appId);
+      }
     } catch (IOException e) {
       SecuException exception = new SecuException("Error converting to JSON.", e);
       if (callback == null) {
@@ -301,7 +282,6 @@ public abstract class StompChannelBase extends AbstractChannel {
       }
     }
 
-    String destination = resolveDestination(type, command, action);
     final String receipt;
     try {
       receipt = stompSupport.send(destination, body, headers, requestReceipt);
@@ -320,7 +300,7 @@ public abstract class StompChannelBase extends AbstractChannel {
       awaitReceipt(receipt, null);
       final String answer = awaitAnswer(corrId, null);
       try {
-        Message<T> msg = mapper.map(answer);
+        Message<T> msg = objectMapper.map(answer, returnType);
         if (msg != null) {
           statusHandler.check(msg);
           result = msg.getData();
@@ -338,7 +318,7 @@ public abstract class StompChannelBase extends AbstractChannel {
               // get answer here, no need for async call since this executed in another thread anyway
               T data;
               try {
-                Message<T> msg = mapper.map(awaitAnswer(corrId, null));
+                Message<T> msg = objectMapper.map(awaitAnswer(corrId, null), returnType);
                 statusHandler.check(msg);
                 data = msg.getData();
               } catch (Exception e) {
@@ -360,9 +340,26 @@ public abstract class StompChannelBase extends AbstractChannel {
     return result;
   }
 
-
-
   // Inner Classes -----------------------------------------------------------------------------------------------------
+
+
+  /**
+   * The default {@code Message<T>} type reference object.
+   */
+  protected static class MessageTypeRef extends DynamicTypeReference<Void> {
+    public MessageTypeRef(Class type) {
+      super(Message.class, type);
+    }
+  }
+
+  /**
+   * The {@code Message<ObjectList<T>>} type reference object.
+   */
+  protected static class MessageListTypeRef extends DynamicTypeReference<Void> {
+    public MessageListTypeRef(Class type) {
+      super(Message.class, new DynamicTypeReference.TypeInfo(ObjectList.class, type));
+    }
+  }
 
   private class StompMessage {
     public final String id;
@@ -376,10 +373,6 @@ public abstract class StompChannelBase extends AbstractChannel {
     }
   }
 
-  interface Mapper<T> {
-    public Message<T> map(String value) throws Exception;
-  }
-
   protected abstract class StatusHandler {
     public abstract boolean hasError(Message message);
 
@@ -387,32 +380,6 @@ public abstract class StompChannelBase extends AbstractChannel {
       if (hasError(message)) {
         throw new SecuException(message.getError() + ", " + message.getErrorDetails());
       }
-    }
-  }
-
-  protected class ObjectListMapper<T> implements Mapper<ObjectList<T>> {
-    private final Class<T> type;
-
-    public ObjectListMapper(Class<T> type) {
-      this.type = type;
-    }
-
-    @Override
-    public Message<ObjectList<T>> map(String value) throws Exception {
-      return bodyMapper.toMessageList(type, value);
-    }
-  }
-
-  protected class ObjectMapper<T> implements Mapper<T> {
-    private final Class<T> type;
-
-    public ObjectMapper(Class<T> type) {
-      this.type = type;
-    }
-
-    @Override
-    public Message<T> map(String value) throws Exception {
-      return bodyMapper.toMessage(type, value);
     }
   }
 
@@ -486,6 +453,65 @@ public abstract class StompChannelBase extends AbstractChannel {
       if (eventListener != null) {
         eventListener.onEvent(Events.DISCONNECTED);
       }
+    }
+  }
+
+  protected class StandardDestination {
+    static final String GET = "get:";
+    static final String UPDATE = "update:";
+    static final String ADD = "add:";
+    static final String DELETE = "delete:";
+    static final String EXEC = "exec:";
+    static final String DEST_PREFIX = "api:";
+
+    String command;  // standard api command like defined by constants above
+    String method;
+    Class type;
+
+
+    StandardDestination(String command) {
+      this.command = command;
+    }
+
+    StandardDestination(String command, Class type) {
+      this.command = command;
+      this.type = type;
+    }
+
+    StandardDestination(String command, Class type, String method) {
+      this.command = command;
+      this.method = method;
+      this.type = type;
+    }
+
+    public String toString() {
+      String dest = configuration.getBasicDestination() + DEST_PREFIX;
+
+      dest += command;
+
+      if (type != null) {
+        dest += pathResolver.resolveType(type, '.');
+      }
+
+      if (method != null) {
+        dest += "." + method;
+      }
+
+      return dest;
+    }
+  }
+
+  protected class AppDestination extends StandardDestination {
+    static final String DEST_PREFIX = "app:";
+    String appId;
+
+    AppDestination(String appId, String method) {
+      super(null, null, method);
+      this.appId = appId;
+    }
+
+    public String toString() {
+      return configuration.getBasicDestination() + DEST_PREFIX + method;
     }
   }
 }

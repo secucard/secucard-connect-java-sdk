@@ -1,15 +1,11 @@
 package com.secucard.connect.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.PathResolver;
-import com.secucard.connect.channel.PathResolverImpl;
 import com.secucard.connect.channel.rest.RestChannel;
-import com.secucard.connect.channel.rest.UserAgentProviderImpl;
-import com.secucard.connect.channel.stomp.JsonBodyMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.MemoryDataStorage;
@@ -51,8 +47,6 @@ public class ServiceFactory {
   protected void setUpContext(ClientContext context) {
     ClientConfiguration config = context.getConfig();
 
-    PathResolver pathResolver = new PathResolverImpl();
-
     DataStorage dataStorage;
     /*try {
       dataStorage = new SimpleFileDataStorage(config.getStoragePath());
@@ -63,19 +57,14 @@ public class ServiceFactory {
     context.setDataStorage(dataStorage);
 
     RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
-    rc.setPathResolver(pathResolver);
-    rc.setJsonMapper(new ObjectMapper());
     rc.setStorage(context.getDataStorage());
-    rc.setUserAgentProvider(new UserAgentProviderImpl());
     context.setRestChannel(rc);
 
-    setUpStomp(context, rc, pathResolver);
+    setUpStomp(context, rc);
   }
 
-  protected static void setUpStomp(ClientContext context, AuthProvider authProvider, PathResolver pathResolver) {
+  protected static void setUpStomp(ClientContext context, AuthProvider authProvider) {
     StompChannel sc = new StompChannel(context.getClientId(), context.getConfig().getStompConfiguration());
-    sc.setBodyMapper(new JsonBodyMapper());
-    sc.setPathResolver(pathResolver);
     sc.setAuthProvider(authProvider);
     context.setStompChannel(sc);
   }

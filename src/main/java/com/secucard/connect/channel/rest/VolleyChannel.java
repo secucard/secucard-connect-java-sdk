@@ -10,7 +10,6 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.OAuthClientCredentials;
 import com.secucard.connect.auth.OAuthUserCredentials;
-import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
@@ -26,22 +25,13 @@ import java.util.Map;
 /**
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
  */
-public class VolleyChannel extends AbstractChannel implements AuthProvider {
+public class VolleyChannel extends RestChannelBase implements AuthProvider {
   private RequestQueue requestQueue;
-  private String id;
   private final android.content.Context context;
-  protected final Configuration configuration;
-  private ObjectMapper objectMapper = new ObjectMapper();
-  private DataStorage storage;
-
-  public void setStorage(DataStorage storage) {
-    this.storage = storage;
-  }
 
   public VolleyChannel(String id, Context context, Configuration configuration) {
-    this.id = id;
+    super(configuration, id);
     this.context = context;
-    this.configuration = configuration;
   }
 
   @Override
@@ -52,11 +42,6 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
   @Override
   public void close(Callback callback) {
     requestQueue.stop();
-  }
-
-  @Override
-  public void setEventListener(EventListener listener) {
-    throw new UnsupportedOperationException("Rest channel doesn't support listener.");
   }
 
   @Override
@@ -90,7 +75,7 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
   public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
     String url = buildRequestUrl(type);
     Request<ObjectList<T>> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, callback,
-        getParameterMap(queryParams), true, new DynamicTypeReference(ObjectList.class, type));
+        queryParamsToMap(queryParams), true, new DynamicTypeReference(ObjectList.class, type));
     requestQueue.add(request);
     return null;
   }
@@ -101,8 +86,8 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     String url = buildRequestUrl(object.getClass(), objectId);
     String requestBody;
     try {
-      requestBody = objectMapper.writeValueAsString(object);
-    } catch (JsonProcessingException e) {
+      requestBody = jsonMapper.map(object);
+    } catch (Exception e) {
       callback.failed(e);
       return null;
     }
@@ -128,8 +113,8 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     String url = buildRequestUrl(arg.getClass(), resourceId, strArg);
     String requestBody;
     try {
-      requestBody = objectMapper.writeValueAsString(arg);
-    } catch (JsonProcessingException e) {
+      requestBody = jsonMapper.map(arg);
+    } catch (Exception e) {
       callback.failed(e);
       return null;
     }
@@ -182,17 +167,12 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     //todo: add backslash check
     String url = configuration.getBaseUrl();
     if (type != null) {
-      url += "/" + pathResolver.resolve(type, '/');
+      url += "/" + pathResolver.resolveType(type, '/');
     }
     for (String pathArg : pathArgs) {
       url += "/" + pathArg;
     }
     return url;
-  }
-
-  private Map<String, String> getParameterMap(QueryParams queryParams) {
-    //todo: implement mapping
-    return new HashMap<>();
   }
 
   /**
@@ -237,7 +217,7 @@ public class VolleyChannel extends AbstractChannel implements AuthProvider {
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
       try {
         String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-        T result = objectMapper.readValue(jsonString, typeReference);
+        T result = jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
       } catch (Exception e) {
         return Response.error(new VolleyError(e));

@@ -12,14 +12,15 @@ import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
-import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.filter.LoggingFilter;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -49,6 +50,7 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
 
   private void initClient() {
     restClient = ClientBuilder.newClient();
+//    restClient.register(new LoggingFilter(LOG, false));
   }
 
   @Override
@@ -97,11 +99,12 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public <T extends SecuObject> T saveObject(T object, Callback<T> callback) {
+  public <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType) {
     Entity<T> entity = Entity.json(object);
     Invocation.Builder builder = builder(object.getClass(), null, secure, object.getId());
     Invocation invocation = object.getId() == null ? builder.buildPost(entity) : builder.buildPut(entity);
-    return getResponse(invocation, new DynamicTypeReference(object.getClass()), callback);
+    DynamicTypeReference typeReference = new DynamicTypeReference(returnType == null ? object.getClass() : returnType);
+    return getResponse(invocation, typeReference, callback);
   }
 
   @Override
@@ -244,7 +247,6 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
         status = readEntity(response, new TypeReference<Status>() {
         });
       } catch (Exception e) {
-        e.printStackTrace();
         // treat as no response
       }
     }

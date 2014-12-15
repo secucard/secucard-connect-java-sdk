@@ -2,7 +2,7 @@ package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.smart.Device;
-import com.secucard.connect.model.transport.InvocationResult;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.util.Converter;
 
@@ -16,14 +16,14 @@ public class DeviceService extends AbstractService {
    */
   public boolean registerDevice(Device device, Callback callback) {
     try {
-      Converter<InvocationResult, Boolean> converter = new Converter<InvocationResult, Boolean>() {
+      Converter<Result, Boolean> converter = new Converter<Result, Boolean>() {
         @Override
-        public Boolean convert(InvocationResult value) {
+        public Boolean convert(Result value) {
           return value == null ? Boolean.FALSE : Boolean.parseBoolean(value.getResult());
         }
       };
       // todo: switch to id, static just for test
-      InvocationResult result = getStompChannel().execute("register", "me", null, device, InvocationResult.class,
+      Result result = getStompChannel().execute("register", "me", null, device, Result.class,
           getCallbackAdapter(callback, converter));
       return converter.convert(result);
     } catch (Exception e) {

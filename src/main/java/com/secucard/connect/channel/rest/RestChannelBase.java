@@ -56,7 +56,7 @@ public abstract class RestChannelBase extends AbstractChannel {
   protected Map<String, String> queryParamsToMap(QueryParams queryParams) {
     Map<String, String> map = new HashMap<>();
 
-    boolean scroll = queryParams.getScrollId() != null && queryParams.getScrollId() > 0;
+    boolean scroll = queryParams.getScrollId() != null && Integer.parseInt(queryParams.getScrollId()) > 0;
     if (scroll) {
       map.put("scroll_id", queryParams.getScrollId().toString());
     }

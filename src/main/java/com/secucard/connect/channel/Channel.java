@@ -23,7 +23,7 @@ public interface Channel {
 
   <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback);
 
-  <T extends SecuObject> T saveObject(T object, Callback<T> callback);
+  <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType);
 
   void deleteObject(Class type, String objectId, Callback<?> callback);
 

@@ -79,7 +79,7 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public <T extends SecuObject> T saveObject(T object, Callback<T> callback) {
+  public <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType) {
     String objectId = object.getId();
     String url = buildRequestUrl(object.getClass(), objectId);
     String requestBody;
@@ -90,8 +90,8 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
       return null;
     }
     int method = objectId == null ? Request.Method.POST : Request.Method.PUT;
-    Request<T> request = new ObjectJsonRequest<>(method, url, requestBody, callback, null, true,
-        new DynamicTypeReference(object.getClass()));
+    DynamicTypeReference typeReference = new DynamicTypeReference(returnType == null ? object.getClass() : returnType);
+    Request request = new ObjectJsonRequest<>(method, url, requestBody, callback, null, true, typeReference);
     requestQueue.add(request);
     return null;
   }

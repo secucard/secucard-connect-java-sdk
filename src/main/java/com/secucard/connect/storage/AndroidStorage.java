@@ -17,6 +17,10 @@ public class AndroidStorage extends DataStorage {
 
   @Override
   public void save(String id, Object object, boolean replace) throws DataStorageException {
+    if (!replace && sharedPreferences.contains(id)) {
+      return;
+    }
+
     SharedPreferences.Editor editor = sharedPreferences.edit();
     if (object instanceof String) {
       editor.putString(id, (String) object);
@@ -40,8 +44,16 @@ public class AndroidStorage extends DataStorage {
   public void clear(String id) {
     if (id == null || "*".equals(id)) {
       sharedPreferences.edit().clear().apply();
-    } else {
+    } else if (id.contains("*")) {
+      SharedPreferences.Editor editor = sharedPreferences.edit();
+      Map<String, ?> map = sharedPreferences.getAll();
+      for (String key : map.keySet()) {
+        if (wildCardMatch(key, id)) {
+          editor.remove(id);
+        }
+      }
+      editor.apply();
+    } else
       sharedPreferences.edit().remove(id).apply();
-    }
   }
 }

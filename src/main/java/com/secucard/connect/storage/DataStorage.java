@@ -28,6 +28,25 @@ public abstract class DataStorage {
    */
   public abstract void clear(String id);
 
+  /**
+   * Removing all data.
+   */
+  public void clear() {
+    clear("*");
+  }
+
+  protected static boolean wildCardMatch(String text, String pattern) {
+    String[] cards = pattern.split("\\*");
+    for (String card : cards) {
+      int idx = text.indexOf(card);
+      if (idx == -1) {
+        return false;
+      }
+      text = text.substring(idx + card.length());
+    }
+    return true;
+  }
+
   public class DataStorageException extends RuntimeException {
     public DataStorageException() {
     }
@@ -44,8 +63,5 @@ public abstract class DataStorage {
       super(cause);
     }
 
-    public DataStorageException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-      super(message, cause, enableSuppression, writableStackTrace);
-    }
   }
 }

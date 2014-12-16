@@ -20,7 +20,7 @@ public abstract class DataStorage {
     save(id, object, true);
   }
 
-  public abstract <T> T get(String id);
+  public abstract Object get(String id);
 
   /**
    * Remove all data for a given id.

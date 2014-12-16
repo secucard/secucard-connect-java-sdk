@@ -55,8 +55,8 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
 
   @Override
   public synchronized Token getToken() {
-    Token token = storage.get("token" + id);
-    Long expireTime = storage.get("expireTime" + id);
+    Token token = (Token) storage.get("token" + id);
+    Long expireTime = (Long) storage.get("expireTime" + id);
     if (token == null) {
       token = createToken(configuration.getClientCredentials(), null, null);
     } else if (expireTime != null && expireTime < System.currentTimeMillis() - 30 * 1000) {

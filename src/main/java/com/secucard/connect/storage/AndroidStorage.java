@@ -35,9 +35,9 @@ public class AndroidStorage extends DataStorage {
   }
 
   @Override
-  public <T> T get(String id) {
+  public Object get(String id) {
     Map<String, ?> all = sharedPreferences.getAll();
-    return (T) all.get(id);
+    return all.get(id);
   }
 
   @Override

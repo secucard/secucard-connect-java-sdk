@@ -127,8 +127,8 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
     // todo: adapt the flow, it's the flow from java client, also not sure what the device string is or where userCredentials come from
 
     String device = "";
-    Token token = storage.get("token" + id);
-    Long expireTime = storage.get("expireTime" + id);
+    Token token = (Token) storage.get("token" + id);
+    Long expireTime = (Long) storage.get("expireTime" + id);
     if (token == null) {
       token = createToken(configuration.getClientCredentials(), null, null, device);
     } else {

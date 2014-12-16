@@ -2,6 +2,8 @@ package com.secucard.connect.storage;
 
 import android.content.SharedPreferences;
 
+import com.secucard.connect.model.auth.Token;
+
 import java.util.Map;
 
 /**
@@ -17,6 +19,9 @@ public class AndroidStorage extends DataStorage {
 
   @Override
   public void save(String id, Object object, boolean replace) throws DataStorageException {
+      if(object == null)
+          return;
+
     SharedPreferences.Editor editor = sharedPreferences.edit();
     if (object instanceof String) {
       editor.putString(id, (String) object);
@@ -24,6 +29,8 @@ public class AndroidStorage extends DataStorage {
       editor.putInt(id, (Integer) object);
     } else if (object instanceof Long) {
       editor.putLong(id, (Long) object);
+    } else if (object instanceof Boolean) {
+        editor.putBoolean(id, (Boolean) object);
     } else {
       throw new UnsupportedOperationException("not implemented yet");
     }

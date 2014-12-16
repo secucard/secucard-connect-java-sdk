@@ -3,12 +3,11 @@ package com.secucard.connect.channel.stomp;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.transport.InvocationResult;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.model.transport.Message;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
-import com.secucard.connect.util.jackson.DynamicTypeReference;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -72,9 +71,9 @@ public class StompChannel extends StompChannelBase {
 
   @Override
   public String invoke(String command, final Callback<String> callback) {
-    Converter<InvocationResult, String> converter = new Converter<InvocationResult, String>() {
+    Converter<Result, String> converter = new Converter<Result, String>() {
       @Override
-      public String convert(InvocationResult value) {
+      public String convert(Result value) {
         if (value == null) {
           return null;
         }
@@ -82,13 +81,13 @@ public class StompChannel extends StompChannelBase {
       }
     };
 
-    Callback<InvocationResult> adaptor = null;
+    Callback<Result> adaptor = null;
     if (callback != null) {
       adaptor = new CallbackAdapter<>(callback, converter);
     }
 
-    InvocationResult result = sendMessage(new StandardDestination(command), null,
-        new MessageTypeRef(InvocationResult.class), adaptor, false);
+    Result result = sendMessage(new StandardDestination(command), null,
+        new MessageTypeRef(Result.class), adaptor, false);
 
     return converter.convert(result);
   }
@@ -124,10 +123,11 @@ public class StompChannel extends StompChannelBase {
 
 
   @Override
-  public <T extends SecuObject> T saveObject(T object, Callback<T> callback) {
+  public <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType) {
     String command = object.getId() == null ? StandardDestination.ADD : StandardDestination.UPDATE;
+    MessageTypeRef typeRef = new MessageTypeRef(returnType == null ? object.getClass() : returnType);
     return sendMessage(new StandardDestination(command, object.getClass()), new Message<>(object.getId(), object),
-        new MessageTypeRef(object.getClass()), callback, true);
+        typeRef, callback, true);
   }
 
   @Override

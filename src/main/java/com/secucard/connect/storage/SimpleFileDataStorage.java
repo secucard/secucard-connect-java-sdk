@@ -12,6 +12,7 @@ import java.util.Map;
  */
 public class SimpleFileDataStorage extends DataStorage {
   private File file;
+  private Map<String, Object> store;
 
   public SimpleFileDataStorage(String path) throws IOException {
     file = new File(path);
@@ -19,62 +20,86 @@ public class SimpleFileDataStorage extends DataStorage {
   }
 
   @Override
-  public void save(String id, Object object, boolean replace) throws DataStorageException {
-    execute(object, id, replace, false);
-  }
-
-  @Override
-  public <T> T get(String id) throws DataStorageException {
-    return execute(null, id, false, false);
-  }
-
-
-  @Override
-  public void clear(String id) {
-    execute(null, id, false, true);
-  }
-
-  private synchronized <T> T execute(T object, String id, boolean replace, boolean clear) {
+  public synchronized void save(String id, Object object, boolean replace) throws DataStorageException {
     try {
+      readStore();
+      if (store == null) {
+        store = new HashMap<>();
+      }
+      if (!replace && store.containsKey(id)) {
+        return;
+      }
+      store.put(id, object);
+      writeStore();
+    } catch (IOException | ClassNotFoundException e) {
+      throw new DataStorageException(e);
+    }
+  }
 
-      Map<String, T> map;
-      if (file.length() == 0) {
-        map = new HashMap<>();
-      } else {
-        map = (Map<String, T>) new ObjectInputStream(new FileInputStream(file)).readObject();
+  @Override
+  public synchronized Object get(String id) throws DataStorageException {
+
+    try {
+      readStore();
+    } catch (IOException | ClassNotFoundException e) {
+      throw new DataStorageException(e);
+    }
+
+    if (store == null) {
+      return null;
+    }
+
+    return store.get(id);
+  }
+
+  @Override
+  public synchronized void clear(String id) {
+
+    try {
+      readStore();
+
+      if (store == null) {
+        return;
       }
 
-      if (object == null && !clear) {
-        // get mode
-        return (T) map.get(id);
-      }
-
-      if (clear) {
-        Iterator<Map.Entry<String, T>> it = map.entrySet().iterator();
-        boolean wildcard = id.contains("*");
-        if (wildcard) {
-          id = id.replace("*", "");
+      if (id == null || "*".equals(id)) {
+        if (!file.delete()) {
+          throw new DataStorageException("Cannot delete store");
         }
+        return;
+      }
+
+      if (id.contains("*")) {
+        Iterator<String> it = store.keySet().iterator();
+
         while (it.hasNext()) {
-          Map.Entry<String, T> next = it.next();
-          if (wildcard && next.getKey().contains(id) || next.getKey().equals(id)) {
+          String key = it.next();
+          if (wildCardMatch(key, id)) {
             it.remove();
           }
         }
+        writeStore();
+      } else {
+        store.remove(id);
+        writeStore();
       }
 
-      // save mode else
-      if (!replace && map.containsKey(id)) {
-        return null;
-      }
-
-      map.put(id, object);
-
-      new ObjectOutputStream(new FileOutputStream(file)).writeObject(map);
-
-      return null;
-    } catch (Exception e) {
-      throw new DataStorageException((e));
+    } catch (IOException | ClassNotFoundException e) {
+      throw new DataStorageException(e);
     }
+  }
+
+  private void writeStore() throws IOException {
+    new ObjectOutputStream(new FileOutputStream(file)).writeObject(store);
+  }
+
+
+  private void readStore() throws IOException, ClassNotFoundException {
+    if (!file.exists() || file.length() == 0) {
+      store = null;
+      return;
+    }
+
+    store = (Map<String, Object>) new ObjectInputStream(new FileInputStream(file)).readObject();
   }
 }

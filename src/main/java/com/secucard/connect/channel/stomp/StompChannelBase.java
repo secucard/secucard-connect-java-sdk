@@ -115,7 +115,7 @@ public abstract class StompChannelBase extends AbstractChannel {
     );
 
     String userId = configuration.getUserId();
-    if (authProvider != null) {
+    if (userId == null && authProvider != null) {
       Token token = authProvider.getToken();
       if (token != null) {
         userId = token.getAccessToken();

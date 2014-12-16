@@ -1,20 +1,8 @@
 package com.secucard.connect.channel.rest;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.RequestFuture;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.*;
+import com.android.volley.toolbox.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
@@ -36,8 +24,8 @@ import java.util.Map;
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
  */
 public class VolleyChannel extends RestChannelBase implements AuthProvider {
-    private final android.content.Context context;
     private RequestQueue requestQueue;
+    private final android.content.Context context;
 
     public VolleyChannel(String id, Context context, Configuration configuration) {
         super(configuration, id);
@@ -46,7 +34,7 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
 
     @Override
     public void open(Callback callback) throws IOException {
-        requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+        requestQueue = Volley.newRequestQueue(context.getApplicationContext(), new HurlStack());
     }
 
     @Override
@@ -82,21 +70,16 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
     }
 
     @Override
-    public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
+    public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
         String url = buildRequestUrl(type);
-        url += "?" + queryParamsToString(queryParams);
-
-        JsonRequest<ObjectList<T>> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, callback,
-                null, true, new DynamicTypeReference(ObjectList.class, type));
-
-//        request.setTag(url);
-        Log.d("ConnectJavaCleint", "VolleyChannel: findObjects ->"+type);
+        Request<ObjectList<T>> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, callback,
+                queryParamsToMap(queryParams), true, new DynamicTypeReference(ObjectList.class, type));
         requestQueue.add(request);
         return null;
     }
 
     @Override
-    public <T extends SecuObject> T saveObject(T object, Callback<T> callback) {
+    public <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType) {
         String objectId = object.getId();
         String url = buildRequestUrl(object.getClass(), objectId);
         String requestBody;
@@ -107,8 +90,8 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
             return null;
         }
         int method = objectId == null ? Request.Method.POST : Request.Method.PUT;
-        Request<T> request = new ObjectJsonRequest<>(method, url, requestBody, callback, null, true,
-                new DynamicTypeReference(object.getClass()));
+        DynamicTypeReference typeReference = new DynamicTypeReference(returnType == null ? object.getClass() : returnType);
+        Request request = new ObjectJsonRequest<>(method, url, requestBody, callback, null, true, typeReference);
         requestQueue.add(request);
         return null;
     }
@@ -144,9 +127,9 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
         // todo: adapt the flow, it's the flow from java client, also not sure what the device string is or where userCredentials come from
 
         String device = "1";
-        String accessToken = storage.get("accessToken" + id);
-        String refreshToken = storage.get("refreshToken" + id);
-        Long expireTime = storage.get("expireTime" + id);
+        String accessToken = String.valueOf(storage.get("accessToken" + id));
+        String refreshToken = String.valueOf(storage.get("refreshToken" + id));
+        Long expireTime = (Long) storage.get("expireTime" + id);
         Token token = new Token();
         token.setAccessToken(accessToken);
         token.setRefreshToken(refreshToken);
@@ -184,7 +167,6 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
             return future.get();
         } catch (Exception e) {
             // todo: just log error
-            e.printStackTrace();
         }
         return null;
     }
@@ -211,7 +193,6 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
         private TypeReference typeReference;
         private Map<String, String> queryParams;
         private Map<String, String> headers;
-        private String mBody;
 
         public ObjectJsonRequest(int method, String url, String requestBody,
                                  Response.Listener<T> listener, Response.ErrorListener errorListener,
@@ -219,7 +200,6 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
             super(method, url, requestBody, listener, errorListener);
             this.typeReference = typeReference;
             this.queryParams = queryParams;
-            this.mBody = requestBody;
             if (secure) {
                 headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + getToken().getAccessToken());
@@ -275,29 +255,15 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
 
         @Override
         public byte[] getBody() {
-            String paramsEncoding = getParamsEncoding();
-            if (mBody != null) {
-                try {
-                    return mBody.getBytes(getParamsEncoding());
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException("Encoding not supported: " + paramsEncoding, e);
-                }
-            }
             if (queryParams == null) {
                 return super.getBody();
             }
 
-            Map<String, String> params = null;
-            try {
-                params = getParams();
-            } catch (AuthFailureError authFailureError) {
-                // will never happen
-            }
-
-            if (params != null && params.size() > 0) {
+            if (queryParams.size() > 0) {
                 StringBuilder encodedParams = new StringBuilder();
+                String paramsEncoding = getParamsEncoding();
                 try {
-                    for (Map.Entry<String, String> entry : params.entrySet()) {
+                    for (Map.Entry<String, String> entry : queryParams.entrySet()) {
                         encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
                         encodedParams.append('=');
                         encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
@@ -310,8 +276,5 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
             }
             return null;
         }
-
-
     }
-
 }

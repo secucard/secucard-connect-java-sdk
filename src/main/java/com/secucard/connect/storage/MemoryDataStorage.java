@@ -15,8 +15,8 @@ public class MemoryDataStorage extends DataStorage {
   }
 
   @Override
-  public <T> T get(String id) {
-    return (T) store.get(id);
+  public Object get(String id) {
+    return store.get(id);
   }
 
   @Override

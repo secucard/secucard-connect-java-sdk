@@ -3,7 +3,7 @@ package com.secucard.connect.service.smart;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
-import com.secucard.connect.model.smart.Result;
+import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.model.smart.Transaction;
 import com.secucard.connect.service.AbstractService;
 
@@ -51,7 +51,7 @@ public class SmartService extends AbstractService {
    * @param type
    * @return The result data.
    */
-  public Result startTransaction(Transaction transaction, String type, Callback<Result> callback) {
+  public TransactionResult startTransaction(Transaction transaction, String type, Callback<TransactionResult> callback) {
     return transactionService.startTransaction(transaction, type, callback);
   }
 }

@@ -2,8 +2,6 @@ package com.secucard.connect.storage;
 
 import android.content.SharedPreferences;
 
-import com.secucard.connect.model.auth.Token;
-
 import java.util.Map;
 
 /**
@@ -11,44 +9,57 @@ import java.util.Map;
  * todo: must be tested.
  */
 public class AndroidStorage extends DataStorage {
-  private final SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
 
-  public AndroidStorage(SharedPreferences sharedPreferences) {
-    this.sharedPreferences = sharedPreferences;
-  }
-
-  @Override
-  public void save(String id, Object object, boolean replace) throws DataStorageException {
-      if(object == null)
-          return;
-
-    SharedPreferences.Editor editor = sharedPreferences.edit();
-    if (object instanceof String) {
-      editor.putString(id, (String) object);
-    } else if (object instanceof Integer) {
-      editor.putInt(id, (Integer) object);
-    } else if (object instanceof Long) {
-      editor.putLong(id, (Long) object);
-    } else if (object instanceof Boolean) {
-        editor.putBoolean(id, (Boolean) object);
-    } else {
-      throw new UnsupportedOperationException("not implemented yet");
+    public AndroidStorage(SharedPreferences sharedPreferences) {
+        this.sharedPreferences = sharedPreferences;
     }
-    editor.apply();
-  }
 
-  @Override
-  public <T> T get(String id) {
-    Map<String, ?> all = sharedPreferences.getAll();
-    return (T) all.get(id);
-  }
+    @Override
+    public void save(String id, Object object, boolean replace) throws DataStorageException {
 
-  @Override
-  public void clear(String id) {
-    if (id == null || "*".equals(id)) {
-      sharedPreferences.edit().clear().apply();
-    } else {
-      sharedPreferences.edit().remove(id).apply();
+        if (object == null)
+            return;
+
+        if (!replace && sharedPreferences.contains(id)) {
+            return;
+        }
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if (object instanceof String) {
+            editor.putString(id, (String) object);
+        } else if (object instanceof Integer) {
+            editor.putInt(id, (Integer) object);
+        } else if (object instanceof Long) {
+            editor.putLong(id, (Long) object);
+        } else if (object instanceof Boolean) {
+            editor.putBoolean(id, (Boolean) object);
+        } else {
+            throw new UnsupportedOperationException("not implemented yet");
+        }
+        editor.apply();
     }
-  }
+
+    @Override
+    public Object get(String id) {
+        Map<String, ?> all = sharedPreferences.getAll();
+        return all.get(id);
+    }
+
+    @Override
+    public void clear(String id) {
+        if (id == null || "*".equals(id)) {
+            sharedPreferences.edit().clear().apply();
+        } else if (id.contains("*")) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            Map<String, ?> map = sharedPreferences.getAll();
+            for (String key : map.keySet()) {
+                if (wildCardMatch(key, id)) {
+                    editor.remove(id);
+                }
+            }
+            editor.apply();
+        } else
+            sharedPreferences.edit().remove(id).apply();
+    }
 }

@@ -23,7 +23,7 @@ public class DeviceService extends AbstractService {
         }
       };
       // todo: switch to id, static just for test
-      Result result = getStompChannel().execute("register", "me", null, device, Result.class,
+      Result result = getStompChannel().execute(Device.class, "me", "register", null, device, Result.class,
           getCallbackAdapter(callback, converter));
       return converter.convert(result);
     } catch (Exception e) {

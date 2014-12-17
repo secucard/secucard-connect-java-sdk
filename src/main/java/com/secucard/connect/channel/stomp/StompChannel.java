@@ -3,12 +3,11 @@ package com.secucard.connect.channel.stomp;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.model.transport.Message;
 import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 
@@ -92,16 +91,11 @@ public class StompChannel extends StompChannelBase {
     return converter.convert(result);
   }
 
-  public <T> T invoke(String appId, String method, Object arg, Class<T> returnType, Callback<T> callback) {
-    return sendMessage(new AppDestination(appId, method), arg, new MessageTypeRef(returnType), callback, true);
-  }
-
   @Override
   public <T> T getObject(final Class<T> type, String objectId, final Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.GET, type), new Message<T>(objectId),
         new MessageTypeRef(type), callback, true);
   }
-
 
   @Override
   public <T> ObjectList<T> findObjects(final Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
@@ -121,13 +115,23 @@ public class StompChannel extends StompChannelBase {
         statusHandler, callback, true);
   }
 
+  @Override
+  public <T> T createObject(T object, Callback<T> callback) {
+    return sendMessage(new StandardDestination(StandardDestination.ADD, object.getClass()),
+        new Message<>(object), new MessageTypeRef(object.getClass()), callback, true);
+  }
 
   @Override
-  public <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType) {
-    String command = object.getId() == null ? StandardDestination.ADD : StandardDestination.UPDATE;
-    MessageTypeRef typeRef = new MessageTypeRef(returnType == null ? object.getClass() : returnType);
-    return sendMessage(new StandardDestination(command, object.getClass()), new Message<>(object.getId(), object),
-        typeRef, callback, true);
+  public <T extends SecuObject> T updateObject(T object, Callback<T> callback) {
+    return sendMessage(new StandardDestination(StandardDestination.UPDATE, object.getClass()),
+        new Message<>(object.getId(), object), new MessageTypeRef(object.getClass()), callback, true);
+  }
+
+  @Override
+  public <T> T updateObject(Class type, String objectId, String action, String actionArg, Object arg,
+                            Class<T> returnType, Callback<T> callback) {
+    return sendMessage(new StandardDestination(StandardDestination.UPDATE, type, action),
+        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, true);
   }
 
   @Override
@@ -137,16 +141,20 @@ public class StompChannel extends StompChannelBase {
   }
 
   @Override
-  public <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType,
+  public void deleteObject(Class type, String objectId, String action, String actionArg, Callback<?> callback) {
+    sendMessage(new StandardDestination(StandardDestination.DELETE, type, action), new Message<>(objectId, actionArg),
+        new MessageTypeRef(type), callback, true);
+  }
+
+  @Override
+  public <T> T execute(String appId, String action, Object arg, Class<T> returnType, Callback<T> callback) {
+    return sendMessage(new AppDestination(appId, action), arg, new MessageTypeRef(returnType), callback, true);
+  }
+
+  @Override
+  public <T> T execute(Class type, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
                        Callback<T> callback) {
-    Message message = new Message<>(null, arg);
-    if (StringUtils.isNotBlank(resourceId)) {
-      message.setPid(resourceId);
-    }
-    if (StringUtils.isNotBlank(strArg)) {
-      message.setSid(strArg);
-    }
-    return sendMessage(new StandardDestination(StandardDestination.EXEC, arg.getClass(), action), message,
-        new MessageTypeRef(returnType), callback, true);
+    return sendMessage(new StandardDestination(StandardDestination.EXEC, arg.getClass(), action),
+        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, true);
   }
 }

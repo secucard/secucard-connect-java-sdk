@@ -416,7 +416,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         }
       }
 
-      if (eventListener != null && correlationId == null && body.contains("CashierDisplay")) {
+      if (eventListener != null && correlationId == null) {
         eventListener.onEvent(new Event(body));
       }
     }

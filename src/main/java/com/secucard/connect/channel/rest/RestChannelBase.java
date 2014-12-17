@@ -10,6 +10,8 @@ import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.storage.DataStorage;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,8 @@ public abstract class RestChannelBase extends AbstractChannel {
   }
 
   protected Map<String, String> createAuthParams(OAuthClientCredentials clientCredentials,
-                                                 OAuthUserCredentials userCredentials, String refreshToken) {
+                                                 OAuthUserCredentials userCredentials, String refreshToken,
+                                                 String deviceId) {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("client_id", clientCredentials.getClientId());
     parameters.put("client_secret", clientCredentials.getClientSecret());
@@ -41,6 +44,11 @@ public abstract class RestChannelBase extends AbstractChannel {
     } else {
       parameters.put("grant_type", "client_credentials");
     }
+
+    if (deviceId != null) {
+      parameters.put("device", deviceId);
+    }
+
     return parameters;
   }
 
@@ -125,80 +133,23 @@ public abstract class RestChannelBase extends AbstractChannel {
     return map;
   }
 
-    protected String queryParamsToString(QueryParams queryParams) {
-       String paramString = "";
+  protected String encodeQueryParams(QueryParams queryParams) {
+    return encodeQueryParams(queryParamsToMap(queryParams));
+  }
 
-        boolean scroll = queryParams.getScrollId() != null && !queryParams.getScrollId().equals("");
-        if (scroll) {
-            paramString += "&scroll_id="+queryParams.getScrollId();
-        }
-
-        boolean scrollExpire = StringUtils.isNotBlank(queryParams.getScrollExpire());
-        if (scrollExpire) {
-            paramString += "&scroll_expire="+queryParams.getScrollExpire();
-        }
-
-        if (!scroll && queryParams.getCount() != null && queryParams.getCount() >= 0) {
-            paramString += "&count="+queryParams.getCount().toString();
-        }
-
-        if (!scroll && !scrollExpire && queryParams.getOffset() != null && queryParams.getOffset() > 0) {
-            paramString += "&offset="+queryParams.getOffset().toString();
-        }
-
-        List<String> fields = queryParams.getFields();
-        if (!scroll && fields != null && fields.size() > 0) {
-            // add "," separated list of field names
-            String names = null;
-            for (String field : fields) {
-                names = names == null ? "" : names + ',';
-                names += field;
-            }
-            paramString += "&fields="+names;
-        }
-
-        Map<String, String> sortOrder = queryParams.getSortOrder();
-        if (!scroll && sortOrder != null) {
-            for (Map.Entry<String, String> entry : sortOrder.entrySet()) {
-                paramString += "&sort[" + entry.getKey() + "]="+entry.getValue();
-            }
-        }
-
-        if (StringUtils.isNotBlank(queryParams.getQuery())) {
-            paramString += "&q="+queryParams.getQuery();
-        }
-
-        if (StringUtils.isNotBlank(queryParams.getPreset())) {
-            paramString += "&preset="+queryParams.getPreset();
-        }
-
-        // todo: check with scroll id etc.
-        QueryParams.GeoQuery gq = queryParams.getGeoQuery();
-        if (gq != null) {
-
-            // sort[_geometry]=asc
-            // geo[lat]=51.175214&geo[lon]=14.027788&geo[field]=geometry
-            // geo[distance]=1000m
-
-            if (StringUtils.isNotBlank(gq.getFieldName())) {
-                paramString += "&geo[field]="+gq.getFieldName();
-            }
-
-            Geometry geometry = gq.getGeometry();
-            if (geometry != null) {
-                if (geometry.getLat() != 0) {
-                    paramString += "&geo[lat]="+Double.toString(geometry.getLat());
-                }
-                if (geometry.getLon() != 0) {
-                    paramString += "&geo[lon]="+Double.toString(geometry.getLon());
-                }
-            }
-
-            if (StringUtils.isNotBlank(gq.getDistance())) {
-                paramString += "&geo[distance]="+gq.getDistance();
-            }
-        }
-
-        return paramString;
+  protected String encodeQueryParams(Map<String, String> queryParams) {
+    StringBuilder encodedParams = new StringBuilder();
+    String paramsEncoding = "UTF-8";
+    try {
+      for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+        encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
+        encodedParams.append('=');
+        encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+        encodedParams.append('&');
+      }
+      return encodedParams.toString();
+    } catch (UnsupportedEncodingException uee) {
+      throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
     }
+  }
 }

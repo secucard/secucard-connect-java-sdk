@@ -4,23 +4,35 @@
 
 package com.secucard.connect.service.general.accounts.beacon;
 
+import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.general.accounts.Account;
+import com.secucard.connect.model.general.accounts.BeaconEnvironment.BeaconEnvironment;
 import com.secucard.connect.model.general.accounts.BeaconEnvironment.BeaconList;
-import com.secucard.connect.model.general.accounts.Location.Location;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
+import java.util.List;
+
 public class BeaconService extends AbstractService {
 
-    /**
-     * Send a BeaconList.
-     *
-     * @param beaconList List of found Beacons
-     * @return True if successfully, false else.
-     */
-    public boolean sendBeacons(BeaconList beaconList) {
-        beaconList.setId("me");
-        Result result = getStompChannel().saveObject(beaconList, null, Result.class);
-        return result.getResult().equals("true");
-    }
+  /**
+   * Send a BeaconList.
+   *
+   * @param beaconList List of found Beacons
+   * @return True if successfully, false else.
+   */
+  public boolean sendBeacons(BeaconList beaconList) {
+    Result result = getStompChannel().updateObject(Account.class, "me", "beacons", null, beaconList, Result.class, null);
+    return result.getResult().equals("true");
+  }
+
+  // todo: kann so der spezielle listtyp vermieden werden?
+  public boolean sendBeacons(List<BeaconEnvironment> beaconList) {
+    ObjectList<BeaconEnvironment> objectList = new ObjectList<>();
+    objectList.setList(beaconList);
+    Result result = getStompChannel().updateObject(Account.class, "me", "beacon", null, objectList, Result.class,
+        null);
+    return result.getResult().equals("true");
+  }
 
 }

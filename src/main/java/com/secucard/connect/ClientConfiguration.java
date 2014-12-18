@@ -62,7 +62,8 @@ public class ClientConfiguration {
         cfg.getProperty("rest.url"),
         cfg.getProperty("oauthUrl"),
         cfg.getProperty("clientId"),
-        cfg.getProperty("clientSecret"));
+        cfg.getProperty("clientSecret"),
+        cfg.getProperty("device"));
   }
 
   public void setUserCredentials(OAuthUserCredentials userCredentials) {

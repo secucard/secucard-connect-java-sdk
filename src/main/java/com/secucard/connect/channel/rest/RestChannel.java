@@ -37,7 +37,7 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
   @Override
   public void open(Callback callback) {
     try {
-      // rest client should be initialized just on time, client is expensive
+      // rest client should be initialized just one time, client is expensive
       initClient();
       onCompleted(callback, null);
     } catch (Throwable e) {
@@ -62,9 +62,10 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
     Token token = (Token) storage.get("token" + id);
     Long expireTime = (Long) storage.get("expireTime" + id);
     if (token == null) {
-      token = createToken(configuration.getClientCredentials(), configuration.getUserCredentials(), null);
+      token = createToken(configuration.getClientCredentials(), configuration.getUserCredentials(), null,
+          configuration.getDeviceId());
     } else if (expireTime != null && expireTime < System.currentTimeMillis() - 30 * 1000) {
-      token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken());
+      token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken(), null);
     }
     expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
     storage.save("token" + id, token);
@@ -73,8 +74,8 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
   }
 
   private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
-                            String refreshToken) {
-    Map<String, String> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, null);
+                            String refreshToken, String deviceid) {
+    Map<String, String> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, deviceid);
 
     Invocation.Builder builder = restClient.target(configuration.getOauthUrl()).request(MediaType.APPLICATION_FORM_URLENCODED);
     builder.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
@@ -274,10 +275,11 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
         });
       } catch (Exception e) {
         // treat as no response
+        LOG.severe(e.getMessage());
       }
     }
     if (status != null) {
-      return new SecuException(status.getErrorDetails(), throwable);
+      return new SecuException(status.toString(), throwable);
     } else {
       return new SecuException(throwable);
     }

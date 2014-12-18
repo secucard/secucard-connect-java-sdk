@@ -206,7 +206,7 @@ public class Client extends AbstractService implements EventListener {
 
   private static class ThrowingExceptionHandler implements ExceptionHandler {
     @Override
-    public void handle(Exception exception) {
+    public void handle(Throwable exception) {
       throw new SecuException(exception);
     }
   }

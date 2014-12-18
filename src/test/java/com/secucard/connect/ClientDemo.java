@@ -42,7 +42,7 @@ public class ClientDemo {
     // if callback are used all exceptions go to the failed method
     client.setExceptionHandler(new ExceptionHandler() {
       @Override
-      public void handle(Exception exception) {
+      public void handle(Throwable exception) {
         System.err.println("Error happened:");
         exception.printStackTrace();
         client.disconnect();

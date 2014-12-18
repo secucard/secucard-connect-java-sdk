@@ -23,7 +23,7 @@ public class SmartService extends AbstractService {
    * @param device The device to register.
    * @return True if successfully, false else.
    */
-  public boolean registerDevice(Device device, Callback callback) {
+  public boolean registerDevice(Device device, Callback<Boolean> callback) {
     return deviceService.registerDevice(device, callback);
   }
 

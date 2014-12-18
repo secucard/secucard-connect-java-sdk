@@ -1,6 +1,7 @@
 package com.secucard.connect.channel.rest;
 
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
@@ -183,8 +184,7 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
 
   @Override
   public Token getToken() {
-//    String device = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-    String device = "1" ;
+    String device = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
 
     String accessToken = (String) (storage.get("accessToken" + id));
     String refreshToken = (String) (storage.get("refreshToken" + id));

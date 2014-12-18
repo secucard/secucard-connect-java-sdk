@@ -128,9 +128,9 @@ public class StompChannel extends StompChannelBase {
   }
 
   @Override
-  public <T> T updateObject(Class type, String objectId, String action, String actionArg, Object arg,
+  public <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
                             Class<T> returnType, Callback<T> callback) {
-    return sendMessage(new StandardDestination(StandardDestination.UPDATE, type, action),
+    return sendMessage(new StandardDestination(StandardDestination.UPDATE, product, action),
         new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, true);
   }
 
@@ -141,9 +141,9 @@ public class StompChannel extends StompChannelBase {
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, String action, String actionArg, Callback<?> callback) {
-    sendMessage(new StandardDestination(StandardDestination.DELETE, type, action), new Message<>(objectId, actionArg),
-        new MessageTypeRef(type), callback, true);
+  public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+    sendMessage(new StandardDestination(StandardDestination.DELETE, product, action), new Message<>(objectId, actionArg),
+        new MessageTypeRef(product), callback, true);
   }
 
   @Override
@@ -152,7 +152,7 @@ public class StompChannel extends StompChannelBase {
   }
 
   @Override
-  public <T> T execute(Class type, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
+  public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
                        Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.EXEC, arg.getClass(), action),
         new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, true);

@@ -116,9 +116,9 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public <T> T updateObject(Class type, String objectId, String action, String actionArg, Object arg,
+  public <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
                             Class<T> returnType, Callback<T> callback) {
-    String url = buildRequestUrl(type, objectId, action, actionArg);
+    String url = buildRequestUrl(product, objectId, action, actionArg);
     String requestBody;
     try {
       requestBody = jsonMapper.map(arg);
@@ -133,9 +133,9 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, String action, String actionArg, Callback<?> callback) {
-    String url = buildRequestUrl(type, objectId, action, actionArg);
-    DynamicTypeReference typeReference = new DynamicTypeReference(type);
+  public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+    String url = buildRequestUrl(product, objectId, action, actionArg);
+    DynamicTypeReference typeReference = new DynamicTypeReference(product);
     Request request = new ObjectJsonRequest<>(Request.Method.DELETE, url, null, secure, typeReference, callback);
     requestQueue.add(request);
   }
@@ -149,9 +149,9 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public <T> T execute(Class type, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
+  public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
                        Callback<T> callback) {
-    String url = buildRequestUrl(type, objectId, action, actionArg);
+    String url = buildRequestUrl(product, objectId, action, actionArg);
     String requestBody;
     try {
       requestBody = jsonMapper.map(arg);

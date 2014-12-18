@@ -13,7 +13,6 @@ import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
-import org.glassfish.jersey.filter.LoggingFilter;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
@@ -118,10 +117,10 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public <T> T updateObject(Class type, String objectId, String action, String actionArg, Object arg,
+  public <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
                             Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
-    Invocation invocation = builder(type, null, secure, objectId, action, actionArg).buildPut(entity);
+    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildPut(entity);
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 
@@ -132,15 +131,15 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, String action, String actionArg, Callback<?> callback) {
-    Invocation invocation = builder(type, null, secure, objectId, action, actionArg).buildDelete();
+  public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildDelete();
     getResponse(invocation, null, callback);
   }
 
   @Override
-  public <T> T execute(Class type, String objectId, String action, String actionArg, Object arg, Class<T> returnType, Callback<T> callback) {
+  public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
-    Invocation invocation = builder(type, null, secure, objectId, action, actionArg).buildPut(entity);
+    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildPut(entity);
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 

@@ -30,16 +30,16 @@ public interface Channel {
 
   <T extends SecuObject> T updateObject(T object, Callback<T> callback);
 
-  <T> T updateObject(Class type, String objectId, String action, String actionArg, Object arg,
+  <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
                      Class<T> returnType, Callback<T> callback);
 
 
   void deleteObject(Class type, String objectId, Callback<?> callback);
 
-  void deleteObject(Class type, String objectId, String action, String actionArg, Callback<?> callback);
+  void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback);
 
 
-  <T> T execute(Class type, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
+  <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
                 Callback<T> callback);
 
   <T> T execute(String appId, String action, Object arg, Class<T> returnType, Callback<T> callback);

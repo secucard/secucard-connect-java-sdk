@@ -4,7 +4,6 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
-import com.secucard.connect.util.Converter;
 
 public class DeviceService extends AbstractService {
 
@@ -14,21 +13,13 @@ public class DeviceService extends AbstractService {
    * @param device The device to register.
    * @return True if successfully, false else.
    */
-  public boolean registerDevice(Device device, Callback callback) {
-    try {
-      Converter<Result, Boolean> converter = new Converter<Result, Boolean>() {
-        @Override
-        public Boolean convert(Result value) {
-          return value == null ? Boolean.FALSE : Boolean.parseBoolean(value.getResult());
-        }
-      };
-      // todo: switch to id, static just for test
-      Result result = getStompChannel().execute("register", "me", null, device, Result.class,
-          getCallbackAdapter(callback, converter));
-      return converter.convert(result);
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return false;
+  public boolean registerDevice(final Device device, Callback<Boolean> callback) {
+    return new Result2BooleanInvoker() {
+      @Override
+      protected Result handle(Callback<Result> callback) throws Exception {
+        // todo: switch to id, static just for test
+        return getStompChannel().execute(Device.class, "me", "register", null, device, Result.class, callback);
+      }
+    }.invokeAndConvert(callback);
   }
 }

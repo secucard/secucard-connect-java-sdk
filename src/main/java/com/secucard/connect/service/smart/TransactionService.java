@@ -1,8 +1,8 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.model.smart.Transaction;
+import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.service.AbstractService;
 
 /**
@@ -16,28 +16,30 @@ public class TransactionService extends AbstractService {
    * @param transaction The transaction data to save.
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
-  public Transaction createTransaction(Transaction transaction, Callback<Transaction> callback) {
-    try {
-      return getChannel().saveObject(transaction, callback, null);
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return null;
+  public Transaction createTransaction(final Transaction transaction, Callback<Transaction> callback) {
+    return new Invoker<Transaction>(){
+      @Override
+      protected Transaction handle(Callback<Transaction> callback) throws Exception {
+        return getChannel().createObject(transaction, callback);
+      }
+    }.invoke(callback);
   }
 
   /**
    * Starting/Exceuting a transaction.
    *
-   * @param transaction The transaction data.
+   * @param transactionId The transaction id.
    * @param type
    * @return The result data.
    */
-  public TransactionResult startTransaction(Transaction transaction, String type, Callback<TransactionResult> callback) {
-    try {
-      return getChannel().execute("start", transaction.getId(), type, transaction, TransactionResult.class, callback);
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return null;
+  public TransactionResult startTransaction(final String transactionId, final String type,
+                                            Callback<TransactionResult> callback) {
+    return new Invoker<TransactionResult>(){
+      @Override
+      protected TransactionResult handle(Callback<TransactionResult> callback) throws Exception {
+        return getChannel().execute(Transaction.class, transactionId, "start", type, null, TransactionResult.class,
+            callback);
+      }
+    }.invoke(callback);
   }
 }

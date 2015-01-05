@@ -3,8 +3,8 @@ package com.secucard.connect.service.smart;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.smart.Device;
 import com.secucard.connect.model.smart.Ident;
-import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.model.smart.Transaction;
+import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.service.AbstractService;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class SmartService extends AbstractService {
    * @param device The device to register.
    * @return True if successfully, false else.
    */
-  public boolean registerDevice(Device device, Callback callback) {
+  public boolean registerDevice(Device device, Callback<Boolean> callback) {
     return deviceService.registerDevice(device, callback);
   }
 
@@ -47,11 +47,11 @@ public class SmartService extends AbstractService {
   /**
    * Starting/Exceuting a transaction.
    *
-   * @param transaction The transaction data.
+   * @param transactionId The transaction id.
    * @param type
    * @return The result data.
    */
-  public TransactionResult startTransaction(Transaction transaction, String type, Callback<TransactionResult> callback) {
-    return transactionService.startTransaction(transaction, type, callback);
+  public TransactionResult startTransaction(String transactionId, String type, Callback<TransactionResult> callback) {
+    return transactionService.startTransaction(transactionId, type, callback);
   }
 }

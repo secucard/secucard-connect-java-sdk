@@ -2,6 +2,7 @@ package com.secucard.connect;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.channel.stomp.Configuration;
 
 import java.io.FileInputStream;
@@ -38,30 +39,35 @@ public class ClientConfiguration {
       defaultChannel = ClientContext.REST;
     }
 
-    heartBeatSec = new Integer(cfg.getProperty("heartBeatSec"));
+    heartBeatSec = Integer.valueOf(cfg.getProperty("heartBeatSec"));
     storagePath = cfg.getProperty("storagePath");
     serviceFactory = cfg.getProperty("serviceFactory");
 
     stompConfiguration = new Configuration(
         cfg.getProperty("stomp.host"),
         cfg.getProperty("stomp.virtualHost"),
-        new Integer(cfg.getProperty("stomp.port")),
+        Integer.valueOf(cfg.getProperty("stomp.port")),
         cfg.getProperty("stomp.destination"),
         cfg.getProperty("stomp.user"),
         cfg.getProperty("stomp.password"),
         Boolean.valueOf(cfg.getProperty("stomp.ssl")),
         cfg.getProperty("stomp.replyQueue"),
-        new Integer(cfg.getProperty("stomp.connTimeoutSec")),
-        new Integer(cfg.getProperty("stomp.messageTimeoutSec")),
-        new Integer(cfg.getProperty("stomp.maxMessageAgeSec")),
-        new Integer(cfg.getProperty("stomp.socketTimeoutSec")),
+        Integer.valueOf(cfg.getProperty("stomp.connTimeoutSec")),
+        Integer.valueOf(cfg.getProperty("stomp.messageTimeoutSec")),
+        Integer.valueOf(cfg.getProperty("stomp.maxMessageAgeSec")),
+        Integer.valueOf(cfg.getProperty("stomp.socketTimeoutSec")),
         1000 * heartBeatSec);
 
     restConfiguration = new com.secucard.connect.channel.rest.Configuration(
         cfg.getProperty("rest.url"),
         cfg.getProperty("oauthUrl"),
         cfg.getProperty("clientId"),
-        cfg.getProperty("clientSecret"));
+        cfg.getProperty("clientSecret"),
+        cfg.getProperty("device"));
+  }
+
+  public void setUserCredentials(OAuthUserCredentials userCredentials) {
+    restConfiguration.setUserCredentials(userCredentials);
   }
 
   /**
@@ -107,7 +113,8 @@ public class ClientConfiguration {
   }
 
   public static ClientConfiguration fromStream(InputStream inputStream) throws IOException {
-    Properties p = new Properties();
+    Properties defaults = getDefaults();  // must provide default properties
+    Properties p = new Properties(defaults);
     p.load(inputStream);
     return new ClientConfiguration(p);
   }

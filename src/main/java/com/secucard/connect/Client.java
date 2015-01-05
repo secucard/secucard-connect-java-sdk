@@ -1,5 +1,6 @@
 package com.secucard.connect;
 
+import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
@@ -42,6 +43,10 @@ public class Client extends AbstractService implements EventListener {
    */
   public static Client create(String id, ClientConfiguration configuration, Object runtimeContext) {
     return new Client(id, configuration, runtimeContext);
+  }
+
+  public void setUserCredentials(String user, String pwd) {
+    context.getConfig().setUserCredentials(new OAuthUserCredentials(user, pwd));
   }
 
   /**
@@ -201,7 +206,7 @@ public class Client extends AbstractService implements EventListener {
 
   private static class ThrowingExceptionHandler implements ExceptionHandler {
     @Override
-    public void handle(Exception exception) {
+    public void handle(Throwable exception) {
       throw new SecuException(exception);
     }
   }

@@ -21,13 +21,29 @@ public interface Channel {
 
   <T> T getObject(Class<T> type, String objectId, Callback<T> callback);
 
+
   <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback);
 
-  <R, T extends SecuObject> R saveObject(T object, Callback<R> callback, Class<R> returnType);
+
+  <T> T createObject(T object, Callback<T> callback);
+
+
+  <T extends SecuObject> T updateObject(T object, Callback<T> callback);
+
+  <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
+                     Class<T> returnType, Callback<T> callback);
+
 
   void deleteObject(Class type, String objectId, Callback<?> callback);
 
-  <T> T execute(String action, String resourceId, String strArg, Object arg, Class<T> returnType, Callback<T> callback);
+  void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback);
+
+
+  <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
+                Callback<T> callback);
+
+  <T> T execute(String appId, String action, Object arg, Class<T> returnType, Callback<T> callback);
+
 
   void close(Callback<?> callback);
 

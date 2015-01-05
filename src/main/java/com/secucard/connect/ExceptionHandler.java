@@ -1,5 +1,5 @@
 package com.secucard.connect;
 
 public interface ExceptionHandler {
-  public void handle(Exception exception);
+  public void handle(Throwable exception);
 }

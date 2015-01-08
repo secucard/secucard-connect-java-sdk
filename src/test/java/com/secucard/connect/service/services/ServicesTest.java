@@ -8,6 +8,8 @@ import com.secucard.connect.model.services.idrequest.Person;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -23,8 +25,14 @@ public class ServicesTest {
     client = Client.create("test", cfg);
   }
 
-  //@Test
-  public void testGetIdentRequest() throws Exception {
+  @Test
+  public void run() throws Exception {
+    testGetIdentRequest();
+    testGetIdentResult();
+//    testIdent();
+  }
+
+  private void testGetIdentRequest() throws Exception {
     ServicesService service = client.getService(ServicesService.class);
     client.connect();
 
@@ -40,8 +48,7 @@ public class ServicesTest {
     }
   }
 
-  @Test
-  public void testGetIdentResult() {
+  private void testGetIdentResult() {
     ServicesService service = client.getService(ServicesService.class);
     client.connect();
 
@@ -58,24 +65,32 @@ public class ServicesTest {
     }
   }
 
-  // @Test
-  public void testIdent() {
+  private void testIdent() throws Exception {
     ServicesService service = client.getService(ServicesService.class);
     client.connect();
 
     try {
       IdentRequest newIr = new IdentRequest();
       newIr.setType(IdentRequest.TYPE_PERSON);
-      newIr.setOwnerTransactionId("123456789");
+      String transactionId = "TX" + System.currentTimeMillis();
+      newIr.setOwnerTransactionId(transactionId);
       Person p = new Person();
-      p.setFirstname("Kalle");
+      p.setOwnerTransactionId(transactionId);
+      p.setFirstname("Hans");
+      p.setLastname("Dampf");
+      p.setCity("Berlin");
+      p.setZipcode("11011");
       p.setGender(Person.GENDER_MALE);
       p.setNationality(Locale.GERMANY);
+      p.setCountry(Locale.GERMANY);
+      p.setStreet("Platz der Republik 1");
+      Date date = new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1951");
+      p.setBirthdate(date);
       newIr.addPerson(p);
       newIr = service.createIdentRequest(newIr, null);
-      assertEquals("Kalle", newIr.getPersons().get(0).getFirstname());
+      assertEquals("Hans", newIr.getPersons().get(0).getFirstname());
 
-    } catch (Exception e) {
+    } finally {
       client.disconnect();
     }
   }

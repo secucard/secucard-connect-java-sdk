@@ -7,3 +7,4 @@ com.secucard.connect.service.general.merchant.PublicMerchantService #{general.pu
 com.secucard.connect.service.loyalty.cards.CardsService #{loyalty.cards, loyalty/cards}
 com.secucard.connect.service.general.accounts.location.LocationService #{general.accounts.location}
 com.secucard.connect.service.general.AccountService #{general.accounts, general/accounts}
+com.secucard.connect.service.services.ServicesService #{services.identrequests, services/identrequests}

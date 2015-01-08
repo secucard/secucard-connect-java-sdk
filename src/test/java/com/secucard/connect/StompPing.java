@@ -2,8 +2,10 @@ package com.secucard.connect;
 
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.stomp.StompChannel;
-import junit.framework.Assert;
 import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class StompPing {
   private StompChannel stompChannel;
@@ -21,18 +23,18 @@ public class StompPing {
     stompChannel.setAuthProvider(authProvider);
   }
 
-  @org.junit.Test
+  @Test
   public void run() throws Exception {
     try {
       stompChannel.open(null);
 
       result = null;
       pingasync();
-      Assert.assertEquals("pong", result);
+      assertEquals("pong", result);
 
       result = null;
       ping(null);
-      Assert.assertEquals("pong", result);
+      assertEquals("pong", result);
 
     } finally {
       stompChannel.close(null);

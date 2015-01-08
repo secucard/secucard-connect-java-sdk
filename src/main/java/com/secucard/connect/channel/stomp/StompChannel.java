@@ -57,8 +57,8 @@ public class StompChannel extends StompChannelBase {
   public synchronized void close(Callback callback) {
     if (connected) {
       try {
-        stompSupport.close();
-        onCompleted(callback, null);
+        String id = stompSupport.close();
+        awaitReceipt(id, callback);
       } catch (Exception e) {
         if (callback == null) {
           throw e;
@@ -85,8 +85,13 @@ public class StompChannel extends StompChannelBase {
       adaptor = new CallbackAdapter<>(callback, converter);
     }
 
-    Result result = sendMessage(new StandardDestination(command), null,
-        new MessageTypeRef(Result.class), adaptor, false);
+    StandardDestination destination = new StandardDestination(command) {
+      @Override
+      public String toString() {
+        return getBasicDestination() + command;
+      }
+    };
+    Result result = sendMessage(destination, null, new MessageTypeRef(Result.class), adaptor, false);
 
     return converter.convert(result);
   }

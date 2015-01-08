@@ -17,6 +17,13 @@ public interface Channel {
 
   void setEventListener(EventListener listener);
 
+  /**
+   * Invoking arbitrary commands and returning the response without any conversion as plain string.
+   *
+   * @param command  The command.
+   * @param callback Callback for asynchronous response and error handling.
+   * @return The response message if no callback is used, else null.
+   */
   String invoke(String command, Callback<String> callback);
 
   <T> T getObject(Class<T> type, String objectId, Callback<T> callback);

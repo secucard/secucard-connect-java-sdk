@@ -299,14 +299,15 @@ public abstract class StompChannelBase extends AbstractChannel {
     if (callback == null) {
       awaitReceipt(receipt, null);
       final String answer = awaitAnswer(corrId, null);
+      Message<T> msg;
       try {
-        Message<T> msg = objectMapper.map(answer, returnType);
-        if (msg != null) {
-          statusHandler.check(msg);
-          result = msg.getData();
-        }
+        msg = objectMapper.map(answer, returnType);
       } catch (Exception e) {
         throw new SecuException("Error reading response message.", e);
+      }
+      if (msg != null) {
+        statusHandler.check(msg);
+        result = msg.getData();
       }
     } else {
       new AsyncExecution() {
@@ -318,7 +319,8 @@ public abstract class StompChannelBase extends AbstractChannel {
               // get answer here, no need for async call since this executed in another thread anyway
               T data;
               try {
-                Message<T> msg = objectMapper.map(awaitAnswer(corrId, null), returnType);
+                String answer = awaitAnswer(corrId, null);
+                Message<T> msg = objectMapper.map(answer, returnType);
                 statusHandler.check(msg);
                 data = msg.getData();
               } catch (Exception e) {
@@ -456,6 +458,7 @@ public abstract class StompChannelBase extends AbstractChannel {
     }
   }
 
+
   protected class StandardDestination {
     static final String GET = "get:";
     static final String UPDATE = "update:";
@@ -485,7 +488,7 @@ public abstract class StompChannelBase extends AbstractChannel {
     }
 
     public String toString() {
-      String dest = configuration.getBasicDestination() + DEST_PREFIX;
+      String dest = getBasicDestination() + DEST_PREFIX;
 
       dest += command;
 
@@ -499,6 +502,10 @@ public abstract class StompChannelBase extends AbstractChannel {
 
       return dest;
     }
+
+    protected String getBasicDestination() {
+      return configuration.getBasicDestination();
+    }
   }
 
   protected class AppDestination extends StandardDestination {
@@ -511,7 +518,7 @@ public abstract class StompChannelBase extends AbstractChannel {
     }
 
     public String toString() {
-      return configuration.getBasicDestination() + DEST_PREFIX + method;
+      return getBasicDestination() + DEST_PREFIX + method;
     }
   }
 }

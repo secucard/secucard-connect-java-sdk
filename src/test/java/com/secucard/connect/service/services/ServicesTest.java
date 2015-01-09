@@ -1,11 +1,9 @@
 package com.secucard.connect.service.services;
 
-import com.secucard.connect.Client;
-import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
-import org.junit.Before;
+import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
@@ -16,17 +14,10 @@ import java.util.Locale;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class ServicesTest {
-  private Client client;
-
-  @Before
-  public void before() throws Exception {
-    ClientConfiguration cfg = ClientConfiguration.fromProperties("config.properties");
-    client = Client.create("test", cfg);
-  }
+public class ServicesTest extends AbstractServicesTest {
 
   @Test
-  public void run() throws Exception {
+  public void test() throws Exception {
     testGetIdentRequest();
     testGetIdentResult();
 //    testIdent();
@@ -48,7 +39,7 @@ public class ServicesTest {
     }
   }
 
-  private void testGetIdentResult() {
+  private void testGetIdentResult() throws Exception {
     ServicesService service = client.getService(ServicesService.class);
     client.connect();
 

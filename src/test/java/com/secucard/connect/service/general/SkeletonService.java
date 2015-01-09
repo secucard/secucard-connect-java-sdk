@@ -8,7 +8,11 @@ import com.secucard.connect.service.AbstractService;
 
 import java.util.List;
 
-public class GeneralService extends AbstractService {
+/**
+ * This service is for testing purposes only.
+ * Skeleton is not a valid secucard resource it exist just for testing and playing around.
+ */
+public class SkeletonService extends AbstractService {
 
   public Skeleton getSkeleton(final String id, final Callback<Skeleton> callback) {
     return new Invoker<Skeleton>() {

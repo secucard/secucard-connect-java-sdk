@@ -20,7 +20,7 @@ public class AbstractServicesTest {
     client = Client.create("test", clientConfiguration);
   }
 
-  private static void initLogging() {
+  public static void initLogging() {
     String path = AbstractServicesTest.class.getClassLoader().getResource("logging.properties").getPath();
     System.setProperty("java.util.logging.config.file", path);
   }

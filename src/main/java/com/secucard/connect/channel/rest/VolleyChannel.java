@@ -184,7 +184,10 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
 
   @Override
   public Token getToken() {
-    String device = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    String device = configuration.getDeviceId();
+    if (device == null) {
+      device = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
 
     String accessToken = (String) (storage.get("accessToken" + id));
     String refreshToken = (String) (storage.get("refreshToken" + id));

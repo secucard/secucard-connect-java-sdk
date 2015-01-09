@@ -22,6 +22,7 @@ public class Configuration {
     if (user != null && pwd != null) {
       this.userCredentials = new OAuthUserCredentials(user, pwd);
     }
+    this.deviceId = deviceId;
   }
 
   public String getDeviceId() {

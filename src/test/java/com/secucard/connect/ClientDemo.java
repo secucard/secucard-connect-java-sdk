@@ -4,7 +4,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.model.transport.QueryParams;
-import com.secucard.connect.service.general.GeneralService;
+import com.secucard.connect.service.general.SkeletonService;
 import com.secucard.connect.service.smart.DeviceService;
 import com.secucard.connect.service.smart.IdentService;
 import com.secucard.connect.service.smart.TransactionService;
@@ -53,13 +53,13 @@ public class ClientDemo {
 
     // simple retrieval ------------------------------------------------------------------------------------------------
 
-    final GeneralService generalService = client.getService(GeneralService.class);
+    final SkeletonService skeletonService = client.getService(SkeletonService.class);
 
     // get skeleton, without/with callback
-    Skeleton skeleton = generalService.getSkeleton("skl_60", null);
+    Skeleton skeleton = skeletonService.getSkeleton("skl_60", null);
     System.out.println("got skeleton: " + skeleton);
 
-    skeleton = generalService.getSkeleton("skl_60", new Callback<Skeleton>() {
+    skeleton = skeletonService.getSkeleton("skl_60", new Callback<Skeleton>() {
       @Override
       public void completed(Skeleton result) {
         System.out.println("got skeleton: " + result);
@@ -80,7 +80,7 @@ public class ClientDemo {
     queryParams.addSortOrder("a", QueryParams.SORT_ASC);
     queryParams.addSortOrder("b", QueryParams.SORT_DESC);
     queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
-    List<Skeleton> skeletons = generalService.getSkeletons(null, new Callback<List<Skeleton>>() {
+    List<Skeleton> skeletons = skeletonService.getSkeletons(null, new Callback<List<Skeleton>>() {
       @Override
       public void completed(List<Skeleton> result) {
         System.out.println("got skeletons: " + result);

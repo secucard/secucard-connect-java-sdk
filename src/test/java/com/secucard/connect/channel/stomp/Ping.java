@@ -1,15 +1,14 @@
-package com.secucard.connect;
+package com.secucard.connect.channel.stomp;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Before;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeNoException;
 
-public class StompPing extends AbstractServicesTest {
+public class Ping extends AbstractServicesTest {
   private StompChannel stompChannel;
 
   @Before

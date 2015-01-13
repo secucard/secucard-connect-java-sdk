@@ -24,7 +24,7 @@ public class ServicesTest extends AbstractServicesTest {
   }
 
   private void testGetIdentRequest() throws Exception {
-    ServicesService service = client.getService(ServicesService.class);
+    IdentService service = client.getService(IdentService.class);
     client.connect();
 
     try {
@@ -40,7 +40,7 @@ public class ServicesTest extends AbstractServicesTest {
   }
 
   private void testGetIdentResult() throws Exception {
-    ServicesService service = client.getService(ServicesService.class);
+    IdentService service = client.getService(IdentService.class);
     client.connect();
 
     try {
@@ -57,7 +57,7 @@ public class ServicesTest extends AbstractServicesTest {
   }
 
   private void testIdent() throws Exception {
-    ServicesService service = client.getService(ServicesService.class);
+    IdentService service = client.getService(IdentService.class);
     client.connect();
 
     try {

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Provides acces to the secucard services resources and operations.
  */
-public class ServicesService extends AbstractService {
+public class IdentService extends AbstractService {
 
   /**
    * Returns a list of ident request objects according to the given query parameters.

@@ -109,13 +109,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.secucard.connect.model</groupId>
-            <artifactId>secucard-java-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
             <version>2.13</version>

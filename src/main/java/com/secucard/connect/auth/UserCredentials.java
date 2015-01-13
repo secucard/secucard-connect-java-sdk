@@ -6,7 +6,7 @@ package com.secucard.connect.auth;
 /**
  * Password credentials used for authorization
  */
-public class OAuthUserCredentials {
+public class UserCredentials {
     private final String username;
     private final String password;
 
@@ -16,7 +16,7 @@ public class OAuthUserCredentials {
      * @param username
      * @param password
      */
-    public OAuthUserCredentials(String username, String password) {
+    public UserCredentials(String username, String password) {
         super();
         this.username = username;
         this.password = password;

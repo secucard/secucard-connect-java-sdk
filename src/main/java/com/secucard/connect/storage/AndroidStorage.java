@@ -1,7 +1,11 @@
 package com.secucard.connect.storage;
 
 import android.content.SharedPreferences;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
+import com.secucard.connect.channel.JsonMapper;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -9,6 +13,8 @@ import java.util.Map;
  * todo: must be tested.
  */
 public class AndroidStorage extends DataStorage {
+  public static final String PREFIX = "#convertedbyme#";
+  private JsonMapper jsonMapper = new JsonMapper();
     private final SharedPreferences sharedPreferences;
 
     public AndroidStorage(SharedPreferences sharedPreferences) {
@@ -35,15 +41,35 @@ public class AndroidStorage extends DataStorage {
         } else if (object instanceof Boolean) {
             editor.putBoolean(id, (Boolean) object);
         } else {
-            throw new UnsupportedOperationException("not implemented yet");
+          // convert to string
+          String str;
+          try {
+            str = PREFIX + object.getClass().getCanonicalName() + ":" +jsonMapper.map(object);
+          } catch (IOException e) {
+            throw new DataStorageException("Error mapping object to JSON", e);
+          }
+          save(id, str, replace);
         }
         editor.apply();
     }
 
     @Override
     public Object get(String id) {
-        Map<String, ?> all = sharedPreferences.getAll();
-        return all.get(id);
+      Map<String, ?> all = sharedPreferences.getAll();
+      Object o = all.get(id);
+      if (o instanceof String ){
+        String str = (String) o;
+        if (str.contains(PREFIX)) {
+          int idx = str.indexOf(":");
+          String cname = str.substring(PREFIX.length(), idx);
+          try {
+            return jsonMapper.map(str.substring(idx), Class.forName(cname));
+          } catch (IOException | ClassNotFoundException e) {
+            throw new DataStorageException("Error mapping JSON to object.", e);
+          }
+        }
+      }
+      return o;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.secucard.connect.service;
 import com.secucard.connect.Callback;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.ExceptionHandler;
+import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
@@ -28,6 +29,10 @@ public abstract class AbstractService {
 
   protected Channel getRestChannel() {
     return context.getRestChannel();
+  }
+
+  protected AuthProvider getAuthProvider() {
+    return context.getAuthProvider();
   }
 
   protected void handleException(Throwable exception, Callback callback) {

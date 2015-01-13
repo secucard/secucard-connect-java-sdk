@@ -1,5 +1,6 @@
 package com.secucard.connect;
 
+import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.storage.DataStorage;
 
@@ -7,6 +8,7 @@ public class ClientContext {
   private DataStorage dataStorage;
   private Channel restChannel;
   private Channel stompChannel;
+  private AuthProvider authProvider;
   private ClientConfiguration config;
   public static final String STOMP = "stomp";
   public static final String REST = "rest";
@@ -79,6 +81,14 @@ public class ClientContext {
       return restChannel;
     }
     return null;
+  }
+
+  public AuthProvider getAuthProvider() {
+    return authProvider;
+  }
+
+  public void setAuthProvider(AuthProvider authProvider) {
+    this.authProvider = authProvider;
   }
 }
 

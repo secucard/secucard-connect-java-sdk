@@ -2,7 +2,8 @@ package com.secucard.connect;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.secucard.connect.auth.OAuthUserCredentials;
+import com.secucard.connect.auth.ClientCredentials;
+import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.channel.stomp.Configuration;
 
 import java.io.FileInputStream;
@@ -22,6 +23,12 @@ public class ClientConfiguration {
   private boolean stompEnabled;
   private String storagePath;
   private String serviceFactory;
+  private int authWaitTimeoutSec;
+  private String oauthUrl;
+  private ClientCredentials clientCredentials;
+  private UserCredentials userCredentials;
+  private String deviceId;
+  private String authType;
 
   private ClientConfiguration(Properties properties) {
     try {
@@ -42,6 +49,11 @@ public class ClientConfiguration {
     heartBeatSec = Integer.valueOf(cfg.getProperty("heartBeatSec"));
     storagePath = cfg.getProperty("storagePath");
     serviceFactory = cfg.getProperty("serviceFactory");
+    authWaitTimeoutSec = Integer.valueOf(cfg.getProperty("auth.waitTimeoutSec"));
+    oauthUrl = cfg.getProperty("auth.oauthUrl");
+    clientCredentials = new ClientCredentials(cfg.getProperty("auth.clientId"), cfg.getProperty("auth.clientSecret"));
+    deviceId = cfg.getProperty("device");
+    authType = cfg.getProperty("auth.type");
 
     stompConfiguration = new Configuration(
         cfg.getProperty("stomp.host"),
@@ -59,15 +71,11 @@ public class ClientConfiguration {
         1000 * heartBeatSec);
 
     restConfiguration = new com.secucard.connect.channel.rest.Configuration(
-        cfg.getProperty("rest.url"),
-        cfg.getProperty("oauthUrl"),
-        cfg.getProperty("clientId"),
-        cfg.getProperty("clientSecret"),
-        cfg.getProperty("device"));
+        cfg.getProperty("rest.url"));
   }
 
-  public void setUserCredentials(OAuthUserCredentials userCredentials) {
-    restConfiguration.setUserCredentials(userCredentials);
+  public void setUserCredentials(UserCredentials userCredentials) {
+    this.userCredentials = userCredentials;
   }
 
   /**
@@ -146,5 +154,29 @@ public class ClientConfiguration {
 
   public String getServiceFactory() {
     return serviceFactory;
+  }
+
+  public int getAuthWaitTimeoutSec() {
+    return authWaitTimeoutSec;
+  }
+
+  public String getOauthUrl() {
+    return oauthUrl;
+  }
+
+  public ClientCredentials getClientCredentials() {
+    return clientCredentials;
+  }
+
+  public UserCredentials getUserCredentials() {
+    return userCredentials;
+  }
+
+  public String getDeviceId() {
+    return deviceId;
+  }
+
+  public String getAuthType() {
+    return authType;
   }
 }

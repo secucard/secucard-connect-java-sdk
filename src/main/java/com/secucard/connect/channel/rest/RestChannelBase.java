@@ -1,7 +1,6 @@
 package com.secucard.connect.channel.rest;
 
-import com.secucard.connect.auth.OAuthClientCredentials;
-import com.secucard.connect.auth.OAuthUserCredentials;
+import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.event.EventListener;
@@ -18,47 +17,22 @@ import java.util.Map;
 
 public abstract class RestChannelBase extends AbstractChannel {
   protected final Configuration configuration;
-  protected UserAgentProvider userAgentProvider = new UserAgentProvider();
   protected JsonMapper jsonMapper = new JsonMapper();
-  protected DataStorage storage;
   protected String id;
+  protected AuthProvider authProvider;
 
   public RestChannelBase(Configuration configuration, String id) {
     this.configuration = configuration;
     this.id = id;
   }
 
-  protected Map<String, String> createAuthParams(OAuthClientCredentials clientCredentials,
-                                                 OAuthUserCredentials userCredentials, String refreshToken,
-                                                 String deviceId) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("client_id", clientCredentials.getClientId());
-    parameters.put("client_secret", clientCredentials.getClientSecret());
-    if (refreshToken != null) {
-      parameters.put("grant_type", "refresh_token");
-      parameters.put("refresh_token", refreshToken);
-    } else if (userCredentials != null) {
-      parameters.put("grant_type", "appuser");
-      parameters.put("username", userCredentials.getUsername());
-      parameters.put("password", userCredentials.getPassword());
-    } else {
-      parameters.put("grant_type", "client_credentials");
-    }
-
-    if (deviceId != null) {
-      parameters.put("device", deviceId);
-    }
-
-    return parameters;
-  }
-
-  public void setStorage(DataStorage storage) {
-    this.storage = storage;
-  }
-
   @Override
   public void setEventListener(EventListener listener) {
     throw new UnsupportedOperationException("Rest channel doesn't support listener.");
+  }
+
+  public void setAuthProvider(AuthProvider authProvider) {
+    this.authProvider = authProvider;
   }
 
   protected Map<String, String> queryParamsToMap(QueryParams queryParams) {
@@ -156,4 +130,10 @@ public abstract class RestChannelBase extends AbstractChannel {
       throw new RuntimeException("Encoding not supported: " + paramsEncoding, uee);
     }
   }
+
+  /**
+   * Low level rest access for internal usage, posting to a url and get the response back as object.
+   */
+  abstract <T> T post(String url, Map<String, String> parameters, Map<String, String> headers, Class<T> responseType,
+                      Integer... ignoredState);
 }

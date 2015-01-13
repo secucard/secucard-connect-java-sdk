@@ -1,13 +1,13 @@
 package com.secucard.connect;
 
-import com.secucard.connect.auth.OAuthUserCredentials;
+import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
+import com.secucard.connect.util.EventUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -46,7 +46,7 @@ public class Client extends AbstractService implements EventListener {
   }
 
   public void setUserCredentials(String user, String pwd) {
-    context.getConfig().setUserCredentials(new OAuthUserCredentials(user, pwd));
+    context.getConfig().setUserCredentials(new UserCredentials(user, pwd));
   }
 
   /**
@@ -72,19 +72,22 @@ public class Client extends AbstractService implements EventListener {
 
   public void setEventListener(final EventListener eventListener) {
     targetEventListener = eventListener;
+
+    // we use the same listener also for auth event purposes
+    getAuthProvider().registerEventListener(eventListener);
   }
 
   public void removeEventListener() {
     targetEventListener = null;
+    getAuthProvider().registerEventListener(null);
   }
 
   public void connect() {
     try {
-      // first rest since it does auth
-      getRestChannel().open(null);
+      getRestChannel().open(null); // init rest first since it does auth,
       getStompChannel().open(null);
       startHeartBeat();
-    } catch (IOException e) {
+    } catch (Exception e) {
       handleException(e, null);
     }
   }
@@ -108,9 +111,7 @@ public class Client extends AbstractService implements EventListener {
   @Override
   public void onEvent(Object event) {
     handleEvent(event);
-    if (targetEventListener != null) {
-      targetEventListener.onEvent(event);
-    }
+    EventUtil.fireEvent(event, targetEventListener);
   }
 
   private void startHeartBeat() {

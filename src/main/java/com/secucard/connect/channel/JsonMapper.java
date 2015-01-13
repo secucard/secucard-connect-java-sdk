@@ -26,7 +26,23 @@ public class JsonMapper {
     return result;
   }
 
-  public String map(Object object) throws IOException{
+  @SuppressWarnings({"unchecked"})
+  public <T> T map(String json, Class<T> type) throws IOException {
+    if (json == null) {
+      return null;
+    }
+
+    T result;
+    if (String.class.equals(type)) {
+      result = (T) json.trim();
+    } else {
+      result = objectMapper.readValue(json, type);
+    }
+
+    return result;
+  }
+
+  public String map(Object object) throws IOException {
     return objectMapper.writeValueAsString(object);
   }
 }

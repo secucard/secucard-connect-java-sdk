@@ -4,19 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
-import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.auth.OAuthClientCredentials;
-import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
@@ -24,14 +19,14 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-public class RestChannel extends RestChannelBase implements AuthProvider {
+public class RestChannel extends RestChannelBase {
   protected javax.ws.rs.client.Client restClient;
   protected LoginFilter loginFilter;
   private final boolean secure = true;
 
   public RestChannel(String id, Configuration cfg) {
     super(cfg, id);
-    loginFilter = new LoginFilter(this);
+    loginFilter = new LoginFilter(authProvider);
   }
 
   @Override
@@ -58,30 +53,14 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
   }
 
   @Override
-  public synchronized Token getToken() {
-    Token token = (Token) storage.get("token" + id);
-    Long expireTime = (Long) storage.get("expireTime" + id);
-    if (token == null) {
-      token = createToken(configuration.getClientCredentials(), configuration.getUserCredentials(), null,
-          configuration.getDeviceId());
-    } else if (expireTime != null && expireTime < System.currentTimeMillis() - 30 * 1000) {
-      token = createToken(configuration.getClientCredentials(), null, token.getRefreshToken(), null);
+  <T> T post(String url, Map<String, String> parameters, Map<String, String> headers, Class<T> responseType,
+             Integer... ignoredState) {
+    Invocation.Builder builder = restClient.target(url).request(MediaType.APPLICATION_FORM_URLENCODED);
+    if (headers != null) {
+      builder.headers(new MultivaluedHashMap<String, Object>(headers));
     }
-    expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
-    storage.save("token" + id, token);
-    storage.save("expireTime" + id, expireTime);
-    return token;
-  }
-
-  private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
-                            String refreshToken, String deviceid) {
-    Map<String, String> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, deviceid);
-
-    Invocation.Builder builder = restClient.target(configuration.getOauthUrl()).request(MediaType.APPLICATION_FORM_URLENCODED);
-    builder.header(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
     Invocation invocation = builder.buildPost(Entity.form(new MultivaluedHashMap<>(parameters)));
-
-    return getResponse(invocation, new DynamicTypeReference(Token.class), null);
+    return getResponse(invocation, new DynamicTypeReference(responseType), null, ignoredState);
   }
 
   @Override
@@ -245,7 +224,7 @@ public class RestChannel extends RestChannelBase implements AuthProvider {
 
   private <T> T readEntity(Response response, TypeReference entityType, Integer... ignoredStatus) throws IOException {
     for (Integer st : ignoredStatus) {
-      if (response.getStatus() == st) {
+      if (st != null && response.getStatus() == st) {
         // ignore exception and return null
         return null;
       }

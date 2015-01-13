@@ -2,10 +2,14 @@ package com.secucard.connect.channel.rest;
 
 import android.app.Application;
 import com.secucard.connect.Callback;
-import com.secucard.connect.auth.OAuthUserCredentials;
+import com.secucard.connect.Client;
+import com.secucard.connect.ClientConfiguration;
+import com.secucard.connect.auth.AuthProvider;
+import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.AbstractServicesTest;
+import com.secucard.connect.service.TestService;
 import com.secucard.connect.storage.MemoryDataStorage;
 import junit.framework.Assert;
 import org.junit.Assume;
@@ -22,29 +26,30 @@ public class VolleyTest extends AbstractServicesTest {
 
   @Before
   public void before() throws Exception {
-    super.before();
     Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
     Robolectric.getFakeHttpLayer().interceptResponseContent(false);
 
+    initLogging();
+
+    clientConfiguration = ClientConfiguration.fromProperties("volley-config.properties");
+    clientConfiguration.setUserCredentials(new UserCredentials("checkout@secucard.com", "checkout"));
+    client = Client.create("test", clientConfiguration, new Application());
+    context = client.getService(TestService.class).getContext();
+
     Configuration configuration = clientConfiguration.getRestConfiguration();
 
-    configuration = addProxy(configuration);
-
-    configuration.setUserCredentials(new OAuthUserCredentials("checkout@secucard.com", "checkout"));
-    configuration.setDeviceId("1");
-
+    channel = (VolleyChannel) context.getRestChannel();
     channel = new VolleyChannel("", new Application(), configuration);
-    channel.setStorage(new MemoryDataStorage());
+    OAuthProvider authProvider = (OAuthProvider) context.getAuthProvider();
+    authProvider.setRestChannel(channel);
+    channel.setAuthProvider(authProvider);
   }
 
 
   private Configuration addProxy(Configuration configuration) {
     // replace original host with intercepting proxy
     String host = "http://localhost:4444/";
-    configuration = new Configuration(
-        host + configuration.getBaseUrl().split("/", 4)[3], host + configuration.getOauthUrl().split("/", 4)[3],
-        configuration.getClientCredentials().getClientId(), configuration.getClientCredentials().getClientSecret(),
-        configuration.getDeviceId());
+    configuration = new Configuration(host + configuration.getBaseUrl().split("/", 4)[3]);
     return configuration;
   }
 
@@ -86,6 +91,4 @@ public class VolleyTest extends AbstractServicesTest {
       channel.close(null);
     }
   }
-
-
 }

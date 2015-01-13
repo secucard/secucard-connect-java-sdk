@@ -2,6 +2,7 @@ package com.secucard.connect.service;
 
 import com.secucard.connect.Client;
 import com.secucard.connect.ClientConfiguration;
+import com.secucard.connect.ClientContext;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import org.junit.Test;
 public class AbstractServicesTest {
   protected Client client;
   protected ClientConfiguration clientConfiguration;
+  protected ClientContext context;
 
   @Before
   public void before() throws Exception {
@@ -17,7 +19,9 @@ public class AbstractServicesTest {
     // todo: enable changing default channel programmatically in config to test other channels
     clientConfiguration = ClientConfiguration.fromProperties("config.properties");
 
-    client = Client.create("test", clientConfiguration);
+    client = Client.create("test", clientConfiguration, null);
+
+    context = client.getService(TestService.class).getContext();
   }
 
   public static void initLogging() {

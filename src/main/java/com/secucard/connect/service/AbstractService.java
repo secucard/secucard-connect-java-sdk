@@ -20,11 +20,19 @@ public abstract class AbstractService {
   }
 
   protected Channel getChannel() {
-    return context.getChannnel(context.getConfig().getDefaultChannel());
+    String name = context.getConfig().getDefaultChannel();
+    if (ClientContext.STOMP.equals(name) && !context.getConfig().isStompEnabled()) {
+      return null; // should not happen
+    }
+    return context.getChannnel(name);
   }
 
   protected Channel getStompChannel() {
-    return context.getStompChannel();
+    if (context.getConfig().isStompEnabled()) {
+      return context.getStompChannel();
+    } else {
+      return null;
+    }
   }
 
   protected Channel getRestChannel() {

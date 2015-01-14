@@ -85,16 +85,20 @@ public class Client extends AbstractService implements EventListener {
   public void connect() {
     try {
       getRestChannel().open(null); // init rest first since it does auth,
-      getStompChannel().open(null);
-      startHeartBeat();
+      if (context.getConfig().isStompEnabled()) {
+        getStompChannel().open(null);
+        startHeartBeat();
+      }
     } catch (Exception e) {
       handleException(e, null);
     }
   }
 
   public void disconnect() {
-    stopHeartBeat();
-    getStompChannel().close(null);
+    if (context.getConfig().isStompEnabled()) {
+      stopHeartBeat();
+      getStompChannel().close(null);
+    }
     getRestChannel().close(null);
     // todo: clear data store?
   }
@@ -184,7 +188,9 @@ public class Client extends AbstractService implements EventListener {
     serviceFactory.init(context);
     isConnected = false;
 
-    getStompChannel().setEventListener(this);
+    if (config.isStompEnabled()) {
+      getStompChannel().setEventListener(this);
+    }
 
     // bubble up ex. for now todo: forward to handler
     setExceptionHandler(new ThrowingExceptionHandler());

@@ -54,6 +54,25 @@ public class IdentService extends AbstractService {
     }.invoke(callback);
   }
 
+  public IdentResult getIdentResultByRequestId(final String identRequestId, Callback<IdentResult> callback) {
+    return new ConvertingInvoker<ObjectList<IdentResult>, IdentResult>() {
+      @Override
+      protected ObjectList<IdentResult> handle(Callback<ObjectList<IdentResult>> callback) {
+        QueryParams params = new QueryParams();
+        params.setQuery("request.id:" + identRequestId);
+        return getChannel().findObjects(IdentResult.class, params, callback);
+      }
+
+      @Override
+      protected IdentResult convert(ObjectList<IdentResult> object) {
+        if (object == null || object.getList() == null || object.getList().size() == 0) {
+          return null;
+        }
+        return object.getList().get(0);
+      }
+    }.invokeAndConvert(callback);
+  }
+
 
   /**
    * Creates a new ident request.

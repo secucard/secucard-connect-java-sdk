@@ -1,21 +1,30 @@
 package com.secucard.connect;
 
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.services.IdentRequest;
+import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
 import com.secucard.connect.service.services.IdentService;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
-
-import static org.junit.Assert.assertEquals;
 
 public class IdentsDemo {
   public static void main(String[] args) throws Exception {
 
     // todo: explain necessary settings in config
 
-    final ClientConfiguration cfg = ClientConfiguration.fromProperties("identdemo-config.properties");
+    final ClientConfiguration cfg = ClientConfiguration.fromProperties("config-identdemo.properties");
     final Client client = Client.create("identdemo", cfg);
+
+    // setting any instance as a receiver for events the client produces, optional for this use case
+    client.setEventListener(new EventListener() {
+      @Override
+      public void onEvent(Object event) {
+        System.out.println("Got event: " + event);
+      }
+    });
 
     IdentService service = client.getService(IdentService.class);
     // or alternatively
@@ -25,10 +34,13 @@ public class IdentsDemo {
     client.connect();
 
     try {
-      IdentRequest identRequest = new IdentRequest();
-      identRequest.setType(IdentRequest.TYPE_PERSON);
+
+      // creating a request,
+      // if successfully the new ident request is returned otherwise a exception is thrown
+
+      IdentRequest request = new IdentRequest();
       String transactionId = "TX" + System.currentTimeMillis();
-      identRequest.setOwnerTransactionId(transactionId);
+
       Person p = new Person();
       p.setOwnerTransactionId(transactionId);
       p.setFirstname("Hans");
@@ -40,11 +52,32 @@ public class IdentsDemo {
       p.setCountry(Locale.GERMANY);
       p.setStreet("Platz der Republik 1");
       p.setBirthdate(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1951"));
-      identRequest.addPerson(p);
-      identRequest = service.createIdentRequest(identRequest, null);
-      assertEquals("Hans", identRequest.getPersons().get(0).getFirstname());
 
-      // todo: complete flow
+      request.setOwnerTransactionId(transactionId);
+      request.setType(IdentRequest.TYPE_PERSON);
+      request.addPerson(p);
+
+      IdentRequest newRequest = service.createIdentRequest(request, null);
+
+
+      // retrieving a single request
+
+      request = service.getIdentRequest(newRequest.getId(), null);
+
+
+
+      // retrieving the results of a specific ident request
+      // returns null if nothing available, throws an exception if a error occurs
+
+      IdentResult result = service.getIdentResultByRequestId(newRequest.getId(), null);
+
+
+
+      // or getting all results (and selecting manually)
+      // no query param is used so no filtering applies to the result
+
+      List<IdentResult> results = service.getIdentResults(null, null);
+      // iterate over results ...
 
 
     } finally {

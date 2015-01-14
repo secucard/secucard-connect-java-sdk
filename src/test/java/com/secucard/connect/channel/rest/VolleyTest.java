@@ -4,13 +4,11 @@ import android.app.Application;
 import com.secucard.connect.Callback;
 import com.secucard.connect.Client;
 import com.secucard.connect.ClientConfiguration;
-import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.AbstractServicesTest;
 import com.secucard.connect.service.TestService;
-import com.secucard.connect.storage.MemoryDataStorage;
 import junit.framework.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -31,7 +29,7 @@ public class VolleyTest extends AbstractServicesTest {
 
     initLogging();
 
-    clientConfiguration = ClientConfiguration.fromProperties("volley-config.properties");
+    clientConfiguration = ClientConfiguration.fromProperties("config-volley.properties");
     clientConfiguration.setUserCredentials(new UserCredentials("checkout@secucard.com", "checkout"));
     client = Client.create("test", clientConfiguration, new Application());
     context = client.getService(TestService.class).getContext();

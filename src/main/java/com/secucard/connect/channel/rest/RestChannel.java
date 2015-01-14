@@ -22,7 +22,7 @@ import java.util.concurrent.Future;
 public class RestChannel extends RestChannelBase {
   protected javax.ws.rs.client.Client restClient;
   protected LoginFilter loginFilter;
-  private final boolean secure = true;
+  private final boolean secure = false; // todo: just for now, set to true
 
   public RestChannel(String id, Configuration cfg) {
     super(cfg, id);

@@ -6,6 +6,7 @@ public class Value {
 
   private String value;
   private String status;
+  private String original;
 
   public Value() {
   }
@@ -13,6 +14,14 @@ public class Value {
   public Value(String value, String status) {
     this.value = value;
     this.status = status;
+  }
+
+  public String getOriginal() {
+    return original;
+  }
+
+  public void setOriginal(String original) {
+    this.original = original;
   }
 
   public String getValue() {
@@ -36,6 +45,7 @@ public class Value {
     return "Value{" +
         "value='" + value + '\'' +
         ", status='" + status + '\'' +
+        ", original='" + original + '\'' +
         '}';
   }
 }

@@ -26,7 +26,7 @@ public class IdentService extends AbstractService {
     return new ConvertingInvoker<ObjectList<IdentRequest>, List<IdentRequest>>() {
       @Override
       protected ObjectList<IdentRequest> handle(Callback<ObjectList<IdentRequest>> callback) {
-        return getRestChannel().findObjects(IdentRequest.class, queryParams, callback);
+        return getChannel().findObjects(IdentRequest.class, queryParams, callback);
       }
 
       @Override
@@ -104,7 +104,7 @@ public class IdentService extends AbstractService {
     return new ConvertingInvoker<ObjectList<IdentResult>, List<IdentResult>>() {
       @Override
       protected ObjectList<IdentResult> handle(Callback<ObjectList<IdentResult>> callback) {
-        return getRestChannel().findObjects(IdentResult.class, queryParams, callback);
+        return getChannel().findObjects(IdentResult.class, queryParams, callback);
       }
 
       @Override

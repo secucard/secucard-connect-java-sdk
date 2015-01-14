@@ -13,8 +13,6 @@ import java.util.Locale;
 public class IdentsDemo {
   public static void main(String[] args) throws Exception {
 
-    // todo: explain necessary settings in config
-
     final ClientConfiguration cfg = ClientConfiguration.fromProperties("config-identdemo.properties");
     final Client client = Client.create("identdemo", cfg);
 
@@ -58,18 +56,19 @@ public class IdentsDemo {
       request.addPerson(p);
 
       IdentRequest newRequest = service.createIdentRequest(request, null);
+      String id = newRequest.getId();
 
 
       // retrieving a single request
 
-      request = service.getIdentRequest(newRequest.getId(), null);
+      request = service.getIdentRequest(id, null);
 
 
 
       // retrieving the results of a specific ident request
       // returns null if nothing available, throws an exception if a error occurs
 
-      IdentResult result = service.getIdentResultByRequestId(newRequest.getId(), null);
+      IdentResult result = service.getIdentResultByRequestId(id, null);
 
 
 

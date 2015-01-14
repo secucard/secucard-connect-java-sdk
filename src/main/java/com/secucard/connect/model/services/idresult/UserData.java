@@ -13,6 +13,15 @@ public class UserData {
 
   private Value nationality;
 
+  private Value gender;
+
+  public Value getGender() {
+    return gender;
+  }
+
+  public void setGender(Value gender) {
+    this.gender = gender;
+  }
 
   public Value getBirthday() {
     return birthday;
@@ -71,6 +80,7 @@ public class UserData {
         ", address=" + address +
         ", birthplace=" + birthplace +
         ", nationality=" + nationality +
+        ", gender=" + gender +
         '}';
   }
 }

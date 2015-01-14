@@ -14,7 +14,7 @@ public class QueryParams {
 
   private Integer count;
 
-  private Integer offset = 1;
+  private Integer offset;
 
   @JsonProperty("scroll_id")
   private String scrollId;

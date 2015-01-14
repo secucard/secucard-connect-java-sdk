@@ -14,6 +14,8 @@ public class EventUtil {
   }
 
   public static void fireEvent(Object event, EventListener listener) {
-    listener.onEvent(event);
+    if (listener != null) {
+      listener.onEvent(event);
+    }
   }
 }

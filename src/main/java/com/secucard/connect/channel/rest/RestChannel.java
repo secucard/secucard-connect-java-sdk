@@ -22,15 +22,18 @@ import java.util.concurrent.Future;
 public class RestChannel extends RestChannelBase {
   protected javax.ws.rs.client.Client restClient;
   protected LoginFilter loginFilter;
-  private final boolean secure = false; // todo: just for now, set to true
+  private final boolean secure = true;
 
   public RestChannel(String id, Configuration cfg) {
     super(cfg, id);
-    loginFilter = new LoginFilter(authProvider);
   }
 
   @Override
   public void open(Callback callback) {
+    if (loginFilter == null) {
+       loginFilter = new LoginFilter(authProvider);
+    }
+
     try {
       // rest client should be initialized just one time, client is expensive
       initClient();
@@ -205,7 +208,7 @@ public class RestChannel extends RestChannelBase {
             public void completed(Response response) {
               T result = null;
               try {
-                result = readEntity(response, entityType);
+                result = readEntity(response, entityType, ignoredStatus);
               } catch (Exception e) {
                 failed(e);
                 return;
@@ -236,12 +239,12 @@ public class RestChannel extends RestChannelBase {
 
     T result = null;
     if (entityType != null) {
-      result = readEntity(response, entityType);
+      result = mapEntity(response, entityType);
     }
     return result;
   }
 
-  private <T> T readEntity(Response response, TypeReference entityType) throws IOException {
+  private <T> T mapEntity(Response response, TypeReference entityType) throws IOException {
     return jsonMapper.map(response.readEntity(String.class), entityType);
   }
 
@@ -250,7 +253,7 @@ public class RestChannel extends RestChannelBase {
     if (throwable instanceof WebApplicationException) {
       Response response = ((WebApplicationException) throwable).getResponse();
       try {
-        status = readEntity(response, new TypeReference<Status>() {
+        status = mapEntity(response, new TypeReference<Status>() {
         });
       } catch (Exception e) {
         // treat as no response

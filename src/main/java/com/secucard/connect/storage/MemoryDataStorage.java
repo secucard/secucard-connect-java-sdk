@@ -75,6 +75,10 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
 
   @Override
   public void clear(String id, Long timestampMs) {
+    if (id == null) {
+       return;
+    }
+
     if ("*".equals(id) && timestampMs == null) {
       store.clear();
       return;

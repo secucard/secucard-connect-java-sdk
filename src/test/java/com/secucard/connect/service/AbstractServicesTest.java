@@ -19,7 +19,7 @@ public class AbstractServicesTest {
     // todo: enable changing default channel programmatically in config to test other channels
     clientConfiguration = ClientConfiguration.fromProperties("config.properties");
 
-    client = Client.create("test", clientConfiguration, null);
+    client = Client.create("test", clientConfiguration);
 
     context = client.getService(TestService.class).getContext();
   }

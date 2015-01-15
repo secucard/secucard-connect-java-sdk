@@ -9,6 +9,7 @@ import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.MemoryDataStorage;
+import com.secucard.connect.storage.SimpleFileDataStorage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -53,20 +54,23 @@ public class ServiceFactory {
   protected void setUpContext(ClientContext context) {
     ClientConfiguration config = context.getConfig();
 
-    DataStorage dataStorage;
-    /*try {
-      dataStorage = new SimpleFileDataStorage(config.getStoragePath());
-    } catch (IOException e) {
-      throw new SecuException("Error creating file storage", e);
-    } */
-    dataStorage = new MemoryDataStorage();
-    context.setDataStorage(dataStorage);
+    if (context.getDataStorage() == null) {
+      if (config.getStoragePath() == null) {
+        context.setDataStorage(new MemoryDataStorage());
+      } else {
+        try {
+          context.setDataStorage(new SimpleFileDataStorage(config.getStoragePath()));
+        } catch (IOException e) {
+          throw new SecuException("Error creating file storage: " + config.getStoragePath(), e);
+        }
+      }
+    }
 
     RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
     context.setRestChannel(rc);
 
     OAuthProvider ap = new OAuthProvider(context.getClientId(), config);
-    ap.setDataStorage(dataStorage);
+    ap.setDataStorage(context.getDataStorage());
     ap.setRestChannel(rc);
 
     rc.setAuthProvider(ap);

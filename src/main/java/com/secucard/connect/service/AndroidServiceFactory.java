@@ -38,7 +38,7 @@ public class AndroidServiceFactory extends ServiceFactory {
         return deviceId;
       }
     };
-    ap.setDataStorage(dataStorage);
+    ap.setDataStorage(authStorage);
     ap.setRestChannel(vc);
 
     vc.setAuthProvider(ap);

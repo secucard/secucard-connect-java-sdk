@@ -22,13 +22,17 @@ public class Client extends AbstractService implements EventListener {
   private EventListener targetEventListener = null;
   private boolean stopHeartbeat;
 
-  private Client(final String id, ClientConfiguration configuration, Object runtimeContext) {
-    init(id, configuration, runtimeContext);
+  private Client(final String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
+    init(id, configuration, runtimeContext, storage);
   }
 
 
+  /**
+   * Creating the client using no runtime context and storage.
+   * @see #Client(String, ClientConfiguration, Object, com.secucard.connect.storage.DataStorage)
+   */
   public static Client create(String id, ClientConfiguration configuration) {
-    return new Client(id, configuration, null);
+    return new Client(id, configuration, null, null);
   }
 
   /**
@@ -40,16 +44,17 @@ public class Client extends AbstractService implements EventListener {
    * @param id             A unique id associated with this client.
    * @param configuration  The configuration of the client.
    * @param runtimeContext Any context object needed to create services etc., accessible later on via ClientContext.
+   *                       Mainly intended for Android usage, pass Application context then. Pass null else.
+   * @param storage        The DataStorage implementation the client uses for caching purposes. Passing null causes usage of
+   *                       default internal solutions. While this is ok for Android it should be avoided in other environments.
+   *                       Please provide a proper implementation there, the default is either a memory based solution or a
+   *                       very simple file based solution if the "storagePath" property is set in config file.
    * @return The client instance.
    */
-  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext) {
-    return new Client(id, configuration, runtimeContext);
+  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
+    return new Client(id, configuration, runtimeContext, storage);
   }
 
-  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
-    // todo: pass provided storage
-    return new Client(id, configuration, runtimeContext);
-  }
 
   public void setUserCredentials(String user, String pwd) {
     context.getConfig().setUserCredentials(new UserCredentials(user, pwd));
@@ -171,7 +176,7 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
-  private void init(String id, ClientConfiguration config, Object runtimeContext) {
+  private void init(String id, ClientConfiguration config, Object runtimeContext, DataStorage storage) {
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
@@ -180,6 +185,7 @@ public class Client extends AbstractService implements EventListener {
     context.setConfig(config);
     context.setClientId(id);
     context.setRuntimeContext(runtimeContext);
+    context.setDataStorage(storage);
     String serviceFactoryName = config.getServiceFactory();
     if (StringUtils.isNotBlank(serviceFactoryName)) {
       try {

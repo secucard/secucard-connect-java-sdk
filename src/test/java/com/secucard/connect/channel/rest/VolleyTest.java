@@ -31,7 +31,7 @@ public class VolleyTest extends AbstractServicesTest {
 
     clientConfiguration = ClientConfiguration.fromProperties("config-volley.properties");
     clientConfiguration.setUserCredentials(new UserCredentials("checkout@secucard.com", "checkout"));
-    client = Client.create("test", clientConfiguration, new Application());
+    client = Client.create("test", clientConfiguration, new Application(), null);
     context = client.getService(TestService.class).getContext();
 
     Configuration configuration = clientConfiguration.getRestConfiguration();

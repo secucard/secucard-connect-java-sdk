@@ -144,7 +144,7 @@ public class OAuthProvider implements AuthProvider {
   }
 
   protected void removeToken() {
-    storage.clear(getTokenStoreId());
+    storage.clear(getTokenStoreId(), null);
   }
 
   protected void storeToken(Token token) {

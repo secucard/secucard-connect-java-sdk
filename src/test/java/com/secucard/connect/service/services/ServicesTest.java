@@ -44,11 +44,11 @@ public class ServicesTest extends AbstractServicesTest {
     client.connect();
 
     try {
-      List<IdentResult> identResults = service.getIdentResults(null, null);
+      List<IdentResult> identResults = service.getIdentResults(null, null, false);
       assertTrue(identResults.size() > 0);
 
       String id = identResults.get(0).getId();
-      IdentResult identResult = service.getIdentResult(id, null);
+      IdentResult identResult = service.getIdentResult(id, null, false);
       assertEquals(id, identResult.getId());
 
     } finally {

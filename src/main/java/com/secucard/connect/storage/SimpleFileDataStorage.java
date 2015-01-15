@@ -1,35 +1,45 @@
 package com.secucard.connect.storage;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
- * Saves to file using Java object serialization. Store is a map.
+ * Saves to file using Java object serialization of the memory based storage.
  * Not very efficient - each access reads (and writes) the whole file.
  * Objects to save must implement serializable!
  */
 public class SimpleFileDataStorage extends DataStorage {
   private File file;
-  private Map<String, Object> store;
+  private MemoryDataStorage store;
 
   public SimpleFileDataStorage(String path) throws IOException {
     file = new File(path);
     file.createNewFile(); // just validation
   }
 
+  public Integer size() throws IOException, ClassNotFoundException {
+    readStore();
+    if (store == null) {
+      return null;
+    }
+    return store.size();
+  }
+
+  public boolean remove() {
+    return file.delete();
+  }
+
   @Override
   public synchronized void save(String id, Object object, boolean replace) throws DataStorageException {
+    saveInternal(id, object, replace);
+  }
+
+  private void saveInternal(String id, Object object, boolean replace) {
     try {
       readStore();
       if (store == null) {
-        store = new HashMap<>();
+        store = new MemoryDataStorage();
       }
-      if (!replace && store.containsKey(id)) {
-        return;
-      }
-      store.put(id, object);
+      store.save(id, object, replace);
       writeStore();
     } catch (IOException | ClassNotFoundException e) {
       throw new DataStorageException(e);
@@ -37,8 +47,16 @@ public class SimpleFileDataStorage extends DataStorage {
   }
 
   @Override
-  public synchronized Object get(String id) throws DataStorageException {
+  public void save(String id, InputStream in, boolean replace) throws DataStorageException {
+    saveInternal(id, in, replace);
+  }
 
+  @Override
+  public synchronized Object get(String id) throws DataStorageException {
+    return getInternal(id);
+  }
+
+  private Object getInternal(String id) {
     try {
       readStore();
     } catch (IOException | ClassNotFoundException e) {
@@ -53,8 +71,12 @@ public class SimpleFileDataStorage extends DataStorage {
   }
 
   @Override
-  public synchronized void clear(String id) {
+  public InputStream getStream(String id) {
+    return (InputStream) getInternal(id);
+  }
 
+  @Override
+  public synchronized void clear(String id, Long timestampMs) {
     try {
       readStore();
 
@@ -62,27 +84,8 @@ public class SimpleFileDataStorage extends DataStorage {
         return;
       }
 
-      if (id == null || "*".equals(id)) {
-        if (!file.delete()) {
-          throw new DataStorageException("Cannot delete store");
-        }
-        return;
-      }
-
-      if (id.contains("*")) {
-        Iterator<String> it = store.keySet().iterator();
-
-        while (it.hasNext()) {
-          String key = it.next();
-          if (wildCardMatch(key, id)) {
-            it.remove();
-          }
-        }
-        writeStore();
-      } else {
-        store.remove(id);
-        writeStore();
-      }
+      store.clear(id, timestampMs);
+      writeStore();
 
     } catch (IOException | ClassNotFoundException e) {
       throw new DataStorageException(e);
@@ -100,6 +103,6 @@ public class SimpleFileDataStorage extends DataStorage {
       return;
     }
 
-    store = (Map<String, Object>) new ObjectInputStream(new FileInputStream(file)).readObject();
+    store = (MemoryDataStorage) new ObjectInputStream(new FileInputStream(file)).readObject();
   }
 }

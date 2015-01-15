@@ -1,9 +1,19 @@
 package com.secucard.connect.model.services.idresult;
 
-public class Attachment {
+import com.secucard.connect.model.AbstractMediaResource;
+
+import java.net.MalformedURLException;
+
+public class Attachment extends AbstractMediaResource {
   private String type;
 
-  private String url;
+  public Attachment() {
+  }
+
+  public Attachment(String url, String type) throws MalformedURLException {
+    super(url);
+    this.type = type;
+  }
 
   public String getType() {
     return type;
@@ -13,19 +23,11 @@ public class Attachment {
     this.type = type;
   }
 
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
   @Override
   public String toString() {
     return "Attachment{" +
         "type='" + type + '\'' +
-        ", url='" + url + '\'' +
+        ", url='" + getUrl() + '\'' +
         '}';
   }
 }

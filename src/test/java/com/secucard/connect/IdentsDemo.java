@@ -68,14 +68,14 @@ public class IdentsDemo {
       // retrieving the results of a specific ident request
       // returns null if nothing available, throws an exception if a error occurs
 
-      IdentResult result = service.getIdentResultByRequestId(id, null);
+      IdentResult result = service.getIdentResultByRequestId(id, null, false);
 
 
 
       // or getting all results (and selecting manually)
       // no query param is used so no filtering applies to the result
 
-      List<IdentResult> results = service.getIdentResults(null, null);
+      List<IdentResult> results = service.getIdentResults(null, null, false);
       // iterate over results ...
 
 

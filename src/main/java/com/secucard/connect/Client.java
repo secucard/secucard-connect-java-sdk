@@ -5,6 +5,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
+import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.EventUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,6 +43,11 @@ public class Client extends AbstractService implements EventListener {
    * @return The client instance.
    */
   public static Client create(String id, ClientConfiguration configuration, Object runtimeContext) {
+    return new Client(id, configuration, runtimeContext);
+  }
+
+  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
+    // todo: pass provided storage
     return new Client(id, configuration, runtimeContext);
   }
 

@@ -1,11 +1,10 @@
 package com.secucard.connect.storage;
 
 import android.content.SharedPreferences;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.secucard.connect.channel.JsonMapper;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -53,7 +52,12 @@ public class AndroidStorage extends DataStorage {
         editor.apply();
     }
 
-    @Override
+  @Override
+  public void save(String id, InputStream in, boolean replace) throws DataStorageException {
+    // todo: implement
+  }
+
+  @Override
     public Object get(String id) {
       Map<String, ?> all = sharedPreferences.getAll();
       Object o = all.get(id);
@@ -72,8 +76,15 @@ public class AndroidStorage extends DataStorage {
       return o;
     }
 
-    @Override
-    public void clear(String id) {
+  @Override
+  public InputStream getStream(String id) {
+    // todo: implement
+    return null;
+  }
+
+  @Override
+    public void clear(String id, Long timestampMs) {
+        // todo: support timestamp
         if (id == null || "*".equals(id)) {
             sharedPreferences.edit().clear().apply();
         } else if (id.contains("*")) {

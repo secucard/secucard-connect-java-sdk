@@ -1,13 +1,14 @@
 package com.secucard.connect;
 
-import com.secucard.connect.auth.OAuthUserCredentials;
+import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
+import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.util.EventUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -21,13 +22,17 @@ public class Client extends AbstractService implements EventListener {
   private EventListener targetEventListener = null;
   private boolean stopHeartbeat;
 
-  private Client(final String id, ClientConfiguration configuration, Object runtimeContext) {
-    init(id, configuration, runtimeContext);
+  private Client(final String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
+    init(id, configuration, runtimeContext, storage);
   }
 
 
+  /**
+   * Creating the client using no runtime context and storage.
+   * @see #Client(String, ClientConfiguration, Object, com.secucard.connect.storage.DataStorage)
+   */
   public static Client create(String id, ClientConfiguration configuration) {
-    return new Client(id, configuration, null);
+    return new Client(id, configuration, null, null);
   }
 
   /**
@@ -39,14 +44,20 @@ public class Client extends AbstractService implements EventListener {
    * @param id             A unique id associated with this client.
    * @param configuration  The configuration of the client.
    * @param runtimeContext Any context object needed to create services etc., accessible later on via ClientContext.
+   *                       Mainly intended for Android usage, pass Application context then. Pass null else.
+   * @param storage        The DataStorage implementation the client uses for caching purposes. Passing null causes usage of
+   *                       default internal solutions. While this is ok for Android it should be avoided in other environments.
+   *                       Please provide a proper implementation there, the default is either a memory based solution or a
+   *                       very simple file based solution if the "storagePath" property is set in config file.
    * @return The client instance.
    */
-  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext) {
-    return new Client(id, configuration, runtimeContext);
+  public static Client create(String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
+    return new Client(id, configuration, runtimeContext, storage);
   }
 
+
   public void setUserCredentials(String user, String pwd) {
-    context.getConfig().setUserCredentials(new OAuthUserCredentials(user, pwd));
+    context.getConfig().setUserCredentials(new UserCredentials(user, pwd));
   }
 
   /**
@@ -72,26 +83,33 @@ public class Client extends AbstractService implements EventListener {
 
   public void setEventListener(final EventListener eventListener) {
     targetEventListener = eventListener;
+
+    // we use the same listener also for auth event purposes
+    getAuthProvider().registerEventListener(eventListener);
   }
 
   public void removeEventListener() {
     targetEventListener = null;
+    getAuthProvider().registerEventListener(null);
   }
 
   public void connect() {
     try {
-      // first rest since it does auth
-      getRestChannel().open(null);
-      getStompChannel().open(null);
-      startHeartBeat();
-    } catch (IOException e) {
+      getRestChannel().open(null); // init rest first since it does auth,
+      if (context.getConfig().isStompEnabled()) {
+        getStompChannel().open(null);
+        startHeartBeat();
+      }
+    } catch (Exception e) {
       handleException(e, null);
     }
   }
 
   public void disconnect() {
-    stopHeartBeat();
-    getStompChannel().close(null);
+    if (context.getConfig().isStompEnabled()) {
+      stopHeartBeat();
+      getStompChannel().close(null);
+    }
     getRestChannel().close(null);
     // todo: clear data store?
   }
@@ -108,9 +126,7 @@ public class Client extends AbstractService implements EventListener {
   @Override
   public void onEvent(Object event) {
     handleEvent(event);
-    if (targetEventListener != null) {
-      targetEventListener.onEvent(event);
-    }
+    EventUtil.fireEvent(event, targetEventListener);
   }
 
   private void startHeartBeat() {
@@ -160,7 +176,7 @@ public class Client extends AbstractService implements EventListener {
     }
   }
 
-  private void init(String id, ClientConfiguration config, Object runtimeContext) {
+  private void init(String id, ClientConfiguration config, Object runtimeContext, DataStorage storage) {
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
@@ -169,6 +185,7 @@ public class Client extends AbstractService implements EventListener {
     context.setConfig(config);
     context.setClientId(id);
     context.setRuntimeContext(runtimeContext);
+    context.setDataStorage(storage);
     String serviceFactoryName = config.getServiceFactory();
     if (StringUtils.isNotBlank(serviceFactoryName)) {
       try {
@@ -183,7 +200,9 @@ public class Client extends AbstractService implements EventListener {
     serviceFactory.init(context);
     isConnected = false;
 
-    getStompChannel().setEventListener(this);
+    if (config.isStompEnabled()) {
+      getStompChannel().setEventListener(this);
+    }
 
     // bubble up ex. for now todo: forward to handler
     setExceptionHandler(new ThrowingExceptionHandler());

@@ -1,21 +1,16 @@
 package com.secucard.connect.channel.rest;
 
 import android.content.Context;
-import android.provider.Settings;
 import android.util.Log;
 import com.android.volley.*;
 import com.android.volley.toolbox.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
-import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.auth.OAuthClientCredentials;
-import com.secucard.connect.auth.OAuthUserCredentials;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,7 +20,7 @@ import java.util.Map;
 /**
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
  */
-public class VolleyChannel extends RestChannelBase implements AuthProvider {
+public class VolleyChannel extends RestChannelBase {
   private final boolean secure = true;
   private RequestQueue requestQueue;
   private final android.content.Context context;
@@ -79,7 +74,7 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
     Request<ObjectList<T>> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, secure,
         new DynamicTypeReference(ObjectList.class, type), callback);
     //        request.setTag(url);
-    Log.d("ConnectJavaCleint", "VolleyChannel: findObjects ->" + type);
+    Log.d("ConnectJavaClient", "VolleyChannel: findObjects ->" + type);
     requestQueue.add(request);
     return null;
   }
@@ -182,49 +177,13 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
     return null;
   }
 
+
   @Override
-  public Token getToken() {
-    String device = configuration.getDeviceId();
-    if (device == null) {
-      device = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-    }
-
-    String accessToken = (String) (storage.get("accessToken" + id));
-    String refreshToken = (String) (storage.get("refreshToken" + id));
-    Long expireTime = (Long) storage.get("expireTime" + id);
-    Token token = null;
-    if (StringUtils.isNotBlank(accessToken)) {
-      // assuming if acessToken exist all other items exist too...
-      token = new Token(accessToken, refreshToken);
-    }
-
-    if (token == null) {
-      token = createToken(configuration.getClientCredentials(), configuration.getUserCredentials(), null, device);
-    } else {
-      int expireTimeoutMs = 30 * 1000; // todo move to config
-      if (expireTime != null && expireTime < System.currentTimeMillis() - expireTimeoutMs) {
-        token = createToken(configuration.getClientCredentials(), null, refreshToken, device);
-      }
-    }
-    if (token != null) {
-      expireTime = System.currentTimeMillis() + token.getExpiresIn() * 1000;
-      storage.save("accessToken" + id, token.getAccessToken());
-      if (token.getRefreshToken() != null) {
-        storage.save("refreshToken" + id, token.getRefreshToken());
-      }
-      storage.save("expireTime" + id, expireTime);
-    }
-    return token;
-  }
-
-  private Token createToken(OAuthClientCredentials clientCredentials, OAuthUserCredentials userCredentials,
-                            String refreshToken, String device) {
-    Map<String, String> authParams = createAuthParams(clientCredentials, userCredentials, refreshToken, device);
-
-    RequestFuture<Token> future = RequestFuture.newFuture();
-    String requestBody = encodeQueryParams(authParams);
-    Request<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, configuration.getOauthUrl(), requestBody,
-        new DynamicTypeReference(Token.class), future, future){
+  <T> T post(String url, Map<String, String> parameters, Map<String, String> headers, Class<T> responseType, Integer... ignoredState) {
+    RequestFuture future = RequestFuture.newFuture();
+    String requestBody = encodeQueryParams(parameters);
+    Request<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody,
+        new DynamicTypeReference(responseType.getClass()), future, future){
       @Override
       public String getBodyContentType() {
         return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
@@ -233,7 +192,7 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
     future.setRequest(requestQueue.add(request));
 
     try {
-      return future.get();
+      return (T) future.get();
     } catch (Exception e) {
       e.printStackTrace();
       // todo: just log error
@@ -294,7 +253,7 @@ public class VolleyChannel extends RestChannelBase implements AuthProvider {
       this.typeReference = typeReference;
       if (secure) {
         headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + getToken().getAccessToken());
+        headers.put("Authorization", "Bearer " + authProvider.getToken().getAccessToken());
         // getBodyContentType() handles media type
       }
     }

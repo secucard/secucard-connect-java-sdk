@@ -24,7 +24,7 @@ public class ServicesTest extends AbstractServicesTest {
   }
 
   private void testGetIdentRequest() throws Exception {
-    ServicesService service = client.getService(ServicesService.class);
+    IdentService service = client.getService(IdentService.class);
     client.connect();
 
     try {
@@ -40,15 +40,15 @@ public class ServicesTest extends AbstractServicesTest {
   }
 
   private void testGetIdentResult() throws Exception {
-    ServicesService service = client.getService(ServicesService.class);
+    IdentService service = client.getService(IdentService.class);
     client.connect();
 
     try {
-      List<IdentResult> identResults = service.getIdentResults(null, null);
+      List<IdentResult> identResults = service.getIdentResults(null, null, false);
       assertTrue(identResults.size() > 0);
 
       String id = identResults.get(0).getId();
-      IdentResult identResult = service.getIdentResult(id, null);
+      IdentResult identResult = service.getIdentResult(id, null, false);
       assertEquals(id, identResult.getId());
 
     } finally {
@@ -57,7 +57,7 @@ public class ServicesTest extends AbstractServicesTest {
   }
 
   private void testIdent() throws Exception {
-    ServicesService service = client.getService(ServicesService.class);
+    IdentService service = client.getService(IdentService.class);
     client.connect();
 
     try {

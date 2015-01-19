@@ -3,6 +3,7 @@ package com.secucard.connect.service;
 import com.secucard.connect.Callback;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.ExceptionHandler;
+import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
@@ -19,15 +20,27 @@ public abstract class AbstractService {
   }
 
   protected Channel getChannel() {
-    return context.getChannnel(context.getConfig().getDefaultChannel());
+    String name = context.getConfig().getDefaultChannel();
+    if (ClientContext.STOMP.equals(name) && !context.getConfig().isStompEnabled()) {
+      return null; // should not happen
+    }
+    return context.getChannnel(name);
   }
 
   protected Channel getStompChannel() {
-    return context.getStompChannel();
+    if (context.getConfig().isStompEnabled()) {
+      return context.getStompChannel();
+    } else {
+      return null;
+    }
   }
 
   protected Channel getRestChannel() {
     return context.getRestChannel();
+  }
+
+  protected AuthProvider getAuthProvider() {
+    return context.getAuthProvider();
   }
 
   protected void handleException(Throwable exception, Callback callback) {

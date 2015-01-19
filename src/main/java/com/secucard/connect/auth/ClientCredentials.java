@@ -6,7 +6,7 @@ package com.secucard.connect.auth;
 /**
  * Class that handles client credentials for authorization
  */
-public final class OAuthClientCredentials {
+public final class ClientCredentials {
 
 	private final String clientId;
 	private final String clientSecret;
@@ -16,7 +16,7 @@ public final class OAuthClientCredentials {
 	 * @param clientId
 	 * @param clientSecret
 	 */
-	public OAuthClientCredentials(String clientId, String clientSecret) {
+	public ClientCredentials(String clientId, String clientSecret) {
 		super();
 		this.clientId = clientId;
 		this.clientSecret = clientSecret;

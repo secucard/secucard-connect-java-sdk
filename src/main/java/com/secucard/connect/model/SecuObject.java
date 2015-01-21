@@ -2,7 +2,9 @@ package com.secucard.connect.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public abstract class SecuObject {
+import java.io.Serializable;
+
+public abstract class SecuObject implements Serializable {
   protected String id;
 
   @JsonIgnore

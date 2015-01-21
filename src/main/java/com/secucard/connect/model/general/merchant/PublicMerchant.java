@@ -74,6 +74,8 @@ public class PublicMerchant extends SecuObject implements Serializable {
     @JsonProperty("_geometry")
     private int distance;
 
+    private boolean checkedIn;
+
     public String getSource() {
         return source;
     }
@@ -224,5 +226,13 @@ public class PublicMerchant extends SecuObject implements Serializable {
 
     public void setDistance(int distance) {
         this.distance = distance;
+    }
+
+    public boolean isCheckedIn() {
+        return checkedIn;
+    }
+
+    public void setCheckedIn(boolean checkedIn) {
+        this.checkedIn = checkedIn;
     }
 }

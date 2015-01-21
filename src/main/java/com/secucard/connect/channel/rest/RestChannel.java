@@ -16,6 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -31,7 +34,7 @@ public class RestChannel extends RestChannelBase {
   @Override
   public void open(Callback callback) {
     if (loginFilter == null) {
-       loginFilter = new LoginFilter(authProvider);
+      loginFilter = new LoginFilter(authProvider);
     }
 
     try {
@@ -56,14 +59,47 @@ public class RestChannel extends RestChannelBase {
   }
 
   @Override
-  <T> T post(String url, Map<String, String> parameters, Map<String, String> headers, Class<T> responseType,
-             Integer... ignoredState) {
+  public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
+                    Integer... ignoredState) {
     Invocation.Builder builder = restClient.target(url).request(MediaType.APPLICATION_FORM_URLENCODED);
     if (headers != null) {
       builder.headers(new MultivaluedHashMap<String, Object>(headers));
     }
-    Invocation invocation = builder.buildPost(Entity.form(new MultivaluedHashMap<>(parameters)));
+    MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
+    for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+      Object value = entry.getValue();
+      String key = entry.getKey();
+      if (value instanceof List) {
+        map.put(key, (List) value);
+      } else if (value instanceof String[]) {
+        map.put(key, Arrays.asList((String[]) value));
+      } else {
+        map.putSingle(key, (String) value);
+      }
+    }
+    Invocation invocation = builder.buildPost(Entity.form(map));
     return getResponse(invocation, new DynamicTypeReference(responseType), null, ignoredState);
+  }
+
+
+  @Override
+  public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers) {
+    WebTarget target = restClient.target(url);
+    if (parameters != null) {
+      for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+        target.queryParam(entry.getKey(), entry.getValue());
+      }
+    }
+    Invocation.Builder builder = target.request();
+    if (headers != null) {
+      builder.headers(new MultivaluedHashMap<String, Object>(headers));
+    }
+
+    Object entity = builder.get().getEntity();
+    if (entity instanceof InputStream) {
+      return (InputStream) entity;
+    }
+    return null;
   }
 
   @Override
@@ -162,7 +198,7 @@ public class RestChannel extends RestChannelBase {
 
   // private -------------------------------------------------------------------------------------------------------------------
 
-  private <T> Invocation.Builder builder(Class<T> type, Map<String, String> queryParams, boolean secure,
+  private <T> Invocation.Builder builder(Class<T> type, Map<String, Object> queryParams, boolean secure,
                                          String... pathArgs) {
     // todo: Cache targets?
     WebTarget target = restClient.target(configuration.getBaseUrl());
@@ -178,7 +214,7 @@ public class RestChannel extends RestChannelBase {
     }
 
     if (queryParams != null) {
-      for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+      for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
         target = target.queryParam(entry.getKey(), entry.getValue());
       }
     }
@@ -266,4 +302,5 @@ public class RestChannel extends RestChannelBase {
       return new SecuException(throwable);
     }
   }
+
 }

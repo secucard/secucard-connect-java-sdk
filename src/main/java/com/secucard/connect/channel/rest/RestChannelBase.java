@@ -6,9 +6,9 @@ import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.transport.QueryParams;
-import com.secucard.connect.storage.DataStorage;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -35,8 +35,8 @@ public abstract class RestChannelBase extends AbstractChannel {
     this.authProvider = authProvider;
   }
 
-  protected Map<String, String> queryParamsToMap(QueryParams queryParams) {
-    Map<String, String> map = new HashMap<>();
+  protected Map<String, Object> queryParamsToMap(QueryParams queryParams) {
+    Map<String, Object> map = new HashMap<>();
 
     if (queryParams == null) {
       return map;
@@ -115,14 +115,14 @@ public abstract class RestChannelBase extends AbstractChannel {
     return encodeQueryParams(queryParamsToMap(queryParams));
   }
 
-  protected String encodeQueryParams(Map<String, String> queryParams) {
+  protected String encodeQueryParams(Map<String, Object> queryParams) {
     StringBuilder encodedParams = new StringBuilder();
     String paramsEncoding = "UTF-8";
     try {
-      for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+      for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
         encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
         encodedParams.append('=');
-        encodedParams.append(URLEncoder.encode(entry.getValue(), paramsEncoding));
+        encodedParams.append(URLEncoder.encode((String) entry.getValue(), paramsEncoding));
         encodedParams.append('&');
       }
       return encodedParams.toString();
@@ -134,6 +134,8 @@ public abstract class RestChannelBase extends AbstractChannel {
   /**
    * Low level rest access for internal usage, posting to a url and get the response back as object.
    */
-  abstract <T> T post(String url, Map<String, String> parameters, Map<String, String> headers, Class<T> responseType,
+  public abstract <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
                       Integer... ignoredState);
+
+  public abstract InputStream getStream(String url,  Map<String, Object> parameters, Map<String, String> headers);
 }

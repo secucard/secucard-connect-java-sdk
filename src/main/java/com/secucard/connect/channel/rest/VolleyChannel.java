@@ -13,6 +13,7 @@ import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -179,7 +180,7 @@ public class VolleyChannel extends RestChannelBase {
 
 
   @Override
-  <T> T post(String url, Map<String, String> parameters, Map<String, String> headers, Class<T> responseType, Integer... ignoredState) {
+  public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType, Integer... ignoredState) {
     RequestFuture future = RequestFuture.newFuture();
     String requestBody = encodeQueryParams(parameters);
     Request<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody,
@@ -197,6 +198,11 @@ public class VolleyChannel extends RestChannelBase {
       e.printStackTrace();
       // todo: just log error
     }
+    return null;
+  }
+
+  @Override
+  public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers) {
     return null;
   }
 

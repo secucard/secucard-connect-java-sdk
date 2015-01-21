@@ -20,19 +20,11 @@ public abstract class AbstractService {
   }
 
   protected Channel getChannel() {
-    String name = context.getConfig().getDefaultChannel();
-    if (ClientContext.STOMP.equals(name) && !context.getConfig().isStompEnabled()) {
-      return null; // should not happen
-    }
-    return context.getChannnel(name);
+    return context.getChannel();
   }
 
   protected Channel getStompChannel() {
-    if (context.getConfig().isStompEnabled()) {
-      return context.getStompChannel();
-    } else {
-      return null;
-    }
+    return context.getStompChannel();
   }
 
   protected Channel getRestChannel() {
@@ -56,6 +48,13 @@ public abstract class AbstractService {
 
   protected <FROM, TO> CallbackAdapter<FROM, TO> getCallbackAdapter(Callback<TO> callback, Converter<FROM, TO> converter) {
     return callback == null ? null : new CallbackAdapter<>(callback, converter);
+  }
+
+  /**
+   * Store client context to current thread so it can be passed around.
+   */
+  protected void passContext() {
+    context.set();
   }
 
   /**

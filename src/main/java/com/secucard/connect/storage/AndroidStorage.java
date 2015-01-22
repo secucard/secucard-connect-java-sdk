@@ -76,7 +76,7 @@ public class AndroidStorage extends DataStorage {
         int idx = str.indexOf(":");
         String cname = str.substring(PREFIX.length(), idx);
         try {
-          return jsonMapper.map(str.substring(idx), Class.forName(cname));
+          return jsonMapper.map(str.substring(idx+1), Class.forName(cname));
         } catch (IOException | ClassNotFoundException e) {
           throw new DataStorageException("Error mapping JSON to object.", e);
         }

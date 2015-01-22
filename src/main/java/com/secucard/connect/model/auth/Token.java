@@ -42,6 +42,10 @@ public class Token implements Serializable {
     this.expireTime = System.currentTimeMillis() + expiresIn * 1000;
   }
 
+  public boolean isExpired() {
+    return expireTime == null || System.currentTimeMillis() > expireTime;
+  }
+
   public String getAccessToken() {
     return accessToken;
   }

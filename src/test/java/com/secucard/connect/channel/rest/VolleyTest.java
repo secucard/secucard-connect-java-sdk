@@ -1,6 +1,8 @@
 package com.secucard.connect.channel.rest;
 
+import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import com.secucard.connect.Callback;
 import com.secucard.connect.Client;
 import com.secucard.connect.ClientConfiguration;
@@ -20,10 +22,11 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class VolleyTest extends AbstractServicesTest {
-  private VolleyChannel channel;
+  private static VolleyChannel channel;
 
   @Before
   public void before() throws Exception {
+    Robolectric.getFakeHttpLayer().logHttpRequests();
     Robolectric.getFakeHttpLayer().interceptHttpRequests(false);
     Robolectric.getFakeHttpLayer().interceptResponseContent(false);
 
@@ -34,10 +37,9 @@ public class VolleyTest extends AbstractServicesTest {
     client = Client.create("test", clientConfiguration, new Application(), null);
     context = client.getService(TestService.class).getContext();
 
-    Configuration configuration = clientConfiguration.getRestConfiguration();
-
-    channel = (VolleyChannel) context.getRestChannel();
-    channel = new VolleyChannel("", new Application(), configuration);
+    // customize rest channel
+    channel = new TestVolleyChannel(context.getClientId(), (Context) context.getRuntimeContext(),
+        clientConfiguration.getRestConfiguration());
     OAuthProvider authProvider = (OAuthProvider) context.getAuthProvider();
     authProvider.setRestChannel(channel);
     channel.setAuthProvider(authProvider);
@@ -45,25 +47,30 @@ public class VolleyTest extends AbstractServicesTest {
 
   @Override
   public void test() throws Exception {
-    try {
-      channel.open(null);
+    Robolectric.buildActivity(TestActivity.class).create().get().test();
+  }
 
-      Callback callback = new Callback() {
-        @Override
-        public void completed(Object result) {
-          Assert.assertNotNull(result);
-        }
+  public static class TestActivity extends Activity {
+    public void test() throws Exception {
+      try {
+        channel.open(null);
 
-        @Override
-        public void failed(Throwable throwable) {
-          Assume.assumeNoException(throwable);
-        }
-      };
+        Callback callback = new Callback() {
+          @Override
+          public void completed(Object result) {
+            Assert.assertNotNull(result);
+          }
 
-      QueryParams queryParams = new QueryParams();
-      queryParams.setOffset(2);
-      queryParams.setCount(10);
-      channel.findObjects(Skeleton.class, queryParams, callback);
+          @Override
+          public void failed(Throwable throwable) {
+            Assume.assumeNoException(throwable);
+          }
+        };
+
+        QueryParams queryParams = new QueryParams();
+        queryParams.setOffset(2);
+        queryParams.setCount(10);
+        channel.findObjects(Skeleton.class, queryParams, callback);
 
 //      channel.getObject(Skeleton.class, "skl_60", callback);
 
@@ -75,10 +82,12 @@ public class VolleyTest extends AbstractServicesTest {
 
 //      channel.execute("21", "start", null, Result.class, callback);
 
-      Thread.sleep(3000);
+        Thread.sleep(3000);
 
-    } finally {
-      channel.close(null);
+      } finally {
+        channel.close(null);
+      }
     }
   }
+
 }

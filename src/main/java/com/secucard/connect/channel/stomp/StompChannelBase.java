@@ -419,7 +419,15 @@ public abstract class StompChannelBase extends AbstractChannel {
       }
 
       if (eventListener != null && correlationId == null) {
-        eventListener.onEvent(new Event(body));
+        // todo: map body to events
+        Object event = null;
+        try {
+          event = objectMapper.map(body, Map.class);
+        } catch (IOException e) {
+          LOG.info(e.getMessage());
+          event = body;
+        }
+        eventListener.onEvent(event);
       }
     }
 

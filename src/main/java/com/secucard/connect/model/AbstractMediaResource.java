@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.util.ResourceDownloader;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

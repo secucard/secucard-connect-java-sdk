@@ -2,64 +2,59 @@ package com.secucard.connect.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.ClientContext;
+import com.secucard.connect.util.ResourceDownloader;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 
+/**
+ * Base class for all URL based media resources like images or pdf documents.
+ * Supports caching of the resource denoted by the URL of this instance. That means the content is downloaded and
+ * put to the cache on demand. Further access is served by the cache.<br/>
+ * Note: This is not a caching by LRU strategy or alike. If enabled the content will be
+ * cached for new instances or when the URL of the instance was changed (its eventually the same).
+ */
 public abstract class AbstractMediaResource {
-  @JsonIgnore
-  private URL url;
+  private String url;
 
   @JsonIgnore
-  private DataStorage storage;
-
-  @JsonIgnore
-  private boolean downloaded = false;
+  private boolean isCached = false;
 
   @JsonIgnore
   private boolean cachingEnabled = true;
 
-  protected AbstractMediaResource() {
+  ResourceDownloader downloader;
+
+  public AbstractMediaResource() {
+    downloader = ClientContext.get().getResourceDownloader();
   }
 
-  protected AbstractMediaResource(String url) throws MalformedURLException {
+  public AbstractMediaResource(String url) throws MalformedURLException {
+    this();
     setUrl(url);
   }
 
-  @JsonProperty
-  protected void setUrl(String url) throws MalformedURLException {
-    this.url = new URL(url);
-    downloaded = false;
-  }
-
-  @JsonProperty
   public String getUrl() {
-    return url.toString();
+    return url;
   }
 
-  public void setStorage(DataStorage storage) {
-    this.storage = storage;
-  }
-
-  /**
-   * Returns if this resource was already downloaded.
-   * Note: If this instances URL is changed the flag is cleared.
-   */
-  public boolean isDownloaded() {
-    return downloaded;
+  public void setUrl(String url) {
+    this.url = url;
+    isCached = false;
   }
 
   /**
-   * Returns if this instances content can be cached
+   * Returns if this resource was already downloaded and cached.
+   * Note: If this instances URL is changed the flag is reset.
    */
-  public boolean isCachable() {
-    return storage != null && cachingEnabled && url != null;
+  public boolean isCached() {
+    return isCached;
   }
 
   /**
@@ -70,15 +65,20 @@ public abstract class AbstractMediaResource {
   }
 
   /**
-   * Downloading resource and put in cache for later access.
-   * Use {@link #downloaded} and {@link #isCachable()} to determine if this was already downloaded before or
-   * if caching is possible at all.
-   *
-   * @throws IOException if a error ocurrs during download or storing.
+   * Returns if this instances content should be cached.
    */
-  public void download() throws IOException {
-    if (isCachable()) {
-      put2cache(openInputStream());
+  public boolean isCachingEnabled() {
+    return cachingEnabled;
+  }
+
+  /**
+   * Downloading resource and put in cache for later access no matter if this was already done before.
+   * Call {@link #isCached} before to determine if this is the case.
+   */
+  public void download() {
+    if (cachingEnabled) {
+      downloader.download(url);
+      isCached = true;
     }
   }
 
@@ -109,32 +109,17 @@ public abstract class AbstractMediaResource {
 
   /**
    * Loads this ressource as a stream from its URL.<br/>
-   * Note: If this instance is cachable (check {@link #isCachable()} the resource content is also downloaded and cached
-   * (if not already happened before, check {@link #isDownloaded()}) and further invocations deliver from cache.
+   * Note: If caching is enabled, (check {@link #isCachingEnabled()}, the resource content is also downloaded and cached
+   * (if not already happened before, check {@link #isCached()}) and further invocations deliver from cache.
    * Set {@link #enableCaching(boolean)} if this behaviour is not wanted.
    *
    * @return The input stream, or null if this resource has no URL.
-   * @throws IOException If a error ocurrs during resource access.
    */
-  public InputStream getInputStream() throws IOException {
-    if (isCachable()) {
-      Object resource = storage.get(getUrl());
-      if (resource == null || !(resource instanceof InputStream)) {
-        put2cache(openInputStream());
-        resource = storage.get(getUrl());
-      }
-      return (InputStream) resource;
+  public InputStream getInputStream() {
+    if (cachingEnabled && !isCached) {
+      // force download if not cached
+      download();
     }
-
-    return url == null ? null : openInputStream();
-  }
-
-  protected InputStream openInputStream() throws IOException {
-    return url.openConnection().getInputStream();
-  }
-
-  protected void put2cache(InputStream is) {
-    storage.save(getUrl(), is);
-    downloaded = true;
+    return downloader.getInputStream(url, cachingEnabled);
   }
 }

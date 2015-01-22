@@ -28,7 +28,7 @@ public class ClientDemo {
   private static void process(final String id, ClientConfiguration cfg) {
     final Client client = Client.create(id, cfg);
     // Android usage (passing android.content.Context): Client.create(id, cfg, getApplication());
-    // additionally set serviceFactory=com.secucard.connect.service.AndroidServiceFactory in client configuration
+    // must additionally set androidMode=true in configuration file
 
     client.setEventListener(new EventListener() {
       @Override

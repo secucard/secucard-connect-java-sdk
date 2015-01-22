@@ -11,12 +11,14 @@ import java.io.InputStream;
 public class AttachmentTest extends AbstractServicesTest {
 
   @Override
-  public void test() throws Exception {
-    Attachment attachment = new Attachment("http://media2.govtech.com/images/770*1000/dog_flickr.jpg", "jpg");
+  protected void executeTests() throws Exception {
+    String url = "http://media2.govtech.com/images/770*1000/dog_flickr.jpg";
 
-    SimpleFileDataStorage storage = new SimpleFileDataStorage("teststore");
+    context.set();
 
-    attachment.setStorage(storage);
+    Attachment attachment = new Attachment(url, "jpg");
+
+    SimpleFileDataStorage storage = (SimpleFileDataStorage) context.getDataStorage();
 
     attachment.download();
 
@@ -35,5 +37,10 @@ public class AttachmentTest extends AbstractServicesTest {
     Assert.assertTrue(storage.size() == 0);
 
     storage.remove();
+  }
+
+  @Override
+  protected String getConfigString() {
+    return "stompEnabled=false\nheartBeatSec=0";
   }
 }

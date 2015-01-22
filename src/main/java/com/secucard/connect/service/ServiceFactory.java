@@ -3,13 +3,6 @@ package com.secucard.connect.service;
 import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.SecuException;
-import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.channel.rest.OAuthProvider;
-import com.secucard.connect.channel.rest.RestChannel;
-import com.secucard.connect.channel.stomp.StompChannel;
-import com.secucard.connect.storage.DataStorage;
-import com.secucard.connect.storage.MemoryDataStorage;
-import com.secucard.connect.storage.SimpleFileDataStorage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -20,65 +13,23 @@ public class ServiceFactory {
   private Map<String, String[]> names = null;
   private Set<AbstractService> services = new HashSet<>();
 
-  protected static void setUpStomp(ClientContext context, AuthProvider authProvider) {
-    StompChannel sc = new StompChannel(context.getClientId(), context.getConfig().getStompConfiguration());
-    sc.setAuthProvider(authProvider);
-    context.setStompChannel(sc);
-  }
-
-  public void init(ClientContext context) {
+  public ServiceFactory(ClientContext context) {
     ClientConfiguration config = context.getConfig();
 
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
 
-    setUpContext(context);
-
     ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
     for (AbstractService service : loader) {
       service.setContext(context);
-      // android ServiceLoader impl. doesn't cache services,
+      // in Android ServiceLoader impl. doesn't cache services,
       services.add(service);
     }
 
     getService("*"); // fetch service ids
   }
 
-  /**
-   * Wiring all dependencies and setting up context needed in services.
-   * Override to implement special behaviour.
-   *
-   * @param context The client context to set up.
-   */
-  protected void setUpContext(ClientContext context) {
-    ClientConfiguration config = context.getConfig();
-
-    if (context.getDataStorage() == null) {
-      if (config.getStoragePath() == null) {
-        context.setDataStorage(new MemoryDataStorage());
-      } else {
-        try {
-          context.setDataStorage(new SimpleFileDataStorage(config.getStoragePath()));
-        } catch (IOException e) {
-          throw new SecuException("Error creating file storage: " + config.getStoragePath(), e);
-        }
-      }
-    }
-
-    RestChannel rc = new RestChannel(context.getClientId(), config.getRestConfiguration());
-    context.setRestChannel(rc);
-
-    OAuthProvider ap = new OAuthProvider(context.getClientId(), config);
-    ap.setDataStorage(context.getDataStorage());
-    ap.setRestChannel(rc);
-
-    rc.setAuthProvider(ap);
-
-    context.setAuthProvider(ap);
-
-    setUpStomp(context, ap);
-  }
 
   public <T extends AbstractService> T getService(String serviceId) {
     Class<T> serviceClass = null;

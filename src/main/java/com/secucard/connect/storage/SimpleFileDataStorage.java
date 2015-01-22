@@ -1,73 +1,38 @@
 package com.secucard.connect.storage;
 
 import java.io.*;
+import java.net.URLEncoder;
 
 /**
- * Saves to file using Java object serialization of the memory based storage.
- * Not very efficient - each access reads (and writes) the whole file.
- * Objects to save must implement serializable!
+ * File based store.
+ * Utilizes Java object serialization for persistence, so objects to save must implement serializable.
+ * Just a basic solution, maybe not the most efficient (actually a MemoryDataStorage instance is maintaned internally
+ * and serialized to a single file after each write to keep the state).
  */
 public class SimpleFileDataStorage extends DataStorage {
   private File file;
   private MemoryDataStorage store;
 
-  public SimpleFileDataStorage(String path) throws IOException {
-    file = new File(path);
-    file.createNewFile(); // just validation
+  public SimpleFileDataStorage(String cacheDir) throws IOException {
+    new File(cacheDir).mkdir();
+    file = new File(cacheDir + File.separator + "scf");
+    file.createNewFile();
   }
 
-  public Integer size() throws IOException, ClassNotFoundException {
-    readStore();
-    if (store == null) {
-      return null;
-    }
-    return store.size();
+  public int size() throws Exception {
+    return readStore().size();
   }
 
   public boolean remove() {
-    return file.delete();
+    clear();
+    boolean deleted = file.delete();
+    file.getParentFile().delete(); // delete also dir if empty
+    return deleted;
   }
 
   @Override
-  public synchronized void save(String id, Object object, boolean replace) throws DataStorageException {
-    saveInternal(id, object, replace);
-  }
-
-  private void saveInternal(String id, Object object, boolean replace) {
-    try {
-      readStore();
-      if (store == null) {
-        store = new MemoryDataStorage();
-      }
-      store.save(id, object, replace);
-      writeStore();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new DataStorageException(e);
-    }
-  }
-
-  @Override
-  public void save(String id, InputStream in, boolean replace) throws DataStorageException {
-    saveInternal(id, in, replace);
-  }
-
-  @Override
-  public synchronized Object get(String id) throws DataStorageException {
+  public Object get(String id) {
     return getInternal(id);
-  }
-
-  private Object getInternal(String id) {
-    try {
-      readStore();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new DataStorageException(e);
-    }
-
-    if (store == null) {
-      return null;
-    }
-
-    return store.get(id);
   }
 
   @Override
@@ -76,33 +41,54 @@ public class SimpleFileDataStorage extends DataStorage {
   }
 
   @Override
+  public void save(String id, Object object, boolean replace) throws DataStorageException {
+    saveInternal(id, object, replace);
+  }
+
+  @Override
+  public void save(String id, InputStream in, boolean replace) throws DataStorageException {
+    saveInternal(id, in, replace);
+  }
+
+  @Override
   public synchronized void clear(String id, Long timestampMs) {
     try {
-      readStore();
-
-      if (store == null) {
-        return;
-      }
-
-      store.clear(id, timestampMs);
+      readStore().clear(id, timestampMs);
       writeStore();
-
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (Exception e) {
       throw new DataStorageException(e);
     }
   }
 
-  private void writeStore() throws IOException {
-    new ObjectOutputStream(new FileOutputStream(file)).writeObject(store);
+  private synchronized Object getInternal(String id) {
+    try {
+      return readStore().get(id);
+    } catch (Exception e) {
+      throw new DataStorageException(e);
+    }
   }
 
-
-  private void readStore() throws IOException, ClassNotFoundException {
-    if (!file.exists() || file.length() == 0) {
-      store = null;
-      return;
+  private synchronized void saveInternal(String id, Object object, boolean replace) {
+    try {
+      readStore().save(id, object, replace);
+      writeStore();
+    } catch (Exception e) {
+      throw new DataStorageException(e);
     }
+  }
 
-    store = (MemoryDataStorage) new ObjectInputStream(new FileInputStream(file)).readObject();
+  private MemoryDataStorage readStore() throws Exception {
+    if (store == null) {
+      if (file.exists() && file.length() > 0) {
+        store = (MemoryDataStorage) new ObjectInputStream(new FileInputStream(file)).readObject();
+      } else {
+        store = new MemoryDataStorage();
+      }
+    }
+    return store;
+  }
+
+  private void writeStore() throws IOException {
+    new ObjectOutputStream(new FileOutputStream(file)).writeObject(store);
   }
 }

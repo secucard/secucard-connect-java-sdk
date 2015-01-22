@@ -21,8 +21,8 @@ public class ClientConfiguration {
   private String defaultChannel;
   private int heartBeatSec;
   private boolean stompEnabled;
-  private String storagePath;
-  private String serviceFactory;
+  private String cacheDir;
+  private boolean androidMode;
   private int authWaitTimeoutSec;
   private String oauthUrl;
   private ClientCredentials clientCredentials;
@@ -47,13 +47,13 @@ public class ClientConfiguration {
     }
 
     heartBeatSec = Integer.valueOf(cfg.getProperty("heartBeatSec"));
-    storagePath = cfg.getProperty("storagePath");
-    serviceFactory = cfg.getProperty("serviceFactory");
+    cacheDir = cfg.getProperty("cacheDir");
     authWaitTimeoutSec = Integer.valueOf(cfg.getProperty("auth.waitTimeoutSec"));
     oauthUrl = cfg.getProperty("auth.oauthUrl");
     clientCredentials = new ClientCredentials(cfg.getProperty("auth.clientId"), cfg.getProperty("auth.clientSecret"));
     deviceId = cfg.getProperty("device");
     authType = cfg.getProperty("auth.type");
+    androidMode = Boolean.valueOf(cfg.getProperty("androidMode"));
 
     stompConfiguration = new Configuration(
         cfg.getProperty("stomp.host"),
@@ -140,8 +140,8 @@ public class ClientConfiguration {
     return defaultChannel;
   }
 
-  public String getStoragePath() {
-    return storagePath;
+  public String getCacheDir() {
+    return cacheDir;
   }
 
   public final com.secucard.connect.channel.rest.Configuration getRestConfiguration() {
@@ -152,8 +152,8 @@ public class ClientConfiguration {
     return stompConfiguration;
   }
 
-  public String getServiceFactory() {
-    return serviceFactory;
+  public boolean isAndroidMode() {
+    return androidMode;
   }
 
   public int getAuthWaitTimeoutSec() {

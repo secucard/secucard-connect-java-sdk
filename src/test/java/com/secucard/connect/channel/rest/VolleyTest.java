@@ -43,14 +43,6 @@ public class VolleyTest extends AbstractServicesTest {
     channel.setAuthProvider(authProvider);
   }
 
-
-  private Configuration addProxy(Configuration configuration) {
-    // replace original host with intercepting proxy
-    String host = "http://localhost:4444/";
-    configuration = new Configuration(host + configuration.getBaseUrl().split("/", 4)[3]);
-    return configuration;
-  }
-
   @Override
   public void test() throws Exception {
     try {

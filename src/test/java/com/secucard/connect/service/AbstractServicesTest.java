@@ -6,6 +6,8 @@ import com.secucard.connect.ClientContext;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+
 
 public class AbstractServicesTest {
   protected Client client;
@@ -17,7 +19,12 @@ public class AbstractServicesTest {
     initLogging();
 
     // todo: enable changing default channel programmatically in config to test other channels
-    clientConfiguration = ClientConfiguration.fromProperties("config.properties");
+    String  cfg = getConfigString();
+    if (cfg == null) {
+      clientConfiguration = ClientConfiguration.fromProperties(getConfigPath());
+    } else {
+      clientConfiguration = ClientConfiguration.fromStream(new ByteArrayInputStream(cfg.getBytes()));
+    }
 
     client = Client.create("test", clientConfiguration);
 
@@ -40,5 +47,13 @@ public class AbstractServicesTest {
   }
 
   protected void executeTests() throws Exception {
+  }
+
+  protected String getConfigString() {
+    return null;
+  }
+
+  protected String getConfigPath() {
+    return "config.properties";
   }
 }

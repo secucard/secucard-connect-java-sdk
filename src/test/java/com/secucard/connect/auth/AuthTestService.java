@@ -31,7 +31,7 @@ public class AuthTestService extends TestService implements EventListener {
     public MyOAuthProvider() throws Exception {
       super("test", context.getConfig());
       setRestChannel((RestChannelBase) getRestChannel());
-      DataStorage storage = new SimpleFileDataStorage("secustore");
+      DataStorage storage = new SimpleFileDataStorage("sccache");
       setDataStorage(storage);
       registerEventListener(AuthTestService.this);
     }

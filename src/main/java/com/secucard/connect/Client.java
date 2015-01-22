@@ -7,7 +7,6 @@ import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.EventUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.logging.Level;
 
@@ -48,7 +47,7 @@ public class Client extends AbstractService implements EventListener {
    * @param storage        The DataStorage implementation the client uses for caching purposes. Passing null causes usage of
    *                       default internal solutions. While this is ok for Android it should be avoided in other environments.
    *                       Please provide a proper implementation there, the default is either a memory based solution or a
-   *                       very simple file based solution if the "storagePath" property is set in config file.
+   *                       very simple file based solution if the "cacheDir" property is set in config file.
    * @return The client instance.
    */
   public static Client create(String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
@@ -181,23 +180,8 @@ public class Client extends AbstractService implements EventListener {
       throw new SecuException("Configuration  must not be null.");
     }
     this.id = id;
-    context = new ClientContext();
-    context.setConfig(config);
-    context.setClientId(id);
-    context.setRuntimeContext(runtimeContext);
-    context.setDataStorage(storage);
-    String serviceFactoryName = config.getServiceFactory();
-    if (StringUtils.isNotBlank(serviceFactoryName)) {
-      try {
-        Class<?> sfc = Class.forName(serviceFactoryName);
-        serviceFactory = (ServiceFactory) sfc.newInstance();
-      } catch (Exception e) {
-        throw new SecuException("Cannnot instantiate service factory " + serviceFactoryName, e);
-      }
-    } else {
-      serviceFactory = new ServiceFactory();
-    }
-    serviceFactory.init(context);
+    context = new ClientContext(id, config, runtimeContext, storage);
+    serviceFactory = new ServiceFactory(context);
     isConnected = false;
 
     if (config.isStompEnabled()) {

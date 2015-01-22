@@ -1,7 +1,6 @@
 package com.secucard.connect.service.services;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.SecuException;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
@@ -10,7 +9,6 @@ import com.secucard.connect.model.services.idresult.Person;
 import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.AbstractService;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,14 +22,14 @@ import java.util.List;
  * to get details which storage implementation is actually used.
  */
 public class IdentService extends AbstractService {
-  private boolean cacheAttachments = true;
+  private boolean cacheAttachmentsEnabled = true;
 
   /**
    * Set to true/false to globally enable/disable attachment caching when requested by methods of this service.
    * Caching is enabled by default but is only performed when requested in methods.
    */
   public void cacheAttachments(boolean cacheAttachments) {
-    this.cacheAttachments = cacheAttachments;
+    this.cacheAttachmentsEnabled = cacheAttachments;
   }
 
   /**
@@ -101,9 +99,7 @@ public class IdentService extends AbstractService {
           return null;
         }
         IdentResult result = object.getList().get(0);
-        if (downloadAttachments) {
-          downloadAttachments(Arrays.asList(result));
-        }
+        processAttachments(Arrays.asList(result), downloadAttachments);
         return result;
       }
     }.invokeAndConvert(callback);
@@ -155,9 +151,7 @@ public class IdentService extends AbstractService {
           return null;
         }
         List<IdentResult> results = object.getList();
-        if (downloadAttachments) {
-          downloadAttachments(results);
-        }
+        processAttachments(results, downloadAttachments);
         return results;
       }
     }.invokeAndConvert(callback);
@@ -180,25 +174,21 @@ public class IdentService extends AbstractService {
       @Override
       protected IdentResult handle(Callback<IdentResult> callback) {
         IdentResult result = getChannel().getObject(IdentResult.class, id, callback);
-        if (downloadAttachments) {
-          downloadAttachments(Arrays.asList(result));
-        }
+        processAttachments(Arrays.asList(result), downloadAttachments);
         return result;
       }
     }.invoke(callback);
   }
 
-  private void downloadAttachments(List<IdentResult> results) {
-    if (cacheAttachments) {
+  private void processAttachments(List<IdentResult> results, boolean cache) {
+    passContext();
+
+    if (cacheAttachmentsEnabled && cache) {
       for (IdentResult result : results) {
         for (Person person : result.getPersons()) {
           for (Attachment attachment : person.getAttachments()) {
             // todo: introduce download policy settings to be able to avoid some downloads
-            try {
-              attachment.download();
-            } catch (IOException e) {
-              throw new SecuException("Error downloading attachments.", e);
-            }
+            attachment.download();
           }
         }
       }

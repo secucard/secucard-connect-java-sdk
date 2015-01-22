@@ -165,7 +165,7 @@ public class OAuthProvider implements AuthProvider {
 
   private Token getToken(ClientCredentials clientCredentials, UserCredentials userCredentials,
                          String refreshToken, String deviceId, String deviceCode) {
-    Map<String, String> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, deviceId,
+    Map<String, Object> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, deviceId,
         deviceCode);
     Map<String, String> headers = new HashMap<>();
     headers.put(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
@@ -179,7 +179,7 @@ public class OAuthProvider implements AuthProvider {
   }
 
   protected DeviceAuthCode requestCodes() {
-    Map<String, String> parameters = createAuthParams(getClientCredentials(), null, null, getDeviceId(), null);
+    Map<String, Object> parameters = createAuthParams(getClientCredentials(), null, null, getDeviceId(), null);
     DeviceAuthCode codes = restChannel.post(configuration.getOauthUrl(), parameters, null, DeviceAuthCode.class);
     if (StringUtils.isAnyBlank(codes.getDeviceCode(), codes.getUserCode(), codes.getVerificationUrl())) {
       throw new AuthException("Authorization failed, got no valid codes or URL.");
@@ -190,10 +190,10 @@ public class OAuthProvider implements AuthProvider {
   /**
    * Returning a map with request params for authorization purposes according to the given credentials.
    */
-  protected Map<String, String> createAuthParams(ClientCredentials clientCredentials,
+  protected Map<String, Object> createAuthParams(ClientCredentials clientCredentials,
                                                  UserCredentials userCredentials, String refreshToken,
                                                  String deviceId, String deviceCode) {
-    Map<String, String> parameters = new HashMap<>();
+    Map<String, Object> parameters = new HashMap<>();
 
     // default type, client id / secrect must always exist
     parameters.put("grant_type", "client_credentials");

@@ -15,6 +15,7 @@ import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -24,7 +25,7 @@ import java.util.concurrent.Future;
 
 public class RestChannel extends RestChannelBase {
   protected javax.ws.rs.client.Client restClient;
-  protected LoginFilter loginFilter;
+  protected AuthFilter authFilter = new AuthFilter();
   private final boolean secure = true;
 
   public RestChannel(String id, Configuration cfg) {
@@ -33,10 +34,6 @@ public class RestChannel extends RestChannelBase {
 
   @Override
   public void open(Callback callback) {
-    if (loginFilter == null) {
-      loginFilter = new LoginFilter(authProvider);
-    }
-
     try {
       // rest client should be initialized just one time, client is expensive
       initClient();
@@ -104,7 +101,7 @@ public class RestChannel extends RestChannelBase {
 
   @Override
   public String invoke(String command, Callback<String> callback) {
-    Invocation invocation = builder(null, null, secure, command).buildGet();
+    Invocation invocation = builder(null, null, false, command).buildGet();
     return getResponse(invocation, new DynamicTypeReference(String.class), callback);
   }
 
@@ -175,7 +172,7 @@ public class RestChannel extends RestChannelBase {
     target = target.path(command);
 
     if (secure) {
-      target.register(loginFilter);
+      target.register(authFilter);
     }
 
     Invocation invocation = target.request(MediaType.APPLICATION_JSON).buildPost(entity);
@@ -220,7 +217,7 @@ public class RestChannel extends RestChannelBase {
     }
 
     if (secure) {
-      target.register(loginFilter);
+      target.register(authFilter);
     }
 
     return target.request(MediaType.APPLICATION_JSON);
@@ -303,4 +300,15 @@ public class RestChannel extends RestChannelBase {
     }
   }
 
+  /**
+   * Filter for supplying the access token to the end point
+   */
+  @Provider
+  private class AuthFilter implements ClientRequestFilter {
+
+    @Override
+    public void filter(ClientRequestContext context) throws IOException {
+      setAuthorizationHeader(context.getHeaders());
+    }
+  }
 }

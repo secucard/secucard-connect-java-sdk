@@ -7,10 +7,8 @@ package com.secucard.connect.service.general.merchant;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.general.merchant.PublicMerchant;
-import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.service.AbstractService;
-
-import java.util.List;
 
 public class PublicMerchantService extends AbstractService {
 

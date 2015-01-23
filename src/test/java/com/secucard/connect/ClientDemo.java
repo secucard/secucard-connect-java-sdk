@@ -3,7 +3,7 @@ package com.secucard.connect;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.model.smart.*;
-import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.service.general.SkeletonService;
 import com.secucard.connect.service.smart.DeviceService;
 import com.secucard.connect.service.smart.IdentService;

@@ -6,7 +6,7 @@ import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idresult.Attachment;
 import com.secucard.connect.model.services.idresult.Person;
-import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.service.AbstractService;
 
 import java.util.Arrays;

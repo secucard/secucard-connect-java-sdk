@@ -5,7 +5,7 @@ import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.components.Geometry;
-import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.QueryParams;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;

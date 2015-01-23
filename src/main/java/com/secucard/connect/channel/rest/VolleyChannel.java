@@ -3,7 +3,10 @@ package com.secucard.connect.channel.rest;
 import android.content.Context;
 import android.util.Log;
 import com.android.volley.*;
-import com.android.volley.toolbox.*;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.RequestFuture;
+import com.android.volley.toolbox.Volley;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
@@ -39,24 +42,6 @@ public class VolleyChannel extends RestChannelBase {
   @Override
   public void close(Callback callback) {
     requestQueue.stop();
-  }
-
-  @Override
-  public String invoke(String command, final Callback<String> callback) {
-    String url = buildRequestUrl(null, command);
-    Request<String> request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-      @Override
-      public void onResponse(String response) {
-        callback.completed(response);
-      }
-    }, new Response.ErrorListener() {
-      @Override
-      public void onErrorResponse(VolleyError error) {
-        callback.failed(error);
-      }
-    });
-    requestQueue.add(request);
-    return null;
   }
 
   @Override

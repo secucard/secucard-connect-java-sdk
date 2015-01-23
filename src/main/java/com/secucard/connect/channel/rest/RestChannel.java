@@ -5,8 +5,8 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.model.ObjectList;
-import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
@@ -97,12 +97,6 @@ public class RestChannel extends RestChannelBase {
       return (InputStream) entity;
     }
     return null;
-  }
-
-  @Override
-  public String invoke(String command, Callback<String> callback) {
-    Invocation invocation = builder(null, null, false, command).buildGet();
-    return getResponse(invocation, new DynamicTypeReference(String.class), callback);
   }
 
   @Override

@@ -1,12 +1,9 @@
 package com.secucard.connect.channel.stomp;
 
-import com.secucard.connect.Callback;
-import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Before;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeNoException;
 
 public class Ping extends AbstractServicesTest {
   private StompChannel stompChannel;
@@ -14,13 +11,11 @@ public class Ping extends AbstractServicesTest {
   @Before
   public void before() throws Exception {
     super.before();
-    AuthProvider authProvider;
 
     stompChannel = new StompChannel("test", clientConfiguration.getStompConfiguration());
 
-    authProvider = null; // No auth provider needed when stomp.user + stomp.password is set in config!
-
-    stompChannel.setAuthProvider(authProvider);
+    // No auth provider needed when stomp.user + stomp.password is set in config!
+    stompChannel.setAuthProvider(null);
   }
 
   @Override
@@ -28,9 +23,7 @@ public class Ping extends AbstractServicesTest {
     try {
       stompChannel.open(null);
 
-      pingasync();
-
-      String result = ping(null);
+      String result = stompChannel.ping();
       assertEquals("pong", result);
 
     } finally {
@@ -38,22 +31,8 @@ public class Ping extends AbstractServicesTest {
     }
   }
 
-  private String ping(Callback<String> callback) {
-    return stompChannel.invoke("ping", callback);
-  }
-
-  private void pingasync() throws InterruptedException {
-    ping(new Callback<String>() {
-      @Override
-      public void completed(String res) {
-        assertEquals("pong", res);
-      }
-
-      @Override
-      public void failed(Throwable throwable) {
-        assumeNoException(throwable);
-      }
-    });
-    Thread.sleep(3000); // need to wait a bit when using callback
+  @Override
+  protected String getConfigString() {
+    return "stomp.user=smart\nstomp.password=smart";
   }
 }

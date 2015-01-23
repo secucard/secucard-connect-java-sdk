@@ -1,6 +1,7 @@
 package com.secucard.connect;
 
 import com.secucard.connect.auth.UserCredentials;
+import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
@@ -141,7 +142,7 @@ public class Client extends AbstractService implements EventListener {
           }
           while (!stopHeartbeat) {
             try {
-              getStompChannel().invoke("ping", null);
+              ((StompChannel)getStompChannel()).ping();
             } catch (Exception e) {
               handleException(new SecuException("Error sending heart beat message.", e), null);
               break;

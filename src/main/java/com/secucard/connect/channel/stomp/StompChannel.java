@@ -2,12 +2,10 @@ package com.secucard.connect.channel.stomp;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.transport.Message;
-import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.transport.Result;
-import com.secucard.connect.util.CallbackAdapter;
-import com.secucard.connect.util.Converter;
 
 import java.io.IOException;
 
@@ -68,32 +66,15 @@ public class StompChannel extends StompChannelBase {
     }
   }
 
-  @Override
-  public String invoke(String command, final Callback<String> callback) {
-    Converter<Result, String> converter = new Converter<Result, String>() {
-      @Override
-      public String convert(Result value) {
-        if (value == null) {
-          return null;
-        }
-        return value.getResult();
-      }
-    };
-
-    Callback<Result> adaptor = null;
-    if (callback != null) {
-      adaptor = new CallbackAdapter<>(callback, converter);
-    }
-
-    StandardDestination destination = new StandardDestination(command) {
+  public String ping() {
+    Result result = sendMessage(new StandardDestination(null) {
       @Override
       public String toString() {
-        return getBasicDestination() + command;
+        return getBasicDestination() + "ping";
       }
-    };
-    Result result = sendMessage(destination, null, new MessageTypeRef(Result.class), adaptor, false);
+    }, null, new MessageTypeRef(Result.class), null, false);
 
-    return converter.convert(result);
+    return result == null ? null : result.getResult();
   }
 
   @Override

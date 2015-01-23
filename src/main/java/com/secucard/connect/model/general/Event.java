@@ -1,28 +1,59 @@
 package com.secucard.connect.model.general;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.secucard.connect.model.SecuObject;
 
-public class Event extends SecuObject {
+import java.util.Date;
 
-  public Event(String content) {
-    this.content = content;
+public class Event<T> extends SecuObject {
+
+  private String type;
+
+  private boolean liveMode;
+
+  private Date created;
+
+  private T data;
+
+  public String getType() {
+    return type;
   }
 
-  private String content;
-
-
-  public String getContent() {
-    return content;
+  public void setType(String type) {
+    this.type = type;
   }
 
-  public void setContent(String content) {
-    this.content = content;
+  public boolean isLiveMode() {
+    return liveMode;
+  }
+
+  public void setLiveMode(boolean liveMode) {
+    this.liveMode = liveMode;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
+  }
+
+  public T getData() {
+    return data;
+  }
+
+  public void setData(T data) {
+    this.data = data;
   }
 
   @Override
   public String toString() {
     return "Event{" +
-        "content='" + content + '\'' +
+        "type='" + type + '\'' +
+        ", liveMode=" + liveMode +
+        ", created=" + created +
+        ", data=" + data +
         '}';
   }
 }

@@ -11,7 +11,6 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.auth.Token;
-import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Message;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 import net.jstomplite.Config;
@@ -419,13 +418,11 @@ public abstract class StompChannelBase extends AbstractChannel {
       }
 
       if (eventListener != null && correlationId == null) {
-        // todo: map body to events
         Object event = null;
         try {
-          event = objectMapper.map(body, Map.class);
+          event = objectMapper.map(body);
         } catch (IOException e) {
-          LOG.info(e.getMessage());
-          event = body;
+          event = "Error mapping: " + body + "; " + e.getMessage();
         }
         eventListener.onEvent(event);
       }

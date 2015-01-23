@@ -1,4 +1,4 @@
-package com.secucard.connect.model.transport;
+package com.secucard.connect.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

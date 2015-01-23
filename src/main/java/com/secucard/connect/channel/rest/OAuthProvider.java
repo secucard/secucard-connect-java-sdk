@@ -8,7 +8,6 @@ import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.auth.Token;
-import com.secucard.connect.model.general.Event;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.EventUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +68,30 @@ public class OAuthProvider implements AuthProvider {
   public synchronized Token getToken() {
     Token token = getStoredToken();
 
+    if (token != null && !token.isExpired()) {
+      return token;
+    }
+
+    if (token != null && token.getRefreshToken() != null) {
+      // token is expired and can be refreshed without further auth.
+      Token refreshToken = null;
+      try {
+        refreshToken = getRefreshToken(token.getRefreshToken());
+      } finally {
+        if (refreshToken == null) {
+          // refreshing failed, clear the token
+          removeToken();
+          token = null;
+        } else {
+          token = refreshToken;
+          token.setExpireTime();
+          storeToken(token);
+        }
+      }
+    } else {
+      token = null;
+    }
+
     if (token == null) {
       // no token yet, a new one must created
       if ("device".equalsIgnoreCase(configuration.getAuthType())) {
@@ -85,22 +108,6 @@ public class OAuthProvider implements AuthProvider {
         // set new expire time and store
         token.setExpireTime();
         storeToken(token);
-      }
-    } else if (token.getExpireTime() != null && token.getRefreshToken() != null
-        && System.currentTimeMillis() > token.getExpireTime()) {
-      // if token is expired and can be refreshed without further auth.
-      Token refreshToken = null;
-      try {
-        refreshToken = getRefreshToken(token.getRefreshToken());
-      } finally {
-        if (refreshToken == null) {
-          // refreshing failed, clear the token
-          removeToken();
-        } else {
-          token = refreshToken;
-          token.setExpireTime();
-          storeToken(token);
-        }
       }
     }
 
@@ -130,10 +137,10 @@ public class OAuthProvider implements AuthProvider {
       }
       token = getDeviceAuthToken(codes);
       if (token != null) {
-        EventUtil.fireEvent(new Event(EVENT_CODE_AUTH_OK), authEventListener);
+        EventUtil.fireEvent(EVENT_CODE_AUTH_OK, authEventListener);
         return token;
       }
-      EventUtil.fireEvent(new Event(EVENT_CODE_AUTH_PENDING), authEventListener);
+      EventUtil.fireEvent(EVENT_CODE_AUTH_PENDING, authEventListener);
     }
 
     throw new AuthException("Authorization failed, auth. request timeout or code expired during request.");

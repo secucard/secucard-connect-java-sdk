@@ -4,7 +4,7 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.transport.Message;
-import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;

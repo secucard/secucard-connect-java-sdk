@@ -6,7 +6,7 @@ import com.secucard.connect.model.general.accounts.Account;
 import com.secucard.connect.model.general.accounts.Location.Location;
 import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.general.merchant.PublicMerchant;
-import com.secucard.connect.model.transport.QueryParams;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 

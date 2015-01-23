@@ -140,7 +140,7 @@ public class StompChannel extends StompChannelBase {
   @Override
   public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
                        Callback<T> callback) {
-    return sendMessage(new StandardDestination(StandardDestination.EXEC, arg.getClass(), action),
+    return sendMessage(new StandardDestination(StandardDestination.EXEC, product, action),
         new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, true);
   }
 }

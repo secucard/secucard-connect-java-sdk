@@ -149,7 +149,7 @@ public class RestChannel extends RestChannelBase {
   @Override
   public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
-    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildPut(entity);
+    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildPost(entity);
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 

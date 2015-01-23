@@ -2,7 +2,6 @@ package com.secucard.connect.channel;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
@@ -83,26 +82,39 @@ public class JsonMapper {
     if (map == null) {
       return json;
     }
-    Object object = map.get("object");
-    Object type = map.get("type");
-    if (object != null && type != null && StringUtils.equalsIgnoreCase("general.events", (String) object)) {
-      Class eventType = TYPE_REGISTRY.getType((String) type);
-      if (eventType != null) {
-        return map(json, new DynamicTypeReference(Event.class, eventType));
+
+    Class type = null;
+    TypeReference typeReference = null;
+
+    Object typeId = map.get("type");
+    if (typeId != null) {
+      type = TYPE_REGISTRY.getType((String) typeId);
+      if (type != null) {
+        typeReference = new DynamicTypeReference(type);
       }
     }
+
+    Object objectId = map.get("object");
+    if (type != null && objectId != null && StringUtils.equalsIgnoreCase("general.events", (String) objectId)) {
+     typeReference = new DynamicTypeReference(Event.class, type);
+    }
+
+    if (type != null) {
+      return map(json, typeReference);
+    }
+
     return map;
   }
 
   /**
-   * Collects all subclasses of {@link SecuObject} from the package for JSON deserialization purposes.
+   * Collects all classes annotated with {@link com.secucard.connect.model.annotation.ProductInfo}
+   * for JSON deserialization purposes.
    */
-  protected static class TypeMap extends HashMap<String, Class<? extends SecuObject>> {
+  protected static class TypeMap extends HashMap<String, Class<?>> {
     {
-      String name = SecuObject.class.getPackage().getName();
-      Reflections reflections = new Reflections(name);
-      Set<Class<? extends SecuObject>> subTypes = reflections.getSubTypesOf(SecuObject.class);
-      for (Class<? extends SecuObject> type : subTypes) {
+      Reflections reflections = new Reflections("com.secucard.connect.model");
+      Set<Class<?>> types = reflections.getTypesAnnotatedWith(ProductInfo.class);
+      for (Class<?> type : types) {
         ProductInfo annotation = type.getAnnotation(ProductInfo.class);
         if (annotation != null) {
           put(annotation.resourceId().toLowerCase(), type);

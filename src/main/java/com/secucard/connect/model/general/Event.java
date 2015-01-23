@@ -50,6 +50,7 @@ public class Event<T> extends SecuObject {
   @Override
   public String toString() {
     return "Event{" +
+        "id='" + id + '\'' +
         "type='" + type + '\'' +
         ", liveMode=" + liveMode +
         ", created=" + created +

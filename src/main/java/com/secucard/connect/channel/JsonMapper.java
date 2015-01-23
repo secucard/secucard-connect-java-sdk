@@ -87,6 +87,9 @@ public class JsonMapper {
     TypeReference typeReference = null;
 
     Object typeId = map.get("type");
+    Object objectId = map.get("object");
+    Object id = map.get("id");
+
     if (typeId != null) {
       type = TYPE_REGISTRY.getType((String) typeId);
       if (type != null) {
@@ -94,9 +97,18 @@ public class JsonMapper {
       }
     }
 
-    Object objectId = map.get("object");
-    if (type != null && objectId != null && StringUtils.equalsIgnoreCase("general.events", (String) objectId)) {
-     typeReference = new DynamicTypeReference(Event.class, type);
+    if (typeId != null && objectId != null && StringUtils.equalsIgnoreCase("general.events", (String) objectId)) {
+      type = TYPE_REGISTRY.getType((String) typeId);
+      if (type != null) {
+        typeReference = new DynamicTypeReference(Event.class, type);
+      }
+    }
+
+    if ("event".equals(typeId) && id != null) {
+      type = TYPE_REGISTRY.getType((String) id);
+      if (type != null) {
+        typeReference = new DynamicTypeReference(Event.class, type);
+      }
     }
 
     if (type != null) {

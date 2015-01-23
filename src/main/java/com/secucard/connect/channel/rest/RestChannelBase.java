@@ -17,7 +17,7 @@ import java.util.Map;
 
 public abstract class RestChannelBase extends AbstractChannel {
   protected final Configuration configuration;
-  protected JsonMapper jsonMapper = new JsonMapper();
+  protected JsonMapper jsonMapper = JsonMapper.get();
   protected String id;
   protected AuthProvider authProvider;
 

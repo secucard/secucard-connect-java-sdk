@@ -14,7 +14,7 @@ import java.util.Map;
 public class AndroidStorage extends DataStorage {
   public static final String PREFIX = "#convertedbyme#";
   public static final String TIME_PREFIX = "#time#";
-  private JsonMapper jsonMapper = new JsonMapper();
+  private JsonMapper jsonMapper = JsonMapper.get();
   private final SharedPreferences sharedPreferences;
 
   public AndroidStorage(SharedPreferences sharedPreferences) {

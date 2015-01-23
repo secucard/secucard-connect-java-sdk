@@ -15,9 +15,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Utility class for mapping JSON to objects and back.
+ * Uses a com.fasterxml.jackson.ObjectMapper instance internally,
+ * it's thread safe and using singleton pattern is recommended.
+ */
 public class JsonMapper {
   protected ObjectMapper objectMapper = new ObjectMapper();
+
   protected static final TypeMap TYPE_REGISTRY = new TypeMap();
+
+  private static final JsonMapper instance = new JsonMapper();
+
+  private JsonMapper() {
+  }
+
+  public static JsonMapper get() {
+    return instance;
+  }
 
   @SuppressWarnings({"unchecked"})
   public <T> T map(String json, TypeReference typeReference) throws IOException {

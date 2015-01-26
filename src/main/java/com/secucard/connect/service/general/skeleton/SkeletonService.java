@@ -6,8 +6,8 @@ package com.secucard.connect.service.general.skeleton;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.skeleton.Skeleton;
-import com.secucard.connect.model.transport.QueryParams;
 import com.secucard.connect.service.AbstractService;
 
 public class SkeletonService extends AbstractService {

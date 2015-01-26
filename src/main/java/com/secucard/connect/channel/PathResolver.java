@@ -10,6 +10,8 @@ import java.util.StringTokenizer;
  * Builds the URL like resource path according to the ProductInfo annotation of a secucard api type.
  */
 public class PathResolver {
+  PathResolver() {
+  }
 
   /**
    * Returns the resource path.
@@ -42,6 +44,7 @@ public class PathResolver {
 
   /**
    * Returns a
+   *
    * @param appId
    * @param separator
    * @return

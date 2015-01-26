@@ -4,10 +4,12 @@ import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.auth.Token;
+import com.secucard.connect.model.general.components.Geometry;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -17,7 +19,7 @@ import java.util.Map;
 
 public abstract class RestChannelBase extends AbstractChannel {
   protected final Configuration configuration;
-  protected JsonMapper jsonMapper = new JsonMapper();
+  protected JsonMapper jsonMapper = JsonMapper.get();
   protected String id;
   protected AuthProvider authProvider;
 
@@ -131,11 +133,25 @@ public abstract class RestChannelBase extends AbstractChannel {
     }
   }
 
+  @SuppressWarnings({"unchecked"})
+  protected void setAuthorizationHeader(Map headers) {
+    Token token = authProvider.getToken();
+    if (token != null) {
+      String key = "Authorization";
+      String value = "Bearer " + token.getAccessToken();
+      if (headers instanceof MultivaluedMap) {
+        ((MultivaluedMap) headers).putSingle(key, value);
+      } else {
+        headers.put(key, value);
+      }
+    }
+  }
+
   /**
    * Low level rest access for internal usage, posting to a url and get the response back as object.
    */
   public abstract <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
-                      Integer... ignoredState);
+                             Integer... ignoredState);
 
-  public abstract InputStream getStream(String url,  Map<String, Object> parameters, Map<String, String> headers);
+  public abstract InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers);
 }

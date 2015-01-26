@@ -3,13 +3,16 @@ package com.secucard.connect.channel.rest;
 import android.content.Context;
 import android.util.Log;
 import com.android.volley.*;
-import com.android.volley.toolbox.*;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.RequestFuture;
+import com.android.volley.toolbox.Volley;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
-import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
@@ -42,28 +45,9 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public String invoke(String command, final Callback<String> callback) {
-    String url = buildRequestUrl(null, command);
-    Request<String> request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-      @Override
-      public void onResponse(String response) {
-        callback.completed(response);
-      }
-    }, new Response.ErrorListener() {
-      @Override
-      public void onErrorResponse(VolleyError error) {
-        callback.failed(error);
-      }
-    });
-    requestQueue.add(request);
-    return null;
-  }
-
-  @Override
   public <T> T getObject(Class<T> type, String objectId, Callback<T> callback) {
     String url = buildRequestUrl(type, objectId);
-    Request<T> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, secure, new DynamicTypeReference(type),
-        callback);
+    Request<T> request = buildRequest(Request.Method.GET, url, null, new DynamicTypeReference(type), callback);
     requestQueue.add(request);
     return null;
   }
@@ -72,7 +56,7 @@ public class VolleyChannel extends RestChannelBase {
   @Override
   public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
     String url = buildRequestUrl(type) + "?" + encodeQueryParams(queryParams);
-    Request<ObjectList<T>> request = new ObjectJsonRequest<>(Request.Method.GET, url, null, secure,
+    Request<ObjectList<T>> request = buildRequest(Request.Method.GET, url, null,
         new DynamicTypeReference(ObjectList.class, type), callback);
     //        request.setTag(url);
     Log.d("ConnectJavaClient", "VolleyChannel: findObjects ->" + type);
@@ -90,11 +74,12 @@ public class VolleyChannel extends RestChannelBase {
       callback.failed(e);
       return null;
     }
-    Request request = new ObjectJsonRequest<>(Request.Method.POST, url, requestBody, secure,
-        new DynamicTypeReference(object.getClass()), callback);
+    Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(object.getClass()),
+        callback);
     requestQueue.add(request);
     return null;
   }
+
 
   @Override
   public <T extends SecuObject> T updateObject(T object, Callback<T> callback) {
@@ -106,8 +91,8 @@ public class VolleyChannel extends RestChannelBase {
       callback.failed(e);
       return null;
     }
-    Request request = new ObjectJsonRequest<>(Request.Method.PUT, url, requestBody, secure,
-        new DynamicTypeReference(object.getClass()), callback);
+    Request request = buildRequest(Request.Method.PUT, url, requestBody, new DynamicTypeReference(object.getClass()),
+        callback);
     requestQueue.add(request);
     return null;
   }
@@ -123,8 +108,7 @@ public class VolleyChannel extends RestChannelBase {
       callback.failed(e);
       return null;
     }
-    Request request = new ObjectJsonRequest<>(Request.Method.PUT, url, requestBody, secure,
-        new DynamicTypeReference(returnType), callback);
+    Request request = buildRequest(Request.Method.PUT, url, requestBody, new DynamicTypeReference(returnType), callback);
     requestQueue.add(request);
     return null;
   }
@@ -132,16 +116,14 @@ public class VolleyChannel extends RestChannelBase {
   @Override
   public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
     String url = buildRequestUrl(product, objectId, action, actionArg);
-    DynamicTypeReference typeReference = new DynamicTypeReference(product);
-    Request request = new ObjectJsonRequest<>(Request.Method.DELETE, url, null, secure, typeReference, callback);
+    Request request = buildRequest(Request.Method.DELETE, url, null, new DynamicTypeReference(product), callback);
     requestQueue.add(request);
   }
 
   @Override
   public void deleteObject(Class type, String objectId, Callback<?> callback) {
     String url = buildRequestUrl(type, objectId);
-    Request request = new ObjectJsonRequest<>(Request.Method.DELETE, url, null, secure, new DynamicTypeReference(type),
-        callback);
+    Request request = buildRequest(Request.Method.DELETE, url, null, new DynamicTypeReference(type), callback);
     requestQueue.add(request);
   }
 
@@ -156,8 +138,8 @@ public class VolleyChannel extends RestChannelBase {
       callback.failed(e);
       return null;
     }
-    Request<T> request = new ObjectJsonRequest<>(Request.Method.POST, url, requestBody, secure,
-        new DynamicTypeReference(returnType), callback);
+    Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(returnType),
+        callback);
     requestQueue.add(request);
     return null;
   }
@@ -172,8 +154,8 @@ public class VolleyChannel extends RestChannelBase {
       callback.failed(e);
       return null;
     }
-    Request<T> request = new ObjectJsonRequest<>(Request.Method.POST, url, requestBody, secure,
-        new DynamicTypeReference(returnType), callback);
+    Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(returnType),
+        callback);
     requestQueue.add(request);
     return null;
   }
@@ -184,15 +166,13 @@ public class VolleyChannel extends RestChannelBase {
                     Integer... ignoredState) {
     RequestFuture future = RequestFuture.newFuture();
     String requestBody = encodeQueryParams(parameters);
-    ObjectJsonRequest<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody,
+    ObjectJsonRequest<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody, headers,
         new DynamicTypeReference(responseType), future, future) {
       @Override
       public String getBodyContentType() {
         return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
       }
     };
-
-    request.setHeaders(headers);
 
     future.setRequest(requestQueue.add(request));
 
@@ -231,6 +211,16 @@ public class VolleyChannel extends RestChannelBase {
     return url;
   }
 
+  private <T> ObjectJsonRequest<T> buildRequest(int method, String url, String requestBody, TypeReference typeReference,
+                                                Callback<T> callback) {
+    Map<String, String> headers = null;
+    if (secure) {
+      headers = new HashMap<>();
+      setAuthorizationHeader(headers);
+    }
+    return new ObjectJsonRequest<>(method, url, requestBody, headers, typeReference, callback);
+  }
+
   /**
    * Request which maps JSON response strings directly into Java objects.
    * Jackson ObjectMapper will be used for this.
@@ -241,25 +231,17 @@ public class VolleyChannel extends RestChannelBase {
     private TypeReference typeReference;
     private Map<String, String> headers;
 
-    public void setHeaders(Map<String, String> headers) {
-      if (headers == null) {
-        return;
-      }
-      if (this.headers == null) {
-        this.headers = new HashMap<>();
-      }
-      this.headers.putAll(headers);
-    }
-
-    private ObjectJsonRequest(int method, String url, String requestBody, TypeReference typeReference,
-                              Response.Listener<T> listener, Response.ErrorListener errorListener) {
+    private ObjectJsonRequest(int method, String url, String requestBody, Map<String, String> headers,
+                              TypeReference typeReference, Response.Listener<T> listener,
+                              Response.ErrorListener errorListener) {
       super(method, url, requestBody, listener, errorListener);
       this.typeReference = typeReference;
+      this.headers = headers;
     }
 
-    private ObjectJsonRequest(int method, String url, String requestBody,
-                              boolean secure, TypeReference typeReference, final Callback<T> callback) {
-      super(method, url, requestBody, new Response.Listener<T>() {
+    private ObjectJsonRequest(int method, String url, String requestBody, Map<String, String> headers,
+                              TypeReference typeReference, final Callback<T> callback) {
+      this(method, url, requestBody, headers, typeReference, new Response.Listener<T>() {
         @Override
         public void onResponse(T response) {
           callback.completed(response);
@@ -270,12 +252,6 @@ public class VolleyChannel extends RestChannelBase {
           callback.failed(error);
         }
       });
-      this.typeReference = typeReference;
-      if (secure) {
-        headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + authProvider.getToken().getAccessToken());
-        // getBodyContentType() handles media type
-      }
     }
 
     @Override

@@ -27,7 +27,7 @@ public abstract class StompChannelBase extends AbstractChannel {
   protected static final String HEADER_CORRELATION_ID = "correlation-id";
   protected static final String STATUS_OK = "ok";
 
-  protected JsonMapper objectMapper = new JsonMapper();
+  protected JsonMapper objectMapper = JsonMapper.get();
   private final Map<String, Frame> receipts = new HashMap<>(20);
   protected final Map<String, StompMessage> messages = new HashMap<>(20);
   private final Object monitor = new Object();

@@ -23,7 +23,7 @@ public class AccountTest extends AbstractServicesTest {
 
     final Location location = new Location(48.138656869103244d, 11.573281288146972d, 1);
 
-    boolean b = service.updateLocation("me", location, null);
+    boolean b = service.updateLocation("me", location);
 
     // event may take a while
     Thread.sleep(30000);

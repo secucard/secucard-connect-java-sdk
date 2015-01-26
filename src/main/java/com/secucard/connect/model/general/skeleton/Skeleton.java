@@ -5,6 +5,7 @@ import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.accounts.Location.Location;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +14,7 @@ import java.util.ArrayList;
  * Model class to hold all fields of a skeleton
  */
 @ProductInfo(resourceId = "general.skeletons")
-public class Skeleton extends SecuObject {
+public class Skeleton extends SecuObject implements Serializable {
   @JsonProperty
   private String a;
 

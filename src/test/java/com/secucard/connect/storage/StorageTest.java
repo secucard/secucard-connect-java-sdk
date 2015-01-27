@@ -7,15 +7,17 @@ import java.io.IOException;
 
 public class StorageTest {
 
-
   @Test
   public void diskStorage() throws IOException {
 
-    SimpleFileDataStorage storage = new SimpleFileDataStorage("teststore");
+    DataStorage storage = new DiskCache("teststore");
 
     storage.save("1", "21");
+    storage.save("2", "21");
     Object o = storage.get("1");
     Assert.assertTrue(o.equals("21"));
-    storage.remove();
+    storage.clear("1", null);
+
+    storage.clear();
   }
 }

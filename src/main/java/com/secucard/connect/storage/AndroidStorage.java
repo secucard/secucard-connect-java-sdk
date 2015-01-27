@@ -9,16 +9,18 @@ import java.util.Map;
 
 /**
  * Stores data in SharedPreferences.
- * and in todo: separate disk cache.
+ * and separate disk cache.
  */
 public class AndroidStorage extends DataStorage {
   public static final String PREFIX = "#convertedbyme#";
   public static final String TIME_PREFIX = "#time#";
   private JsonMapper jsonMapper = JsonMapper.get();
   private final SharedPreferences sharedPreferences;
+  private final DiskCache diskCache;
 
-  public AndroidStorage(SharedPreferences sharedPreferences) {
+  public AndroidStorage(SharedPreferences sharedPreferences, DiskCache diskCache) {
     this.sharedPreferences = sharedPreferences;
+    this.diskCache = diskCache;
   }
 
   @Override
@@ -63,7 +65,9 @@ public class AndroidStorage extends DataStorage {
 
   @Override
   public void save(String id, InputStream in, boolean replace) throws DataStorageException {
-    // todo: implement, use separate file based cache for streams, not SharedPreferences
+    if (diskCache != null) {
+      diskCache.save(id, in, replace);
+    }
   }
 
   @Override
@@ -76,7 +80,7 @@ public class AndroidStorage extends DataStorage {
         int idx = str.indexOf(":");
         String cname = str.substring(PREFIX.length(), idx);
         try {
-          return jsonMapper.map(str.substring(idx+1), Class.forName(cname));
+          return jsonMapper.map(str.substring(idx + 1), Class.forName(cname));
         } catch (IOException | ClassNotFoundException e) {
           throw new DataStorageException("Error mapping JSON to object.", e);
         }
@@ -87,7 +91,9 @@ public class AndroidStorage extends DataStorage {
 
   @Override
   public InputStream getStream(String id) {
-    // todo: implement, use separate file based cache for streams, not SharedPreferences
+    if (diskCache != null) {
+      return diskCache.getStream(id);
+    }
     return null;
   }
 
@@ -113,6 +119,18 @@ public class AndroidStorage extends DataStorage {
         }
       }
       editor.apply();
+    }
+
+    if (diskCache != null) {
+      diskCache.clear(id, timestampMs);
+    }
+  }
+
+  @Override
+  public void destroy() {
+    sharedPreferences.edit().clear().apply();
+    if (diskCache != null) {
+      diskCache.destroy();
     }
   }
 }

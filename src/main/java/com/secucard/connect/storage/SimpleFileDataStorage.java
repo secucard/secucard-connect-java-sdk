@@ -60,6 +60,11 @@ public class SimpleFileDataStorage extends DataStorage {
     }
   }
 
+  @Override
+  public void destroy() {
+    remove();
+  }
+
   private synchronized Object getInternal(String id) {
     try {
       return readStore().get(id);

@@ -181,7 +181,7 @@ public class IdentService extends AbstractService {
   }
 
   private void processAttachments(List<IdentResult> results, boolean cache) {
-    passContext();
+    setContext();
 
     if (cacheAttachmentsEnabled && cache) {
       for (IdentResult result : results) {

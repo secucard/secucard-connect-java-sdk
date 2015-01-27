@@ -2,23 +2,26 @@ package com.secucard.connect.service.services;
 
 import com.secucard.connect.model.services.idresult.Attachment;
 import com.secucard.connect.service.AbstractServicesTest;
-import com.secucard.connect.storage.SimpleFileDataStorage;
+import com.secucard.connect.service.TestService;
+import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.storage.DiskCache;
 import junit.framework.Assert;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.URL;
 
 public class AttachmentTest extends AbstractServicesTest {
 
   @Override
   protected void executeTests() throws Exception {
-    String url = "http://media2.govtech.com/images/770*1000/dog_flickr.jpg";
+    String url = "http://media2.govtech.com/images/770*1000/dog_flickr.jpg?1&2&3";
 
-    context.set();
+    client.getService(TestService.class).setContextToCurrentThread();
 
     Attachment attachment = new Attachment(url, "jpg");
 
-    SimpleFileDataStorage storage = (SimpleFileDataStorage) context.getDataStorage();
+    DiskCache storage = (DiskCache) context.getDataStorage();
 
     attachment.download();
 
@@ -36,7 +39,7 @@ public class AttachmentTest extends AbstractServicesTest {
     storage.clear(System.currentTimeMillis());
     Assert.assertTrue(storage.size() == 0);
 
-    storage.remove();
+    storage.clear();
   }
 
   @Override

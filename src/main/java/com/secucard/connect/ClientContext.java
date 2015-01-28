@@ -9,13 +9,18 @@ import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.channel.stomp.StompChannel;
-import com.secucard.connect.storage.*;
+import com.secucard.connect.storage.AndroidStorage;
+import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.storage.DiskCache;
+import com.secucard.connect.storage.MemoryDataStorage;
 import com.secucard.connect.util.ResourceDownloader;
+import com.secucard.connect.util.ThreadLocalUtil;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
- * Singleton context instance holding all necessary beans used in client.
+ * Context instance holding all necessary beans used in client.
  */
 public class ClientContext {
   public static final String STOMP = "stomp";
@@ -31,28 +36,15 @@ public class ClientContext {
   protected Object runtimeContext;
   protected ResourceDownloader resourceDownloader;
 
-  private static final ThreadLocal<ClientContext> instance = new ThreadLocal<>();
-
   public ClientContext(String clientId, ClientConfiguration config, Object runtimeContext, DataStorage dataStorage) {
     init(clientId, config, runtimeContext, dataStorage);
   }
 
   /**
-   * Returns a reference to a client context instance associated with the current thread.
+   * Obtain the current client context instance..
    */
   public static ClientContext get() {
-    return instance.get();
-  }
-
-  /**
-   * Associates this instance with the current thread.
-   */
-  public void set() {
-    instance.set(this);
-  }
-
-  public void remove(){
-    instance.remove();
+    return (ClientContext) ThreadLocalUtil.get(ClientContext.class.getName());
   }
 
   public DataStorage getDataStorage() {
@@ -133,7 +125,16 @@ public class ClientContext {
       final Context appContext = (Context) runtimeContext;
 
       if (dataStorage == null) {
-        dataStorage = new AndroidStorage(appContext.getSharedPreferences("secuconnect", Context.MODE_PRIVATE));
+        DiskCache diskCache = null;
+        String path = appContext.getCacheDir().getPath() + File.separator + clientId;
+        try {
+          diskCache = new DiskCache(path);
+        } catch (IOException e) {
+          throw new SecuException("Error creating file storage: " + path, e);
+        }
+
+        dataStorage = new AndroidStorage(appContext.getSharedPreferences("secuconnect", Context.MODE_PRIVATE),
+            diskCache);
       }
 
       restChannel = new VolleyChannel(clientId, appContext, config.getRestConfiguration());
@@ -155,7 +156,7 @@ public class ClientContext {
           dataStorage = new MemoryDataStorage();
         } else {
           try {
-            dataStorage = new SimpleFileDataStorage(config.getCacheDir());
+            dataStorage = new DiskCache(config.getCacheDir() + File.separator + clientId);
           } catch (IOException e) {
             throw new SecuException("Error creating file storage: " + config.getCacheDir(), e);
           }

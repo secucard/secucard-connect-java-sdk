@@ -29,6 +29,7 @@ public class Client extends AbstractService implements EventListener {
 
   /**
    * Creating the client using no runtime context and storage.
+   *
    * @see #Client(String, ClientConfiguration, Object, com.secucard.connect.storage.DataStorage)
    */
   public static Client create(String id, ClientConfiguration configuration) {
@@ -111,6 +112,7 @@ public class Client extends AbstractService implements EventListener {
       getStompChannel().close(null);
     }
     getRestChannel().close(null);
+    clear();
     // todo: clear data store?
   }
 
@@ -142,7 +144,7 @@ public class Client extends AbstractService implements EventListener {
           }
           while (!stopHeartbeat) {
             try {
-              ((StompChannel)getStompChannel()).ping();
+              ((StompChannel) getStompChannel()).ping();
             } catch (Exception e) {
               handleException(new SecuException("Error sending heart beat message.", e), null);
               break;

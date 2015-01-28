@@ -23,9 +23,9 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
     return store.size();
   }
 
-  private void saveInternal(String id, Object object, boolean replace) {
+  protected boolean saveInternal(String id, Object object, boolean replace) {
     if (!replace && store.containsKey(id)) {
-      return;
+      return false;
     }
     Item item = new Item();
     try {
@@ -48,6 +48,7 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
     }
     item.time = System.currentTimeMillis();
     store.put(id, item);
+    return true;
   }
 
   @Override
@@ -55,7 +56,7 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
     return getInternal(id);
   }
 
-  private Object getInternal(String id) {
+  protected Object getInternal(String id) {
     Object o = null;
     Item item = store.get(id);
     if (item != null) {
@@ -76,7 +77,7 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
   @Override
   public void clear(String id, Long timestampMs) {
     if (id == null) {
-       return;
+      return;
     }
 
     if ("*".equals(id) && timestampMs == null) {
@@ -96,7 +97,12 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
     }
   }
 
-  private class Item implements Serializable {
+  @Override
+  public void destroy() {
+    store.clear();
+  }
+
+  protected class Item implements Serializable {
     public Long time;
     public String type;
     public Object value;

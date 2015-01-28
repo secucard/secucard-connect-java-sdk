@@ -8,6 +8,7 @@ import com.secucard.connect.channel.Channel;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
+import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.util.logging.Logger;
 
@@ -51,10 +52,18 @@ public abstract class AbstractService {
   }
 
   /**
-   * Store client context to current thread so it can be passed around.
+   * Assign client context to current thread of execution so it can be accessed from objects not having a
+   * reference to the client.
    */
-  protected void passContext() {
-    context.set();
+  protected void setContext() {
+    ThreadLocalUtil.set(ClientContext.class.getName(), context);
+  }
+
+  /**
+   * Remove all data assigned to threads.
+   */
+  protected void clear() {
+    ThreadLocalUtil.remove();
   }
 
   /**

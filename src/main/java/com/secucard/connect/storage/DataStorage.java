@@ -67,6 +67,8 @@ public abstract class DataStorage {
     clear("*", timestampMs);
   }
 
+  public abstract void destroy();
+
   protected static boolean wildCardMatch(String text, String pattern) {
     String[] cards = pattern.split("\\*");
     for (String card : cards) {

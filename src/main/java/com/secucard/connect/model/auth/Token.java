@@ -7,94 +7,105 @@ import java.io.Serializable;
 
 public class Token implements Serializable {
 
-  @JsonProperty("access_token")
-  private String accessToken;
+    @JsonProperty("access_token")
+    private String accessToken;
 
-  @JsonProperty("expires_in")
-  private int expiresIn;
+    @JsonProperty("expires_in")
+    private int expiresIn;
 
-  @JsonProperty("token_type")
-  private String tokenType;
+    @JsonProperty("token_type")
+    private String tokenType;
 
-  @JsonProperty
-  private String scope;
+    @JsonProperty
+    private String scope;
 
-  @JsonProperty("refresh_token")
-  private String refreshToken;
+    @JsonProperty("refresh_token")
+    private String refreshToken;
 
-  // UNIX timestamp of token expiring
-  @JsonIgnore
-  private Long expireTime;
+    @JsonProperty
+    private boolean expired;
 
-  public Token() {
-  }
+    // UNIX timestamp of token expiring
+    @JsonIgnore
+    private Long expireTime;
 
-  public Token(String accessToken, String refreshToken) {
-    this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
-  }
+    public Token() {
+    }
 
-  public Long getExpireTime() {
-    return expireTime;
-  }
+    public Token(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+    }
 
-  public void setExpireTime() {
-    this.expireTime = System.currentTimeMillis() + expiresIn * 1000;
-  }
+    public Long getExpireTime() {
+        return expireTime;
+    }
 
-  public boolean isExpired() {
-    return expireTime == null || System.currentTimeMillis() > expireTime;
-  }
+    public void setExpireTime() {
+        this.expireTime = System.currentTimeMillis() + expiresIn * 1000;
+    }
 
-  public String getAccessToken() {
-    return accessToken;
-  }
+    public boolean isExpired() {
+        return expireTime == null || System.currentTimeMillis() > expireTime;
+    }
 
-  public void setAccessToken(String accessToken) {
-    this.accessToken = accessToken;
-  }
+    public boolean getExpired() {
+        return this.expired;
+    }
 
-  public int getExpiresIn() {
-    return expiresIn;
-  }
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
 
-  public void setExpiresIn(int expiresIn) {
-    this.expiresIn = expiresIn;
-  }
+    public String getAccessToken() {
+        return accessToken;
+    }
 
-  public String getTokenType() {
-    return tokenType;
-  }
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
 
-  public void setTokenType(String tokenType) {
-    this.tokenType = tokenType;
-  }
+    public int getExpiresIn() {
+        return expiresIn;
+    }
 
-  public String getScope() {
-    return scope;
-  }
+    public void setExpiresIn(int expiresIn) {
+        this.expiresIn = expiresIn;
+    }
 
-  public void setScope(String scope) {
-    this.scope = scope;
-  }
+    public String getTokenType() {
+        return tokenType;
+    }
 
-  public String getRefreshToken() {
-    return refreshToken;
-  }
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
 
-  public void setRefreshToken(String refreshToken) {
-    this.refreshToken = refreshToken;
-  }
+    public String getScope() {
+        return scope;
+    }
 
-  @Override
-  public String toString() {
-    return "Token{" +
-        "accessToken='" + accessToken + '\'' +
-        ", expiresIn=" + expiresIn +
-        ", tokenType='" + tokenType + '\'' +
-        ", scope='" + scope + '\'' +
-        ", refreshToken='" + refreshToken + '\'' +
-        ", expireTime=" + expireTime +
-        '}';
-  }
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    @Override
+    public String toString() {
+        return "Token{" +
+                "accessToken='" + accessToken + '\'' +
+                ", expiresIn=" + expiresIn +
+                ", tokenType='" + tokenType + '\'' +
+                ", scope='" + scope + '\'' +
+                ", refreshToken='" + refreshToken + '\'' +
+                ", expireTime=" + expireTime +
+                '}';
+    }
 }

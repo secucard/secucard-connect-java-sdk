@@ -28,4 +28,14 @@ public class AccountService extends AbstractService {
       }
     }.invokeAndConvert(callback);
   }
+
+    public boolean updateGCM(final String accountId, final String registrationId, Callback<Boolean> callback) {
+//        return new Result2BooleanInvoker() {
+//            @Override
+//            protected Result handle(Callback<Result> callback) throws Exception {
+//                return getStompChannel().updateObject(Account.class, accountId, "location", null, registrationId, Result.class, callback);
+//            }
+//        }.invokeAndConvert(callback);
+        return true;
+    }
 }

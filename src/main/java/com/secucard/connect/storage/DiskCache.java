@@ -9,10 +9,10 @@ import java.nio.file.Paths;
 /**
  * Writes objects and streams to disk.
  */
-public class DiskCache extends DataStorage {
-  private String cacheDir;
-  private ObjectStore store;
-  boolean bundleObjects = true; // bundle object to save in separate store and save store to disk
+public class DiskCache extends DataStorage implements Serializable {
+  private transient String cacheDir;
+  private transient ObjectStore store;
+  private transient boolean bundleObjects = true; // bundle object to save in separate store and save store to disk
 
   public DiskCache(String cacheDir) throws IOException {
     init(cacheDir);

@@ -7,7 +7,6 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
-import com.secucard.connect.util.EventUtil;
 
 import java.util.logging.Level;
 
@@ -19,8 +18,8 @@ public class Client extends AbstractService implements EventListener {
   private Thread heartbeatInvoker;
   private String id;
   private ServiceFactory serviceFactory;
-  private EventListener targetEventListener = null;
   private boolean stopHeartbeat;
+
 
   private Client(final String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
     init(id, configuration, runtimeContext, storage);
@@ -82,18 +81,6 @@ public class Client extends AbstractService implements EventListener {
     return id;
   }
 
-  public void setEventListener(final EventListener eventListener) {
-    targetEventListener = eventListener;
-
-    // we use the same listener also for auth event purposes
-    getAuthProvider().registerEventListener(eventListener);
-  }
-
-  public void removeEventListener() {
-    targetEventListener = null;
-    getAuthProvider().registerEventListener(null);
-  }
-
   public void connect() {
     try {
       getRestChannel().open(null); // init rest first since it does auth,
@@ -121,14 +108,15 @@ public class Client extends AbstractService implements EventListener {
   }
 
   /**
-   * Performes basic stomp event handling, delegates event to another target listener after.
-   *
-   * @param event
+   * Client can act itself as an event listener, for instance to stomp events,
+   * see {@link #init(String, ClientConfiguration, Object, DataStorage)}.
+   * This propagates this events via dispatcher to other listeners registered to the dispatcher after handling them.
+   * todo: introduce separate listener like an event source
    */
   @Override
   public void onEvent(Object event) {
     handleEvent(event);
-    EventUtil.fireEvent(event, targetEventListener);
+    context.getEventDispatcher().fireEvent(event);
   }
 
   private void startHeartBeat() {
@@ -182,11 +170,13 @@ public class Client extends AbstractService implements EventListener {
     if (config == null) {
       throw new SecuException("Configuration  must not be null.");
     }
+
     this.id = id;
     context = new ClientContext(id, config, runtimeContext, storage);
     serviceFactory = new ServiceFactory(context);
     isConnected = false;
 
+    // set up event sources
     if (config.isStompEnabled()) {
       getStompChannel().setEventListener(this);
     }

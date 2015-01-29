@@ -1,5 +1,5 @@
 package com.secucard.connect.event;
 
-public interface EventListener extends java.util.EventListener {
-  public void onEvent(Object event);
+public interface EventListener<T> extends java.util.EventListener {
+  public void onEvent(T event);
 }

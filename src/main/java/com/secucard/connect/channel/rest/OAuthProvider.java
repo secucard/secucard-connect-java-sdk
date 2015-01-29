@@ -5,11 +5,11 @@ import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.ClientCredentials;
 import com.secucard.connect.auth.UserCredentials;
+import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.storage.DataStorage;
-import com.secucard.connect.util.EventUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -97,7 +97,7 @@ public class OAuthProvider implements AuthProvider {
       if ("device".equalsIgnoreCase(configuration.getAuthType())) {
         // perform a device auth
         DeviceAuthCode codes = requestCodes();
-        EventUtil.fireAsyncEvent(codes, authEventListener);
+        EventDispatcher.fireEvent(codes, authEventListener, true);
         token = pollToken(codes);
       } else {
         // get a new token depending on what credentials are available
@@ -137,10 +137,10 @@ public class OAuthProvider implements AuthProvider {
       }
       token = getDeviceAuthToken(codes);
       if (token != null) {
-        EventUtil.fireEvent(EVENT_CODE_AUTH_OK, authEventListener);
+        EventDispatcher.fireEvent(EVENT_CODE_AUTH_OK, authEventListener, false);
         return token;
       }
-      EventUtil.fireEvent(EVENT_CODE_AUTH_PENDING, authEventListener);
+      EventDispatcher.fireEvent(EVENT_CODE_AUTH_PENDING, authEventListener, false);
     }
 
     throw new AuthException("Authorization failed, auth. request timeout or code expired during request.");

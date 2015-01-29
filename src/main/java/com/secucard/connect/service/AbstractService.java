@@ -5,6 +5,8 @@ import com.secucard.connect.ClientContext;
 import com.secucard.connect.ExceptionHandler;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
+import com.secucard.connect.event.EventListener;
+import com.secucard.connect.event.Events;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
@@ -64,6 +66,22 @@ public abstract class AbstractService {
    */
   protected void clear() {
     ThreadLocalUtil.remove();
+  }
+
+  public void setEventListener(final EventListener eventListener) {
+    context.getEventDispatcher().setEventListener(Events.Any.class, eventListener);
+
+    // we use the same listener also for auth event purposes
+    getAuthProvider().registerEventListener(eventListener);
+  }
+
+  public <T> void setEventListener(Class<T> type, EventListener<T> listener) {
+    context.getEventDispatcher().setEventListener(type, listener);
+  }
+
+  public void removeEventListener() {
+    context.getEventDispatcher().removeEventListener();
+    getAuthProvider().registerEventListener(null);
   }
 
   /**

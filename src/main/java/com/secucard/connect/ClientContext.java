@@ -9,6 +9,8 @@ import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.channel.stomp.StompChannel;
+import com.secucard.connect.event.EventDispatcher;
+import com.secucard.connect.event.EventListener;
 import com.secucard.connect.storage.AndroidStorage;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.DiskCache;
@@ -18,6 +20,8 @@ import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Context instance holding all necessary beans used in client.
@@ -35,6 +39,7 @@ public class ClientContext {
   protected ExceptionHandler exceptionHandler;
   protected Object runtimeContext;
   protected ResourceDownloader resourceDownloader;
+  protected EventDispatcher eventDispatcher;
 
   public ClientContext(String clientId, ClientConfiguration config, Object runtimeContext, DataStorage dataStorage) {
     init(clientId, config, runtimeContext, dataStorage);
@@ -45,6 +50,14 @@ public class ClientContext {
    */
   public static ClientContext get() {
     return (ClientContext) ThreadLocalUtil.get(ClientContext.class.getName());
+  }
+
+  public EventDispatcher getEventDispatcher() {
+    return eventDispatcher;
+  }
+
+  public void setEventDispatcher(EventDispatcher eventDispatcher) {
+    this.eventDispatcher = eventDispatcher;
   }
 
   public DataStorage getDataStorage() {
@@ -188,6 +201,8 @@ public class ClientContext {
     this.clientId = clientId;
     this.config = config;
     this.runtimeContext = runtimeContext;
+
+    this.eventDispatcher = new EventDispatcher();
   }
 }
 

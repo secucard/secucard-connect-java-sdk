@@ -2,6 +2,7 @@ package com.secucard.connect.service.general;
 
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.accounts.Location.Location;
+import com.secucard.connect.model.general.accounts.MerchantList;
 import com.secucard.connect.service.AbstractServicesTest;
 import junit.framework.Assert;
 
@@ -15,11 +16,18 @@ public class AccountTest extends AbstractServicesTest {
     client.setEventListener(new EventListener() {
       @Override
       public void onEvent(Object event) {
-        result = event;
+        System.out.println(event);
       }
     });
 
     AccountService service = client.getService(AccountService.class);
+
+    service.setMerchantsChangedListener(new EventListener<MerchantList>() {
+      @Override
+      public void onEvent(MerchantList event) {
+        result = event;
+      }
+    });
 
     final Location location = new Location(48.138656869103244d, 11.573281288146972d, 1);
 

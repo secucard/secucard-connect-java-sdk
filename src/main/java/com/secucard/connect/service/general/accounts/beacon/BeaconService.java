@@ -6,8 +6,8 @@ package com.secucard.connect.service.general.accounts.beacon;
 
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.general.accounts.Account;
-import com.secucard.connect.model.general.accounts.BeaconEnvironment.BeaconEnvironment;
-import com.secucard.connect.model.general.accounts.BeaconEnvironment.BeaconList;
+import com.secucard.connect.model.general.accounts.beaconenvironment.BeaconEnvironment;
+import com.secucard.connect.model.general.accounts.beaconenvironment.BeaconList;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 

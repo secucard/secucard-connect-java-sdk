@@ -3,7 +3,7 @@ package com.secucard.connect.service.general;
 import com.secucard.connect.Callback;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.accounts.Account;
-import com.secucard.connect.model.general.accounts.Location.Location;
+import com.secucard.connect.model.general.accounts.location.Location;
 import com.secucard.connect.model.general.accounts.MerchantList;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;

@@ -2,7 +2,7 @@
  * Copyright (c) 2014 secucard AG. All rights reserved
  */
 
-package com.secucard.connect.model.general.accounts.Location;
+package com.secucard.connect.model.general.accounts.location;
 
 /**
  * Created by Steffen Schröder on 22.09.2014.

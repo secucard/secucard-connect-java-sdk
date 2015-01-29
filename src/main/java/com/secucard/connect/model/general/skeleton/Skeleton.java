@@ -3,7 +3,7 @@ package com.secucard.connect.model.general.skeleton;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
-import com.secucard.connect.model.general.accounts.Location.Location;
+import com.secucard.connect.model.general.accounts.location.Location;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -3,7 +3,7 @@ package com.secucard.connect.service.custom;
 import com.secucard.connect.Callback;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.model.general.accounts.Account;
-import com.secucard.connect.model.general.accounts.Location.Location;
+import com.secucard.connect.model.general.accounts.location.Location;
 import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.general.merchant.PublicMerchant;
 import com.secucard.connect.model.QueryParams;

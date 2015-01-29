@@ -2,7 +2,7 @@
  * Copyright (c) 2014 secucard AG. All rights reserved
  */
 
-package com.secucard.connect.model.general.accounts.BeaconEnvironment;
+package com.secucard.connect.model.general.accounts.beaconenvironment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

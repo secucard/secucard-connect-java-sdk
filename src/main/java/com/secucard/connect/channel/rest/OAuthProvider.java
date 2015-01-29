@@ -217,8 +217,7 @@ public class OAuthProvider implements AuthProvider {
       if (deviceId != null) {
         parameters.put("device", deviceId);
       }
-    } else if (deviceId != null || deviceCode != null) {
-      //todo: fix, this will also cause device auth when device code is set in config and no auth type
+    } else if ("device".equals(configuration.getAuthType()) && (deviceId != null || deviceCode != null)) {
       parameters.put("grant_type", "device");
       if (deviceId != null) {
         parameters.put("uuid", deviceId);

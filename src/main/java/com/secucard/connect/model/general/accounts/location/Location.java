@@ -4,13 +4,17 @@
 
 package com.secucard.connect.model.general.accounts.location;
 
+import com.secucard.connect.model.SecuObject;
+
+import java.io.Serializable;
+
 /**
  * Created by Steffen Schröder on 22.09.2014.
  * Copyright (c) 2014 secucard AG. All rights reserved.
  *
  * Model class to hold latitude and longitude of a location
  */
-public class Location {
+public class Location extends SecuObject implements Serializable {
     private double lat;
 
     private double lon;

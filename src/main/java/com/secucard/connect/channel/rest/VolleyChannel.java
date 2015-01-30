@@ -45,6 +45,9 @@ public class VolleyChannel extends RestChannelBase {
 
   @Override
   public synchronized void close(Callback callback) {
+    if(requestQueue == null)
+          return;
+
     requestQueue.cancelAll(new RequestQueue.RequestFilter() {
       @Override
       public boolean apply(Request<?> request) {

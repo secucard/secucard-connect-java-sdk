@@ -22,11 +22,7 @@ public class Token implements Serializable {
     @JsonProperty("refresh_token")
     private String refreshToken;
 
-    @JsonProperty
-    private boolean expired;
-
     // UNIX timestamp of token expiring
-    @JsonIgnore
     private Long expireTime;
 
     public Token() {
@@ -45,16 +41,9 @@ public class Token implements Serializable {
         this.expireTime = System.currentTimeMillis() + expiresIn * 1000;
     }
 
+    @JsonIgnore
     public boolean isExpired() {
         return expireTime == null || System.currentTimeMillis() > expireTime;
-    }
-
-    public boolean getExpired() {
-        return this.expired;
-    }
-
-    public void setExpired(boolean expired) {
-        this.expired = expired;
     }
 
     public String getAccessToken() {

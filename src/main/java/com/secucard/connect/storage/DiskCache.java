@@ -1,16 +1,12 @@
 package com.secucard.connect.storage;
 
 import java.io.*;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Writes objects and streams to disk.
  */
 public class DiskCache extends DataStorage implements Serializable {
-  private transient String cacheDir;
+  private transient File cacheDir;
   private transient ObjectStore store;
   private transient boolean bundleObjects = true; // bundle object to save in separate store and save store to disk
 
@@ -18,10 +14,9 @@ public class DiskCache extends DataStorage implements Serializable {
     init(cacheDir);
   }
 
-  protected void init(String cacheDir) throws IOException {
-    Path path = Paths.get(cacheDir);
-    Files.createDirectories(path);
-    this.cacheDir = cacheDir;
+  protected void init(String path) {
+    cacheDir = new File(path);
+    cacheDir.mkdir();
   }
 
   @Override
@@ -31,7 +26,7 @@ public class DiskCache extends DataStorage implements Serializable {
     }
     ObjectOutputStream out = null;
     try {
-      Path path;
+      File path;
 
       if (bundleObjects) {
         // save given object in separate store and save this whole store instead of the object itself as file
@@ -44,13 +39,13 @@ public class DiskCache extends DataStorage implements Serializable {
         object = store;
       }
 
-      path = Paths.get(cacheDir, id);
+      path = new File(cacheDir, id);
 
-      if (!bundleObjects && Files.exists(path) && !replace) {
+      if (!bundleObjects && path.exists() && !replace) {
         return;
       }
 
-      out = new ObjectOutputStream(Files.newOutputStream(path));
+      out = new ObjectOutputStream(new FileOutputStream(path));
       out.writeObject(object);
       out.flush();
     } catch (IOException | ClassNotFoundException e) {
@@ -69,14 +64,14 @@ public class DiskCache extends DataStorage implements Serializable {
   @Override
   public synchronized void save(String id, InputStream in, boolean replace) throws DataStorageException {
     // always save streams as separate files
-    Path path = Paths.get(cacheDir, id);
-    if (Files.exists(path) && !replace) {
+    File path = new File(cacheDir, id);
+    if (path.exists() && !replace) {
       return;
     }
     BufferedOutputStream out = null;
     BufferedInputStream bufferedIn = new BufferedInputStream(in);
     try {
-      out = new BufferedOutputStream(Files.newOutputStream(path));
+      out = new BufferedOutputStream(new FileOutputStream(path));
       int b;
       while ((b = bufferedIn.read()) != -1) {
         out.write(b);
@@ -115,10 +110,10 @@ public class DiskCache extends DataStorage implements Serializable {
 
   @Override
   public InputStream getStream(String id) {
-    Path path = Paths.get(cacheDir, id);
+    File path = new File(cacheDir, id);
     try {
-      if (Files.exists(path) && Files.size(path) > 0) {
-        return Files.newInputStream(path);
+      if (path.exists() && path.length() > 0) {
+        return new FileInputStream(path);
       }
     } catch (IOException e) {
       throw new DataStorageException("Error reading stream \"" + id + "\" from disk.", e);
@@ -128,8 +123,7 @@ public class DiskCache extends DataStorage implements Serializable {
 
   @Override
   public synchronized void clear(final String pattern, final Long timestampMs) {
-    Path cache = Paths.get(cacheDir);
-    if (!Files.exists(cache)) {
+    if (!cacheDir.exists()) {
       return;
     }
 
@@ -139,7 +133,7 @@ public class DiskCache extends DataStorage implements Serializable {
       try {
         readStore();
         store.clear(pattern, timestampMs);
-        out = new ObjectOutputStream(Files.newOutputStream(Paths.get(cacheDir, "objectstore")));
+        out = new ObjectOutputStream(new FileOutputStream(new File(cacheDir, "objectstore")));
         out.writeObject(store);
       } catch (IOException | ClassNotFoundException e) {
         throw new DataStorageException("Error deleting  file from disk.", e);
@@ -154,38 +148,33 @@ public class DiskCache extends DataStorage implements Serializable {
       }
     }
 
-    DirectoryStream.Filter<Path> filter = new DirectoryStream.Filter<Path>() {
+    FileFilter filter = new FileFilter() {
       @Override
-      public boolean accept(Path entry) throws IOException {
-        return wildCardMatch(entry.getFileName().toString(), pattern)
-            && (timestampMs == null || Files.getLastModifiedTime(entry).toMillis() < timestampMs);
+      public boolean accept(File pathname) {
+        return wildCardMatch(pathname.getPath(), pattern)
+            && (timestampMs == null || pathname.lastModified() < timestampMs);
       }
     };
 
-    DirectoryStream<Path> paths = null;
-    try {
-      paths = Files.newDirectoryStream(cache, filter);
-    } catch (IOException e) {
-      throw new DataStorageException("Error listing directory contents of \"" + cacheDir + "\"", e);
-    }
+    File[] paths = cacheDir.listFiles(filter);
 
-    for (Path path : paths) {
-      try {
-        Files.delete(path);
-      } catch (IOException e) {
-        throw new DataStorageException("Error deleting  file \"" + path.toString() + "\" from disk.", e);
+    for (File path : paths) {
+      if (!path.delete()) {
+        throw new DataStorageException("Error deleting  file \"" + path.toString() + "\" from disk.");
       }
     }
   }
 
   public int size() {
-    String[] files = new File(cacheDir).list();
+    if (!cacheDir.exists()) {
+      return 0;
+    }
+    String[] files = cacheDir.list();
     return files == null ? 0 : files.length;
   }
 
   public void destroy() {
-    Path cache = Paths.get(cacheDir);
-    if (!Files.exists(cache)) {
+    if (!cacheDir.exists()) {
       return;
     }
 
@@ -193,20 +182,20 @@ public class DiskCache extends DataStorage implements Serializable {
       store = null;
     }
 
-    String[] files = new File(cacheDir).list();
+    String[] files = cacheDir.list();
     for (String file : files) {
       new File(file).delete();
     }
 
-    new File(cacheDir).delete();
+    cacheDir.delete();
   }
 
   private void readStore() throws IOException, ClassNotFoundException {
     if (store == null) {
       // read from disk only if not exist yet
-      Path path = Paths.get(cacheDir, "objectstore");
-      if (Files.exists(path) && Files.size(path) > 0) {
-        store = (ObjectStore) new ObjectInputStream(Files.newInputStream(path)).readObject();
+      File path = new File(cacheDir, "objectstore");
+      if (path.exists() && path.length() > 0) {
+        store = (ObjectStore) new ObjectInputStream(new FileInputStream(path)).readObject();
       } else {
         store = new ObjectStore();
       }

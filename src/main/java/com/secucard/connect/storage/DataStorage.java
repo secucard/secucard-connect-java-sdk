@@ -81,7 +81,7 @@ public abstract class DataStorage {
     return true;
   }
 
-  public class DataStorageException extends RuntimeException {
+  public static class DataStorageException extends RuntimeException {
     public DataStorageException() {
     }
 

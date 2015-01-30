@@ -23,6 +23,10 @@ public class AttachmentTest extends AbstractServicesTest {
 
     DiskCache storage = (DiskCache) context.getDataStorage();
 
+
+    storage.clear();
+    Assert.assertTrue(storage.size() == 0);
+
     attachment.download();
 
     InputStream in = attachment.getInputStream();
@@ -33,13 +37,16 @@ public class AttachmentTest extends AbstractServicesTest {
     FileOutputStream out = new FileOutputStream("att-test");
     out.write(contents);
 
+    storage.save("1", "1");
+
     storage.clear(System.currentTimeMillis() - 1000 * 60 * 60 * 2);
-    Assert.assertTrue(storage.size() == 1);
+    Assert.assertTrue(storage.size() == 2);
 
     storage.clear(System.currentTimeMillis());
     Assert.assertTrue(storage.size() == 0);
 
-    storage.clear();
+    storage.destroy();
+    Assert.assertTrue(storage.size() == 0);
   }
 
   @Override

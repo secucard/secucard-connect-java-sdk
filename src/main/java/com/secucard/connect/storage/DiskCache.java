@@ -6,6 +6,7 @@ import java.io.*;
  * Writes objects and streams to disk.
  */
 public class DiskCache extends DataStorage implements Serializable {
+  private transient static final String OBJECTSTORE = "objectstore";
   private transient File cacheDir;
   private transient ObjectStore store;
   private transient boolean bundleObjects = true; // bundle object to save in separate store and save store to disk
@@ -16,7 +17,10 @@ public class DiskCache extends DataStorage implements Serializable {
 
   protected void init(String path) {
     cacheDir = new File(path);
-    cacheDir.mkdir();
+    cacheDir.mkdirs();
+    if (!cacheDir.exists()) {
+      throw new DataStorageException("Can't create directory " + cacheDir);
+    }
   }
 
   @Override
@@ -35,7 +39,7 @@ public class DiskCache extends DataStorage implements Serializable {
         if (!store.saveInternal(id, object, replace)) {
           return;
         }
-        id = "objectstore";
+        id = OBJECTSTORE;
         object = store;
       }
 
@@ -133,7 +137,7 @@ public class DiskCache extends DataStorage implements Serializable {
       try {
         readStore();
         store.clear(pattern, timestampMs);
-        out = new ObjectOutputStream(new FileOutputStream(new File(cacheDir, "objectstore")));
+        out = new ObjectOutputStream(new FileOutputStream(new File(cacheDir, OBJECTSTORE)));
         out.writeObject(store);
       } catch (IOException | ClassNotFoundException e) {
         throw new DataStorageException("Error deleting  file from disk.", e);
@@ -148,15 +152,16 @@ public class DiskCache extends DataStorage implements Serializable {
       }
     }
 
-    FileFilter filter = new FileFilter() {
+    // delete cache files but not object store
+
+    File[] paths = cacheDir.listFiles(new FileFilter() {
       @Override
       public boolean accept(File pathname) {
-        return wildCardMatch(pathname.getPath(), pattern)
+        String fileName = pathname.getName();
+        return !OBJECTSTORE.equals(fileName) && wildCardMatch(fileName, pattern)
             && (timestampMs == null || pathname.lastModified() < timestampMs);
       }
-    };
-
-    File[] paths = cacheDir.listFiles(filter);
+    });
 
     for (File path : paths) {
       if (!path.delete()) {
@@ -165,12 +170,26 @@ public class DiskCache extends DataStorage implements Serializable {
     }
   }
 
-  public int size() {
+  public int size() throws Exception {
     if (!cacheDir.exists()) {
       return 0;
     }
+
     String[] files = cacheDir.list();
-    return files == null ? 0 : files.length;
+    if (files == null) {
+      return 0;
+    }
+
+    int size;
+    if (new File(cacheDir, OBJECTSTORE).exists()) {
+      size = files.length - 1;
+      readStore();
+      size += store.size();
+    } else {
+      size = files.length;
+    }
+
+    return size;
   }
 
   public void destroy() {
@@ -182,18 +201,31 @@ public class DiskCache extends DataStorage implements Serializable {
       store = null;
     }
 
-    String[] files = cacheDir.list();
-    for (String file : files) {
-      new File(file).delete();
+    File[] files = cacheDir.listFiles();
+    for (File file : files) {
+      if (!file.delete()) {
+        throw new DataStorageException("Error deleting  file \"" + file.getPath() + "\" from disk.");
+      }
     }
 
-    cacheDir.delete();
+    deleteDir(cacheDir);
+  }
+
+  private void deleteDir(File file) {
+    if (file != null && file.isDirectory() && file.list().length == 0) {
+
+      if (!file.delete()) {
+        throw new DataStorageException("Error deleting  file \"" + file.getPath() + "\" from disk.");
+      }
+
+      deleteDir(file.getParentFile());
+    }
   }
 
   private void readStore() throws IOException, ClassNotFoundException {
     if (store == null) {
       // read from disk only if not exist yet
-      File path = new File(cacheDir, "objectstore");
+      File path = new File(cacheDir, OBJECTSTORE);
       if (path.exists() && path.length() > 0) {
         store = (ObjectStore) new ObjectInputStream(new FileInputStream(path)).readObject();
       } else {

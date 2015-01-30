@@ -1,8 +1,10 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.model.general.skeleton.Skeleton;
+import com.secucard.connect.event.EventListener;
+import com.secucard.connect.event.Events;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.general.skeleton.Skeleton;
 import com.secucard.connect.service.AbstractServicesTest;
 
 import java.util.List;
@@ -19,6 +21,12 @@ public class SkeletonTest extends AbstractServicesTest {
   public void before() throws Exception {
     super.before();
     service = client.getService(SkeletonService.class);
+    client.setEventListener(Events.ConnectionStateChanged.class, new EventListener<Events.ConnectionStateChanged>() {
+      @Override
+      public void onEvent(Events.ConnectionStateChanged event) {
+        System.out.println("Client is connected: " + event.connected);
+      }
+    });
   }
 
   @Override

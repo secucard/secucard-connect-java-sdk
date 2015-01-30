@@ -81,7 +81,10 @@ public class Client extends AbstractService implements EventListener {
     return id;
   }
 
-  public void connect() {
+  public synchronized void connect() {
+    if (isConnected) {
+      return;
+    }
     try {
       getRestChannel().open(null); // init rest first since it does auth,
       if (context.getConfig().isStompEnabled()) {
@@ -89,18 +92,24 @@ public class Client extends AbstractService implements EventListener {
         startHeartBeat();
       }
     } catch (Exception e) {
+      isConnected = false;
       handleException(e, null);
     }
+    isConnected = true;
   }
 
-  public void disconnect() {
-    if (context.getConfig().isStompEnabled()) {
-      stopHeartBeat();
-      getStompChannel().close(null);
+  public synchronized void disconnect() {
+    try {
+      if (context.getConfig().isStompEnabled()) {
+        stopHeartBeat();
+        getStompChannel().close(null);
+      }
+      getRestChannel().close(null);
+      clear();
+      // todo: clear data store?
+    } finally {
+      isConnected = false;
     }
-    getRestChannel().close(null);
-    clear();
-    // todo: clear data store?
   }
 
   public boolean isConnected() {
@@ -187,10 +196,8 @@ public class Client extends AbstractService implements EventListener {
 
   private void handleEvent(Object event) {
     if (Events.CONNECTED.equals(event)) {
-      isConnected = true;
       LOG.info("Connected to server.");
     } else if (Events.DISCONNECTED.equals(event)) {
-      isConnected = false;
       LOG.info("Disconnected from server.");
     }
   }

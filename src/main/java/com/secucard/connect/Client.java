@@ -96,6 +96,7 @@ public class Client extends AbstractService implements EventListener {
       handleException(e, null);
     }
     isConnected = true;
+    context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(true));
   }
 
   public synchronized void disconnect() {
@@ -109,6 +110,7 @@ public class Client extends AbstractService implements EventListener {
       // todo: clear data store?
     } finally {
       isConnected = false;
+      context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(false));
     }
   }
 
@@ -159,10 +161,6 @@ public class Client extends AbstractService implements EventListener {
       };
       heartbeatInvoker.start();
     }
-  }
-
-  public void handleConnectionStateChanged() {
-
   }
 
   private void stopHeartBeat() {

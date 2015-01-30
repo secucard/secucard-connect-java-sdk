@@ -69,7 +69,7 @@ public abstract class AbstractService {
   }
 
   public void setEventListener(final EventListener eventListener) {
-    context.getEventDispatcher().setEventListener(Events.Any.class, eventListener);
+    context.getEventDispatcher().setEventListener(Events.ANY, eventListener);
 
     // we use the same listener also for auth event purposes
     getAuthProvider().registerEventListener(eventListener);

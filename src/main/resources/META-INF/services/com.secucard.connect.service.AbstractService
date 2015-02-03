@@ -7,3 +7,5 @@ com.secucard.connect.service.general.skeleton.SkeletonService #{general.skeleton
 com.secucard.connect.service.loyalty.cards.CardsService #{loyalty.cards, loyalty/cards}
 com.secucard.connect.service.general.AccountService #{general.accounts, general/accounts}
 com.secucard.connect.service.services.IdentService #{services.idents, services/idents}
+com.secucard.connect.service.payment.CustomerService #{payment.customers, payment/customers}
+com.secucard.connect.service.payment.ContainerService #{payment.containers, payment/containers}

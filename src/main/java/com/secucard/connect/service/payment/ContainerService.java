@@ -38,7 +38,7 @@ public class ContainerService extends AbstractService {
     }.invoke(callback);
   }
 
-  public Container updateContainerAssigment(final String containerId, final String customerId, Callback<Container> callback) {
+  public Container updateContainerAssignment(final String containerId, final String customerId, Callback<Container> callback) {
     return new Invoker<Container>() {
       @Override
       protected Container handle(Callback<Container> callback) throws Exception {
@@ -48,7 +48,7 @@ public class ContainerService extends AbstractService {
     }.invoke(callback);
   }
 
-  public void deleteContainerAssigment(final String containerId, Callback callback) {
+  public void deleteContainerAssignment(final String containerId, Callback callback) {
     new Invoker<Void>() {
       @Override
       protected Void handle(Callback<Void> callback) throws Exception {

@@ -1,6 +1,7 @@
 package com.secucard.connect;
 
 import com.secucard.connect.auth.UserCredentials;
+import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
@@ -87,8 +88,9 @@ public class Client extends AbstractService implements EventListener {
     }
     try {
       getRestChannel().open(null); // init rest first since it does auth,
-      if (context.getConfig().isStompEnabled()) {
-        getStompChannel().open(null);
+      Channel sc = getStompChannel();
+      if (sc != null) {
+        sc.open(null);
         startHeartBeat();
       }
     } catch (Exception e) {
@@ -101,9 +103,10 @@ public class Client extends AbstractService implements EventListener {
 
   public synchronized void disconnect() {
     try {
-      if (context.getConfig().isStompEnabled()) {
+      Channel sc = getStompChannel();
+      if (sc != null) {
         stopHeartBeat();
-        getStompChannel().close(null);
+        sc.close(null);
       }
       getRestChannel().close(null);
       clear();
@@ -184,11 +187,12 @@ public class Client extends AbstractService implements EventListener {
     isConnected = false;
 
     // set up event sources
-    if (config.isStompEnabled()) {
-      getStompChannel().setEventListener(this);
+    Channel sc = getStompChannel();
+    if (sc != null) {
+      sc.setEventListener(this);
     }
 
-    // bubble up ex. for now todo: forward to handler
+    // simply throw all catched exceptions by default, can be overwritten by clients user
     setExceptionHandler(new ThrowingExceptionHandler());
   }
 

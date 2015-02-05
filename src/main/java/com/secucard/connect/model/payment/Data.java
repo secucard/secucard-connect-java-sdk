@@ -7,6 +7,15 @@ public class  Data {
 
   private String bic;
 
+  public Data() {
+  }
+
+  public Data(String owner, String iban, String bic) {
+    this.owner = owner;
+    this.iban = iban;
+    this.bic = bic;
+  }
+
   public String getOwner() {
     return owner;
   }

@@ -5,6 +5,7 @@ import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.merchant.Merchant;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @ProductInfo(resourceId = "payment.customers")
@@ -14,8 +15,8 @@ public class Customer extends SecuObject {
   @JsonProperty("forename")
   private String foreName;
 
-  @JsonProperty("surename")
-  private String sureName;
+  @JsonProperty("surname")
+  private String surName;
 
   @JsonProperty("companyname")
   private String companyName;
@@ -62,12 +63,12 @@ public class Customer extends SecuObject {
     this.foreName = foreName;
   }
 
-  public String getSureName() {
-    return sureName;
+  public String getSurName() {
+    return surName;
   }
 
-  public void setSureName(String sureName) {
-    this.sureName = sureName;
+  public void setSurName(String surName) {
+    this.surName = surName;
   }
 
   public String getCompanyName() {
@@ -134,7 +135,11 @@ public class Customer extends SecuObject {
     this.phone = phone;
   }
 
-  public Date getDateOfBirth() {
+  public String getDateOfBirth() {
+    return dateOfBirth == null ? null : new SimpleDateFormat("YYYY-MM-dd").format(dateOfBirth);
+  }
+
+  public Date getDateOfBirthAsDate() {
     return dateOfBirth;
   }
 
@@ -163,7 +168,7 @@ public class Customer extends SecuObject {
     return "Customer{" +
         "merchant=" + merchant +
         ", foreName='" + foreName + '\'' +
-        ", sureName='" + sureName + '\'' +
+        ", sureName='" + surName + '\'' +
         ", companyName='" + companyName + '\'' +
         ", salutation='" + salutation + '\'' +
         ", title='" + title + '\'' +

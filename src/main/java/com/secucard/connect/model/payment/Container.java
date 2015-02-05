@@ -78,6 +78,14 @@ public class Container extends SecuObject {
     this.updated = updated;
   }
 
+  public Customer getAssigned() {
+    return assigned;
+  }
+
+  public void setAssigned(Customer assigned) {
+    this.assigned = assigned;
+  }
+
   @Override
   public String toString() {
     return "Container{" +

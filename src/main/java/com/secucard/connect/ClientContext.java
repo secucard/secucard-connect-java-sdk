@@ -10,7 +10,6 @@ import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.VolleyChannel;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.event.EventDispatcher;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.storage.AndroidStorage;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.DiskCache;
@@ -20,8 +19,6 @@ import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Context instance holding all necessary beans used in client.
@@ -64,10 +61,6 @@ public class ClientContext {
     return dataStorage;
   }
 
-  public Channel getRestChannel() {
-    return restChannel;
-  }
-
   public AuthProvider getAuthProvider() {
     return authProvider;
   }
@@ -96,31 +89,28 @@ public class ClientContext {
     return resourceDownloader;
   }
 
-  public Channel getStompChannel() {
-    if (config.isStompEnabled()) {
-      return stompChannel;
-    } else {
-      return null;
-    }
-  }
-
+  /**
+   * Return a channel to the given name.
+   *
+   * @param name The channel name or null for default channel.
+   *             Valid names are: {@link ClientContext#STOMP}, {@link ClientContext#REST}.
+   * @return Null if the requested channel is not available or disabled by config, the channel instance else.
+   * @throws java.lang.IllegalArgumentException if the name is not valid.
+   */
   public Channel getChannel(String name) {
-    if (name.equals(STOMP)) {
-      return stompChannel;
+    if (name == null) {
+      name = config.getDefaultChannel();
     }
 
-    if (name.equals(REST)) {
+    if (REST.equals(name)) {
       return restChannel;
     }
-    return null;
-  }
 
-  public Channel getChannel() {
-    String name = config.getDefaultChannel();
-    if (STOMP.equals(name) && !config.isStompEnabled()) {
-      return null; // should not happen
+    if (STOMP.equals(name)) {
+      return stompChannel;
     }
-    return getChannel(name);
+
+    throw new IllegalArgumentException("invalid channel name " + name);
   }
 
   /**
@@ -194,8 +184,11 @@ public class ClientContext {
     downloader.setHttpClient(restChannel);
     this.resourceDownloader = downloader;
 
-    StompChannel sc = new StompChannel(clientId, config.getStompConfiguration());
-    sc.setAuthProvider(this.authProvider);
+    StompChannel sc = null;
+    if (config.isStompEnabled()) {
+      sc = new StompChannel(clientId, config.getStompConfiguration());
+      sc.setAuthProvider(this.authProvider);
+    }
     this.stompChannel = sc;
 
     this.clientId = clientId;

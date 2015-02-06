@@ -1,54 +1,48 @@
 package com.secucard.connect.model.general.merchant;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.model.SecuObject;
 
 /**
  * Created by Steffen Schröder on 26.08.2014.
  * Copyright (c) 2014 secucard AG. All rights reserved.
  */
-public class Merchant {
+public class Merchant extends SecuObject {
+  private String a;
 
-    @JsonProperty
-    private String id;
+  private String b;
 
-    @JsonProperty
-    private String a;
+  private String name;
 
-    @JsonProperty
-    private String b;
+  public Merchant() {
+  }
 
-    @JsonProperty
-    private String name;
+  public Merchant(String id) {
+    this.id = id;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public String getA() {
+    return a;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public void setA(String a) {
+    this.a = a;
+  }
 
-    public String getA() {
-        return a;
-    }
+  public String getB() {
+    return b;
+  }
 
-    public void setA(String a) {
-        this.a = a;
-    }
+  public void setB(String b) {
+    this.b = b;
+  }
 
-    public String getB() {
-        return b;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setB(String b) {
-        this.b = b;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 }

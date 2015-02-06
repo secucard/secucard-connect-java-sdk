@@ -7,11 +7,15 @@ import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
+import com.secucard.connect.model.ObjectList;
+import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
 import com.secucard.connect.util.ThreadLocalUtil;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class AbstractService {
@@ -22,16 +26,25 @@ public abstract class AbstractService {
     this.context = context;
   }
 
+  /**
+   * See {@link ClientContext#getChannel(String)}
+   */
   protected Channel getChannel() {
-    return context.getChannel();
+    return context.getChannel(null);
   }
 
+  /**
+   * See {@link ClientContext#getChannel(String)}
+   */
   protected Channel getStompChannel() {
-    return context.getStompChannel();
+    return context.getChannel(ClientContext.STOMP);
   }
 
+  /**
+   * See {@link ClientContext#getChannel(String)}
+   */
   protected Channel getRestChannel() {
-    return context.getRestChannel();
+    return context.getChannel(ClientContext.REST);
   }
 
   protected AuthProvider getAuthProvider() {
@@ -84,6 +97,80 @@ public abstract class AbstractService {
     getAuthProvider().registerEventListener(null);
   }
 
+  public <T> T get(final Class<T> type, final String id, final Callback<T> callback,
+                   final String channel) {
+    return new Invoker<T>() {
+      @Override
+      protected T handle(Callback<T> callback) throws Exception {
+        return context.getChannel(channel).getObject(type, id, callback);
+      }
+    }.invoke(callback);
+  }
+
+  public <T> List<T> get(final Class<T> type, final QueryParams queryParams, final Callback<List<T>> callback,
+                         final String channel) {
+    return new ConvertingInvoker<ObjectList<T>, List<T>>() {
+      @Override
+      protected ObjectList<T> handle(Callback<ObjectList<T>> callback) {
+        return context.getChannel(channel).findObjects(type, queryParams, callback);
+      }
+
+      @Override
+      protected List<T> convert(ObjectList<T> object) {
+        return object == null ? null : object.getList();
+      }
+    }.invokeAndConvert(callback);
+  }
+
+  protected <T extends SecuObject> T update(final T object, Callback<T> callback, final String channel) {
+    return new Invoker<T>() {
+      @Override
+      protected T handle(Callback<T> callback) throws Exception {
+        return context.getChannel(channel).updateObject(object, callback);
+      }
+    }.invoke(callback);
+  }
+
+  public <T> T execute(final Class<T> type, final String objectId, final String action, final String actionArg,
+                       final Object arg, Class<T> returnType, Callback<T> callback, final String channel) {
+    return new Invoker<T>() {
+      @Override
+      protected T handle(Callback<T> callback) throws Exception {
+        return context.getChannel(channel).execute(type, objectId, action, actionArg, arg, type, callback);
+      }
+    }.invoke(callback);
+  }
+
+  protected <T> T create(final T object, Callback<T> callback, final String channel) {
+    return new Invoker<T>() {
+      @Override
+      protected T handle(Callback<T> callback) throws Exception {
+        return context.getChannel(channel).createObject(object, callback);
+      }
+    }.invoke(callback);
+  }
+
+  public void delete(final Class type, final String id, Callback<Void> callback, final String channel) {
+    new Invoker<Void>() {
+      @Override
+      protected Void handle(Callback<Void> callback) throws Exception {
+        context.getChannel(channel).deleteObject(type, id, callback);
+        return null;
+      }
+    }.invoke(callback);
+  }
+
+  public void delete(final Class type, final String objectId, final String action, final String actionArg,
+                     Callback<Void> callback, final String channel) {
+    new Invoker<Void>() {
+      @Override
+      protected Void handle(Callback<Void> callback) throws Exception {
+        context.getChannel(channel).deleteObject(type, objectId, action, actionArg, callback);
+        return null;
+      }
+    }.invoke(callback);
+  }
+
   /**
    * Helps to wrap the execution of code to handle exceptions and callbacks in a standartized way.
    * If a callback is used all exceptions go to failed() method otherwise (direct return) they will be forwarded to
@@ -128,14 +215,14 @@ public abstract class AbstractService {
           new Converter<FROM, TO>() {
             @Override
             public TO convert(FROM value) {
-              return AbstractService.ConvertingInvoker.this.convert(value);
+              return ConvertingInvoker.this.convert(value);
             }
           });
       return convert(invoke(adapter));
     }
   }
 
-  protected abstract class Result2BooleanInvoker extends AbstractService.ConvertingInvoker<Result, Boolean> {
+  protected abstract class Result2BooleanInvoker extends ConvertingInvoker<Result, Boolean> {
     @Override
     protected Boolean convert(Result object) {
       return object == null ? Boolean.FALSE : Boolean.parseBoolean(object.getResult());

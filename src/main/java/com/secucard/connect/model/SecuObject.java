@@ -7,7 +7,6 @@ import java.io.Serializable;
 public abstract class SecuObject implements Serializable {
   protected String id;
 
-  @JsonIgnore
   protected String object;
 
   public String getObject() {

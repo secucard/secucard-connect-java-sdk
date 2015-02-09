@@ -188,7 +188,11 @@ public class IdentService extends AbstractService {
         for (Person person : result.getPersons()) {
           for (Attachment attachment : person.getAttachments()) {
             // todo: introduce download policy settings to be able to avoid some downloads
-            attachment.download();
+            try {
+              attachment.download();
+            } catch (Exception e) {
+              // ignore download errors
+            }
           }
         }
       }

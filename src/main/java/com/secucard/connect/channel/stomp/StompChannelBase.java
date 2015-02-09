@@ -191,11 +191,13 @@ public abstract class StompChannelBase extends AbstractChannel {
 
     if (callback == null) {
       if (!connected) {
-        throw new ConnectionTimeoutException();
+        stompSupport.close();
+        throw new ConnectionTimeoutException("Unable to establish STOMP connection in time.");
       }
     } else if (connected) {
       onCompleted(callback, null);
     } else {
+      stompSupport.close();
       onFailed(callback, new ConnectionTimeoutException());
     }
   }
@@ -394,7 +396,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         monitor.notify();
       }
       if (eventListener != null) {
-        eventListener.onEvent(Events.CONNECTED);
+        eventListener.onEvent(Events.STOMP_CONNECTED);
       }
     }
 
@@ -418,11 +420,12 @@ public abstract class StompChannelBase extends AbstractChannel {
       }
 
       if (eventListener != null && correlationId == null) {
+        // this is an STOMP event message, no direct correlation to a request
         Object event = null;
         try {
           event = objectMapper.map(body);
         } catch (IOException e) {
-          event = "Error mapping: " + body + "; " + e.getMessage();
+          event = new Events.Error("STOMP message received but unable to convert: " + body + "; " + e.getMessage());
         }
         eventListener.onEvent(event);
       }
@@ -444,10 +447,14 @@ public abstract class StompChannelBase extends AbstractChannel {
           connected = false;
           monitor.notify();
         }
+        eventListener.onEvent(new Events.AuthorizationFailed("STOMP authorization failed, reason: " + frame.getBody()));
+        return;
       }
 
       if (eventListener != null) {
-        eventListener.onEvent(frame.toString());
+        Map<String, String> headers = frame.getHeaders();
+        headers.put("body", frame.getBody());
+        eventListener.onEvent(new Events.Error("STOMP error happened.", headers));
       }
     }
 
@@ -458,7 +465,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         monitor.notify();
       }
       if (eventListener != null) {
-        eventListener.onEvent(Events.DISCONNECTED);
+        eventListener.onEvent(Events.STOMP_DISCONNECTED);
       }
     }
   }

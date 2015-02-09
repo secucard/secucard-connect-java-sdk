@@ -1,6 +1,7 @@
 package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.ClientConfiguration;
+import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.auth.ClientCredentials;
@@ -9,6 +10,7 @@ import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.auth.Token;
+import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.storage.DataStorage;
 import org.apache.commons.lang3.StringUtils;
 
@@ -182,7 +184,16 @@ public class OAuthProvider implements AuthProvider {
       // server will return 401 - it's part of the procedure in this case, so ignore
       ignored = 401;
     }
-    return restChannel.post(configuration.getOauthUrl(), parameters, headers, Token.class, ignored);
+    try {
+      return restChannel.post(configuration.getOauthUrl(), parameters, headers, Token.class, ignored);
+    } catch (SecuException e) {
+      Status status = e.getStatus();
+      if (status == null) {
+        throw e;
+      } else {
+        throw new AuthException(status.getError() + ", " + status.getErrorDescription());
+      }
+    }
   }
 
   protected DeviceAuthCode requestCodes() {

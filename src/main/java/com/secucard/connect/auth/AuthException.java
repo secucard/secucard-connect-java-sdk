@@ -1,5 +1,8 @@
 package com.secucard.connect.auth;
 
+/**
+ * Exception thrown when authentication, authorization errors happen.
+ */
 public class AuthException extends RuntimeException {
   public AuthException() {
     super();

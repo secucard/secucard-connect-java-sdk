@@ -1,8 +1,10 @@
 package com.secucard.connect.event;
 
+import java.util.Map;
+
 public class Events {
-  public static final String CONNECTED = "CONNECTED";
-  public static final String DISCONNECTED = "DISCONNECTED";
+  public static final String STOMP_CONNECTED = "STOMP_CONNECTED";
+  public static final String STOMP_DISCONNECTED = "STOMP_DISCONNECTED";
   public static final String ANY = "*";
 
   /**
@@ -13,6 +15,43 @@ public class Events {
 
     public ConnectionStateChanged(boolean connected) {
       this.connected = connected;
+    }
+  }
+
+  public static class AuthorizationFailed {
+    public String message;
+
+    public AuthorizationFailed(String message) {
+      this.message = message;
+    }
+
+    @Override
+    public String toString() {
+      return "AuthorizationFailed{" +
+          "message='" + message + '\'' +
+          '}';
+    }
+  }
+
+  public static class Error {
+    public String message;
+    public Map errorDetails;
+
+    public Error(String message) {
+      this.message = message;
+    }
+
+    public Error(String message, Map errorDetails) {
+      this.message = message;
+      this.errorDetails = errorDetails;
+    }
+
+    @Override
+    public String toString() {
+      return "Error{" +
+          "message='" + message + '\'' +
+          ", errorDetails=" + errorDetails +
+          '}';
     }
   }
 }

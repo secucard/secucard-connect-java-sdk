@@ -225,7 +225,7 @@ public class RestChannel extends RestChannelBase {
       try {
         Response response = future.get();
         result = readEntity(response, entityType, ignoredStatus);
-      } catch (Exception e) {
+      } catch (Throwable e) {
         throw translate(e);
       }
     } else {
@@ -275,7 +275,7 @@ public class RestChannel extends RestChannelBase {
     return jsonMapper.map(response.readEntity(String.class), entityType);
   }
 
-  private SecuException translate(Throwable throwable) {
+  private RuntimeException translate(Throwable throwable) {
     Status status = null;
     if (throwable instanceof WebApplicationException) {
       Response response = ((WebApplicationException) throwable).getResponse();
@@ -288,7 +288,7 @@ public class RestChannel extends RestChannelBase {
       }
     }
     if (status != null) {
-      return new SecuException(status.toString(), throwable);
+      return new SecuException(status, throwable);
     } else {
       return new SecuException(throwable);
     }

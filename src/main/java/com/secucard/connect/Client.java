@@ -82,6 +82,15 @@ public class Client extends AbstractService implements EventListener {
     return id;
   }
 
+  /**
+   * Initializes connects the client to the secucard server.<br/>
+   * Throws {@link com.secucard.connect.auth.AuthException} if an error happens during authentication.<br/>
+   * May also fire an event of type {@link com.secucard.connect.event.Events.AuthorizationFailed} if a STOMP auth.
+   * problem or similiar happens.
+   * In both cases, or in general when a exception was thrown by this method, it's a good idea to call {@link #disconnect()}
+   * to help clean up resources.<br/>
+   * If the client is successfully connected an event of type {@link com.secucard.connect.event.Events.ConnectionStateChanged} is fired.
+   */
   public synchronized void connect() {
     if (isConnected) {
       return;
@@ -93,12 +102,13 @@ public class Client extends AbstractService implements EventListener {
         sc.open(null);
         startHeartBeat();
       }
-    } catch (Exception e) {
-      isConnected = false;
-      handleException(e, null);
+      isConnected = true;
+      context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(true));
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Throwable e) {
+      throw new SecuException(e);
     }
-    isConnected = true;
-    context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(true));
   }
 
   public synchronized void disconnect() {
@@ -196,11 +206,15 @@ public class Client extends AbstractService implements EventListener {
     setExceptionHandler(new ThrowingExceptionHandler());
   }
 
+  /**
+   * Handle events before dispatching to listeners.
+   */
   private void handleEvent(Object event) {
-    if (Events.CONNECTED.equals(event)) {
-      LOG.info("Connected to server.");
-    } else if (Events.DISCONNECTED.equals(event)) {
-      LOG.info("Disconnected from server.");
+    // just log STOMP connection for now
+    if (Events.STOMP_CONNECTED.equals(event)) {
+      LOG.info("Connected to STOMP server.");
+    } else if (Events.STOMP_DISCONNECTED.equals(event)) {
+      LOG.info("Disconnected from STOMP server.");
     }
   }
 

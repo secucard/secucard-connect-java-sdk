@@ -65,7 +65,7 @@ public class StompClient implements StompEventListener {
 
   /**
    * Creates a instance with itself attached as event lister.
-   * Override the according methods like {@link StompEventListener#onConnect()}
+   * Override the according methods like {@link net.jstomplite.StompEventListener#onConnect()}
    */
   public StompClient(String id, Config config) {
     this(id, config, null);
@@ -87,13 +87,13 @@ public class StompClient implements StompEventListener {
   /**
    * Connects to the stomp server.
    * Throws exceptions if not sucessfully, this client should be closed then.
-   * On success {@link StompEventListener#onConnect()} is called.
+   * On success {@link net.jstomplite.StompEventListener#onConnect()} is called.
    *
    * @param login    User to connect, may be null.
    * @param password password, may be null.
    * @throws java.io.IOException                If a error ocurrs.
-   * @throws ConnectionTimeoutException If the server does not acknowledge the connection in time,
-   *                                    timeout is {@link Config#getConnectionTimeoutSec()}
+   * @throws net.jstomplite.ConnectionTimeoutException If the server does not acknowledge the connection in time,
+   *                                    timeout is {@link net.jstomplite.Config#getConnectionTimeoutSec()}
    */
   public synchronized void open(String login, String password) throws IOException, ConnectionTimeoutException {
     if (connected > 0) {
@@ -149,7 +149,7 @@ public class StompClient implements StompEventListener {
 
   /**
    * Closing the server connection by sending DISCONNECT frame, waiting for the receipt and closing all resources.
-   * {@link net.jstomplite.StompEventListener#onDisconnect()} is called when the connection was really closed.
+   * {@link StompEventListener#onDisconnect()} is called when the connection was really closed.
    * This is not the case when calling close on a already closed client.
    * The methods fails silently, but the client can be considered as closed anyway.
    */
@@ -188,9 +188,9 @@ public class StompClient implements StompEventListener {
    * @param headers
    * @param requestReceipt  If true a receipt is requested else not.
    * @throws java.io.IOException        If a rather technical error happened.
-   * @throws StompException     If the server could not process the message correctly and sent an error instead receipt.
-   * @throws NoReceiptException If the receipt was not received in time.
-   *                            Timeout is {@link Config#getReceiptTimeoutSec()}
+   * @throws net.jstomplite.StompException     If the server could not process the message correctly and sent an error instead receipt.
+   * @throws net.jstomplite.NoReceiptException If the receipt was not received in time.
+   *                            Timeout is {@link net.jstomplite.Config#getReceiptTimeoutSec()}
    */
   public synchronized void send(String destination, String body, Map<String, String> headers, boolean requestReceipt)
       throws IOException, StompException, NoReceiptException {

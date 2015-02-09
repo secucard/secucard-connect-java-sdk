@@ -21,6 +21,8 @@ public class IdentRequest extends SecuObject {
 
   private String owner;
 
+  private Contract contract;
+
   @JsonProperty("owner_transaction_id")
   private String ownerTransactionId;
 
@@ -28,6 +30,14 @@ public class IdentRequest extends SecuObject {
   private List<Person> persons = new ArrayList<>();
 
   private Date created;
+
+  public Contract getContract() {
+    return contract;
+  }
+
+  public void setContract(Contract contract) {
+    this.contract = contract;
+  }
 
   public Date getCreated() {
     return created;
@@ -88,4 +98,16 @@ public class IdentRequest extends SecuObject {
     return persons.add(person);
   }
 
+  @Override
+  public String toString() {
+    return "IdentRequest{" +
+        "type='" + type + '\'' +
+        ", status='" + status + '\'' +
+        ", owner='" + owner + '\'' +
+        ", contract=" + contract +
+        ", ownerTransactionId='" + ownerTransactionId + '\'' +
+        ", persons=" + persons +
+        ", created=" + created +
+        '}';
+  }
 }

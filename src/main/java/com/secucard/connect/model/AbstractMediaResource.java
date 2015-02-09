@@ -27,14 +27,10 @@ public abstract class AbstractMediaResource {
   @JsonIgnore
   private boolean cachingEnabled = true;
 
-  ResourceDownloader downloader;
-
   public AbstractMediaResource() {
-    downloader = ClientContext.get().getResourceDownloader();
   }
 
   public AbstractMediaResource(String url) throws MalformedURLException {
-    this();
     setUrl(url);
   }
 
@@ -75,7 +71,7 @@ public abstract class AbstractMediaResource {
    */
   public void download() {
     if (cachingEnabled) {
-      downloader.download(url);
+      getDownloader().download(url);
       isCached = true;
     }
   }
@@ -118,6 +114,10 @@ public abstract class AbstractMediaResource {
       // force download if not cached
       download();
     }
-    return downloader.getInputStream(url, cachingEnabled);
+    return getDownloader().getInputStream(url, cachingEnabled);
+  }
+
+  protected ResourceDownloader getDownloader() {
+    return ClientContext.get().getResourceDownloader();
   }
 }

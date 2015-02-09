@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.services.idresult.Person;
-import com.secucard.connect.model.services.idresult.Request;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @ProductInfo(resourceId = "services.identresults")
 public class IdentResult extends SecuObject {
-  private Request request;
+  private IdentRequest request;
 
   private String status;
 
@@ -21,11 +20,11 @@ public class IdentResult extends SecuObject {
 
   private Date created;
 
-  public Request getRequest() {
+  public IdentRequest getRequest() {
     return request;
   }
 
-  public void setRequest(Request request) {
+  public void setRequest(IdentRequest request) {
     this.request = request;
   }
 
@@ -62,5 +61,4 @@ public class IdentResult extends SecuObject {
         ", created=" + created +
         '}';
   }
-
 }

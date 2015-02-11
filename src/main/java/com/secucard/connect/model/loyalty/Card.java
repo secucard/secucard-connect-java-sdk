@@ -7,6 +7,7 @@ package com.secucard.connect.model.loyalty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
+import com.secucard.connect.model.general.accounts.Account;
 
 import java.io.Serializable;
 
@@ -18,6 +19,9 @@ public class Card extends SecuObject implements Serializable {
 
     @JsonProperty
     private String created;
+
+    @JsonProperty
+    private Account account;
 
     public String getCardNumber() {
         return cardNumber;
@@ -33,5 +37,13 @@ public class Card extends SecuObject implements Serializable {
 
     public void setCreated(String created) {
         this.created = created;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
 }

@@ -7,7 +7,6 @@ package com.secucard.connect.service.general.accounts.beacon;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.general.accounts.Account;
 import com.secucard.connect.model.general.accounts.beaconenvironment.BeaconEnvironment;
-import com.secucard.connect.model.general.accounts.beaconenvironment.BeaconList;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
@@ -21,12 +20,6 @@ public class BeaconService extends AbstractService {
    * @param beaconList List of found Beacons
    * @return True if successfully, false else.
    */
-  public boolean sendBeacons(BeaconList beaconList) {
-    Result result = getStompChannel().updateObject(Account.class, "me", "beacons", null, beaconList, Result.class, null);
-    return result.getResult().equals("true");
-  }
-
-  // todo: kann so der spezielle listtyp vermieden werden?
   public boolean sendBeacons(List<BeaconEnvironment> beaconList) {
     ObjectList<BeaconEnvironment> objectList = new ObjectList<>();
     objectList.setList(beaconList);

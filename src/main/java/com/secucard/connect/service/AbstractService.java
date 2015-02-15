@@ -5,11 +5,13 @@ import com.secucard.connect.ClientContext;
 import com.secucard.connect.ExceptionHandler;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
+import com.secucard.connect.event.EventHandler;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
@@ -21,6 +23,11 @@ import java.util.logging.Logger;
 public abstract class AbstractService {
   protected ClientContext context;
   protected final Logger LOG = Logger.getLogger(getClass().getName());
+  protected EventListener serviceEventListener;
+
+  public static enum Constant {
+    EVENT_SKIPPED
+  }
 
   public void setContext(ClientContext context) {
     this.context = context;
@@ -95,6 +102,22 @@ public abstract class AbstractService {
   public void removeEventListener() {
     context.getEventDispatcher().removeEventListener();
     getAuthProvider().registerEventListener(null);
+  }
+
+  public EventListener getServiceEventListener() {
+    return serviceEventListener;
+  }
+
+  protected void addEventHandler(String id, EventHandler<?, Event> handler) {
+    context.getEventDispatcher().addEventHandler(id, handler);
+  }
+
+  protected void removeEventHandler(String id) {
+    context.getEventDispatcher().removeEventHandler(id);
+  }
+
+  protected void disableEventHandler(String id, boolean disabled) {
+    context.getEventDispatcher().disableEventHandler(id, disabled);
   }
 
   public <T> T get(final Class<T> type, final String id, final Callback<T> callback,
@@ -172,12 +195,12 @@ public abstract class AbstractService {
   }
 
   /**
-   * Helps to wrap the execution of code to handle exceptions and callbacks in a standartized way.
+   * Helps to wrap the execution of code to handle exceptions and callbacks in a standardized way.
    * If a callback is used all exceptions go to failed() method otherwise (direct return) they will be forwarded to
    * the services exception handler set by
    * {@link com.secucard.connect.Client#setExceptionHandler(com.secucard.connect.ExceptionHandler)}.
    *
-   * @param <T> The excpected return type.
+   * @param <T> The expected return type.
    */
   protected abstract class Invoker<T> {
 
@@ -226,6 +249,16 @@ public abstract class AbstractService {
     @Override
     protected Boolean convert(Result object) {
       return object == null ? Boolean.FALSE : Boolean.parseBoolean(object.getResult());
+    }
+  }
+
+  protected class ServiceEventListener implements EventListener {
+    public ServiceEventListener() {
+    }
+
+    @Override
+    public void onEvent(Object event) {
+
     }
   }
 }

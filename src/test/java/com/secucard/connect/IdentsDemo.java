@@ -7,6 +7,7 @@ import com.secucard.connect.model.services.idrequest.Person;
 import com.secucard.connect.service.services.IdentService;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -60,24 +61,40 @@ public class IdentsDemo {
 
 
       // retrieving a single request
-
       request = service.getIdentRequest(id, null);
 
 
-
-      // retrieving the results of a specific ident request
-      // returns null if nothing available, throws an exception if a error occurs
-
-      IdentResult result = service.getIdentResultByRequestId(id, null, false);
+      // 1. retrieving the results of an ident request by manual polling:
+      // returns null if nothing available yet, throws an exception if a error occurs, result else
+      List<IdentResult> results = service.getIdentResultsByRequestIds(Arrays.asList(id), null, false);
 
 
+      // or 2. by responding on web hook event: 
+      // first create special handler (needed one time)
+      service.registerEventHandler(new IdentService.IdentEventHandler() {
+        @Override
+        public boolean downloadAttachments(List<IdentRequest> requests) {
+          return false;
+        }
+      });
+      // when event happens call Client.handle() and pass event JSON data, result will be the ident result list
+      String jsonEventData = "..."; /* get from web server, example:
+       {  "object": "event.pushes",
+          "id": "XXX_XXXXXXXXXXX",
+          "created": "2015-02-02T11:40:50+01:00",
+          "target": "services.identrequests",
+          "type": "changed", "data": [
+          {
+            "object": "services.identrequests",
+            "id": "XXX_XXXXXXXXXXXXXXXXXXXXXXXX"
+          }
+        ]} */
 
-      // or getting all results (and selecting manually)
-      // no query param is used so no filtering applies to the result
-
-      List<IdentResult> results = service.getIdentResults(null, null, false);
-      // iterate over results ...
-
+      Object result = client.handleEvent(jsonEventData, null);
+      if (result != null) {
+        results = (List<IdentResult>) result;
+        // ... do further processing
+      }
 
     } finally {
       // important to close the client properly at last, avoids leaking resources

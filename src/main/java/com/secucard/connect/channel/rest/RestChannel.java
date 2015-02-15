@@ -191,6 +191,10 @@ public class RestChannel extends RestChannelBase {
 
   private <T> Invocation.Builder builder(Class<T> type, Map<String, Object> queryParams, boolean secure,
                                          String... pathArgs) {
+    if (restClient == null) {
+      throw new IllegalStateException("REST client not initialized.");
+    }
+
     // todo: Cache targets?
     WebTarget target = restClient.target(configuration.getBaseUrl());
 

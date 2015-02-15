@@ -1,9 +1,12 @@
 package com.secucard.connect.channel;
 
 import com.secucard.connect.SecuException;
+import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.StringTokenizer;
 
 /**
@@ -21,14 +24,33 @@ public class PathResolver {
    * @return The path as a string.
    */
   public String resolveType(Class type, char separator) {
-    try {
-      String resourceId;
-      Annotation annotation = type.getAnnotation(ProductInfo.class);
-      if (annotation == null) {
-        throw new IllegalArgumentException("Type has no metadata annotated: " + type);
-      } else {
-        resourceId = ((ProductInfo) annotation).resourceId();
+    String resourceId;
+    Annotation annotation = type.getAnnotation(ProductInfo.class);
+    if (annotation == null) {
+      try {
+        Field fields = type.getDeclaredField("OBJECT");
+        resourceId = (String) fields.get(null);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Type has no metadata annotated nor static OBJECT field: " + type);
       }
+    } else {
+      resourceId = ((ProductInfo) annotation).resourceId();
+    }
+    return resolve(resourceId, separator);
+  }
+
+  public String resolveType(Object object, char separator) {
+    if (object instanceof SecuObject) {
+      String objectId = ((SecuObject) object).getObject();
+      if (StringUtils.isNotBlank(objectId)) {
+        return resolve(objectId, separator);
+      }
+    }
+    return resolveType(object.getClass(), separator);
+  }
+
+  private static String resolve(String resourceId, char separator) {
+    try {
       StringTokenizer st = new StringTokenizer(resourceId, ".");
       String path = "";
       while (st.hasMoreTokens()) {
@@ -38,7 +60,7 @@ public class PathResolver {
       }
       return path.substring(1);
     } catch (Exception e) {
-      throw new SecuException("Error building path for type " + type, e);
+      throw new SecuException("Error building path for resource " + resourceId, e);
     }
   }
 

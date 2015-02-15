@@ -1,33 +1,53 @@
 package com.secucard.connect.event;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.model.general.Event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Event handling.
+ * Registers event handlers or listeners and dispatches events to them.
  */
 public class EventDispatcher {
 
-  protected Map<Class, EventListener> eventListener = new ConcurrentHashMap<>();
-  protected Map<String, EventListener> eventListener2 = new ConcurrentHashMap<>();
+  // event type to listener map
+  protected Map<Class, EventListener> event2Listener = new ConcurrentHashMap<>();
+  protected Map<String, EventListener> stringEvent2Listener = new ConcurrentHashMap<>();
+
+  // event handler
+  protected Map<String, EventHandler<?, Event>> eventHandler = new ConcurrentHashMap<>();
 
   public void setEventListener(final EventListener listener) {
-    eventListener2.put("*", listener);
+    stringEvent2Listener.put("*", listener);
   }
 
   public <T> void setEventListener(Class<T> type, EventListener<T> listener) {
-    eventListener.put(type, listener);
+    event2Listener.put(type, listener);
   }
 
   public <T> void setEventListener(String type, EventListener<T> listener) {
-    eventListener2.put(type, listener);
+    stringEvent2Listener.put(type, listener);
   }
 
   public void removeEventListener() {
-    eventListener.clear();
-    eventListener2.clear();
+    event2Listener.clear();
+    stringEvent2Listener.clear();
+  }
+
+  public void addEventHandler(String id, EventHandler<?, Event> handler) {
+    eventHandler.put(id, handler);
+  }
+
+  public void removeEventHandler(String id) {
+    eventHandler.remove(id);
+  }
+
+  public void disableEventHandler(String id, boolean disabled) {
+    EventHandler handler = eventHandler.get(id);
+    if (handler != null) {
+      handler.setDisabled(disabled);
+    }
   }
 
   /**
@@ -47,14 +67,14 @@ public class EventDispatcher {
    * * @param async Async execution or not.
    */
   public void fireEvent(Object event, boolean async) {
-    for (Map.Entry<String, EventListener> entry : eventListener2.entrySet()) {
+    for (Map.Entry<String, EventListener> entry : stringEvent2Listener.entrySet()) {
       String key = entry.getKey();
       if (key.equals(Events.ANY) || event instanceof String && key.equalsIgnoreCase((String) event)) {
         fireEvent(event, entry.getValue(), async);
       }
     }
 
-    for (Map.Entry<Class, EventListener> entry : eventListener.entrySet()) {
+    for (Map.Entry<Class, EventListener> entry : event2Listener.entrySet()) {
       Class<?> listenerType = entry.getKey();
       Class<?> eventType = event.getClass();
       if (event instanceof Event) {
@@ -89,5 +109,21 @@ public class EventDispatcher {
         listener.onEvent(event);
       }
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public Object handleEvent(Event event, Callback callback) throws NoHandlerException {
+    // assuming one handler per event
+    for (EventHandler<?, Event> handler : eventHandler.values()) {
+      if (handler.accept(event) && !handler.isDisabled()) {
+        return handler.handle(event, callback);
+      }
+    }
+
+    throw new NoHandlerException();
+  }
+
+  public static class NoHandlerException extends Exception {
+
   }
 }

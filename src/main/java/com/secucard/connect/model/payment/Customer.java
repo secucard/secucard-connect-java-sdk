@@ -10,6 +10,7 @@ import java.util.Date;
 
 @ProductInfo(resourceId = "payment.customers")
 public class Customer extends SecuObject {
+  public static final String OBJECT = "payment.customers";
   private Merchant merchant;
 
   @JsonProperty("forename")
@@ -44,7 +45,7 @@ public class Customer extends SecuObject {
 
   @Override
   public String getObject() {
-    return "payment.customers";
+    return OBJECT;
   }
 
   public Merchant getMerchant() {

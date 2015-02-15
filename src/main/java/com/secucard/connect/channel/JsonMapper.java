@@ -1,16 +1,20 @@
 package com.secucard.connect.channel;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,30 +90,22 @@ public class JsonMapper {
     Class type = null;
     TypeReference typeReference = null;
 
-    Object typeId = map.get("type");
     Object objectId = map.get("object");
-    Object id = map.get("id");
 
-    if (typeId != null) {
-      type = TYPE_REGISTRY.getType((String) typeId);
+    if (objectId != null) {
+      type = TYPE_REGISTRY.getType((String) objectId);
       if (type != null) {
         typeReference = new DynamicTypeReference(type);
       }
     }
 
-    if (typeId != null && objectId != null && StringUtils.equalsIgnoreCase("general.events", (String) objectId)) {
-      type = TYPE_REGISTRY.getType((String) typeId);
+    if (objectId != null && StringUtils.equalsIgnoreCase("general.events", (String) objectId)) {
+      type = TYPE_REGISTRY.getType((String) objectId);
       if (type != null) {
         typeReference = new DynamicTypeReference(Event.class, type);
       }
     }
 
-    if ("event".equals(typeId) && id != null) {
-      type = TYPE_REGISTRY.getType((String) id);
-      if (type != null) {
-        typeReference = new DynamicTypeReference(Event.class, type);
-      }
-    }
 
     if (type != null) {
       return map(json, typeReference);
@@ -118,23 +114,62 @@ public class JsonMapper {
     return map;
   }
 
+  public Event mapEvent(String json) throws IOException {
+    Map map = map(json, Map.class);
+    if (map == null) {
+      return null;
+    }
+
+    JsonNode tree = objectMapper.readTree(json);
+
+    JsonNode object = tree.get(SecuObject.OBJECT_PROPERTY);
+    if (object != null && object.textValue().startsWith(Event.OBJECT_PROPERTY_PREFIX)) {
+      Event event = objectMapper.readValue(json, Event.class);
+      Class dataType = TYPE_REGISTRY.getType(event.getTarget());
+      if (dataType != null) {
+        JsonNode data = tree.get(Event.DATA_PROPERTY);
+        if (data != null) {
+          event.setData(objectMapper.reader(new DynamicTypeReference(List.class, dataType)).readValue(data));
+        }
+      }
+      return event;
+    }
+
+    return null;
+  }
+
   /**
    * Collects all classes annotated with {@link com.secucard.connect.model.annotation.ProductInfo}
    * for JSON deserialization purposes.
    */
   protected static class TypeMap extends HashMap<String, Class<?>> {
     {
-      Reflections reflections = new Reflections("com.secucard.connect.model");
-      Set<Class<?>> types = reflections.getTypesAnnotatedWith(ProductInfo.class);
+      // todo: maybe better to change to inspecting byte code instead, because this instantiates each class
+      Reflections reflections = new Reflections("com.secucard.connect.model", new SubTypesScanner(false));
+      Set<Class<?>> types = reflections.getSubTypesOf(Object.class);
       for (Class<?> type : types) {
+        String resourceId;
         ProductInfo annotation = type.getAnnotation(ProductInfo.class);
         if (annotation != null) {
-          put(annotation.resourceId().toLowerCase(), type);
+          resourceId = annotation.resourceId();
+        } else {
+          try {
+            resourceId = (String) type.getField("OBJECT").get(null);
+          } catch (Exception e) {
+            resourceId = null;
+          }
+        }
+
+        if (resourceId != null) {
+          put(resourceId.toLowerCase(), type);
         }
       }
     }
 
     public Class getType(String typeString) {
+      if (typeString == null) {
+        return null;
+      }
       return get(typeString.toLowerCase());
     }
   }

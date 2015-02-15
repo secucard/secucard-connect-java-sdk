@@ -2,15 +2,15 @@ package com.secucard.connect.model.services;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.services.idresult.Person;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@ProductInfo(resourceId = "services.identresults")
 public class IdentResult extends SecuObject {
+  public static final String OBJECT = "services.identresults";
+
   private IdentRequest request;
 
   private String status;
@@ -19,6 +19,11 @@ public class IdentResult extends SecuObject {
   List<Person> persons = new ArrayList<>();
 
   private Date created;
+
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
   public IdentRequest getRequest() {
     return request;
@@ -59,6 +64,6 @@ public class IdentResult extends SecuObject {
         ", status='" + status + '\'' +
         ", persons=" + persons +
         ", created=" + created +
-        '}';
+        "} " + super.toString();
   }
 }

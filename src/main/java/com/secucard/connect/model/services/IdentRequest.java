@@ -3,15 +3,15 @@ package com.secucard.connect.model.services;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.services.idrequest.Person;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@ProductInfo(resourceId = "services.identrequests")
 public class IdentRequest extends SecuObject {
+  public static final String OBJECT = "services.identrequests";
+
   public static final String TYPE_PERSON = "person";
   public static final String TYPE_COMPANY = "company";
 
@@ -30,6 +30,11 @@ public class IdentRequest extends SecuObject {
   private List<Person> persons = new ArrayList<>();
 
   private Date created;
+
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
   public Contract getContract() {
     return contract;
@@ -108,6 +113,6 @@ public class IdentRequest extends SecuObject {
         ", ownerTransactionId='" + ownerTransactionId + '\'' +
         ", persons=" + persons +
         ", created=" + created +
-        '}';
+        "} " + super.toString();
   }
 }

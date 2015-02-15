@@ -6,14 +6,26 @@ import com.secucard.connect.model.SecuObject;
 import java.util.Date;
 
 public class Event<T> extends SecuObject {
+  public static final String TYPE_PROPERTY = "type";
+  public static final String DATA_PROPERTY = "data";
+  public static final String TARGET_PROPERTY = "target";
+  public static final String OBJECT_PROPERTY_PREFIX = "event.";
 
   private String type;
 
-  private boolean liveMode;
+  private String target;
 
   private Date created;
 
   private T data;
+
+  public String getTarget() {
+    return target;
+  }
+
+  public void setTarget(String target) {
+    this.target = target;
+  }
 
   public String getType() {
     return type;
@@ -21,14 +33,6 @@ public class Event<T> extends SecuObject {
 
   public void setType(String type) {
     this.type = type;
-  }
-
-  public boolean isLiveMode() {
-    return liveMode;
-  }
-
-  public void setLiveMode(boolean liveMode) {
-    this.liveMode = liveMode;
   }
 
   public Date getCreated() {
@@ -50,9 +54,8 @@ public class Event<T> extends SecuObject {
   @Override
   public String toString() {
     return "Event{" +
-        "id='" + id + '\'' +
         "type='" + type + '\'' +
-        ", liveMode=" + liveMode +
+        ", target='" + target + '\'' +
         ", created=" + created +
         ", data=" + data +
         '}';

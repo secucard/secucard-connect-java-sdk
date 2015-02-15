@@ -31,4 +31,13 @@ public class CardsService extends AbstractService {
         }
         return null;
     }
+
+    public Card addCard(String cardNumber, Callback<Card> callback){
+        try {
+            //return getRestChannel().createObject()
+        }catch (Exception e){
+            handleException(e, callback);
+        }
+        return null;
+    }
 }

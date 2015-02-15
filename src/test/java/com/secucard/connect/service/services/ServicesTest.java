@@ -1,5 +1,8 @@
 package com.secucard.connect.service.services;
 
+import com.secucard.connect.Callback;
+import com.secucard.connect.event.EventListener;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
@@ -18,9 +21,52 @@ public class ServicesTest extends AbstractServicesTest {
 
   @Test
   public void test() throws Exception {
-    testGetIdentRequest();
-    testGetIdentResult();
+    client.setEventListener(new EventListener() {
+      @Override
+      public void onEvent(Object event) {
+        System.out.println(event);
+      }
+    });
+//    testGetIdentRequest();
+//    testGetIdentResult();
 //    testIdent();
+    testEvents();
+  }
+
+  public void testEvents() throws Exception {
+
+    final String json = "{\n" +
+        "    \"object\": \"event.pushes\",\n" +
+        "    \"id\": \"XXX_XXXXXXXXXXX\",\n" +
+        "    \"created\": \"2015-02-02T11:40:50+01:00\",\n" +
+        "    \"target\": \"services.identrequests\",\n" +
+        "    \"type\": \"changed\",\n" +
+        "    \"data\": [\n" +
+        "            {\n" +
+        "                \"object\": \"services.identrequests\",\n" +
+        "                \"id\": \"XXX_XXXXXXXXXXXXXXXXXXXXXXXX\"\n" +
+        "            }\n" +
+        "    ]\n" +
+        "}";
+
+    IdentService service = client.getService(IdentService.class);
+
+
+    service.registerEventHandler(new IdentService.IdentEventHandler() {
+      @Override
+      public boolean downloadAttachments(List<IdentRequest> requests) {
+        return false;
+      }
+    });
+
+    client.connect();
+
+    try {
+      Object o = client.handleEvent(json, null);
+      System.out.println();
+    } finally {
+      client.disconnect();
+    }
   }
 
   private void testGetIdentRequest() throws Exception {
@@ -41,14 +87,16 @@ public class ServicesTest extends AbstractServicesTest {
 
   private void testGetIdentResult() throws Exception {
     IdentService service = client.getService(IdentService.class);
-    client.connect();
+
+    service.getServiceEventListener().onEvent("Event");
 
     try {
-      List<IdentResult> identResults = service.getIdentResults(null, null, false);
+      client.connect();
+      List<IdentResult> identResults = service.getIdentResults(null, null, true);
       assertTrue(identResults.size() > 0);
 
       String id = identResults.get(0).getId();
-      IdentResult identResult = service.getIdentResult(id, null, false);
+      IdentResult identResult = service.getIdentResult(id, null, true);
       assertEquals(id, identResult.getId());
 
     } finally {

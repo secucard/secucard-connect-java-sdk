@@ -2,9 +2,12 @@ package com.secucard.connect;
 
 import com.secucard.connect.auth.UserCredentials;
 import com.secucard.connect.channel.Channel;
+import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
+import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
@@ -14,7 +17,7 @@ import java.util.logging.Level;
 /**
  * Main entry to the Java Secucard Connect API.
  */
-public class Client extends AbstractService implements EventListener {
+public class Client extends AbstractService {
   protected volatile boolean isConnected;
   private Thread heartbeatInvoker;
   private String id;
@@ -132,15 +135,41 @@ public class Client extends AbstractService implements EventListener {
   }
 
   /**
-   * Client can act itself as an event listener, for instance to stomp events,
-   * see {@link #init(String, ClientConfiguration, Object, DataStorage)}.
-   * This propagates this events via dispatcher to other listeners registered to the dispatcher after handling them.
-   * todo: introduce separate listener like an event source
+   * Main service method for event processing, takes JSON event data, processes them accordingly and returns the result,
+   * either direct or via the given callback. The caller doesn't need to know anything about the provided event, all
+   * handling is done internally, he may only inspect and handle the returned data.<br/>
+   * For processing of some events additional input beside the given event data is needed. In this cases a custom
+   * {@link com.secucard.connect.event.EventHandler} implementation must be registered which provides the needed data.
+   * This is done by calling a service method prefixed "register",
+   * see {@link com.secucard.connect.service.services.IdentService#registerEventHandler(
+   *com.secucard.connect.service.services.IdentService.IdentEventHandler)} <br/>
+   * To disable event handling for certain events call one of the service methods prefixed "disabled".
+   * <p/>
+   * card.connect.service.services.IdentService#registerEventHandler(
+   * com.secucard.connect.service.services.IdentService.IdentEventHandler)}) and passing the implementation to use.<br/>
+   * Without the event is not getting processed, so always check the service to see if the registration for an event is
+   * necessary.
+   *
+   * @param json     Contains the event data.
+   * @param callback Callback for async delivery of the operations results, null if not needed.
+   * @return The processing result or Void if no result is involved. Returns
+   * {@link com.secucard.connect.service.AbstractService.Constant#EVENT_SKIPPED} if event was not handled at all,
+   * this may happen if the event is unknown , no handler was registered or handling was disabled.
+   * @throws com.secucard.connect.SecuException if the given string provides no proper event data.
    */
-  @Override
-  public void onEvent(Object event) {
-    handleEvent(event);
-    context.getEventDispatcher().fireEvent(event);
+  public synchronized Object handleEvent(String json, Callback callback) {
+    Event event;
+    try {
+      event = JsonMapper.get().mapEvent(json);
+    } catch (Exception e) {
+      throw new SecuException("Error processing event, invalid event data.", e);
+    }
+
+    try {
+      return context.getEventDispatcher().handleEvent(event, callback);
+    } catch (EventDispatcher.NoHandlerException e) {
+      return Constant.EVENT_SKIPPED;
+    }
   }
 
   private void startHeartBeat() {
@@ -196,13 +225,19 @@ public class Client extends AbstractService implements EventListener {
     serviceFactory = new ServiceFactory(context);
     isConnected = false;
 
-    // set up event sources
+    // set up STOMP event listening
     Channel sc = getStompChannel();
     if (sc != null) {
-      sc.setEventListener(this);
+      sc.setEventListener(new EventListener() {
+        @Override
+        public void onEvent(Object event) {
+          handleEvent(event);
+          context.getEventDispatcher().fireEvent(event);
+        }
+      });
     }
 
-    // simply throw all catched exceptions by default, can be overwritten by clients user
+    // simply throws all exceptions by default, can be overwritten by clients user
     setExceptionHandler(new ThrowingExceptionHandler());
   }
 

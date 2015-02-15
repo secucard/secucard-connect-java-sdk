@@ -1,15 +1,15 @@
 package com.secucard.connect;
 
 /**
- * Implementing  instances can be passed to methods to get asyncronous notified when the
- * operation performed by the method completes or failes.
+ * Implementing instances can be passed to methods to get asynchronous notified when the
+ * operation performed by the method completes or fails.
  *
  * @param <T> The type of the operations result.
  */
 public interface Callback<T> {
 
   /**
-   * Gets called when the operation is sucessfully completed.
+   * Gets called when the operation is successfully completed.
    *
    * @param result The value returned by the operation.
    */

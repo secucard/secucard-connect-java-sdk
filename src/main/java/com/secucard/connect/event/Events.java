@@ -3,9 +3,14 @@ package com.secucard.connect.event;
 import java.util.Map;
 
 public class Events {
+
+  // string events
   public static final String STOMP_CONNECTED = "STOMP_CONNECTED";
   public static final String STOMP_DISCONNECTED = "STOMP_DISCONNECTED";
   public static final String ANY = "*";
+
+  // event types
+  public static final String TYPE_CHANGED = "changed";
 
   /**
    * Event listener registered for this type gets notified when the connection state of the client changes.

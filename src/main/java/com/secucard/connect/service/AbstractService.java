@@ -88,6 +88,10 @@ public abstract class AbstractService {
     ThreadLocalUtil.remove();
   }
 
+  public void init(){
+
+  }
+
   public void setEventListener(final EventListener eventListener) {
     context.getEventDispatcher().setEventListener(Events.ANY, eventListener);
 
@@ -130,8 +134,19 @@ public abstract class AbstractService {
     }.invoke(callback);
   }
 
-  public <T> List<T> get(final Class<T> type, final QueryParams queryParams, final Callback<List<T>> callback,
-                         final String channel) {
+  /**
+   * Return a list of objects.<br/>
+   * Note: Add list post processing by implementing {@link #postProcessObjects(java.util.List)}. This method is called
+   * after the list was retrieved.
+   *
+   * @param type        Actual list element type.
+   * @param queryParams Query params
+   * @param callback    Callback for async processing.
+   * @param channel     The channel to use, like {@link com.secucard.connect.ClientContext#REST}. Pass null to use default channel.
+   * @return The objects.
+   */
+  public <T> List<T> getList(final Class<T> type, final QueryParams queryParams, final Callback<List<T>> callback,
+                             final String channel) {
     return new ConvertingInvoker<ObjectList<T>, List<T>>() {
       @Override
       protected ObjectList<T> handle(Callback<ObjectList<T>> callback) {
@@ -140,9 +155,19 @@ public abstract class AbstractService {
 
       @Override
       protected List<T> convert(ObjectList<T> object) {
-        return object == null ? null : object.getList();
+        if (object == null) {
+          return null;
+        }
+        List<T> objects = object.getList();
+        setContext();
+        postProcessObjects(objects);
+        return objects;
       }
     }.invokeAndConvert(callback);
+  }
+
+  protected void postProcessObjects(List<?> objects) {
+
   }
 
   protected <T extends SecuObject> T update(final T object, Callback<T> callback, final String channel) {

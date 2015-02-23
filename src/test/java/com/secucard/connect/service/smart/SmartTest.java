@@ -2,6 +2,7 @@ package com.secucard.connect.service.smart;
 
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.AbstractServicesTest;
+import org.junit.Assert;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,9 +16,30 @@ public class SmartTest extends AbstractServicesTest {
 
   @Override
   protected void executeTests() throws Exception {
-    testIdents();
-    testDevice();
-    testTransaction();
+//    testIdents();
+//    testDevice();
+//    testTransaction();
+    testCheckins();
+  }
+
+  public void testCheckins() throws Exception {
+    final String json = "{\n" +
+        "    \"object\": \"event.pushes\",\n" +
+        "    \"id\": \"XXX_XXXXXXXXXXX\",\n" +
+        "    \"created\": \"2015-02-02T11:40:50+01:00\",\n" +
+        "    \"target\": \"smart.checkins\",\n" +
+        "    \"type\": \"changed\"}";
+    CheckinService service = client.getService(CheckinService.class);
+
+    List<Checkin> checkins = (List<Checkin>) client.handleEvent(json, null);
+
+    // or
+    // List<Checkin> checkins = service.getCheckins(null);
+
+    for (Checkin checkin : checkins) {
+      byte[] contents = checkin.getPicture().getContents();
+      Assert.assertTrue(contents.length > 0);
+    }
   }
 
   private void testIdents() {

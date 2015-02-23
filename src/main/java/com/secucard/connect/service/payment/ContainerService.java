@@ -11,7 +11,7 @@ import java.util.List;
 public class ContainerService extends AbstractService {
 
   public List<Container> getContainers(QueryParams queryParams, final Callback<List<Container>> callback) {
-    return get(Container.class, queryParams, callback, null);
+    return getList(Container.class, queryParams, callback, null);
   }
 
   public Container createContainer(final Container container, Callback<Container> callback) {

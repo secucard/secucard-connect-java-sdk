@@ -1,10 +1,10 @@
 package com.secucard.connect.model.services.idresult;
 
-import com.secucard.connect.model.AbstractMediaResource;
+import com.secucard.connect.model.MediaResource;
 
 import java.net.MalformedURLException;
 
-public class Attachment extends AbstractMediaResource {
+public class Attachment extends MediaResource {
   private String type;
 
   public Attachment() {

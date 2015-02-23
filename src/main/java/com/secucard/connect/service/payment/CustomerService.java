@@ -10,7 +10,7 @@ import java.util.List;
 public class CustomerService extends AbstractService {
 
   public List<Customer> getCustomers(QueryParams queryParams, final Callback<List<Customer>> callback) {
-    return get(Customer.class, queryParams, callback, null);
+    return getList(Customer.class, queryParams, callback, null);
   }
 
   public Customer createCustomer(final Customer customer, Callback<Customer> callback) {

@@ -89,7 +89,7 @@ public class Client extends AbstractService {
    * Initializes connects the client to the secucard server.<br/>
    * Throws {@link com.secucard.connect.auth.AuthException} if an error happens during authentication.<br/>
    * May also fire an event of type {@link com.secucard.connect.event.Events.AuthorizationFailed} if a STOMP auth.
-   * problem or similiar happens.
+   * problem or similar happens.
    * In both cases, or in general when a exception was thrown by this method, it's a good idea to call {@link #disconnect()}
    * to help clean up resources.<br/>
    * If the client is successfully connected an event of type {@link com.secucard.connect.event.Events.ConnectionStateChanged} is fired.

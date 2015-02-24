@@ -2,13 +2,12 @@ package com.secucard.connect.model.general.accounts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.contacts.Contact;
 
 import java.util.List;
 
-@ProductInfo(resourceId = "general.accounts")
 public class Account extends SecuObject {
+    public static final String OBJECT = "general.accounts";
 
     @JsonProperty
     private String username;
@@ -63,5 +62,10 @@ public class Account extends SecuObject {
 
     public void setAssignment(List<Assignment> assignment) {
         this.assignment = assignment;
+    }
+
+    @Override
+    public String getObject() {
+        return OBJECT;
     }
 }

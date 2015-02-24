@@ -23,6 +23,7 @@ public class ServiceFactory {
     ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
     for (AbstractService service : loader) {
       service.setContext(context);
+      service.init();
       // in Android ServiceLoader impl. doesn't cache services,
       services.add(service);
     }

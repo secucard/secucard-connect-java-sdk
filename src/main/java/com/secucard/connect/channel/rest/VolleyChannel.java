@@ -225,8 +225,11 @@ public class VolleyChannel extends RestChannelBase {
                                                 Callback<T> callback) {
     Map<String, String> headers = null;
     if (secure) {
-      headers = new HashMap<>();
-      setAuthorizationHeader(headers);
+      Token token = authProvider.getToken();
+      if (token != null) {
+        headers = new HashMap<>();
+        setAuthorizationHeader(headers, token.getAccessToken());
+      }
     }
     return new ObjectJsonRequest<>(method, url, requestBody, headers, typeReference, callback);
   }

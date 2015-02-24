@@ -18,7 +18,7 @@ import java.net.MalformedURLException;
  * Note: This is not a caching by LRU strategy or alike. If enabled the content will be
  * cached for new instances or when the URL of the instance was changed (its eventually the same).
  */
-public abstract class AbstractMediaResource {
+public class MediaResource {
   private String url;
 
   @JsonIgnore
@@ -27,10 +27,10 @@ public abstract class AbstractMediaResource {
   @JsonIgnore
   private boolean cachingEnabled = true;
 
-  public AbstractMediaResource() {
+  public MediaResource() {
   }
 
-  public AbstractMediaResource(String url) throws MalformedURLException {
+  public MediaResource(String url) throws MalformedURLException {
     setUrl(url);
   }
 
@@ -102,7 +102,7 @@ public abstract class AbstractMediaResource {
   }
 
   /**
-   * Loads this ressource as a stream from its URL.<br/>
+   * Loads this resource as a stream from its URL.<br/>
    * Note: If caching is enabled, (check {@link #isCachingEnabled()}, the resource content is also downloaded and cached
    * (if not already happened before, check {@link #isCached()}) and further invocations deliver from cache.
    * Set {@link #enableCaching(boolean)} if this behaviour is not wanted.

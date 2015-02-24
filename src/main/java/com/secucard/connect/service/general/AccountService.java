@@ -1,6 +1,7 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.ClientContext;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.accounts.Account;
 import com.secucard.connect.model.general.accounts.MerchantList;
@@ -9,6 +10,62 @@ import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
 public class AccountService extends AbstractService {
+
+
+    /**
+     * Creating a account.
+     *
+     * @param account The account data to save.
+     * @return The new account. Use this instance for further processing rather the provided.
+     */
+    public Account createAccount(final Account account, Callback<Account> callback){
+        return new Invoker<Account>(){
+            @Override
+            protected Account handle(Callback<Account> callback) throws Exception {
+                return getChannel().createObject(account, callback);
+            }
+        }.invoke(callback);
+    }
+
+    /**
+     * Gets the account with the given id
+     *
+     * @param id The account id
+     * @return The account with the given id
+     */
+    public Account getAccount(String id, Callback<Account> callback) {
+        try {
+            return getRestChannel().getObject(Account.class, id, callback);
+        } catch (Exception e) {
+            handleException(e, callback);
+        }
+        return null;
+    }
+
+    /**
+     * Updates the account
+     *
+     * @param account Updated account
+     * @return True if successfully updated, false else.
+     */
+    public Account updateAccount(Account account, Callback<Account> callback){
+        try{
+            return getRestChannel().updateObject(account, callback);
+        }catch (Exception e){
+            handleException(e, callback);
+        }
+
+        return null;
+    }
+
+    /**
+     * Delete the account
+     *
+     * @param accountId Account ID
+     */
+    public void deleteAccount(String accountId, Callback callback){
+        delete(Account.class, accountId, callback, ClientContext.REST);
+    }
 
     /**
      * Updates the location of a account.

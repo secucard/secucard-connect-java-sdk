@@ -213,7 +213,7 @@ public class OAuthProvider implements AuthProvider {
                                                  String deviceId, String deviceCode) {
     Map<String, Object> parameters = new HashMap<>();
 
-    // default type, client id / secrect must always exist
+    // default type, client id / secret must always exist
     parameters.put("grant_type", "client_credentials");
     parameters.put("client_id", clientCredentials.getClientId());
     parameters.put("client_secret", clientCredentials.getClientSecret());

@@ -134,11 +134,10 @@ public abstract class RestChannelBase extends AbstractChannel {
   }
 
   @SuppressWarnings({"unchecked"})
-  protected void setAuthorizationHeader(Map headers) {
-    Token token = authProvider.getToken();
+  protected void setAuthorizationHeader(Map headers, String token) {
     if (token != null) {
       String key = "Authorization";
-      String value = "Bearer " + token.getAccessToken();
+      String value = "Bearer " + token;
       if (headers instanceof MultivaluedMap) {
         ((MultivaluedMap) headers).putSingle(key, value);
       } else {

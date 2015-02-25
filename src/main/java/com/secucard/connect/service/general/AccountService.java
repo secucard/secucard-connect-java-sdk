@@ -5,9 +5,12 @@ import com.secucard.connect.ClientContext;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.accounts.Account;
 import com.secucard.connect.model.general.accounts.MerchantList;
+import com.secucard.connect.model.general.accounts.beaconenvironment.BeaconEnvironment;
 import com.secucard.connect.model.general.accounts.location.Location;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
+
+import java.util.List;
 
 public class AccountService extends AbstractService {
 
@@ -77,6 +80,24 @@ public class AccountService extends AbstractService {
     public boolean updateLocation(String accountId, Location location) {
         try {
             Result result = getStompChannel().updateObject(Account.class, accountId, "location", null, location, Result.class,
+                    null);
+            return Boolean.parseBoolean(result.getResult());
+        } catch (Throwable e) {
+            handleException(e, null);
+        }
+        return false;
+    }
+
+    /**
+     * Updates the beacons of the account
+     *
+     * @param accountId Account ID
+     * @param beaconList List of beacons near by
+     * @return True if successfully updated, false else.
+     */
+    public boolean updateBeacons(String accountId, List<BeaconEnvironment> beaconList) {
+        try {
+            Result result = getStompChannel().updateObject(Account.class, "me", "beaconEnvironment", null, beaconList, Result.class,
                     null);
             return Boolean.parseBoolean(result.getResult());
         } catch (Throwable e) {

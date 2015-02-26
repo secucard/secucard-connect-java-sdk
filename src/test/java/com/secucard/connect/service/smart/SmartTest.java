@@ -1,14 +1,18 @@
 package com.secucard.connect.service.smart;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Assert;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNoException;
 
 public class SmartTest extends AbstractServicesTest {
   private Device device;
@@ -31,15 +35,29 @@ public class SmartTest extends AbstractServicesTest {
         "    \"type\": \"changed\"}";
     CheckinService service = client.getService(CheckinService.class);
 
-    List<Checkin> checkins = (List<Checkin>) client.handleEvent(json, null);
+    service.onCheckinsChanged(new Callback<List<Checkin>>() {
+      @Override
+      public void completed(List<Checkin> checkins) {
+        try {
+          for (Checkin checkin : checkins) {
+            byte[] contents = checkin.getPicture().getContents();
+            Assert.assertTrue(contents.length > 0);
+          }
+        } catch (IOException e) {
+          assumeNoException(e);
+        }
+      }
 
-    // or
-    // List<Checkin> checkins = service.getCheckins(null);
+      @Override
+      public void failed(Throwable cause) {
+        assumeNoException(cause);
+      }
+    });
+    boolean b = client.handleEvent(json);
 
-    for (Checkin checkin : checkins) {
-      byte[] contents = checkin.getPicture().getContents();
-      Assert.assertTrue(contents.length > 0);
-    }
+    Assert.assertTrue(b);
+
+    Thread.sleep(10000);
   }
 
   private void testIdents() {

@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import static org.junit.Assume.assumeNoException;
+
 public class IdentsDemo {
   public static void main(String[] args) throws Exception {
 
@@ -70,14 +72,26 @@ public class IdentsDemo {
 
 
       // or 2. by responding on web hook event: 
-      // first create special handler (needed one time)
-      service.registerEventHandler(new IdentService.IdentEventHandler() {
+      // provide a special handler for the event
+      // when event happens call Client.handle() and pass event JSON data, result will be the ident result list
+
+      service.onIdentRequestChanged(new IdentService.IdentEventHandler() {
         @Override
         public boolean downloadAttachments(List<IdentRequest> requests) {
           return false;
         }
+
+        @Override
+        public void completed(List<IdentResult> result) {
+          // handle ident result data  ...
+        }
+
+        @Override
+        public void failed(Throwable cause) {
+          // handle fail ...
+        }
       });
-      // when event happens call Client.handle() and pass event JSON data, result will be the ident result list
+
       String jsonEventData = "..."; /* get from web server, example:
        {  "object": "event.pushes",
           "id": "XXX_XXXXXXXXXXX",
@@ -90,11 +104,8 @@ public class IdentsDemo {
           }
         ]} */
 
-      Object result = client.handleEvent(jsonEventData, null);
-      if (result != null) {
-        results = (List<IdentResult>) result;
-        // ... do further processing
-      }
+      boolean ok = client.handleEvent(jsonEventData);
+      // done
 
     } finally {
       // important to close the client properly at last, avoids leaking resources

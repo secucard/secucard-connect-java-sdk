@@ -40,8 +40,6 @@ public class Contact extends SecuObject {
     @JsonProperty
     private Address address;
 
-    @JsonProperty
-    private String picture;
 
     public String getName() {
         return name;
@@ -123,11 +121,5 @@ public class Contact extends SecuObject {
         this.mobile = mobile;
     }
 
-    public String getPicture() {
-        return picture;
-    }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
-    }
 }

@@ -13,6 +13,9 @@ import java.util.Date;
 @ProductInfo(resourceId = "general.transactions")
 public class Transaction extends SecuObject {
 
+    public static final String TYPE_SALE = "sale";
+    public static final String TYPE_CHARGE = "charge";
+
     @JsonProperty
     private Merchant merchant;
 

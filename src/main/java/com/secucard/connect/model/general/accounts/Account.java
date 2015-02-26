@@ -22,6 +22,9 @@ public class Account extends SecuObject {
     private Contact contact;
 
     @JsonProperty
+    private String picture;
+
+    @JsonProperty
     private List<Assignment> assignment;
 
     public String getUsername() {
@@ -54,6 +57,14 @@ public class Account extends SecuObject {
 
     public void setContact(Contact contact) {
         this.contact = contact;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
     public List<Assignment> getAssignment() {

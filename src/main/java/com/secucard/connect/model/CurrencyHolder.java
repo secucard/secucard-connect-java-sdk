@@ -1,27 +1,27 @@
 package com.secucard.connect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.math.BigDecimal;
 import java.util.Currency;
 
 public class CurrencyHolder {
-  protected Currency currency;
-
-  public CurrencyHolder() {
-  }
-
-  public CurrencyHolder(Currency currency) {
-    this.currency = currency;
-  }
+  private Currency currency;
 
   public String getCurrency() {
     return currency.getCurrencyCode();
+  }
+
+  public Currency getCurrencyAsCurrency() {
+    return currency;
   }
 
   public void setCurrency(String currency) {
     this.currency = Currency.getInstance(currency);
   }
 
-  public void setCurrencyInstance(Currency currency) {
+  @JsonIgnore
+  public void setCurrency(Currency currency) {
     this.currency = currency;
   }
 

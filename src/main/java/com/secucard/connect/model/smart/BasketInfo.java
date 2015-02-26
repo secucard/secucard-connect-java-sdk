@@ -14,7 +14,7 @@ public class BasketInfo extends CurrencyHolder {
 
   public BasketInfo(BigDecimal sum, Currency currency) {
     this.sum = sum;
-    setCurrencyInstance(currency);
+    setCurrency(currency);
   }
 
   public BasketInfo(String sum, Currency currency) {
@@ -42,7 +42,7 @@ public class BasketInfo extends CurrencyHolder {
   public String toString() {
     return "BasketInfo{" +
         "sum=" + sum +
-        ", currency='" + currency + '\'' +
+        ", currency='" + getCurrency() + '\'' +
         '}';
   }
 }

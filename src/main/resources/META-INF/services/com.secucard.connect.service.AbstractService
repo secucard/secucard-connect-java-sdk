@@ -10,3 +10,4 @@ com.secucard.connect.service.services.IdentService #{services.idents, services/i
 com.secucard.connect.service.payment.CustomerService #{payment.customers, payment/customers}
 com.secucard.connect.service.payment.ContainerService #{payment.containers, payment/containers}
 com.secucard.connect.service.smart.CheckinService #{smart.checkins, smart/checkins}
+com.secucard.connect.service.payment.SecupayDebitService #{payment.secupaydebits, payment/secupaydebits}

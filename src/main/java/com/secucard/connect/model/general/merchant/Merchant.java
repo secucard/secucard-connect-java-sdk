@@ -10,55 +10,61 @@ import com.secucard.connect.model.general.components.MetaData;
  * Copyright (c) 2014 secucard AG. All rights reserved.
  */
 public class Merchant extends SecuObject {
+  public static final String OBJECT = "general.merchants";
 
-    @JsonProperty
-    private String name;
+  @JsonProperty
+  private String name;
 
-    @JsonProperty
-    private String email;
+  @JsonProperty
+  private String email;
 
-    @JsonProperty
-    private MetaData metadata;
+  @JsonProperty
+  private MetaData metadata;
 
-    @JsonProperty
-    private Location location;
+  @JsonProperty
+  private Location location;
 
-    public Merchant() {
-    }
+  public Merchant() {
+  }
 
-    public Merchant(String id) {
-        this.id = id;
-    }
+  public Merchant(String id) {
+    this.id = id;
+  }
 
-    public String getName() {
-        return name;
-    }
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public MetaData getMetadata() {
-        return metadata;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void setMetadata(MetaData metadata) {
-        this.metadata = metadata;
-    }
+  public MetaData getMetadata() {
+    return metadata;
+  }
 
-    public Location getLocation() {
-        return location;
-    }
+  public void setMetadata(MetaData metadata) {
+    this.metadata = metadata;
+  }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
+  public Location getLocation() {
+    return location;
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
+  }
 }

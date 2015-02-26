@@ -2,19 +2,18 @@ package com.secucard.connect.model.general.skeleton;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.accounts.location.Location;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Steffen on 26.08.2014.
  * <p/>
  * Model class to hold all fields of a skeleton
  */
-@ProductInfo(resourceId = "general.skeletons")
-public class Skeleton extends SecuObject implements Serializable {
+public class Skeleton extends SecuObject{
+  public static final String OBJECT = "general.skeletons";
+
   @JsonProperty
   private String a;
 
@@ -43,7 +42,12 @@ public class Skeleton extends SecuObject implements Serializable {
   private Skeleton skeleton;
 
   @JsonProperty("skeleton_list")
-  private ArrayList<Skeleton> skeletonList;
+  private List<Skeleton> skeletonList;
+
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
   public String getA() {
     return a;
@@ -109,11 +113,11 @@ public class Skeleton extends SecuObject implements Serializable {
     this.location = location;
   }
 
-  public ArrayList<Skeleton> getSkeletonList() {
+  public List<Skeleton> getSkeletonList() {
     return skeletonList;
   }
 
-  public void setSkeletonList(ArrayList<Skeleton> skeletonList) {
+  public void setSkeletonList(List<Skeleton> skeletonList) {
     this.skeletonList = skeletonList;
   }
 

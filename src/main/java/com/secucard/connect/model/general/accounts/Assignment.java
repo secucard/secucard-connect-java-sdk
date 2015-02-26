@@ -20,7 +20,7 @@ public class Assignment implements Serializable {
     private boolean owner;
 
     @JsonProperty
-    private Assign assign;
+    private Assign assign;  // todo: assign ist Typ general.Merchant oder general.AccountDevice nicht Assign
 
     public String getCreated() {
         return created;

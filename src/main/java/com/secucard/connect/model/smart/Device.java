@@ -1,10 +1,10 @@
 package com.secucard.connect.model.smart;
 
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 
-@ProductInfo(resourceId = "smart.devices")
 public class Device extends SecuObject {
+  public static final String OBJECT = "smart.devices";
+
   private String type;
 
   public Device() {
@@ -17,6 +17,11 @@ public class Device extends SecuObject {
   public Device(String id, String type) {
     this.id = id;
     this.type = type;
+  }
+
+  @Override
+  public String getObject() {
+    return OBJECT;
   }
 
   public String getType() {

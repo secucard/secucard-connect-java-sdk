@@ -1,7 +1,7 @@
 package com.secucard.connect.service.services;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.event.AbstractEventHandler;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
@@ -197,15 +197,15 @@ public class IdentService extends AbstractService {
   }
 
   /**
-   * Register an single event handler, see {@link IdentEventHandler} for which event.<br/>
-   * This handler will be used then when the event is passed to
-   * {@link com.secucard.connect.Client#handleEvent(String, com.secucard.connect.Callback)}
+   * Register an event handler, see {@link IdentEventHandler} for which event.<br/>
+   * This handler will be called then when the event is passed to
+   * {@link com.secucard.connect.Client#handleEvent(String)}
    * The event is discarded if no handler is registered.<br/>
    * Note: Registering a handler multiple times just replaces the previous instance.
    *
    * @param handler The handler instance or null to remove the handler.
    */
-  public void registerEventHandler(IdentEventHandler handler) {
+  public void onIdentRequestChanged(IdentEventHandler handler) {
     if (handler == null) {
       removeEventHandler(IdentEventHandler.ID);
     } else {
@@ -245,9 +245,9 @@ public class IdentService extends AbstractService {
    * Event handler for event type {@link Events#TYPE_CHANGED} and target {@link IdentRequest#OBJECT}, happening when
    * IdentRequests are approved. The handler retrieves and returns a list of belonging IdentResults and downloads the
    * containing attachments when required if such an event is passed to
-   * {@link com.secucard.connect.Client#handleEvent(String, Callback)}.
+   * {@link com.secucard.connect.Client#handleEvent(String)}.
    */
-  public static abstract class IdentEventHandler extends EventHandler<List<IdentResult>, Event> {
+  public static abstract class IdentEventHandler extends AbstractEventHandler<List<IdentResult>, Event> {
     public static final String ID = IdentRequest.OBJECT + Events.TYPE_CHANGED;
     private IdentService service;
 
@@ -260,9 +260,7 @@ public class IdentService extends AbstractService {
       return IdentRequest.OBJECT.equals(event.getTarget()) && Events.TYPE_CHANGED.equals(event.getType());
     }
 
-
-    public final synchronized List<IdentResult> handle(Event event,
-                                                       Callback<List<IdentResult>> callback) {
+    public final synchronized void handle(Event event) {
       List<IdentRequest> requests = (List<IdentRequest>) event.getData();
       List<String> ids;
       if (requests == null) {
@@ -273,7 +271,17 @@ public class IdentService extends AbstractService {
           ids.add(request.getId());
         }
       }
-      return service.getIdentResultsByRequestIds(ids, callback, downloadAttachments(requests));
+      service.getIdentResultsByRequestIds(ids, new Callback<List<IdentResult>>() {
+        @Override
+        public void completed(List<IdentResult> result) {
+          IdentEventHandler.this.completed(result);
+        }
+
+        @Override
+        public void failed(Throwable cause) {
+          IdentEventHandler.this.failed(cause);
+        }
+      }, downloadAttachments(requests));
     }
 
     /**

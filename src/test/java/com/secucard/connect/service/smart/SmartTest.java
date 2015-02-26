@@ -1,14 +1,18 @@
 package com.secucard.connect.service.smart;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Assert;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNoException;
 
 public class SmartTest extends AbstractServicesTest {
   private Device device;
@@ -31,15 +35,29 @@ public class SmartTest extends AbstractServicesTest {
         "    \"type\": \"changed\"}";
     CheckinService service = client.getService(CheckinService.class);
 
-    List<Checkin> checkins = (List<Checkin>) client.handleEvent(json, null);
+    service.onCheckinsChanged(new Callback<List<Checkin>>() {
+      @Override
+      public void completed(List<Checkin> checkins) {
+        try {
+          for (Checkin checkin : checkins) {
+            byte[] contents = checkin.getPicture().getContents();
+            Assert.assertTrue(contents.length > 0);
+          }
+        } catch (IOException e) {
+          assumeNoException(e);
+        }
+      }
 
-    // or
-    // List<Checkin> checkins = service.getCheckins(null);
+      @Override
+      public void failed(Throwable cause) {
+        assumeNoException(cause);
+      }
+    });
+    boolean b = client.handleEvent(json);
 
-    for (Checkin checkin : checkins) {
-      byte[] contents = checkin.getPicture().getContents();
-      Assert.assertTrue(contents.length > 0);
-    }
+    Assert.assertTrue(b);
+
+    Thread.sleep(10000);
   }
 
   private void testIdents() {
@@ -64,13 +82,13 @@ public class SmartTest extends AbstractServicesTest {
     TransactionService service = client.getService("smart.transactions");
 
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", 5.f, 19.99f, 19));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", 1.5f, 9.99f, 2));
+    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.0", "19.99", "19"));
+    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2"));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", 20f, 2.19f, 50f));
+    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50"));
 
-    BasketInfo basketInfo = new BasketInfo(136.50f, BasketInfo.getEuro());
+    BasketInfo basketInfo = new BasketInfo("136.50", BasketInfo.getEuro());
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, Arrays.asList(ident));
 

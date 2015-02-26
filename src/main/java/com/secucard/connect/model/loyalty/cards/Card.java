@@ -2,7 +2,7 @@
  * Copyright (c) 2014 secucard AG. All rights reserved
  */
 
-package com.secucard.connect.model.loyalty;
+package com.secucard.connect.model.loyalty.cards;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;

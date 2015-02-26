@@ -64,13 +64,13 @@ public class SmartTest extends AbstractServicesTest {
     TransactionService service = client.getService("smart.transactions");
 
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", 5.f, 19.99f, 19));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", 1.5f, 9.99f, 2));
+    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.0", "19.99", "19"));
+    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2"));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", 20f, 2.19f, 50f));
+    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50"));
 
-    BasketInfo basketInfo = new BasketInfo(136.50f, BasketInfo.getEuro());
+    BasketInfo basketInfo = new BasketInfo("136.50", BasketInfo.getEuro());
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, Arrays.asList(ident));
 

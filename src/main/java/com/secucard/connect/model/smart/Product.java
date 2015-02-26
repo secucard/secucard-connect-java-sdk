@@ -1,12 +1,13 @@
 package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.secucard.connect.model.CurrencyHolder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Product {
-
+public class Product extends CurrencyHolder {
   protected String id;
 
   private String articleNumber;
@@ -15,18 +16,19 @@ public class Product {
 
   protected String desc;
 
-  private float quantity;
+  private BigDecimal quantity;
 
-  private float priceOne;
+  private BigDecimal priceOne;
 
-  private float tax;
+  private BigDecimal tax;
 
   private List<ProductGroup> productGroups = new ArrayList<>();
 
   public Product() {
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, float quantity, float priceOne, float tax) {
+  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, BigDecimal priceOne,
+                 BigDecimal tax) {
     this.id = id;
     this.articleNumber = articleNumber;
     this.ean = ean;
@@ -36,8 +38,18 @@ public class Product {
     this.tax = tax;
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, float quantity, float priceOne, float tax,
-                 List<ProductGroup> productGroups) {
+  public Product(String id, String articleNumber, String ean, String desc, String quantity, String priceOne, String tax) {
+    this.id = id;
+    this.articleNumber = articleNumber;
+    this.ean = ean;
+    this.desc = desc;
+    setQuantity(quantity);
+    setPriceOne(priceOne);
+    setTax(tax);
+  }
+
+  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, BigDecimal priceOne,
+                 BigDecimal tax, List<ProductGroup> productGroups) {
     this.id = id;
     this.articleNumber = articleNumber;
     this.ean = ean;
@@ -45,6 +57,18 @@ public class Product {
     this.quantity = quantity;
     this.priceOne = priceOne;
     this.tax = tax;
+    this.productGroups = productGroups;
+  }
+
+  public Product(String id, String articleNumber, String ean, String desc, String quantity, String priceOne, String tax,
+                 List<ProductGroup> productGroups) {
+    this.id = id;
+    this.articleNumber = articleNumber;
+    this.ean = ean;
+    this.desc = desc;
+    setQuantity(quantity);
+    setPriceOne(priceOne);
+    setTax(tax);
     this.productGroups = productGroups;
   }
 
@@ -93,28 +117,55 @@ public class Product {
     this.desc = desc;
   }
 
-  public float getQuantity() {
+  public BigDecimal getQuantityABigDecimal() {
     return quantity;
   }
 
-  public void setQuantity(float quantity) {
+  public String getQuantity() {
+    return getValue(quantity);
+  }
+
+  @JsonIgnore
+  public void setQuantity(BigDecimal quantity) {
     this.quantity = quantity;
   }
 
-  public float getPriceOne() {
+  public void setQuantity(String quantity) {
+    this.quantity = getValue(quantity);
+  }
+
+  public BigDecimal getPriceOneAsBigDecimal() {
     return priceOne;
   }
 
-  public void setPriceOne(float priceOne) {
+  public String getPriceOne() {
+    return getValue(priceOne);
+  }
+
+  @JsonIgnore
+  public void setPriceOne(BigDecimal priceOne) {
     this.priceOne = priceOne;
   }
 
-  public float getTax() {
+  public void setPriceOne(String priceOne) {
+    this.priceOne = getValue(priceOne);
+  }
+
+  public BigDecimal getTaxAsBigDecimal() {
     return tax;
   }
 
-  public void setTax(float tax) {
+  public String getTax() {
+    return getValue(tax);
+  }
+
+  @JsonIgnore
+  public void setTax(BigDecimal tax) {
     this.tax = tax;
+  }
+
+  public void setTax(String tax) {
+    this.tax = getValue(tax);
   }
 
   @Override

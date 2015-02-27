@@ -41,17 +41,12 @@ public class CardsService extends AbstractService {
   }
 
   /**
-   * Add a card
+   * Assign a card
    *
    * @param cardNumber Card number
-   * @return Added card
+   * @return Assigned card
    */
-  public Card addCard(String cardNumber, Callback<Card> callback) {
-    try {
-      //return getRestChannel().createObject()
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return null;
+  public Card assignCard(String cardNumber, Callback<Card> callback) {
+    return getRestChannel().execute(Card.class, cardNumber, "assignUser", "me", null, Card.class, callback);
   }
 }

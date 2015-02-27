@@ -1,6 +1,7 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.ClientContext;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.Merchant;
@@ -18,7 +19,7 @@ public class MerchantService extends AbstractService {
    * @return The merchant with the given ID or null if not found
    */
   public Merchant getMerchant(String appId, Object arg, Callback<Merchant> callback) {
-    return getRestChannel().execute(appId, "getMerchantDetails", arg, Merchant.class, callback);
+    return execute(appId, "getMerchantDetails", arg, Merchant.class, callback, ClientContext.REST);
   }
 
   /**
@@ -30,7 +31,7 @@ public class MerchantService extends AbstractService {
    */
   public ObjectList<Merchant> getMerchants(String appId, QueryParams arg, final Callback callback) {
 
-    return getRestChannel().execute(appId, "getMyMerchants", arg, MerchantList.class, callback);
+    return execute(appId, "getMyMerchants", arg, MerchantList.class, callback, ClientContext.REST);
 
   }
 

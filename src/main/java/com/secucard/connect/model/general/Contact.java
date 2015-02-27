@@ -22,7 +22,7 @@ public class Contact extends SecuObject {
   private String email;
 
   @JsonProperty("dob")
-  private String birthday;
+  private String dateOfBirth;
 
   @JsonProperty("url_website")
   private String websiteUrl;
@@ -85,12 +85,12 @@ public class Contact extends SecuObject {
     this.address = address;
   }
 
-  public String getBirthday() {
-    return birthday;
+  public String getDateOfBirth() {
+    return dateOfBirth;
   }
 
-  public void setBirthday(String birthday) {
-    this.birthday = birthday;
+  public void setDateOfBirth(String dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 
   public String getWebsiteUrl() {

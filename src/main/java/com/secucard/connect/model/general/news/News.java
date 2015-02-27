@@ -9,70 +9,76 @@ import java.util.List;
  * Created by Steffen Schröder on 26.02.15.
  */
 public class News extends SecuObject {
+  public static final String OBJECT = "general.news";
 
-    @JsonProperty
-    private String headline;
+  @JsonProperty
+  private String headline;
 
-    @JsonProperty("text_teaser")
-    private String textTeaser;
+  @JsonProperty("text_teaser")
+  private String textTeaser;
 
-    @JsonProperty("text_full")
-    private String textFull;
+  @JsonProperty("text_full")
+  private String textFull;
 
-    @JsonProperty
-    private String author;
+  @JsonProperty
+  private String author;
 
-    @JsonProperty("document_id")
-    private String documentId;
+  @JsonProperty("document_id")
+  private String documentId;
 
-    @JsonProperty
-    private List<SecuObject> related;
+  @JsonProperty
+  private List<SecuObject> related;
 
-    public String getHeadline() {
-        return headline;
-    }
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
-    public void setHeadline(String headline) {
-        this.headline = headline;
-    }
+  public String getHeadline() {
+    return headline;
+  }
 
-    public String getTextTeaser() {
-        return textTeaser;
-    }
+  public void setHeadline(String headline) {
+    this.headline = headline;
+  }
 
-    public void setTextTeaser(String textTeaser) {
-        this.textTeaser = textTeaser;
-    }
+  public String getTextTeaser() {
+    return textTeaser;
+  }
 
-    public String getTextFull() {
-        return textFull;
-    }
+  public void setTextTeaser(String textTeaser) {
+    this.textTeaser = textTeaser;
+  }
 
-    public void setTextFull(String textFull) {
-        this.textFull = textFull;
-    }
+  public String getTextFull() {
+    return textFull;
+  }
 
-    public String getAuthor() {
-        return author;
-    }
+  public void setTextFull(String textFull) {
+    this.textFull = textFull;
+  }
 
-    public void setAuthor(String author) {
-        this.author = author;
-    }
+  public String getAuthor() {
+    return author;
+  }
 
-    public String getDocumentId() {
-        return documentId;
-    }
+  public void setAuthor(String author) {
+    this.author = author;
+  }
 
-    public void setDocumentId(String documentId) {
-        this.documentId = documentId;
-    }
+  public String getDocumentId() {
+    return documentId;
+  }
 
-    public List<SecuObject> getRelated() {
-        return related;
-    }
+  public void setDocumentId(String documentId) {
+    this.documentId = documentId;
+  }
 
-    public void setRelated(List<SecuObject> related) {
-        this.related = related;
-    }
+  public List<SecuObject> getRelated() {
+    return related;
+  }
+
+  public void setRelated(List<SecuObject> related) {
+    this.related = related;
+  }
 }

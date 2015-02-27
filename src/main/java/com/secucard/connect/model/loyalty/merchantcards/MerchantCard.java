@@ -13,8 +13,9 @@ import java.util.Date;
  * Created by Steffen Schröder on 25.02.15.
  */
 public class MerchantCard extends SecuObject {
+  public static final String OBJECT = "loyalty.merchantcards";
 
-    @JsonProperty
+  @JsonProperty
     private Merchant merchant;
 
     @JsonProperty("created_for_merchant")
@@ -31,6 +32,8 @@ public class MerchantCard extends SecuObject {
 
     @JsonProperty
     private CardGroup cardgroup;
+
+    // todo: Customer property ergänzen
 
     @JsonProperty
     private int balance;
@@ -50,7 +53,12 @@ public class MerchantCard extends SecuObject {
     @JsonProperty("lock_status")
     private String lockStatus;
 
-    public Merchant getMerchant() {
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
+
+  public Merchant getMerchant() {
         return merchant;
     }
 

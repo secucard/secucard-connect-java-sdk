@@ -1,48 +1,47 @@
 package com.secucard.connect.model.smart;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.secucard.connect.model.CurrencyHolder;
-
 import java.math.BigDecimal;
 import java.util.Currency;
 
-public class BasketInfo extends CurrencyHolder {
+public class BasketInfo {
   private BigDecimal sum;
+
+  private Currency currency;
 
   public BasketInfo() {
   }
 
   public BasketInfo(BigDecimal sum, Currency currency) {
     this.sum = sum;
-    setCurrency(currency);
+    this.currency = currency;
   }
 
-  public BasketInfo(String sum, Currency currency) {
-    this(getValue(sum), currency);
+  public BasketInfo(String sum, String currencyCode) {
+    this.sum = new BigDecimal(sum);
+    this.currency = Currency.getInstance(currencyCode);
   }
 
-  public String getSum() {
-    return getValue(sum);
-  }
-
-  public BigDecimal getSumAsBigDecimal() {
+  public BigDecimal getSum() {
     return sum;
   }
 
-  @JsonIgnore
   public void setSum(BigDecimal sum) {
     this.sum = sum;
   }
 
-  public void setSum(String sum) {
-    this.sum = getValue(sum);
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(Currency currency) {
+    this.currency = currency;
   }
 
   @Override
   public String toString() {
     return "BasketInfo{" +
         "sum=" + sum +
-        ", currency='" + getCurrency() + '\'' +
+        ", currency=" + currency +
         '}';
   }
 }

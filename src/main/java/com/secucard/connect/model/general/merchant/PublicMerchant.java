@@ -6,233 +6,236 @@ package com.secucard.connect.model.general.merchant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.components.AddressComponent;
 import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.general.components.OpenHours;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 
-@ProductInfo(resourceId = "general.publicMerchants")
-public class PublicMerchant extends SecuObject implements Serializable {
+public class PublicMerchant extends SecuObject {
+  public static final String OBJECT = "general.publicmerchants";
 
-    @JsonProperty
-    private String source;
+  @JsonProperty
+  private String source;
 
-    @JsonProperty
-    private String key;
+  @JsonProperty
+  private String key;
 
-    @JsonProperty
-    private String hash;
+  @JsonProperty
+  private String hash;
 
-    @JsonProperty("address_components")
-    private ArrayList<AddressComponent> addressComponents;
+  @JsonProperty("address_components")
+  private List<AddressComponent> addressComponents;
 
-    @JsonProperty("address_formatted")
-    private String addressFormatted;
+  @JsonProperty("address_formatted")
+  private String addressFormatted;
 
-    @JsonProperty("phone_number_formatted")
-    private String phoneNumberFormatted;
+  @JsonProperty("phone_number_formatted")
+  private String phoneNumberFormatted;
 
-    @JsonProperty
-    private Geometry geometry;
+  @JsonProperty
+  private Geometry geometry;
 
-    @JsonProperty
-    private String name;
+  @JsonProperty
+  private String name;
 
-    @JsonProperty
-    private ArrayList<String> photo;
+  @JsonProperty
+  private List<String> photo;
 
-    @JsonProperty("photo_main")
-    private String photoMain;
+  @JsonProperty("photo_main")
+  private String photoMain;
 
-    @JsonProperty
-    private ArrayList<String> category;
+  @JsonProperty
+  private List<String> category;
 
-    @JsonProperty("category_main")
-    private String categoryMain;
+  @JsonProperty("category_main")
+  private String categoryMain;
 
-    @JsonProperty("url_googleplus")
-    private String urlGooglePlus;
+  @JsonProperty("url_googleplus")
+  private String urlGooglePlus;
 
-    @JsonProperty("url_website")
-    private String urlWebsite;
+  @JsonProperty("url_website")
+  private String urlWebsite;
 
-    @JsonProperty("utc_offset")
-    private int utcOffset;
+  @JsonProperty("utc_offset")
+  private int utcOffset;
 
-    @JsonProperty("open_now")
-    private boolean openNow;
+  @JsonProperty("open_now")
+  private boolean openNow;
 
-    @JsonProperty("open_time")
-    private int openTime;
+  @JsonProperty("open_time")
+  private int openTime;
 
-    @JsonProperty("open_hours")
-    private ArrayList<OpenHours> openHours;
+  @JsonProperty("open_hours")
+  private List<OpenHours> openHours;
 
-    @JsonProperty("_geometry")
-    private int distance;
+  @JsonProperty("_geometry")
+  private int distance;
 
-    private boolean checkedIn;
+  private boolean checkedIn;
 
-    public String getSource() {
-        return source;
-    }
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
-    public void setSource(String source) {
-        this.source = source;
-    }
+  public String getSource() {
+    return source;
+  }
 
-    public String getKey() {
-        return key;
-    }
+  public void setSource(String source) {
+    this.source = source;
+  }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
+  public String getKey() {
+    return key;
+  }
 
-    public String getHash() {
-        return hash;
-    }
+  public void setKey(String key) {
+    this.key = key;
+  }
 
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
+  public String getHash() {
+    return hash;
+  }
 
-    public ArrayList<AddressComponent> getAddressComponents() {
-        return addressComponents;
-    }
+  public void setHash(String hash) {
+    this.hash = hash;
+  }
 
-    public void setAddressComponents(ArrayList<AddressComponent> addressComponents) {
-        this.addressComponents = addressComponents;
-    }
+  public List<AddressComponent> getAddressComponents() {
+    return addressComponents;
+  }
 
-    public String getAddressFormatted() {
-        return addressFormatted;
-    }
+  public void setAddressComponents(List<AddressComponent> addressComponents) {
+    this.addressComponents = addressComponents;
+  }
 
-    public void setAddressFormatted(String addressFormatted) {
-        this.addressFormatted = addressFormatted;
-    }
+  public String getAddressFormatted() {
+    return addressFormatted;
+  }
 
-    public String getPhoneNumberFormatted() {
-        return phoneNumberFormatted;
-    }
+  public void setAddressFormatted(String addressFormatted) {
+    this.addressFormatted = addressFormatted;
+  }
 
-    public void setPhoneNumberFormatted(String phoneNumberFormatted) {
-        this.phoneNumberFormatted = phoneNumberFormatted;
-    }
+  public String getPhoneNumberFormatted() {
+    return phoneNumberFormatted;
+  }
 
-    public Geometry getGeometry() {
-        return geometry;
-    }
+  public void setPhoneNumberFormatted(String phoneNumberFormatted) {
+    this.phoneNumberFormatted = phoneNumberFormatted;
+  }
 
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
-    }
+  public Geometry getGeometry() {
+    return geometry;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public void setGeometry(Geometry geometry) {
+    this.geometry = geometry;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public ArrayList<String> getPhoto() {
-        return photo;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public void setPhoto(ArrayList<String> photo) {
-        this.photo = photo;
-    }
+  public List<String> getPhoto() {
+    return photo;
+  }
 
-    public String getPhotoMain() {
-        return photoMain;
-    }
+  public void setPhoto(List<String> photo) {
+    this.photo = photo;
+  }
 
-    public void setPhotoMain(String photoMain) {
-        this.photoMain = photoMain;
-    }
+  public String getPhotoMain() {
+    return photoMain;
+  }
 
-    public ArrayList<String> getCategory() {
-        return category;
-    }
+  public void setPhotoMain(String photoMain) {
+    this.photoMain = photoMain;
+  }
 
-    public void setCategory(ArrayList<String> category) {
-        this.category = category;
-    }
+  public List<String> getCategory() {
+    return category;
+  }
 
-    public String getCategoryMain() {
-        return categoryMain;
-    }
+  public void setCategory(List<String> category) {
+    this.category = category;
+  }
 
-    public void setCategoryMain(String categoryMain) {
-        this.categoryMain = categoryMain;
-    }
+  public String getCategoryMain() {
+    return categoryMain;
+  }
 
-    public String getUrlGooglePlus() {
-        return urlGooglePlus;
-    }
+  public void setCategoryMain(String categoryMain) {
+    this.categoryMain = categoryMain;
+  }
 
-    public void setUrlGooglePlus(String urlGooglePlus) {
-        this.urlGooglePlus = urlGooglePlus;
-    }
+  public String getUrlGooglePlus() {
+    return urlGooglePlus;
+  }
 
-    public String getUrlWebsite() {
-        return urlWebsite;
-    }
+  public void setUrlGooglePlus(String urlGooglePlus) {
+    this.urlGooglePlus = urlGooglePlus;
+  }
 
-    public void setUrlWebsite(String urlWebsite) {
-        this.urlWebsite = urlWebsite;
-    }
+  public String getUrlWebsite() {
+    return urlWebsite;
+  }
 
-    public int getUtcOffset() {
-        return utcOffset;
-    }
+  public void setUrlWebsite(String urlWebsite) {
+    this.urlWebsite = urlWebsite;
+  }
 
-    public void setUtcOffset(int utcOffset) {
-        this.utcOffset = utcOffset;
-    }
+  public int getUtcOffset() {
+    return utcOffset;
+  }
 
-    public boolean isOpenNow() {
-        return openNow;
-    }
+  public void setUtcOffset(int utcOffset) {
+    this.utcOffset = utcOffset;
+  }
 
-    public void setOpenNow(boolean openNow) {
-        this.openNow = openNow;
-    }
+  public boolean isOpenNow() {
+    return openNow;
+  }
 
-    public int getOpenTime() {
-        return openTime;
-    }
+  public void setOpenNow(boolean openNow) {
+    this.openNow = openNow;
+  }
 
-    public void setOpenTime(int openTime) {
-        this.openTime = openTime;
-    }
+  public int getOpenTime() {
+    return openTime;
+  }
 
-    public ArrayList<OpenHours> getOpenHours() {
-        return openHours;
-    }
+  public void setOpenTime(int openTime) {
+    this.openTime = openTime;
+  }
 
-    public void setOpenHours(ArrayList<OpenHours> openHours) {
-        this.openHours = openHours;
-    }
+  public List<OpenHours> getOpenHours() {
+    return openHours;
+  }
 
-    public int getDistance() {
-        return distance;
-    }
+  public void setOpenHours(List<OpenHours> openHours) {
+    this.openHours = openHours;
+  }
 
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
+  public int getDistance() {
+    return distance;
+  }
 
-    public boolean isCheckedIn() {
-        return checkedIn;
-    }
+  public void setDistance(int distance) {
+    this.distance = distance;
+  }
 
-    public void setCheckedIn(boolean checkedIn) {
-        this.checkedIn = checkedIn;
-    }
+  public boolean isCheckedIn() {
+    return checkedIn;
+  }
+
+  public void setCheckedIn(boolean checkedIn) {
+    this.checkedIn = checkedIn;
+  }
 }

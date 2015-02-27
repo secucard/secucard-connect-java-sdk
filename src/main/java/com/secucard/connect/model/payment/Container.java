@@ -3,13 +3,13 @@ package com.secucard.connect.model.payment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 import com.secucard.connect.model.general.merchant.Merchant;
 
 import java.util.Date;
 
-@ProductInfo(resourceId = "payment.containers")
 public class Container extends SecuObject {
+  public static final String OBJECT = "payment.containers";
+
   @JsonIgnore
   public static final String TYPE_BANK_ACCOUNT = "bank_account";
 
@@ -84,6 +84,11 @@ public class Container extends SecuObject {
 
   public void setAssigned(Customer assigned) {
     this.assigned = assigned;
+  }
+
+  @Override
+  public String getObject() {
+    return OBJECT;
   }
 
   @Override

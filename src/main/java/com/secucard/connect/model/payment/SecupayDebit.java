@@ -1,12 +1,12 @@
 package com.secucard.connect.model.payment;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.model.CurrencyHolderObject;
+import com.secucard.connect.model.SecuObject;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 
-public class SecupayDebit extends CurrencyHolderObject {
+public class SecupayDebit extends SecuObject {
   private Container container;
 
   private Customer customer;
@@ -14,6 +14,8 @@ public class SecupayDebit extends CurrencyHolderObject {
   private Contract contract;
 
   private BigDecimal amount;
+
+  private Currency currency;
 
   private String purpose;
 
@@ -65,23 +67,6 @@ public class SecupayDebit extends CurrencyHolderObject {
     this.status = status;
   }
 
-  public String getAmount() {
-    return getValue(amount);
-  }
-
-  public BigDecimal getAmountAsBigDecimal() {
-    return amount;
-  }
-
-  @JsonIgnore
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
-  }
-
-  public void setAmount(String amount) {
-    this.amount = getValue(amount);
-  }
-
   public String getPurpose() {
     return purpose;
   }
@@ -98,15 +83,34 @@ public class SecupayDebit extends CurrencyHolderObject {
     this.orderId = orderId;
   }
 
+  public BigDecimal getAmount() {
+    return amount;
+  }
+
+  public void setAmount(BigDecimal amount) {
+    this.amount = amount;
+  }
+
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(Currency currency) {
+    this.currency = currency;
+  }
+
   @Override
   public String toString() {
     return "SecupayDebit{" +
-        "container='" + container + '\'' +
-        ", customer='" + customer + '\'' +
-        ", contract='" + contract + '\'' +
+        "container=" + container +
+        ", customer=" + customer +
+        ", contract=" + contract +
         ", amount=" + amount +
+        ", currency=" + currency +
         ", purpose='" + purpose + '\'' +
         ", orderId='" + orderId + '\'' +
+        ", transId='" + transId + '\'' +
+        ", status='" + status + '\'' +
         "} " + super.toString();
   }
 }

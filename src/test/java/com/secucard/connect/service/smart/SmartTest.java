@@ -6,8 +6,10 @@ import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Assert;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -82,13 +84,13 @@ public class SmartTest extends AbstractServicesTest {
     TransactionService service = client.getService("smart.transactions");
 
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.0", "19.99", "19"));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2"));
+    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.0", "19.99", "19", "EUR", null));
+    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2", "EUR", null));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50"));
+    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50", "EUR", null));
 
-    BasketInfo basketInfo = new BasketInfo("136.50", BasketInfo.getEuro());
+    BasketInfo basketInfo = new BasketInfo("136.50", "EUR");
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, Arrays.asList(ident));
 

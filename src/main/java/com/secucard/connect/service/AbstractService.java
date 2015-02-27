@@ -136,6 +136,15 @@ public abstract class AbstractService {
     context.getEventDispatcher().disableEventHandler(id, disabled);
   }
 
+  /**
+   * Return an object.<br/>
+   *
+   * @param type     Actual object element type.
+   * @param id       Object id.
+   * @param callback Callback for async processing.
+   * @param channel  The channel to use, like {@link com.secucard.connect.ClientContext#REST}. Pass null to use default channel.
+   * @return The object.
+   */
   public <T> T get(final Class<T> type, final String id, final Callback<T> callback,
                    final String channel) {
     return new Invoker<T>() {

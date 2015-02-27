@@ -2,12 +2,12 @@ package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 
 import java.util.List;
 
-@ProductInfo(resourceId = "smart.idents")
 public class Ident extends SecuObject {
+  public static final String OBJECT = "smart.idents";
+
   private String type;
 
   private String name;
@@ -26,6 +26,11 @@ public class Ident extends SecuObject {
   }
 
   public Ident() {
+  }
+
+  @Override
+  public String getObject() {
+    return OBJECT;
   }
 
   /**

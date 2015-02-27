@@ -1,6 +1,7 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.PublicMerchant;
 import com.secucard.connect.service.AbstractService;
@@ -35,8 +36,8 @@ public class PublicMerchantService extends AbstractService {
    * @param queryParams Query params to find the wanted public merchants
    * @return List of public merchants
    */
-  public List<PublicMerchant> getPublicMerchants(QueryParams queryParams, final Callback<List<PublicMerchant>> callback) {
-    return getList(PublicMerchant.class, queryParams, callback, null);
+  public ObjectList<PublicMerchant> getPublicMerchants(QueryParams queryParams, final Callback<ObjectList<PublicMerchant>> callback) {
+    return getObjectList(PublicMerchant.class, queryParams, callback, null);
   }
 
   /*

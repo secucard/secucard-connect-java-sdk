@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.components.MetaData;
 
+import java.util.List;
+
 public class Merchant extends SecuObject {
   public static final String OBJECT = "general.merchants";
 
@@ -18,6 +20,11 @@ public class Merchant extends SecuObject {
 
   @JsonProperty
   private Location location;
+
+  private List<String> photo;
+
+  @JsonProperty("photo_main")
+  private String photoMain;
 
   public Merchant() {
   }
@@ -61,5 +68,21 @@ public class Merchant extends SecuObject {
 
   public void setLocation(Location location) {
     this.location = location;
+  }
+
+  public List<String> getPhoto() {
+    return photo;
+  }
+
+  public void setPhoto(List<String> photo) {
+    this.photo = photo;
+  }
+
+  public String getPhotoMain() {
+    return photoMain;
+  }
+
+  public void setPhotoMain(String photoMain) {
+    this.photoMain = photoMain;
   }
 }

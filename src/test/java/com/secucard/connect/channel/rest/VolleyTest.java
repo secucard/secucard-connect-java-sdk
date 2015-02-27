@@ -7,7 +7,7 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.Client;
 import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.auth.UserCredentials;
-import com.secucard.connect.model.general.skeleton.Skeleton;
+import com.secucard.connect.model.general.Skeleton;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.service.AbstractServicesTest;
 import com.secucard.connect.service.TestService;

@@ -2,18 +2,12 @@ package com.secucard.connect.model.loyalty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.general.stores.Store;
-import com.secucard.connect.model.loyalty.cardgroups.CardGroup;
-import com.secucard.connect.model.loyalty.cards.Card;
-import com.secucard.connect.model.loyalty.merchantcards.MerchantCard;
+import com.secucard.connect.model.general.Store;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
 
-/**
- * Created by Steffen Schröder on 25.02.15.
- */
 public class Sale extends SecuObject {
   public static final String OBJECT = "loyalty.sales";
 

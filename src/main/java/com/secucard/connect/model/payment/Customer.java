@@ -2,8 +2,7 @@ package com.secucard.connect.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.general.merchant.Merchant;
-import com.secucard.connect.model.services.*;
+import com.secucard.connect.model.general.Merchant;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -150,12 +149,12 @@ public class Customer extends SecuObject {
     return dateOfBirth == null ? null : new SimpleDateFormat("YYYY-MM-dd").format(dateOfBirth);
   }
 
-  public Date getDateOfBirthAsDate() {
-    return dateOfBirth;
-  }
-
   public void setDateOfBirth(Date dateOfBirth) {
     this.dateOfBirth = dateOfBirth;
+  }
+
+  public Date getDateOfBirthAsDate() {
+    return dateOfBirth;
   }
 
   public Date getCreated() {
@@ -177,20 +176,20 @@ public class Customer extends SecuObject {
   @Override
   public String toString() {
     return "Customer{" +
-        "merchant=" + merchant +
-        ", foreName='" + foreName + '\'' +
-        ", sureName='" + surName + '\'' +
-        ", companyName='" + companyName + '\'' +
-        ", salutation='" + salutation + '\'' +
-        ", title='" + title + '\'' +
-        ", street='" + street + '\'' +
-        ", zipcode='" + zipcode + '\'' +
-        ", city='" + city + '\'' +
-        ", email='" + email + '\'' +
-        ", phone='" + phone + '\'' +
-        ", dateOfBirth=" + dateOfBirth +
-        ", created=" + created +
-        ", updated=" + updated +
-        '}';
+            "merchant=" + merchant +
+            ", foreName='" + foreName + '\'' +
+            ", sureName='" + surName + '\'' +
+            ", companyName='" + companyName + '\'' +
+            ", salutation='" + salutation + '\'' +
+            ", title='" + title + '\'' +
+            ", street='" + street + '\'' +
+            ", zipcode='" + zipcode + '\'' +
+            ", city='" + city + '\'' +
+            ", email='" + email + '\'' +
+            ", phone='" + phone + '\'' +
+            ", dateOfBirth=" + dateOfBirth +
+            ", created=" + created +
+            ", updated=" + updated +
+            '}';
   }
 }

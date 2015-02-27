@@ -1,12 +1,11 @@
 package com.secucard.connect.service.services;
 
-import com.secucard.connect.Callback;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
 import com.secucard.connect.service.AbstractServicesTest;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
@@ -16,6 +15,7 @@ import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNoException;
 
 public class ServicesTest extends AbstractServicesTest {
 
@@ -51,19 +51,28 @@ public class ServicesTest extends AbstractServicesTest {
 
     IdentService service = client.getService(IdentService.class);
 
-
-    service.registerEventHandler(new IdentService.IdentEventHandler() {
+    service.onIdentRequestChanged(new IdentService.IdentEventHandler() {
       @Override
       public boolean downloadAttachments(List<IdentRequest> requests) {
         return false;
+      }
+
+      @Override
+      public void completed(List<IdentResult> result) {
+        Assert.assertTrue(result.size() > 0);
+      }
+
+      @Override
+      public void failed(Throwable cause) {
+        assumeNoException(cause);
       }
     });
 
     client.connect();
 
     try {
-      Object o = client.handleEvent(json, null);
-      System.out.println();
+      client.handleEvent(json);
+      Thread.sleep(30000);
     } finally {
       client.disconnect();
     }

@@ -1,34 +1,39 @@
 package com.secucard.connect.model.smart;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 
 public class BasketInfo {
+  private BigDecimal sum;
 
-  private float sum;
-
-  private String currency; // todo: use Currency  constante
+  private Currency currency;
 
   public BasketInfo() {
   }
 
-  public BasketInfo(float sum, Currency currency) {
+  public BasketInfo(BigDecimal sum, Currency currency) {
     this.sum = sum;
-    this.currency = currency.getCurrencyCode();
+    this.currency = currency;
   }
 
-  public float getSum() {
+  public BasketInfo(String sum, String currencyCode) {
+    this.sum = new BigDecimal(sum);
+    this.currency = Currency.getInstance(currencyCode);
+  }
+
+  public BigDecimal getSum() {
     return sum;
   }
 
-  public void setSum(float sum) {
+  public void setSum(BigDecimal sum) {
     this.sum = sum;
   }
 
-  public String getCurrency() {
+  public Currency getCurrency() {
     return currency;
   }
 
-  public void setCurrency(String currency) {
+  public void setCurrency(Currency currency) {
     this.currency = currency;
   }
 
@@ -36,15 +41,7 @@ public class BasketInfo {
   public String toString() {
     return "BasketInfo{" +
         "sum=" + sum +
-        ", currency='" + currency + '\'' +
+        ", currency=" + currency +
         '}';
-  }
-
-  public static Currency getEuro() {
-    return Currency.getInstance("EUR");
-  }
-
-  public static Currency getUSDollar() {
-    return Currency.getInstance("USD");
   }
 }

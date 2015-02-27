@@ -3,7 +3,7 @@ package com.secucard.connect.model.smart;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.general.accounts.Account;
+import com.secucard.connect.model.general.Account;
 
 import java.net.MalformedURLException;
 import java.util.Date;

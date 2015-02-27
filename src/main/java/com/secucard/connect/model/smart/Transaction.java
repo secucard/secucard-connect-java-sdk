@@ -2,13 +2,13 @@ package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
 
 import java.util.Date;
 import java.util.List;
 
-@ProductInfo(resourceId = "smart.transactions")
 public class Transaction extends SecuObject {
+  public static final String OBJECT = "smart.transactions";
+
   @JsonProperty("basket_info")
   private BasketInfo basketInfo;
 
@@ -35,6 +35,11 @@ public class Transaction extends SecuObject {
     this.originDevice = originDevice;
     this.basket = basket;
     this.idents = idents;
+  }
+
+  @Override
+  public String getObject() {
+    return OBJECT;
   }
 
   public String getTransactionRef() {

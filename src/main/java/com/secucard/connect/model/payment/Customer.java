@@ -2,15 +2,14 @@ package com.secucard.connect.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
-import com.secucard.connect.model.general.merchant.Merchant;
+import com.secucard.connect.model.general.Merchant;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@ProductInfo(resourceId = "payment.customers")
 public class Customer extends SecuObject {
   public static final String OBJECT = "payment.customers";
+
   private Merchant merchant;
 
   @JsonProperty("forename")

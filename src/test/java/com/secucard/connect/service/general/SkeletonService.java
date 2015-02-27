@@ -2,7 +2,7 @@ package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
-import com.secucard.connect.model.general.skeleton.Skeleton;
+import com.secucard.connect.model.general.Skeleton;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.service.AbstractService;
 

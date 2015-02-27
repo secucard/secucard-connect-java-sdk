@@ -1,9 +1,9 @@
 package com.secucard.connect;
 
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.model.general.skeleton.Skeleton;
-import com.secucard.connect.model.smart.*;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.general.Skeleton;
+import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.general.SkeletonService;
 import com.secucard.connect.service.smart.DeviceService;
 import com.secucard.connect.service.smart.IdentService;
@@ -118,16 +118,20 @@ public class ClientDemo {
 
     List<Ident> selectedIdents = Arrays.asList(ident);
 
+    List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages"));
+
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", 5.f, 19.99f, 19));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", 1.5f, 9.99f, 2));
+    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.17", "19.99", "18.99", "EUR", groups));
+    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2", "EUR", groups));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", 20f, 2.19f, 50f));
-
-    BasketInfo basketInfo = new BasketInfo(136.50f, BasketInfo.getEuro());
+    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50", "EUR", null));
+//
+    BasketInfo basketInfo = new BasketInfo("0.1", "EUR");
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
+    newTrans.setMerchantRef("merchant21");
+    newTrans.setTransactionRef("transaction99");
 
     Transaction transaction = transactionService.createTransaction(newTrans, null);
 

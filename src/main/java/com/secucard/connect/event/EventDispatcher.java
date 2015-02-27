@@ -1,6 +1,5 @@
 package com.secucard.connect.event;
 
-import com.secucard.connect.Callback;
 import com.secucard.connect.model.general.Event;
 
 import java.util.Map;
@@ -16,7 +15,7 @@ public class EventDispatcher {
   protected Map<String, EventListener> stringEvent2Listener = new ConcurrentHashMap<>();
 
   // event handler
-  protected Map<String, EventHandler<?, Event>> eventHandler = new ConcurrentHashMap<>();
+  protected Map<String, AbstractEventHandler<?, Event>> eventHandler = new ConcurrentHashMap<>();
 
   public void setEventListener(final EventListener listener) {
     stringEvent2Listener.put("*", listener);
@@ -35,7 +34,7 @@ public class EventDispatcher {
     stringEvent2Listener.clear();
   }
 
-  public void addEventHandler(String id, EventHandler<?, Event> handler) {
+  public void addEventHandler(String id, AbstractEventHandler<?, Event> handler) {
     eventHandler.put(id, handler);
   }
 
@@ -44,7 +43,7 @@ public class EventDispatcher {
   }
 
   public void disableEventHandler(String id, boolean disabled) {
-    EventHandler handler = eventHandler.get(id);
+    AbstractEventHandler handler = eventHandler.get(id);
     if (handler != null) {
       handler.setDisabled(disabled);
     }
@@ -112,18 +111,19 @@ public class EventDispatcher {
   }
 
   @SuppressWarnings("unchecked")
-  public Object handleEvent(Event event, Callback callback) throws NoHandlerException {
+  public boolean handleEvent(Event event) {
     // assuming one handler per event
-    for (EventHandler<?, Event> handler : eventHandler.values()) {
+    for (AbstractEventHandler<?, Event> handler : eventHandler.values()) {
       if (handler.accept(event) && !handler.isDisabled()) {
-        return handler.handle(event, callback);
+        try {
+          handler.handle(event);
+        } catch (Exception e) {
+          handler.failed(e);
+        }
+        return true;
       }
     }
 
-    throw new NoHandlerException();
-  }
-
-  public static class NoHandlerException extends Exception {
-
+    return false;
   }
 }

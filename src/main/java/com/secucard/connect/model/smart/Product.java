@@ -2,11 +2,12 @@ package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 public class Product {
-
   protected String id;
 
   private String articleNumber;
@@ -15,37 +16,30 @@ public class Product {
 
   protected String desc;
 
-  private float quantity;
+  private BigDecimal quantity;
 
-  private float priceOne;
+  private BigDecimal priceOne;
 
-  private float tax;
+  private BigDecimal tax;
+
+  private Currency currency;
 
   private List<ProductGroup> productGroups = new ArrayList<>();
 
   public Product() {
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, float quantity, float priceOne, float tax) {
+  public Product(String id, String articleNumber, String ean, String desc, String quantity, String priceOne, String tax,
+                 String currency, List<ProductGroup> productGroups) {
     this.id = id;
     this.articleNumber = articleNumber;
     this.ean = ean;
     this.desc = desc;
-    this.quantity = quantity;
-    this.priceOne = priceOne;
-    this.tax = tax;
-  }
-
-  public Product(String id, String articleNumber, String ean, String desc, float quantity, float priceOne, float tax,
-                 List<ProductGroup> productGroups) {
-    this.id = id;
-    this.articleNumber = articleNumber;
-    this.ean = ean;
-    this.desc = desc;
-    this.quantity = quantity;
-    this.priceOne = priceOne;
-    this.tax = tax;
+    this.quantity = new BigDecimal(quantity);
+    this.priceOne = new BigDecimal(priceOne);
+    this.tax = new BigDecimal(tax);
     this.productGroups = productGroups;
+    this.currency = Currency.getInstance(currency);
   }
 
   public List<ProductGroup> getProductGroups() {
@@ -93,28 +87,36 @@ public class Product {
     this.desc = desc;
   }
 
-  public float getQuantity() {
+  public BigDecimal getQuantity() {
     return quantity;
   }
 
-  public void setQuantity(float quantity) {
+  public void setQuantity(BigDecimal quantity) {
     this.quantity = quantity;
   }
 
-  public float getPriceOne() {
+  public BigDecimal getPriceOne() {
     return priceOne;
   }
 
-  public void setPriceOne(float priceOne) {
+  public void setPriceOne(BigDecimal priceOne) {
     this.priceOne = priceOne;
   }
 
-  public float getTax() {
+  public BigDecimal getTax() {
     return tax;
   }
 
-  public void setTax(float tax) {
+  public void setTax(BigDecimal tax) {
     this.tax = tax;
+  }
+
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(Currency currency) {
+    this.currency = currency;
   }
 
   @Override
@@ -127,6 +129,8 @@ public class Product {
         ", quantity=" + quantity +
         ", priceOne=" + priceOne +
         ", tax=" + tax +
+        ", currency=" + currency +
+        ", productGroups=" + productGroups +
         '}';
   }
 }

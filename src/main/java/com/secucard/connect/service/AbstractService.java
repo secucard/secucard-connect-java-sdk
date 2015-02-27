@@ -5,7 +5,7 @@ import com.secucard.connect.ClientContext;
 import com.secucard.connect.ExceptionHandler;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.event.AbstractEventHandler;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
@@ -88,7 +88,11 @@ public abstract class AbstractService {
     ThreadLocalUtil.remove();
   }
 
-  public void init(){
+  /**
+   * Service initialization method to override for special initialization. The default does nothing.
+   * Should get called after construction of a service instance and when all dependencies are set.
+   */
+  public void init() {
 
   }
 
@@ -112,8 +116,16 @@ public abstract class AbstractService {
     return serviceEventListener;
   }
 
-  protected void addEventHandler(String id, EventHandler<?, Event> handler) {
+  protected void addEventHandler(String id, AbstractEventHandler<?, Event> handler) {
     context.getEventDispatcher().addEventHandler(id, handler);
+  }
+
+  protected void addOrRemoveEventHandler(String id, AbstractEventHandler<?, Event> handler) {
+    if (handler == null) {
+      removeEventHandler(id);
+    } else {
+      addEventHandler(id, handler);
+    }
   }
 
   protected void removeEventHandler(String id) {
@@ -124,6 +136,15 @@ public abstract class AbstractService {
     context.getEventDispatcher().disableEventHandler(id, disabled);
   }
 
+  /**
+   * Return an object.<br/>
+   *
+   * @param type     Actual object element type.
+   * @param id       Object id.
+   * @param callback Callback for async processing.
+   * @param channel  The channel to use, like {@link com.secucard.connect.ClientContext#REST}. Pass null to use default channel.
+   * @return The object.
+   */
   public <T> T get(final Class<T> type, final String id, final Callback<T> callback,
                    final String channel) {
     return new Invoker<T>() {

@@ -14,19 +14,8 @@ import java.util.List;
 public class CheckinService extends AbstractService {
   public static final String ID = IdentRequest.OBJECT + Events.TYPE_CHANGED;
 
-  @Override
-  public void init() {
-    addEventHandler(ID, new EventHandler<List<Checkin>, Event>() {
-      @Override
-      public boolean accept(Event event) {
-        return Events.TYPE_CHANGED.equals(event.getType()) && Checkin.OBJECT.equals(event.getTarget());
-      }
-
-      @Override
-      public List<Checkin> handle(Event event, Callback<List<Checkin>> callback) {
-        return getCheckins(callback);
-      }
-    });
+  public void onCheckinsChanged(final Callback<List<Checkin>> callback) {
+    addOrRemoveEventHandler(ID, callback == null ? null : new CheckinsEventEventHandler(callback));
   }
 
   /**
@@ -60,6 +49,22 @@ public class CheckinService extends AbstractService {
       if (picture != null && !picture.isCached()) {
         picture.download();
       }
+    }
+  }
+
+  private class CheckinsEventEventHandler extends EventHandler<List<Checkin>, Event> {
+    public CheckinsEventEventHandler(Callback<List<Checkin>> callback) {
+      super(callback);
+    }
+
+    @Override
+    public boolean accept(Event event) {
+      return Events.TYPE_CHANGED.equals(event.getType()) && Checkin.OBJECT.equals(event.getTarget());
+    }
+
+    @Override
+    public void handle(Event event) {
+      getCheckins(callback);
     }
   }
 }

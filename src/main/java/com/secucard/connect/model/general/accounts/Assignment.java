@@ -1,56 +1,57 @@
 package com.secucard.connect.model.general.accounts;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.model.general.components.Assign;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.general.AccountDevice;
+import com.secucard.connect.model.general.merchant.Merchant;
 
 import java.io.Serializable;
+import java.util.Date;
 
-/**
- * Created by Steffen Schröder on 24.02.15.
- */
 public class Assignment implements Serializable {
+  private Date created;
 
-    @JsonProperty
-    private String created;
+  private String type;
 
-    @JsonProperty
-    private String type;
+  private boolean owner;
 
-    @JsonProperty
-    private boolean owner;
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY,
+      property = SecuObject.OBJECT_PROPERTY)
+  @JsonSubTypes({
+      @JsonSubTypes.Type(value = Merchant.class, name = Merchant.OBJECT),
+      @JsonSubTypes.Type(value = AccountDevice.class, name = AccountDevice.OBJECT)})
+  private SecuObject assign;
 
-    @JsonProperty
-    private Assign assign;  // todo: assign ist Typ general.Merchant oder general.AccountDevice nicht Assign
+  public SecuObject getAssign() {
+    return assign;
+  }
 
-    public String getCreated() {
-        return created;
-    }
+  public void setAssign(SecuObject assign) {
+    this.assign = assign;
+  }
 
-    public void setCreated(String created) {
-        this.created = created;
-    }
+  public Date getCreated() {
+    return created;
+  }
 
-    public String getType() {
-        return type;
-    }
+  public void setCreated(Date created) {
+    this.created = created;
+  }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+  public String getType() {
+    return type;
+  }
 
-    public boolean isOwner() {
-        return owner;
-    }
+  public void setType(String type) {
+    this.type = type;
+  }
 
-    public void setOwner(boolean owner) {
-        this.owner = owner;
-    }
+  public boolean isOwner() {
+    return owner;
+  }
 
-    public Assign getAssign() {
-        return assign;
-    }
-
-    public void setAssign(Assign assign) {
-        this.assign = assign;
-    }
+  public void setOwner(boolean owner) {
+    this.owner = owner;
+  }
 }

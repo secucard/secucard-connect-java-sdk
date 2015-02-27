@@ -42,9 +42,19 @@ public class Customer extends SecuObject {
 
   private Date updated;
 
+  private Contract contract;
+
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public Contract getContract() {
+    return contract;
+  }
+
+  public void setContract(Contract contract) {
+    this.contract = contract;
   }
 
   public Merchant getMerchant() {
@@ -139,12 +149,12 @@ public class Customer extends SecuObject {
     return dateOfBirth == null ? null : new SimpleDateFormat("YYYY-MM-dd").format(dateOfBirth);
   }
 
-  public Date getDateOfBirthAsDate() {
-    return dateOfBirth;
-  }
-
   public void setDateOfBirth(Date dateOfBirth) {
     this.dateOfBirth = dateOfBirth;
+  }
+
+  public Date getDateOfBirthAsDate() {
+    return dateOfBirth;
   }
 
   public Date getCreated() {
@@ -166,20 +176,20 @@ public class Customer extends SecuObject {
   @Override
   public String toString() {
     return "Customer{" +
-        "merchant=" + merchant +
-        ", foreName='" + foreName + '\'' +
-        ", sureName='" + surName + '\'' +
-        ", companyName='" + companyName + '\'' +
-        ", salutation='" + salutation + '\'' +
-        ", title='" + title + '\'' +
-        ", street='" + street + '\'' +
-        ", zipcode='" + zipcode + '\'' +
-        ", city='" + city + '\'' +
-        ", email='" + email + '\'' +
-        ", phone='" + phone + '\'' +
-        ", dateOfBirth=" + dateOfBirth +
-        ", created=" + created +
-        ", updated=" + updated +
-        '}';
+            "merchant=" + merchant +
+            ", foreName='" + foreName + '\'' +
+            ", sureName='" + surName + '\'' +
+            ", companyName='" + companyName + '\'' +
+            ", salutation='" + salutation + '\'' +
+            ", title='" + title + '\'' +
+            ", street='" + street + '\'' +
+            ", zipcode='" + zipcode + '\'' +
+            ", city='" + city + '\'' +
+            ", email='" + email + '\'' +
+            ", phone='" + phone + '\'' +
+            ", dateOfBirth=" + dateOfBirth +
+            ", created=" + created +
+            ", updated=" + updated +
+            '}';
   }
 }

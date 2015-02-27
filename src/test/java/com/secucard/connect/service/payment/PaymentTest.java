@@ -1,7 +1,7 @@
 package com.secucard.connect.service.payment;
 
 import com.secucard.connect.model.QueryParams;
-import com.secucard.connect.model.general.merchant.Merchant;
+import com.secucard.connect.model.general.Merchant;
 import com.secucard.connect.model.payment.Container;
 import com.secucard.connect.model.payment.Customer;
 import com.secucard.connect.model.payment.Data;

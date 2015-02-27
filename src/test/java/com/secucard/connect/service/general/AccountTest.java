@@ -1,8 +1,8 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.model.general.accounts.location.Location;
-import com.secucard.connect.model.general.accounts.MerchantList;
+import com.secucard.connect.model.general.Location;
+import com.secucard.connect.model.general.MerchantList;
 import com.secucard.connect.service.AbstractServicesTest;
 import junit.framework.Assert;
 

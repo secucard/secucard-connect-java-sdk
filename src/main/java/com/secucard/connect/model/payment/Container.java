@@ -3,7 +3,7 @@ package com.secucard.connect.model.payment;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.general.merchant.Merchant;
+import com.secucard.connect.model.general.Merchant;
 
 import java.util.Date;
 

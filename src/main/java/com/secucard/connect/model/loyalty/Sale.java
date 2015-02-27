@@ -1,19 +1,20 @@
 package com.secucard.connect.model.loyalty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.model.CurrencyHolderObject;
+import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.stores.Store;
 import com.secucard.connect.model.loyalty.cardgroups.CardGroup;
 import com.secucard.connect.model.loyalty.cards.Card;
 import com.secucard.connect.model.loyalty.merchantcards.MerchantCard;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.Date;
 
 /**
  * Created by Steffen Schröder on 25.02.15.
  */
-public class Sale extends CurrencyHolderObject {
+public class Sale extends SecuObject {
   public static final String OBJECT = "loyalty.sales";
 
   @JsonProperty
@@ -49,25 +50,28 @@ public class Sale extends CurrencyHolderObject {
   @JsonProperty("balance_points")
   private int balancePoints;
 
+  private Currency currency;
+
+
   @Override
   public String getObject() {
     return OBJECT;
   }
 
-  public BigDecimal getAmountAsBigDecimal() {
+  public BigDecimal getAmount() {
     return amount;
-  }
-
-  public String getAmount() {
-    return getValue(amount);
   }
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
   }
 
-  public void setAmount(String amount) {
-    this.amount = getValue(amount);
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(Currency currency) {
+    this.currency = currency;
   }
 
   public Date getLastChange() {

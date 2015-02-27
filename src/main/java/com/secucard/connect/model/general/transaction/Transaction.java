@@ -1,18 +1,18 @@
 package com.secucard.connect.model.general.transaction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.model.CurrencyHolderObject;
+import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.merchant.Merchant;
 import com.secucard.connect.model.loyalty.Sale;
 
 import java.math.BigDecimal;
+import java.util.Currency;
 import java.util.Date;
 
 /**
  * Created by Steffen on 26.08.2014.
  */
-public class Transaction extends CurrencyHolderObject {
+public class Transaction extends SecuObject {
   public static final String OBJECT = "general.transactions";
 
   public static final String TYPE_SALE = "sale";
@@ -29,6 +29,8 @@ public class Transaction extends CurrencyHolderObject {
 
   private Sale details;
 
+  private Currency currency;
+
   @Override
   public String getObject() {
     return OBJECT;
@@ -42,19 +44,10 @@ public class Transaction extends CurrencyHolderObject {
     this.merchant = merchant;
   }
 
-  public String getAmount() {
-    return getValue(amount);
-  }
-
-  public BigDecimal getAmountAsBigDecimal() {
+  public BigDecimal getAmount() {
     return amount;
   }
 
-  public void setAmount(String amount) {
-    this.amount = getValue(amount);
-  }
-
-  @JsonIgnore
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
   }
@@ -81,5 +74,13 @@ public class Transaction extends CurrencyHolderObject {
 
   public void setDetails(Sale details) {
     this.details = details;
+  }
+
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(Currency currency) {
+    this.currency = currency;
   }
 }

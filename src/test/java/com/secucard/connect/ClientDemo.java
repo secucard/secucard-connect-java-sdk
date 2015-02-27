@@ -121,13 +121,13 @@ public class ClientDemo {
     List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages"));
 
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.17", "19.99", "18.99", groups));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2", groups));
+    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.17", "19.99", "18.99", "EUR", groups));
+    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2", "EUR", groups));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50"));
+    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50", "EUR", null));
 //
-    BasketInfo basketInfo = new BasketInfo("0.1", BasketInfo.getEuro());
+    BasketInfo basketInfo = new BasketInfo("0.1", "EUR");
 
     Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
     newTrans.setMerchantRef("merchant21");

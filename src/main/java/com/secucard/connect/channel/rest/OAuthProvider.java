@@ -198,7 +198,17 @@ public class OAuthProvider implements AuthProvider {
 
   protected DeviceAuthCode requestCodes() {
     Map<String, Object> parameters = createAuthParams(getClientCredentials(), null, null, getDeviceId(), null);
-    DeviceAuthCode codes = restChannel.post(configuration.getOauthUrl(), parameters, null, DeviceAuthCode.class);
+    DeviceAuthCode codes = null;
+    try {
+      codes = restChannel.post(configuration.getOauthUrl(), parameters, null, DeviceAuthCode.class);
+    } catch (SecuException e) {
+      Status status = e.getStatus();
+      if (status == null) {
+        throw e;
+      } else {
+        throw new AuthException(status.getError() + ", " + status.getErrorDescription());
+      }
+    }
     if (StringUtils.isAnyBlank(codes.getDeviceCode(), codes.getUserCode(), codes.getVerificationUrl())) {
       throw new AuthException("Authorization failed, got no valid codes or URL.");
     }

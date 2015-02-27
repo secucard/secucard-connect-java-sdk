@@ -30,6 +30,16 @@ public class Container extends SecuObject {
 
   private Date updated;
 
+  private Contract contract;
+
+  public Contract getContract() {
+    return contract;
+  }
+
+  public void setContract(Contract contract) {
+    this.contract = contract;
+  }
+
   public Merchant getMerchant() {
     return merchant;
   }

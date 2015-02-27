@@ -3,6 +3,7 @@ package com.secucard.connect.model.payment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.merchant.Merchant;
+import com.secucard.connect.model.services.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,9 +43,19 @@ public class Customer extends SecuObject {
 
   private Date updated;
 
+  private Contract contract;
+
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public Contract getContract() {
+    return contract;
+  }
+
+  public void setContract(Contract contract) {
+    this.contract = contract;
   }
 
   public Merchant getMerchant() {

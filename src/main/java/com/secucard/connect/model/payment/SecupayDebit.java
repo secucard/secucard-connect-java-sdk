@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 public class SecupayDebit extends SecuObject {
+  public static final String OBJECT = "payment.secupaydebits";
+
   private Container container;
 
   private Customer customer;
@@ -26,6 +28,11 @@ public class SecupayDebit extends SecuObject {
   private String transId;
 
   private String status;
+
+  @Override
+  public String getObject() {
+    return OBJECT;
+  }
 
   public Container getContainer() {
     return container;

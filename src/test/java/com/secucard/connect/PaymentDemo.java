@@ -66,9 +66,12 @@ public class PaymentDemo {
 
       // process returned debit
 
+      assert(debit.getStatus().equalsIgnoreCase("ok"));
+
     } catch (Exception e) {
-      // important to close the client properly at last, avoids leaking resources
       e.printStackTrace();
+    } finally {
+      // important to close the client properly at last, avoids leaking resources
       client.disconnect();
     }
   }

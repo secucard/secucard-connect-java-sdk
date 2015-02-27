@@ -1,29 +1,39 @@
 package com.secucard.connect.model.general;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.model.general.components.Assign;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.secucard.connect.model.SecuObject;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Assignment implements Serializable {
+  private Date created;
 
-  @JsonProperty
-  private String created;
-
-  @JsonProperty
   private String type;
 
-  @JsonProperty
   private boolean owner;
 
-  @JsonProperty
-  private Assign assign;  // todo: assign ist Typ general.Merchant oder general.AccountDevice nicht Assign
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY,
+          property = SecuObject.OBJECT_PROPERTY)
+  @JsonSubTypes({
+          @JsonSubTypes.Type(value = Merchant.class, name = Merchant.OBJECT),
+          @JsonSubTypes.Type(value = AccountDevice.class, name = AccountDevice.OBJECT)})
+  private SecuObject assign;
 
-  public String getCreated() {
+  public SecuObject getAssign() {
+    return assign;
+  }
+
+  public void setAssign(SecuObject assign) {
+    this.assign = assign;
+  }
+
+  public Date getCreated() {
     return created;
   }
 
-  public void setCreated(String created) {
+  public void setCreated(Date created) {
     this.created = created;
   }
 
@@ -41,13 +51,5 @@ public class Assignment implements Serializable {
 
   public void setOwner(boolean owner) {
     this.owner = owner;
-  }
-
-  public Assign getAssign() {
-    return assign;
-  }
-
-  public void setAssign(Assign assign) {
-    this.assign = assign;
   }
 }

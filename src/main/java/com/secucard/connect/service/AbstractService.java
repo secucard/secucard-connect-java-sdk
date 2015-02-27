@@ -163,7 +163,8 @@ public abstract class AbstractService {
    * @param type        Actual list element type.
    * @param queryParams Query params
    * @param callback    Callback for async processing.
-   * @param channel     The channel to use, like {@link com.secucard.connect.ClientContext#REST}. Pass null to use default channel.
+   * @param channel     The channel to use, like {@link com.secucard.connect.ClientContext#REST}.
+   *                    Pass null to use default channel.
    * @return The objects.
    */
   public <T> List<T> getList(final Class<T> type, final QueryParams queryParams, final Callback<List<T>> callback,
@@ -175,16 +176,45 @@ public abstract class AbstractService {
       }
 
       @Override
-      protected List<T> convert(ObjectList<T> object) {
-        if (object == null) {
+      protected List<T> convert(ObjectList<T> objectList) {
+        if (objectList == null || objectList.getCount() == 0) {
           return null;
         }
-        List<T> objects = object.getList();
+        List<T> objects = objectList.getList();
         setContext();
         postProcessObjects(objects);
         return objects;
       }
     }.invokeAndConvert(callback);
+  }
+
+  /**
+   * Return a list of objects wrapped in ObjectList.<br/>
+   * Note: Add list post processing by implementing {@link #postProcessObjects(java.util.List)}. This method is called
+   * after the list was retrieved.
+   *
+   * @param type        Actual list element type.
+   * @param queryParams Query params
+   * @param callback    Callback for async processing.
+   * @param channel     The channel to use, like {@link com.secucard.connect.ClientContext#REST}.
+   *                    Pass null to use default channel.
+   * @return The objects.
+   */
+  public <T> ObjectList<T> getObjectList(final Class<T> type, final QueryParams queryParams,
+                                         final Callback<ObjectList<T>> callback,
+                                         final String channel) {
+    return new Invoker<ObjectList<T>>() {
+      @Override
+      protected ObjectList<T> handle(Callback<ObjectList<T>> callback) {
+        ObjectList<T> objectList = context.getChannel(channel).findObjects(type, queryParams, callback);
+        if (objectList == null || objectList.getCount() == 0) {
+          return null;
+        }
+        setContext();
+        postProcessObjects(objectList.getList());
+        return objectList;
+      }
+    }.invoke(callback);
   }
 
   protected void postProcessObjects(List<?> objects) {

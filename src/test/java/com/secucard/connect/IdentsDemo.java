@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.Assume.assumeNoException;
-
 public class IdentsDemo {
   public static void main(String[] args) throws Exception {
 
@@ -76,6 +74,18 @@ public class IdentsDemo {
       // when event happens call Client.handle() and pass event JSON data, result will be the ident result list
 
       service.onIdentRequestChanged(new IdentService.IdentEventHandler() {
+
+        /**
+         *  If returning true all ident result attachments (pdf, etc) will be downloaded BEFORE completed() method is
+         *  called, later access to an attachment (pdf, etc.) will be served from cache.
+         *  (Access to attachment is like: result.getPersons().get(0).getAttachments().get(0).getInputStream())
+         *
+         *  Returning false prevents such eager attachment download at all, attachments are downloaded and cached on
+         *  the fly when accessed (lazy).
+         *
+         *  Depending on the amount of data to download eager loading may be a good idea or not (considering also if
+         *  all of the downloaded data will be actually accessed).
+         */
         @Override
         public boolean downloadAttachments(List<IdentRequest> requests) {
           return false;

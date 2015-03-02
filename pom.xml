@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
 
     <name>secucard-java</name>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <description>The official Java wrapper for the Secucard API</description>
     <url>http://secucard.com</url>
 
@@ -38,6 +38,23 @@
                 <version>2.18.1</version>
                 <configuration>
                     <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                            <goal>directory</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
                 </configuration>
             </plugin>
         </plugins>
@@ -105,7 +122,6 @@
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
             <version>2.16</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>

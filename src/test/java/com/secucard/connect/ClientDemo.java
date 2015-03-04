@@ -72,6 +72,9 @@ public class ClientDemo {
     // AuthException is thrown when failed
     client.connect();
 
+    // cancel pending device auth if necessary
+    // client will throw  AuthCanceledException
+    client.cancelAuth();
 
     try {
       // must sleep in this demo to give time to enter  device code

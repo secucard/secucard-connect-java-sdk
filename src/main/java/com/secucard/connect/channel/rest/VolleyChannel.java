@@ -27,7 +27,6 @@ import java.util.Map;
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
  */
 public class VolleyChannel extends RestChannelBase {
-  protected final boolean secure = true;
   protected final android.content.Context context;
   protected RequestQueue requestQueue;
 

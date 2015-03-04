@@ -17,29 +17,30 @@ public class TransactionService extends AbstractService {
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction createTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return new Invoker<Transaction>(){
-      @Override
-      protected Transaction handle(Callback<Transaction> callback) throws Exception {
-        return getChannel().createObject(transaction, callback);
-      }
-    }.invoke(callback);
+    return create(transaction, callback, null);
   }
 
   /**
-   * Starting/Exceuting a transaction.
+   * Updating a transaction.
+   *
+   * @param transaction The transaction data to update.
+   * @return The updated transaction. Use this instance for further processing rather the the provided..
+   */
+  public Transaction updateTransaction(final Transaction transaction, Callback<Transaction> callback) {
+    return update(transaction, callback, null);
+  }
+
+  /**
+   * Starting/Executing a transaction.
+   * An event of type {@link com.secucard.connect.model.smart.CashierDisplay} may happen during the execution.
    *
    * @param transactionId The transaction id.
-   * @param type
+   * @param type          The transaction type like "auto" or "cash".
    * @return The result data.
    */
   public TransactionResult startTransaction(final String transactionId, final String type,
                                             Callback<TransactionResult> callback) {
-    return new Invoker<TransactionResult>(){
-      @Override
-      protected TransactionResult handle(Callback<TransactionResult> callback) throws Exception {
-        return getChannel().execute(Transaction.class, transactionId, "start", type, null, TransactionResult.class,
-            callback);
-      }
-    }.invoke(callback);
+    return execute(Transaction.class, transactionId, "start", type, null, TransactionResult.class,
+        callback, null);
   }
 }

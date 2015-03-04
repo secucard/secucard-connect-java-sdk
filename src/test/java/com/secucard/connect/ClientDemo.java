@@ -197,7 +197,7 @@ public class ClientDemo {
 //
     BasketInfo basketInfo = new BasketInfo("0.1", "EUR");
 
-    Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, selectedIdents);
+    Transaction newTrans = new Transaction(device, basketInfo, basket, selectedIdents);
     newTrans.setMerchantRef("merchant21");
     newTrans.setTransactionRef("transaction99");
 

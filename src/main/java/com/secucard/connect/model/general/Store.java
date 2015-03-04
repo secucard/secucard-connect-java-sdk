@@ -71,6 +71,9 @@ public class Store extends SecuObject {
   @JsonProperty("_isDefault")
   private boolean isDefault;
 
+  @JsonProperty("facebook_id")
+  private String facebookId;
+
   @Override
   public String getObject() {
     return OBJECT;
@@ -204,11 +207,19 @@ public class Store extends SecuObject {
     this.program = program;
   }
 
-  public boolean getIsDefault() {
+  public boolean isDefault() {
     return isDefault;
   }
 
-  public void setIsDefault(boolean isDefault) {
+  public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  public String getFacebookId() {
+    return facebookId;
+  }
+
+  public void setFacebookId(String facebookId) {
+    this.facebookId = facebookId;
   }
 }

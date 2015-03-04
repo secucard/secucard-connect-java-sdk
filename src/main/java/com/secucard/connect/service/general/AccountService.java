@@ -43,7 +43,7 @@ public class AccountService extends AbstractService {
   public Account getAccount(String id, Callback<Account> callback) {
     try {
       RestChannelBase channel = (RestChannelBase) getRestChannel();
-      channel.setSecure(false);
+      channel.setSecure(true);
       return channel.getObject(Account.class, id, callback);
     } catch (Exception e) {
       handleException(e, callback);
@@ -60,7 +60,7 @@ public class AccountService extends AbstractService {
   public Account updateAccount(Account account, Callback<Account> callback) {
     try {
       RestChannelBase channel = (RestChannelBase) getRestChannel();
-      channel.setSecure(false);
+      channel.setSecure(true);
       return channel.updateObject(account, callback);
     } catch (Exception e) {
       handleException(e, callback);
@@ -79,7 +79,7 @@ public class AccountService extends AbstractService {
       @Override
       protected Void handle(Callback<Void> callback11) throws Exception {
         RestChannelBase channel = (RestChannelBase) getRestChannel();
-        channel.setSecure(false);
+        channel.setSecure(true);
         channel.deleteObject(Account.class, accountId, callback11);
         return null;
       }
@@ -122,14 +122,15 @@ public class AccountService extends AbstractService {
     return false;
   }
 
-  public boolean updateGCM(final String accountId, final String registrationId, Callback<Boolean> callback) {
-//        return new Result2BooleanInvoker() {
-//            @Override
-//            protected Result handle(Callback<Result> callback) throws Exception {
-//                return getStompChannel().updateObject(Account.class, accountId, "location", null, registrationId, Result.class, callback);
-//            }
-//        }.invokeAndConvert(callback);
-    return true;
+  public boolean updateGCM(String accountId, Object objectArg) {
+    try {
+      Result result = getStompChannel().updateObject(Account.class, accountId, "gcm", null, objectArg, Result.class,
+              null);
+      return Boolean.parseBoolean(result.getResult());
+    } catch (Throwable e) {
+      handleException(e, null);
+    }
+    return false;
   }
 
 

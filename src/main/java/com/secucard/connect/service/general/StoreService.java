@@ -15,11 +15,11 @@ public class StoreService extends AbstractService {
    * @param storeId StoreID
    * @return True if successfully updated, false else.
    */
-  public boolean checkIn(final String storeId, Callback<Boolean> callback) {
+  public boolean checkIn(final String storeId, final String sid, Callback<Boolean> callback) {
     return new Result2BooleanInvoker() {
       @Override
       protected Result handle(Callback<Result> callback) throws Exception {
-        return getRestChannel().execute(Store.class, storeId, "checkin", null, null, Result.class, callback);
+        return getRestChannel().execute(Store.class, storeId, "checkin", sid, null, Result.class, callback);
       }
     }.invokeAndConvert(callback);
   }

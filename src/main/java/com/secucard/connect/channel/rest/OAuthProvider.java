@@ -2,10 +2,7 @@ package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.SecuException;
-import com.secucard.connect.auth.AuthException;
-import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.auth.ClientCredentials;
-import com.secucard.connect.auth.UserCredentials;
+import com.secucard.connect.auth.*;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
@@ -30,6 +27,7 @@ public class OAuthProvider implements AuthProvider {
   private DataStorage storage;
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
   private final String id;
+  private volatile boolean cancelAuth;
 
   public OAuthProvider(String id, ClientConfiguration configuration) {
     this.id = id;
@@ -52,6 +50,10 @@ public class OAuthProvider implements AuthProvider {
     return configuration.getUserCredentials();
   }
 
+  public void cancelAuth() {
+    this.cancelAuth = true;
+  }
+
   /**
    * Returns the client devices unique id like android id or UUID.
    * Gets it from config by default, override to retrieve it dynamically or whatever.
@@ -60,11 +62,18 @@ public class OAuthProvider implements AuthProvider {
     return configuration.getDeviceId();
   }
 
+  /**
+   * Return additional device info like software version.
+   */
+  protected Map<String, String> getDeviceInfo() {
+    return null;
+  }
+
+
   @Override
   public void registerEventListener(EventListener eventListener) {
     authEventListener = eventListener;
   }
-
 
   @Override
   public synchronized Token getToken() {
@@ -103,7 +112,7 @@ public class OAuthProvider implements AuthProvider {
         token = pollToken(codes);
       } else {
         // get a new token depending on what credentials are available
-        token = getToken(getClientCredentials(), getUserCredentials(), null, getDeviceId(), null);
+        token = getToken(getClientCredentials(), getUserCredentials(), null, getDeviceId(), getDeviceInfo(), null);
       }
 
       if (token != null) {
@@ -131,7 +140,11 @@ public class OAuthProvider implements AuthProvider {
 
     // poll server and send events to client accordingly
     Token token = null;
+    cancelAuth = false;
     while (System.currentTimeMillis() < timeout) {
+      if (cancelAuth) {
+        throw new AuthCanceledException("Authorization canceled by request.");
+      }
       try {
         Thread.sleep(pollInterval);
       } catch (InterruptedException e) {
@@ -145,7 +158,7 @@ public class OAuthProvider implements AuthProvider {
       EventDispatcher.fireEvent(EVENT_CODE_AUTH_PENDING, authEventListener, false);
     }
 
-    throw new AuthException("Authorization failed, auth. request timeout or code expired during request.");
+    throw new AuthCanceledException("Authorization canceled by timeout or authorization code was expired.");
   }
 
   protected Token getStoredToken() {
@@ -165,17 +178,17 @@ public class OAuthProvider implements AuthProvider {
   }
 
   protected Token getRefreshToken(String refreshToken) {
-    return getToken(getClientCredentials(), null, refreshToken, null, null);
+    return getToken(getClientCredentials(), null, refreshToken, null, null, null);
   }
 
   protected Token getDeviceAuthToken(DeviceAuthCode codes) {
-    return getToken(getClientCredentials(), null, null, null, codes.getDeviceCode());
+    return getToken(getClientCredentials(), null, null, null, null, codes.getDeviceCode());
   }
 
   private Token getToken(ClientCredentials clientCredentials, UserCredentials userCredentials,
-                         String refreshToken, String deviceId, String deviceCode) {
+                         String refreshToken, String deviceId, Map<String, String> deviceInfo, String deviceCode) {
     Map<String, Object> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, deviceId,
-        deviceCode);
+        deviceInfo, deviceCode);
     Map<String, String> headers = new HashMap<>();
     headers.put(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
     Integer ignored = null;
@@ -197,7 +210,7 @@ public class OAuthProvider implements AuthProvider {
   }
 
   protected DeviceAuthCode requestCodes() {
-    Map<String, Object> parameters = createAuthParams(getClientCredentials(), null, null, getDeviceId(), null);
+    Map<String, Object> parameters = createAuthParams(getClientCredentials(), null, null, getDeviceId(), null, null);
     DeviceAuthCode codes = null;
     try {
       codes = restChannel.post(configuration.getOauthUrl(), parameters, null, DeviceAuthCode.class);
@@ -218,9 +231,9 @@ public class OAuthProvider implements AuthProvider {
   /**
    * Returning a map with request params for authorization purposes according to the given credentials.
    */
-  protected Map<String, Object> createAuthParams(ClientCredentials clientCredentials,
-                                                 UserCredentials userCredentials, String refreshToken,
-                                                 String deviceId, String deviceCode) {
+  protected Map<String, Object> createAuthParams(ClientCredentials clientCredentials, UserCredentials userCredentials,
+                                                 String refreshToken, String deviceId, Map<String, String> deviceInfo,
+                                                 String deviceCode) {
     Map<String, Object> parameters = new HashMap<>();
 
     // default type, client id / secret must always exist
@@ -237,6 +250,9 @@ public class OAuthProvider implements AuthProvider {
       parameters.put("password", userCredentials.getPassword());
       if (deviceId != null) {
         parameters.put("device", deviceId);
+      }
+      if (deviceInfo != null) {
+        parameters.putAll(deviceInfo);
       }
     } else if ("device".equals(configuration.getAuthType()) && (deviceId != null || deviceCode != null)) {
       parameters.put("grant_type", "device");

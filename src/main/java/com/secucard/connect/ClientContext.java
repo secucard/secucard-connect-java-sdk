@@ -1,6 +1,7 @@
 package com.secucard.connect;
 
 import android.content.Context;
+import android.os.Build;
 import android.provider.Settings;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
@@ -19,6 +20,8 @@ import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Context instance holding all necessary beans used in client.
@@ -142,6 +145,7 @@ public class ClientContext {
 
       restChannel = new VolleyChannel(clientId, appContext, config.getRestConfiguration());
 
+      // special auth provider for android, gets some additional information
       authProvider = new OAuthProvider(clientId, config) {
         @Override
         protected String getDeviceId() {
@@ -150,6 +154,14 @@ public class ClientContext {
             deviceId = Settings.Secure.getString(appContext.getContentResolver(), Settings.Secure.ANDROID_ID);
           }
           return deviceId;
+        }
+
+        @Override
+        protected Map<String, String> getDeviceInfo() {
+          return null;
+//          Map<String, String> info = new HashMap<>();
+//          info.put("", Build.VERSION.CODENAME);
+//          return info;
         }
       };
 

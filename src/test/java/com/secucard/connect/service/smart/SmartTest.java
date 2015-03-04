@@ -92,7 +92,7 @@ public class SmartTest extends AbstractServicesTest {
 
     BasketInfo basketInfo = new BasketInfo("136.50", "EUR");
 
-    Transaction newTrans = new Transaction(device.getId(), basketInfo, basket, Arrays.asList(ident));
+    Transaction newTrans = new Transaction(device, basketInfo, basket, Arrays.asList(ident));
 
     Transaction transaction = service.createTransaction(newTrans, null);
     assertNotNull(transaction);

@@ -2,7 +2,13 @@ package com.secucard.connect.channel.rest;
 
 import android.content.Context;
 import android.util.Log;
-import com.android.volley.*;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.RequestFuture;
@@ -19,6 +25,7 @@ import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,8 +52,8 @@ public class VolleyChannel extends RestChannelBase {
 
   @Override
   public synchronized void close(Callback callback) {
-    if(requestQueue == null)
-          return;
+    if (requestQueue == null)
+      return;
 
     requestQueue.cancelAll(new RequestQueue.RequestFilter() {
       @Override
@@ -70,7 +77,7 @@ public class VolleyChannel extends RestChannelBase {
   public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
     String url = buildRequestUrl(type) + "?" + encodeQueryParams(queryParams);
     Request<ObjectList<T>> request = buildRequest(Request.Method.GET, url, null,
-        new DynamicTypeReference(ObjectList.class, type), callback);
+            new DynamicTypeReference(ObjectList.class, type), callback);
     putToQueue(request);
     return null;
   }
@@ -86,7 +93,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(object.getClass()),
-        callback);
+            callback);
     putToQueue(request);
     return null;
   }
@@ -103,7 +110,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.PUT, url, requestBody, new DynamicTypeReference(object.getClass()),
-        callback);
+            callback);
     putToQueue(request);
     return null;
   }
@@ -150,7 +157,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(returnType),
-        callback);
+            callback);
     putToQueue(request);
     return null;
   }
@@ -166,7 +173,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(returnType),
-        callback);
+            callback);
     putToQueue(request);
     return null;
   }
@@ -178,7 +185,7 @@ public class VolleyChannel extends RestChannelBase {
     RequestFuture future = RequestFuture.newFuture();
     String requestBody = encodeQueryParams(parameters);
     ObjectJsonRequest<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody, headers,
-        new DynamicTypeReference(responseType), future, future) {
+            new DynamicTypeReference(responseType), future, future) {
       @Override
       public String getBodyContentType() {
         return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
@@ -273,6 +280,7 @@ public class VolleyChannel extends RestChannelBase {
       }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
+          error.printStackTrace();
           callback.failed(error);
         }
       });
@@ -282,6 +290,10 @@ public class VolleyChannel extends RestChannelBase {
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
       try {
         String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+        //TODO: Check why sometimes the response starts with \n
+        if (jsonString.startsWith("\n")) {
+          jsonString = jsonString.replaceFirst("\n","");
+        }
         T result = jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
       } catch (Exception e) {

@@ -22,12 +22,7 @@ public class AccountService extends AbstractService {
    * @return The new account. Use this instance for further processing rather the provided.
    */
   public Account createAccount(final Account account, Callback<Account> callback) {
-    return new Invoker<Account>() {
-      @Override
-      protected Account handle(Callback<Account> callback) throws Exception {
-        return getChannel().createObject(account, callback);
-      }
-    }.invoke(callback);
+    return  getRestChannel().createObject(account, callback);
   }
 
   /**
@@ -53,7 +48,7 @@ public class AccountService extends AbstractService {
    */
   public Account updateAccount(Account account, Callback<Account> callback) {
     try {
-      return getRestChannel().updateObject(account, callback);
+      return getRestChannel().updateObject(Account.class, account.getId(), null, null, account, Account.class, callback);
     } catch (Exception e) {
       handleException(e, callback);
     }

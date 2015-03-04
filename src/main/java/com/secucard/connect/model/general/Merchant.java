@@ -26,13 +26,6 @@ public class Merchant extends SecuObject {
   @JsonProperty("photo_main")
   private String photoMain;
 
-  public Merchant() {
-  }
-
-  public Merchant(String id) {
-    this.id = id;
-  }
-
   @Override
   public String getObject() {
     return OBJECT;

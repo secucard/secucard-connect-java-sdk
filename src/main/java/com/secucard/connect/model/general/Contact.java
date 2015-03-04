@@ -3,6 +3,8 @@ package com.secucard.connect.model.general;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 
+import java.util.Date;
+
 public class Contact extends SecuObject {
   public static final String OBJECT = "general.contacts";
 
@@ -22,10 +24,7 @@ public class Contact extends SecuObject {
   private String email;
 
   @JsonProperty("dob")
-  private String dateOfBirth;
-
-  @JsonProperty("url_website")
-  private String websiteUrl;
+  private Date dateOfBirth;
 
   @JsonProperty
   private String phone;
@@ -35,6 +34,9 @@ public class Contact extends SecuObject {
 
   @JsonProperty
   private Address address;
+
+  @JsonProperty("url_website")
+  private String websiteUrl;
 
 
   public String getName() {
@@ -85,20 +87,12 @@ public class Contact extends SecuObject {
     this.address = address;
   }
 
-  public String getDateOfBirth() {
+  public Date getDateOfBirth() {
     return dateOfBirth;
   }
 
-  public void setDateOfBirth(String dateOfBirth) {
+  public void setDateOfBirth(Date dateOfBirth) {
     this.dateOfBirth = dateOfBirth;
-  }
-
-  public String getWebsiteUrl() {
-    return websiteUrl;
-  }
-
-  public void setWebsiteUrl(String websiteUrl) {
-    this.websiteUrl = websiteUrl;
   }
 
   public String getPhone() {
@@ -115,6 +109,14 @@ public class Contact extends SecuObject {
 
   public void setMobile(String mobile) {
     this.mobile = mobile;
+  }
+
+  public String getWebsiteUrl() {
+    return websiteUrl;
+  }
+
+  public void setWebsiteUrl(String websiteUrl) {
+    this.websiteUrl = websiteUrl;
   }
 
   @Override

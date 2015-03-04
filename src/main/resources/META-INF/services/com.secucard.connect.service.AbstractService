@@ -6,7 +6,9 @@ com.secucard.connect.service.general.PublicMerchantService #{general.publicMerch
 com.secucard.connect.service.general.MerchantService #{general.merchants, general/merchants}
 com.secucard.connect.service.general.SkeletonService #{general.skeletons, general/skeletons}
 com.secucard.connect.service.loyalty.CardsService #{loyalty.cards, loyalty/cards}
+com.secucard.connect.service.loyalty.MerchantCardsService #{loyalty.merchantcards, loyalty/merchantcards}
 com.secucard.connect.service.general.StoreService #{general.stores, general/stores}
+com.secucard.connect.service.general.NewsService #{general.news, general/news}
 com.secucard.connect.service.general.TransactionService #{genaral.transactions, general/transactions}
 com.secucard.connect.service.general.AccountService #{general.accounts, general/accounts}
 com.secucard.connect.service.services.IdentService #{services.idents, services/idents}
@@ -15,3 +17,4 @@ com.secucard.connect.service.payment.ContainerService #{payment.containers, paym
 com.secucard.connect.service.smart.CheckinService #{smart.checkins, smart/checkins}
 com.secucard.connect.service.document.UploadService #{document.uploads, document/uploads}
 com.secucard.connect.service.payment.SecupayDebitService #{payment.secupaydebits, payment/secupaydebits}
+com.secucard.connect.service.general.apps.SecuAppService #{general.stores, general/stores}

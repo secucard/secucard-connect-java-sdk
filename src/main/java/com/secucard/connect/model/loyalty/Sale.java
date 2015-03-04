@@ -7,6 +7,7 @@ import com.secucard.connect.model.general.Store;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
+import java.util.List;
 
 public class Sale extends SecuObject {
   public static final String OBJECT = "loyalty.sales";
@@ -45,6 +46,8 @@ public class Sale extends SecuObject {
   private int balancePoints;
 
   private Currency currency;
+
+  private List<Bonus> bonus;
 
 
   @Override
@@ -146,5 +149,13 @@ public class Sale extends SecuObject {
 
   public void setBalancePoints(int balancePoints) {
     this.balancePoints = balancePoints;
+  }
+
+  public List<Bonus> getBonus() {
+    return bonus;
+  }
+
+  public void setBonus(List<Bonus> bonus) {
+    this.bonus = bonus;
   }
 }

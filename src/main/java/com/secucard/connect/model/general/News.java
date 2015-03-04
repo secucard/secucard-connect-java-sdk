@@ -1,8 +1,11 @@
 package com.secucard.connect.model.general;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.secucard.connect.model.SecuObject;
 
+import java.util.Date;
 import java.util.List;
 
 public class News extends SecuObject {
@@ -23,7 +26,13 @@ public class News extends SecuObject {
   @JsonProperty("document_id")
   private String documentId;
 
-  @JsonProperty
+  private Date created;
+
+  private String picture;
+
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = SecuObject.OBJECT_PROPERTY)
+  @JsonSubTypes({
+          @JsonSubTypes.Type(value = Merchant.class, name = Merchant.OBJECT)})
   private List<SecuObject> related;
 
   @Override
@@ -69,6 +78,22 @@ public class News extends SecuObject {
 
   public void setDocumentId(String documentId) {
     this.documentId = documentId;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
+  }
+
+  public String getPicture() {
+    return picture;
+  }
+
+  public void setPicture(String picture) {
+    this.picture = picture;
   }
 
   public List<SecuObject> getRelated() {

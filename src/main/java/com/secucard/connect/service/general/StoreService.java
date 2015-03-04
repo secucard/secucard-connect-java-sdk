@@ -10,7 +10,7 @@ import com.secucard.connect.service.AbstractService;
 public class StoreService extends AbstractService {
 
   /**
-   * Set cjeckIn state for the store
+   * Set checkIn state for the store
    *
    * @param storeId StoreID
    * @return True if successfully updated, false else.
@@ -22,6 +22,16 @@ public class StoreService extends AbstractService {
         return getRestChannel().execute(Store.class, storeId, "checkin", null, null, Result.class, callback);
       }
     }.invokeAndConvert(callback);
+  }
+
+  /**
+   * Set store as default
+   *
+   * @param storeId StoreID
+   * @return True if successfully updated, false else.
+   */
+  public boolean setDefault(final String storeId, Callback<Boolean> callback) {
+    return getRestChannel().execute(Store.class, storeId, "setDefault", null, null, Boolean.class, callback);
   }
 
   /**

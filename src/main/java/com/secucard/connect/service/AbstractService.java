@@ -230,12 +230,12 @@ public abstract class AbstractService {
     }.invoke(callback);
   }
 
-  public <T> T execute(final Class<T> type, final String objectId, final String action, final String actionArg,
-                       final Object arg, Class<T> returnType, Callback<T> callback, final String channel) {
+  public <T> T execute(final Class type, final String objectId, final String action, final String actionArg,
+                       final Object arg, final Class<T> returnType, Callback<T> callback, final String channel) {
     return new Invoker<T>() {
       @Override
       protected T handle(Callback<T> callback) throws Exception {
-        return context.getChannel(channel).execute(type, objectId, action, actionArg, arg, type, callback);
+        return context.getChannel(channel).execute(type, objectId, action, actionArg, arg, returnType, callback);
       }
     }.invoke(callback);
   }

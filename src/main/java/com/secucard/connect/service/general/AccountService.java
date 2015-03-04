@@ -2,6 +2,8 @@ package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.ClientContext;
+import com.secucard.connect.channel.Channel;
+import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Account;
 import com.secucard.connect.model.general.BeaconEnvironment;
@@ -25,7 +27,9 @@ public class AccountService extends AbstractService {
     return new Invoker<Account>() {
       @Override
       protected Account handle(Callback<Account> callback) throws Exception {
-        return getChannel().createObject(account, callback);
+        RestChannelBase channel = (RestChannelBase) getRestChannel();
+        channel.setSecure(false);
+        return channel.createObject(account, callback);
       }
     }.invoke(callback);
   }
@@ -38,7 +42,9 @@ public class AccountService extends AbstractService {
    */
   public Account getAccount(String id, Callback<Account> callback) {
     try {
-      return getRestChannel().getObject(Account.class, id, callback);
+      RestChannelBase channel = (RestChannelBase) getRestChannel();
+      channel.setSecure(false);
+      return channel.getObject(Account.class, id, callback);
     } catch (Exception e) {
       handleException(e, callback);
     }
@@ -53,7 +59,9 @@ public class AccountService extends AbstractService {
    */
   public Account updateAccount(Account account, Callback<Account> callback) {
     try {
-      return getRestChannel().updateObject(account, callback);
+      RestChannelBase channel = (RestChannelBase) getRestChannel();
+      channel.setSecure(false);
+      return channel.updateObject(account, callback);
     } catch (Exception e) {
       handleException(e, callback);
     }
@@ -66,8 +74,16 @@ public class AccountService extends AbstractService {
    *
    * @param accountId Account ID
    */
-  public void deleteAccount(String accountId, Callback callback) {
-    delete(Account.class, accountId, callback, ClientContext.REST);
+  public void deleteAccount(final String accountId, Callback callback) {
+    new Invoker<Void>() {
+      @Override
+      protected Void handle(Callback<Void> callback11) throws Exception {
+        RestChannelBase channel = (RestChannelBase) getRestChannel();
+        channel.setSecure(false);
+        channel.deleteObject(Account.class, accountId, callback11);
+        return null;
+      }
+    }.invoke(callback);
   }
 
   /**

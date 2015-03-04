@@ -3,8 +3,13 @@ package com.secucard.connect.service.loyalty;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.general.Store;
 import com.secucard.connect.model.loyalty.Card;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class CardsService extends AbstractService {
 
@@ -30,14 +35,7 @@ public class CardsService extends AbstractService {
    * @return List of cards
    */
   public ObjectList<Card> getCards(QueryParams queryParams, final Callback<ObjectList<Card>> callback) {
-    try {
-      ObjectList<Card> objects = getRestChannel().findObjects(Card.class, queryParams,
-              callback);
-      return objects;
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return null;
+    return getRestChannel().findObjects(Card.class, queryParams, callback);
   }
 
   /**
@@ -46,7 +44,13 @@ public class CardsService extends AbstractService {
    * @param cardNumber Card number
    * @return Assigned card
    */
-  public Card assignCard(String cardNumber, Callback<Card> callback) {
-    return getRestChannel().execute(Card.class, cardNumber, "assignUser", "me", null, Card.class, callback);
+  public Boolean assignUser(final String cardNumber, final Object pin, Callback<Boolean> callback) {
+    return new Result2BooleanInvoker() {
+      @Override
+      protected Result handle(Callback<Result> callback) throws Exception {
+        return getRestChannel().execute(Card.class, cardNumber, "assignUser", "me", pin, Result.class, callback);
+      }
+    }.invokeAndConvert(callback);
+
   }
 }

@@ -25,7 +25,6 @@ import java.util.concurrent.Future;
 
 public class RestChannel extends RestChannelBase {
   protected javax.ws.rs.client.Client restClient;
-  private final boolean secure = true;
 
   public RestChannel(String id, Configuration cfg) {
     super(cfg, id);

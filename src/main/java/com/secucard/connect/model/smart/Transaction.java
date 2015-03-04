@@ -12,8 +12,11 @@ public class Transaction extends SecuObject {
   @JsonProperty("basket_info")
   private BasketInfo basketInfo;
 
-  @JsonProperty("origin_device")
-  String originDevice;
+  @JsonProperty("device_source")
+  Device deviceSource;
+
+  @JsonProperty("target_device")
+  Device targetDevice;
 
   String status;
 
@@ -30,9 +33,9 @@ public class Transaction extends SecuObject {
   public Transaction() {
   }
 
-  public Transaction(String originDevice, BasketInfo basketInfo, Basket basket, List<Ident> idents) {
+  public Transaction(Device deviceSource, BasketInfo basketInfo, Basket basket, List<Ident> idents) {
     this.basketInfo = basketInfo;
-    this.originDevice = originDevice;
+    this.deviceSource = deviceSource;
     this.basket = basket;
     this.idents = idents;
   }
@@ -66,12 +69,20 @@ public class Transaction extends SecuObject {
     this.basketInfo = basketInfo;
   }
 
-  public String getOriginDevice() {
-    return originDevice;
+  public Device getDeviceSource() {
+    return deviceSource;
   }
 
-  public void setOriginDevice(String originDevice) {
-    this.originDevice = originDevice;
+  public void setDeviceSource(Device deviceSource) {
+    this.deviceSource = deviceSource;
+  }
+
+  public Device getTargetDevice() {
+    return targetDevice;
+  }
+
+  public void setTargetDevice(Device targetDevice) {
+    this.targetDevice = targetDevice;
   }
 
   public String getStatus() {
@@ -110,7 +121,7 @@ public class Transaction extends SecuObject {
   public String toString() {
     return "Transaction{" +
         "basketInfo=" + basketInfo +
-        ", originDevice='" + originDevice + '\'' +
+        ", originDevice='" + deviceSource + '\'' +
         ", status='" + status + '\'' +
         ", created=" + created +
         ", idents=" + idents +

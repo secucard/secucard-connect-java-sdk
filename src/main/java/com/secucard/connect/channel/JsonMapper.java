@@ -1,6 +1,7 @@
 package com.secucard.connect.channel;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.model.SecuObject;
@@ -31,6 +32,7 @@ public class JsonMapper {
   private static final JsonMapper instance = new JsonMapper();
 
   private JsonMapper() {
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
   public static JsonMapper get() {

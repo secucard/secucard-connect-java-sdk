@@ -99,6 +99,7 @@ public class Client extends AbstractService {
     }
     try {
       getRestChannel().open(null); // init rest first since it does auth,
+      context.getAuthProvider().getToken(); // fetch token
       Channel sc = getStompChannel();
       if (sc != null) {
         sc.open(null);
@@ -111,6 +112,10 @@ public class Client extends AbstractService {
     } catch (Throwable e) {
       throw new SecuException(e);
     }
+  }
+
+  public void cancelAuth() {
+    getAuthProvider().cancelAuth();
   }
 
   public synchronized void disconnect() {

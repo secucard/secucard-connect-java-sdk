@@ -2,13 +2,16 @@ package com.secucard.connect;
 
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.general.Skeleton;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.general.SkeletonService;
+import com.secucard.connect.service.smart.CheckinService;
 import com.secucard.connect.service.smart.DeviceService;
 import com.secucard.connect.service.smart.IdentService;
 import com.secucard.connect.service.smart.TransactionService;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,7 +19,7 @@ public class ClientDemo {
 
   public static void main(String[] args) throws Exception {
 
-    final ClientConfiguration cfg = ClientConfiguration.fromProperties("config.properties");
+    final ClientConfiguration cfg = ClientConfiguration.fromProperties("config-clientdemo.properties");
     // or use default: ClientConfiguration.getDefault();
 
     process("device1", cfg);
@@ -30,10 +33,25 @@ public class ClientDemo {
     // Android usage (passing android.content.Context): Client.create(id, cfg, getApplication());
     // must additionally set androidMode=true in configuration file
 
+    // set up event listener, especially required to handle auth events!
     client.setEventListener(new EventListener() {
       @Override
       public void onEvent(Object event) {
         System.out.println("Got event: " + event);
+
+        if (event instanceof DeviceAuthCode) {
+          // device code retrieved successfully - present this data to user
+          // user must visit URL in DeviceAuthCode.verificationUrl and must enter codes
+          // client polls auth server in background meanwhile until success or timeout (config: auth.waitTimeoutSec )
+        }
+
+        if ("AUTH_PENDING".equals(event)) {
+          // present to the user - this event comes up periodically as long the authentication is not performed
+        }
+
+        if ("AUTH_OK".equals(event)) {
+          // present to the user - user has device codes codes typed in and the auth was successfully
+        }
       }
     });
 
@@ -49,7 +67,57 @@ public class ClientDemo {
       }
     });
 
+
+    // connect will trigger the authentication
+    // AuthException is thrown when failed
     client.connect();
+
+    // cancel pending device auth if necessary
+    // client will throw  AuthCanceledException
+    client.cancelAuth();
+
+    try {
+      // must sleep in this demo to give time to enter  device code
+      Thread.sleep(30000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    // Check ins ------------------------------------------------------------------------------------------------
+
+    CheckinService service = client.getService(CheckinService.class);
+
+    // set up callback to get notified when a check in event was processed
+    service.onCheckinsChanged(new Callback<List<Checkin>>() {
+      @Override
+      public void completed(List<Checkin> result) {
+        // at this point  all pictures are downloaded
+        // access binary content to create a image like:
+        InputStream is = result.get(0).getPicture().getInputStream();
+      }
+
+      @Override
+      public void failed(Throwable cause) {
+        // error happened, handle appropriately
+        // no need to disconnect client here
+      }
+    });
+
+
+    // get the event data from web hook
+    // i.e. a request is posted to your server with this event data as payload
+    String json = "";
+    /* Example data:
+       {  "object": "event.pushes",
+          "id": "12345",
+          "created": "2015-02-02T11:40:50+01:00",
+          "target": "services.checkins",
+          "type": "changed" }
+    */
+
+    // process the event
+    boolean ok = client.handleEvent(json);
+
 
     // simple retrieval ------------------------------------------------------------------------------------------------
 
@@ -102,7 +170,7 @@ public class ClientDemo {
 
     // in production id would be the vendor uuid,
     Device device = new Device(id);
-    boolean ok = deviceService.registerDevice(device, null);
+    ok = deviceService.registerDevice(device, null);
     if (!ok) {
       client.disconnect();
       throw new RuntimeException("Error registering device.");

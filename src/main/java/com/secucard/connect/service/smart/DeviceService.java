@@ -17,7 +17,6 @@ public class DeviceService extends AbstractService {
     return new Result2BooleanInvoker() {
       @Override
       protected Result handle(Callback<Result> callback) throws Exception {
-        // todo: switch to id, static just for test
         return getStompChannel().execute(Device.class, "me", "register", null, device, Result.class, callback);
       }
     }.invokeAndConvert(callback);

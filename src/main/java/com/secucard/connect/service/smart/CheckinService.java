@@ -34,7 +34,6 @@ public class CheckinService extends AbstractService {
    * Returns always null if a callback was provided, the callbacks methods return the result analogous.
    */
   public List<Checkin> getCheckins(Callback<List<Checkin>> callback) {
-    // todo: add query param
     return getList(Checkin.class, null, callback, null);
   }
 

@@ -78,6 +78,14 @@ public class ClientConfiguration {
     this.userCredentials = userCredentials;
   }
 
+  public void setClientCredentials(ClientCredentials clientCredentials) {
+    this.clientCredentials = clientCredentials;
+  }
+
+  public void setDeviceId(String deviceId) {
+    this.deviceId = deviceId;
+  }
+
   /**
    * Load the default configuration from file default-config.properties.
    *
@@ -98,9 +106,9 @@ public class ClientConfiguration {
   /**
    * Create configuration from file.
    *
-   * @param path The file path. If this path is relative (no first "/") it will be treatet a a classpath relative path.
+   * @param path The file path. If this path is relative (no first "/") it will be treated a a classpath relative path.
    * @return Configuration instance.
-   * @throws IOException If a error ocurrs.
+   * @throws IOException If a error occurs.
    */
   public static ClientConfiguration fromProperties(String path) throws IOException {
     InputStream inputStream;

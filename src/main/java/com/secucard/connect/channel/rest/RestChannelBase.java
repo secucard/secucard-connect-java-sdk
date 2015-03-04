@@ -19,6 +19,7 @@ import java.util.Map;
 
 public abstract class RestChannelBase extends AbstractChannel {
   protected final Configuration configuration;
+  protected boolean secure = true;
   protected JsonMapper jsonMapper = JsonMapper.get();
   protected String id;
   protected AuthProvider authProvider;
@@ -35,6 +36,10 @@ public abstract class RestChannelBase extends AbstractChannel {
 
   public void setAuthProvider(AuthProvider authProvider) {
     this.authProvider = authProvider;
+  }
+
+  public void setSecure(boolean secure) {
+    this.secure = secure;
   }
 
   protected Map<String, Object> queryParamsToMap(QueryParams queryParams) {

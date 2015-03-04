@@ -1,5 +1,6 @@
 package com.secucard.connect.util;
 
+import com.secucard.connect.SecuException;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.storage.DataStorage;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
  * Later requests are served from the cache.
  */
 public class ResourceDownloader {
+  boolean retry = false;
   private RestChannelBase httpClient;
   private DataStorage cache;
   private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile("[\\/:*?\"<>|\\.&]+", Pattern.DOTALL);
@@ -26,12 +28,31 @@ public class ResourceDownloader {
 
   /**
    * Retrieve a resource and store in cache.
-   * Overrrides existing resources with same URL.
+   * Overrides existing resources with same URL.
    *
    * @param url HTTP URL of the resource to read.
    */
   public void download(String url) {
-    cache.save(createId(url), httpClient.getStream(url, null, null));
+    InputStream stream;
+    int count = 0;
+    Exception ex = null;
+    do {
+      try {
+        stream = httpClient.getStream(url, null, null);
+      } catch (Exception e) {
+        // todo check out which exception are subject to retry, retry is disabled until
+        stream = null;
+        ex = e;
+      }
+    } while (retry && stream == null && count++ < 2);
+
+    if (ex != null) {
+      throw new SecuException("Unable to download resource from " + url, ex);
+    }
+
+    if (stream != null) {
+      cache.save(createId(url), stream);
+    }
   }
 
   /**

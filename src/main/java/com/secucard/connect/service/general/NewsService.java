@@ -4,6 +4,7 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.News;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
 public class NewsService extends AbstractService {
@@ -15,14 +16,21 @@ public class NewsService extends AbstractService {
    * @return A list of found news
    */
   public ObjectList<News> getNews(QueryParams queryParams, final Callback<ObjectList<News>> callback) {
-    try {
-      ObjectList<News> objects = getRestChannel().findObjects(News.class, queryParams,
-              callback);
-      return objects;
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return null;
+    return getRestChannel().findObjects(News.class, queryParams, callback);
   }
 
+  /**
+   * Mark news as read
+   *
+   * @param pid News ID
+   * @return True if successfully updated, false else.
+   */
+  public Boolean markRead(final String pid, Callback<Boolean> callback) {
+    return new Result2BooleanInvoker() {
+      @Override
+      protected Result handle(Callback<Result> callback) throws Exception {
+        return getRestChannel().execute(News.class, pid, "markRead", null, null, Result.class, callback);
+      }
+    }.invokeAndConvert(callback);
+  }
 }

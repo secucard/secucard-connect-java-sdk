@@ -114,6 +114,10 @@ public class Client extends AbstractService {
     }
   }
 
+  public void cancelAuth() {
+    getAuthProvider().cancelAuth();
+  }
+
   public synchronized void disconnect() {
     try {
       Channel sc = getStompChannel();

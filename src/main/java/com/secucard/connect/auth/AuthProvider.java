@@ -18,7 +18,13 @@ public interface AuthProvider {
   Token getToken();
 
   /**
-   * Registering a listener getting events ocurring during the auth process. This is the case when a auth.
+   * Cancel a pending authorization request. Only useful for auth processes which involves token polling step.
+   * Provider throws {@link com.secucard.connect.auth.AuthCanceledException} if successfully canceled.
+   */
+  void cancelAuth();
+
+  /**
+   * Registering a listener getting events occurring during the auth process. This is the case when a auth.
    * process is done in multiple steps and user input is required.
    */
   void registerEventListener(EventListener eventListener);

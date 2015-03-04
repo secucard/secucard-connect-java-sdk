@@ -4,6 +4,7 @@ import com.secucard.connect.SecuException;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Account;
+import com.secucard.connect.model.loyalty.Customer;
 
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -19,8 +20,16 @@ public class Checkin extends SecuObject {
 
   private Account account;
 
-  private MediaResource picture;
+  private Customer customer;
 
+
+  public Customer getCustomer() {
+    return customer;
+  }
+
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
+  }
 
   public Account getAccount() {
     return account;
@@ -37,6 +46,8 @@ public class Checkin extends SecuObject {
   public void setCustomerName(String customerName) {
     this.customerName = customerName;
   }
+
+  private MediaResource picture;
 
   public String getPictureUrl() {
     return pictureUrl;

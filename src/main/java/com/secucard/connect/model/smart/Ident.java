@@ -1,7 +1,8 @@
 package com.secucard.connect.model.smart;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.loyalty.Customer;
+import com.secucard.connect.model.loyalty.MerchantCard;
 
 import java.util.List;
 
@@ -14,10 +15,13 @@ public class Ident extends SecuObject {
 
   private int length;
 
-  @JsonProperty("bin_prefix")
-  private String binPrefix;
+  private String prefix;
 
   private String value;
+
+  private Customer customer;
+
+  private MerchantCard merchantCard;
 
 
   public Ident(String type, String value) {
@@ -83,12 +87,28 @@ public class Ident extends SecuObject {
     this.length = length;
   }
 
-  public String getBinPrefix() {
-    return binPrefix;
+  public String getPrefix() {
+    return prefix;
   }
 
-  public void setBinPrefix(String binPrefix) {
-    this.binPrefix = binPrefix;
+  public void setPrefix(String prefix) {
+    this.prefix = prefix;
+  }
+
+  public Customer getCustomer() {
+    return customer;
+  }
+
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
+  }
+
+  public MerchantCard getMerchantCard() {
+    return merchantCard;
+  }
+
+  public void setMerchantCard(MerchantCard merchantCard) {
+    this.merchantCard = merchantCard;
   }
 
   @Override
@@ -97,7 +117,7 @@ public class Ident extends SecuObject {
         "type='" + type + '\'' +
         ", name='" + name + '\'' +
         ", length=" + length +
-        ", binPrefix='" + binPrefix + '\'' +
+        ", binPrefix='" + prefix + '\'' +
         ", value='" + value + '\'' +
         '}';
   }

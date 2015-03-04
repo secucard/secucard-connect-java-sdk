@@ -1,29 +1,29 @@
 package com.secucard.connect.model.general;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.SecuException;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 public class Account extends SecuObject {
   public static final String OBJECT = "general.accounts";
 
-  @JsonProperty
   private String username;
 
-  @JsonProperty
   private String password;
 
-  @JsonProperty
   private String role;
 
-  @JsonProperty
   private Contact contact;
 
-  @JsonProperty
-  private String picture;
+  @JsonProperty("picture")
+  private String pictureUrl;
 
-  @JsonProperty
+  private MediaResource picture;
+
   private List<Assignment> assignment;
 
   public String getUsername() {
@@ -58,12 +58,23 @@ public class Account extends SecuObject {
     this.contact = contact;
   }
 
-  public String getPicture() {
+  public MediaResource getPicture() {
     return picture;
   }
 
-  public void setPicture(String picture) {
-    this.picture = picture;
+  public String getPictureUrl() {
+    return pictureUrl;
+  }
+
+  public void setPictureUrl(String pictureUrl) {
+    this.pictureUrl = pictureUrl;
+    if (pictureUrl != null) {
+      try {
+        this.picture = new MediaResource(pictureUrl);
+      } catch (MalformedURLException e) {
+        throw new SecuException("Invalid acccount picture URL");
+      }
+    }
   }
 
   public List<Assignment> getAssignment() {

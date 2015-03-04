@@ -1,13 +1,24 @@
 package com.secucard.connect.model.smart;
 
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.general.Merchant;
 
 public class Device extends SecuObject {
   public static final String OBJECT = "smart.devices";
 
   private String type;
 
+  private Merchant merchant;
+
   public Device() {
+  }
+
+  public Merchant getMerchant() {
+    return merchant;
+  }
+
+  public void setMerchant(Merchant merchant) {
+    this.merchant = merchant;
   }
 
   public Device(String id) {

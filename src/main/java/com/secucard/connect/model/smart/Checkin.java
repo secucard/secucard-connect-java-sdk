@@ -1,5 +1,6 @@
 package com.secucard.connect.model.smart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
@@ -16,12 +17,14 @@ public class Checkin extends SecuObject {
 
   private String pictureUrl;
 
+  @JsonIgnore
+  private MediaResource picture;
+
   private Date created;
 
   private Account account;
 
   private Customer customer;
-
 
   public Customer getCustomer() {
     return customer;
@@ -46,8 +49,6 @@ public class Checkin extends SecuObject {
   public void setCustomerName(String customerName) {
     this.customerName = customerName;
   }
-
-  private MediaResource picture;
 
   public String getPictureUrl() {
     return pictureUrl;

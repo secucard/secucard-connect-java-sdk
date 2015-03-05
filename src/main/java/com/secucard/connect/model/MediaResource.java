@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Base class for all URL based media resources like images or pdf documents.
@@ -27,15 +28,28 @@ public class MediaResource {
   @JsonIgnore
   private boolean cachingEnabled = true;
 
+  @JsonIgnore
+  private ResourceDownloader downloader;
+
   public MediaResource() {
   }
 
   public MediaResource(String url) throws MalformedURLException {
+    new URL(url); // validate
     setUrl(url);
   }
 
   public String getUrl() {
     return url;
+  }
+
+  public void setDownloader(ResourceDownloader downloader) {
+    this.downloader = downloader;
+  }
+
+  protected ResourceDownloader getDownloader() {
+//    return ClientContext.get().getResourceDownloader();
+    return downloader;
   }
 
   public void setUrl(String url) {
@@ -70,7 +84,7 @@ public class MediaResource {
    * Call {@link #isCached} before to determine if this is the case.
    */
   public void download() {
-    if (cachingEnabled) {
+    if (cachingEnabled && getDownloader() != null) {
       getDownloader().download(url);
       isCached = true;
     }
@@ -114,10 +128,11 @@ public class MediaResource {
       // force download if not cached
       download();
     }
-    return getDownloader().getInputStream(url, cachingEnabled);
-  }
 
-  protected ResourceDownloader getDownloader() {
-    return ClientContext.get().getResourceDownloader();
+    if (getDownloader() == null) {
+      return null;
+    }
+
+    return getDownloader().getInputStream(url, cachingEnabled);
   }
 }

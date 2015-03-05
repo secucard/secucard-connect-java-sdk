@@ -5,8 +5,6 @@ import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.QueryParams;
-import com.secucard.connect.model.auth.Token;
-import com.secucard.connect.model.general.components.Geometry;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -96,18 +94,16 @@ public abstract class RestChannelBase extends AbstractChannel {
 
     QueryParams.GeoQuery gq = queryParams.getGeoQuery();
     if (gq != null) {
-      if (StringUtils.isNotBlank(gq.getFieldName())) {
-        map.put("geo[field]", gq.getFieldName());
+      if (StringUtils.isNotBlank(gq.getField())) {
+        map.put("geo[field]", gq.getField());
       }
 
-      Geometry geometry = gq.getGeometry();
-      if (geometry != null) {
-        if (geometry.getLat() != 0) {
-          map.put("geo[lat]", Double.toString(geometry.getLat()));
-        }
-        if (geometry.getLon() != 0) {
-          map.put("geo[lon]", Double.toString(geometry.getLon()));
-        }
+      if (gq.getLat() != null) {
+        map.put("geo[lat]", Double.toString(gq.getLat()));
+      }
+
+      if (gq.getLon() != null) {
+        map.put("geo[lon]", Double.toString(gq.getLon()));
       }
 
       if (StringUtils.isNotBlank(gq.getDistance())) {

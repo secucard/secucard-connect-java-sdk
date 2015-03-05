@@ -1,9 +1,7 @@
 package com.secucard.connect.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.model.general.components.Geometry;
 
 import java.util.*;
 
@@ -32,7 +30,7 @@ public class QueryParams {
 
   private String preset;
 
-  @JsonIgnore
+  @JsonProperty("geo")
   private GeoQuery geoQuery;
 
   public String getPreset() {
@@ -114,14 +112,36 @@ public class QueryParams {
   }
 
   public static class GeoQuery {
-    private String fieldName;
-    private String distance;
-    private Geometry geometry;
+    private String field;
 
-    public GeoQuery(String fieldName, Geometry geometry, String distance) {
-      this.fieldName = fieldName;
+    private String distance;
+
+    private Double lat;
+
+    private Double lon;
+
+    public GeoQuery() {
+    }
+
+    public GeoQuery(String field, Double lat, Double lon, String distance) {
+      this.field = field;
       this.distance = distance;
-      this.geometry = geometry;
+      this.lat = lat;
+      this.lon = lon;
+    }
+
+    public GeoQuery(Double lat, Double lon, String distance) {
+      this.distance = distance;
+      this.lat = lat;
+      this.lon = lon;
+    }
+
+    public String getField() {
+      return field;
+    }
+
+    public void setField(String field) {
+      this.field = field;
     }
 
     public String getDistance() {
@@ -132,20 +152,20 @@ public class QueryParams {
       this.distance = distance;
     }
 
-    public String getFieldName() {
-      return fieldName;
+    public Double getLat() {
+      return lat;
     }
 
-    public void setFieldName(String fieldName) {
-      this.fieldName = fieldName;
+    public void setLat(Double lat) {
+      this.lat = lat;
     }
 
-    public Geometry getGeometry() {
-      return geometry;
+    public Double getLon() {
+      return lon;
     }
 
-    public void setGeometry(Geometry geometry) {
-      this.geometry = geometry;
+    public void setLon(Double lon) {
+      this.lon = lon;
     }
   }
 }

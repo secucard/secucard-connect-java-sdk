@@ -52,7 +52,7 @@ public class AppService extends AbstractService {
 //    queryParams.addSortOrder("b", QueryParams.SORT_DESC);
 //    queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
 //    queryParams.addSortOrder("_geometry", QueryParams.SORT_ASC);
-    queryParams.setGeoQuery(new QueryParams.GeoQuery("geometry", new Geometry(51.175214, 14.027788), "1000m"));
+    queryParams.setGeoQuery(new QueryParams.GeoQuery("geometry", 51.175214, 14.027788, "1000m"));
     try {
       return channel.findObjects(PublicMerchant.class, queryParams, null);
     } catch (Exception e) {

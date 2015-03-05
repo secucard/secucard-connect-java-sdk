@@ -229,6 +229,7 @@ public class IdentService extends AbstractService {
       for (IdentResult result : results) {
         for (Person person : result.getPersons()) {
           for (Attachment attachment : person.getAttachments()) {
+            attachment.setDownloader(context.getResourceDownloader());
             // todo: introduce download policy settings to be able to avoid some downloads
             attachment.download();
           }

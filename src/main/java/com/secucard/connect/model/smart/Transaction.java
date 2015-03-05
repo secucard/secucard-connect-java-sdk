@@ -33,9 +33,8 @@ public class Transaction extends SecuObject {
   public Transaction() {
   }
 
-  public Transaction(Device deviceSource, BasketInfo basketInfo, Basket basket, List<Ident> idents) {
+  public Transaction(BasketInfo basketInfo, Basket basket, List<Ident> idents) {
     this.basketInfo = basketInfo;
-    this.deviceSource = deviceSource;
     this.basket = basket;
     this.idents = idents;
   }

@@ -76,8 +76,6 @@ public class SmartTest extends AbstractServicesTest {
     DeviceService service = client.getService(DeviceService.class);
 
     device = new Device("device1");
-    boolean ok = service.registerDevice(device, null);
-    assertTrue(ok);
   }
 
   private void testTransaction() {
@@ -92,7 +90,7 @@ public class SmartTest extends AbstractServicesTest {
 
     BasketInfo basketInfo = new BasketInfo("136.50", "EUR");
 
-    Transaction newTrans = new Transaction(device, basketInfo, basket, Arrays.asList(ident));
+    Transaction newTrans = new Transaction(basketInfo, basket, Arrays.asList(ident));
 
     Transaction transaction = service.createTransaction(newTrans, null);
     assertNotNull(transaction);

@@ -10,13 +10,11 @@ import java.util.Date;
 public class MerchantCard extends SecuObject {
   public static final String OBJECT = "loyalty.merchantcards";
 
-  @JsonProperty
   private Merchant merchant;
 
   @JsonProperty("created_for_merchant")
   private Merchant createdForMerchant;
 
-  @JsonProperty
   private Card card;
 
   @JsonProperty("created_for_store")
@@ -25,15 +23,12 @@ public class MerchantCard extends SecuObject {
   @JsonProperty("is_base_card")
   private boolean isBaseCard;
 
-  @JsonProperty
   private CardGroup cardgroup;
 
-  // todo: Customer property ergänzen
+  private Customer customer;
 
-  @JsonProperty
   private int balance;
 
-  @JsonProperty
   private int points;
 
   @JsonProperty("last_usage")
@@ -51,6 +46,14 @@ public class MerchantCard extends SecuObject {
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public Customer getCustomer() {
+    return customer;
+  }
+
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
   }
 
   public Merchant getMerchant() {

@@ -166,15 +166,6 @@ public class ClientDemo {
     // get services by class or by id, getting by class is typesafe
     TransactionService transactionService = client.getService("smart.transactions");
     IdentService identService = client.getService("smart/idents");
-    DeviceService deviceService = client.getService(DeviceService.class);
-
-    // in production id would be the vendor uuid,
-    Device device = new Device(id);
-    ok = deviceService.registerDevice(device, null);
-    if (!ok) {
-      client.disconnect();
-      throw new RuntimeException("Error registering device.");
-    }
 
     // select an ident
     List<Ident> availableIdents = identService.getIdents(null);
@@ -197,7 +188,7 @@ public class ClientDemo {
 //
     BasketInfo basketInfo = new BasketInfo("0.1", "EUR");
 
-    Transaction newTrans = new Transaction(device, basketInfo, basket, selectedIdents);
+    Transaction newTrans = new Transaction(basketInfo, basket, selectedIdents);
     newTrans.setMerchantRef("merchant21");
     newTrans.setTransactionRef("transaction99");
 

@@ -94,7 +94,11 @@ public class OAuthProvider implements AuthProvider {
           removeToken();
           token = null;
         } else {
-          token = refreshToken;
+          token.setAccessToken(refreshToken.getAccessToken());
+          token.setExpiresIn(refreshToken.getExpiresIn());
+          if (StringUtils.isNotBlank(refreshToken.getRefreshToken())) {
+            token.setRefreshToken(refreshToken.getRefreshToken());
+          }
           token.setExpireTime();
           storeToken(token);
         }

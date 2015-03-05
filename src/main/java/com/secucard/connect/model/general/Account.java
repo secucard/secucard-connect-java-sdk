@@ -2,7 +2,6 @@ package com.secucard.connect.model.general;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.secucard.connect.SecuException;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 
@@ -68,13 +67,13 @@ public class Account extends SecuObject {
     return pictureUrl;
   }
 
-  public void setPictureUrl(String pictureUrl) {
-    this.pictureUrl = pictureUrl;
-    if (pictureUrl != null) {
+  public void setPictureUrl(String value) {
+    this.pictureUrl = value;
+    if (value != null) {
       try {
-        this.picture = new MediaResource(pictureUrl);
+        this.picture = new MediaResource(value);
       } catch (MalformedURLException e) {
-        throw new SecuException("Invalid acccount picture URL");
+        // ignore here, value could be just an id as well
       }
     }
   }

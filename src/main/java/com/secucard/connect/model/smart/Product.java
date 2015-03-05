@@ -31,15 +31,26 @@ public class Product {
 
   public Product(String id, String articleNumber, String ean, String desc, String quantity, String priceOne, String tax,
                  String currency, List<ProductGroup> productGroups) {
+    this(id, articleNumber, ean, desc, new BigDecimal(quantity), new BigDecimal(priceOne), new BigDecimal(tax),
+        Currency.getInstance(currency), productGroups);
+  }
+
+  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, BigDecimal priceOne,
+                 BigDecimal tax, String currency, List<ProductGroup> productGroups) {
+    this(id, articleNumber, ean, desc, quantity, priceOne, tax, Currency.getInstance(currency), productGroups);
+  }
+
+  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, BigDecimal priceOne,
+                 BigDecimal tax, Currency currency, List<ProductGroup> productGroups) {
     this.id = id;
     this.articleNumber = articleNumber;
     this.ean = ean;
     this.desc = desc;
-    this.quantity = new BigDecimal(quantity);
-    this.priceOne = new BigDecimal(priceOne);
-    this.tax = new BigDecimal(tax);
+    this.quantity = quantity;
+    this.priceOne = priceOne;
+    this.tax = tax;
+    this.currency = currency;
     this.productGroups = productGroups;
-    this.currency = Currency.getInstance(currency);
   }
 
   public List<ProductGroup> getProductGroups() {

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Base class for all URL based media resources like images or pdf documents.
@@ -32,6 +33,7 @@ public class MediaResource implements Serializable{
   }
 
   public MediaResource(String url) throws MalformedURLException {
+    new URL(url); // validate
     setUrl(url);
   }
 

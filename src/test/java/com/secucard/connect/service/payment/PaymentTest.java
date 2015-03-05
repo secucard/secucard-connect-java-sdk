@@ -25,7 +25,7 @@ public class PaymentTest extends AbstractServicesTest {
     customer.setEmail("email");
     customer.setForeName("forename");
     customer.setSurName("surname");
-    customer.setMerchant(new Merchant("123"));
+    customer.setMerchant(new Merchant());
     customer.setPhone("110");
     customer.setStreet("street");
 

@@ -11,7 +11,8 @@ import java.util.List;
 public class Store extends SecuObject {
   public static final String OBJECT = "general.stores";
 
-  public static final String CHECKIN_STATUS_DECLINED = "declined";
+  public static final String CHECKIN_STATUS_DECLINED_DISTANCE = "declined_distance";
+  public static final String CHECKIN_STATUS_DECLINED_NOTAVAIL = "declined_notavail";
   public static final String CHECKIN_STATUS_AVAILABLE = "available";
   public static final String CHECKIN_STATUS_CHECKED_IN = "checked_in";
 

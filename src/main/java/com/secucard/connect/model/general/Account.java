@@ -1,5 +1,6 @@
 package com.secucard.connect.model.general;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.model.MediaResource;
@@ -22,6 +23,7 @@ public class Account extends SecuObject {
   @JsonProperty("picture")
   private String pictureUrl;
 
+  @JsonIgnore
   private MediaResource picture;
 
   private List<Assignment> assignment;

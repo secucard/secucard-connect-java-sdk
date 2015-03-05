@@ -19,9 +19,9 @@ public class Ident extends SecuObject {
 
   private String value;
 
-  private Customer customer;
-
   private MerchantCard merchantCard;
+
+  private boolean valid;
 
 
   public Ident(String type, String value) {
@@ -53,6 +53,14 @@ public class Ident extends SecuObject {
       }
     }
     return null;
+  }
+
+  public boolean isValid() {
+    return valid;
+  }
+
+  public void setValid(boolean valid) {
+    this.valid = valid;
   }
 
   public String getValue() {
@@ -93,14 +101,6 @@ public class Ident extends SecuObject {
 
   public void setPrefix(String prefix) {
     this.prefix = prefix;
-  }
-
-  public Customer getCustomer() {
-    return customer;
-  }
-
-  public void setCustomer(Customer customer) {
-    this.customer = customer;
   }
 
   public MerchantCard getMerchantCard() {

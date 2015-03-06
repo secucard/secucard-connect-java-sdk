@@ -53,4 +53,10 @@ public class CardsService extends AbstractService {
     }.invokeAndConvert(callback);
 
   }
+
+  public Boolean deleteUserFromCard(final String cardNumber, Callback<Boolean> callback) {
+    getRestChannel().deleteObject(Card.class, cardNumber, "assignUser", "me", callback);
+
+    return true;
+  }
 }

@@ -1,8 +1,11 @@
 package com.secucard.connect.model.general;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 
+import java.net.MalformedURLException;
 import java.util.Date;
 
 public class Contact extends SecuObject {
@@ -24,6 +27,7 @@ public class Contact extends SecuObject {
   private String email;
 
   @JsonProperty("dob")
+  @JsonIgnore
   private Date dateOfBirth;
 
   @JsonProperty
@@ -37,6 +41,13 @@ public class Contact extends SecuObject {
 
   @JsonProperty("url_website")
   private String websiteUrl;
+
+
+  @JsonProperty("picture")
+  private String pictureUrl;
+
+  @JsonIgnore
+  private MediaResource picture;
 
 
   public String getName() {
@@ -118,6 +129,26 @@ public class Contact extends SecuObject {
   public void setWebsiteUrl(String websiteUrl) {
     this.websiteUrl = websiteUrl;
   }
+
+  public MediaResource getPicture() {
+    return picture;
+  }
+
+  public String getPictureUrl() {
+    return pictureUrl;
+  }
+
+  public void setPictureUrl(String value) {
+    this.pictureUrl = value;
+    if (value != null) {
+      try {
+        this.picture = new MediaResource(value);
+      } catch (MalformedURLException e) {
+        // ignore here, value could be just an id as well
+      }
+    }
+  }
+
 
   @Override
   public String getObject() {

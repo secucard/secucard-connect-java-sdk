@@ -1,8 +1,12 @@
 package com.secucard.connect.model.loyalty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Merchant;
+
+import java.net.MalformedURLException;
 
 public class CardGroup extends SecuObject {
   public static final String OBJECT = "loyalty.cardgroups";
@@ -18,6 +22,12 @@ public class CardGroup extends SecuObject {
 
   @JsonProperty
   private Merchant merchant;
+
+  @JsonProperty("picture")
+  private String pictureUrl;
+
+  @JsonIgnore
+  private MediaResource picture;
 
   @Override
   public String getObject() {
@@ -54,5 +64,24 @@ public class CardGroup extends SecuObject {
 
   public void setMerchant(Merchant merchant) {
     this.merchant = merchant;
+  }
+
+  public MediaResource getPicture() {
+    return picture;
+  }
+
+  public String getPictureUrl() {
+    return pictureUrl;
+  }
+
+  public void setPictureUrl(String value) {
+    this.pictureUrl = value;
+    if (value != null) {
+      try {
+        this.picture = new MediaResource(value);
+      } catch (MalformedURLException e) {
+        // ignore here, value could be just an id as well
+      }
+    }
   }
 }

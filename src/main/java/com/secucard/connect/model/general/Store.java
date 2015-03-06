@@ -75,6 +75,12 @@ public class Store extends SecuObject {
   @JsonProperty("facebook_id")
   private String facebookId;
 
+  @JsonProperty("photo")
+  private List<String> pictureUrls;
+
+  @JsonProperty("photo_main")
+  private String logo;
+
   @Override
   public String getObject() {
     return OBJECT;
@@ -222,5 +228,21 @@ public class Store extends SecuObject {
 
   public void setFacebookId(String facebookId) {
     this.facebookId = facebookId;
+  }
+
+  public List<String> getPictureUrls() {
+    return pictureUrls;
+  }
+
+  public void setPictureUrls(List<String> pictureUrls) {
+    this.pictureUrls = pictureUrls;
+  }
+
+  public String getLogo() {
+    return logo;
+  }
+
+  public void setLogo(String logo) {
+    this.logo = logo;
   }
 }

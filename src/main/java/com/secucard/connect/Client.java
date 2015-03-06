@@ -125,9 +125,17 @@ public class Client extends AbstractService {
       Channel sc = getStompChannel();
       if (sc != null) {
         stopHeartBeat();
-        sc.close(null);
+        try {
+          sc.close(null);
+        } catch (Exception e) {
+          // ignore
+        }
       }
-      getRestChannel().close(null);
+      try {
+        getRestChannel().close(null);
+      } catch (Exception e) {
+        // ignore
+      }
       clear();
       // todo: clear data store?
     } finally {
@@ -180,7 +188,10 @@ public class Client extends AbstractService {
             try {
               channel.execute(Session.class, "me", "refresh", null, null, Result.class, null);
             } catch (Throwable e) {
-              channel.close(null);
+              try {
+                channel.close(null);
+              } catch (Exception e1) {
+              }
               //ignore all just try to go on
             }
 

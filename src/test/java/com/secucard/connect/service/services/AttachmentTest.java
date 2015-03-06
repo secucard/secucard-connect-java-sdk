@@ -17,9 +17,11 @@ public class AttachmentTest extends AbstractServicesTest {
   protected void executeTests() throws Exception {
     String url = "http://media2.govtech.com/images/770*1000/dog_flickr.jpg?1&2&3";
 
-    client.getService(TestService.class).setContextToCurrentThread();
 
     Attachment attachment = new Attachment(url, "jpg");
+
+//    client.getService(TestService.class).setContextToCurrentThread();
+    attachment.setDownloader(context.getResourceDownloader());
 
     DiskCache storage = (DiskCache) context.getDataStorage();
 
@@ -51,6 +53,6 @@ public class AttachmentTest extends AbstractServicesTest {
 
   @Override
   protected String getConfigString() {
-    return "stompEnabled=false\nheartBeatSec=0";
+    return "stompEnabled=false\nheartBeatSec=0\ncacheDir=sccachetest";
   }
 }

@@ -90,7 +90,13 @@ public class RestChannel extends RestChannelBase {
       builder.headers(new MultivaluedHashMap<String, Object>(headers));
     }
 
-    Object entity = builder.get().getEntity();
+    Response response = builder.get();
+
+    if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+      throw new HttpErrorException(response.getStatus());
+    }
+
+    Object entity = response.getEntity();
     if (entity instanceof InputStream) {
       return (InputStream) entity;
     }

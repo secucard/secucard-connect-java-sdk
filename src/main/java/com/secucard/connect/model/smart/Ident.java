@@ -1,7 +1,6 @@
 package com.secucard.connect.model.smart;
 
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.loyalty.Customer;
 import com.secucard.connect.model.loyalty.MerchantCard;
 
 import java.util.List;
@@ -23,13 +22,22 @@ public class Ident extends SecuObject {
 
   private boolean valid;
 
+  public Ident() {
+  }
+
+  public Ident(Ident ident) {
+    this.type = ident.getType();
+    this.name = ident.getName();
+    this.length = ident.getLength();
+    this.prefix = ident.getPrefix();
+    this.value = ident.getValue();
+    this.merchantCard = ident.getMerchantCard();
+    this.valid = ident.isValid();
+  }
 
   public Ident(String type, String value) {
     this.type = type;
     this.value = value;
-  }
-
-  public Ident() {
   }
 
   @Override
@@ -111,14 +119,17 @@ public class Ident extends SecuObject {
     this.merchantCard = merchantCard;
   }
 
+
   @Override
   public String toString() {
     return "Ident{" +
         "type='" + type + '\'' +
         ", name='" + name + '\'' +
         ", length=" + length +
-        ", binPrefix='" + prefix + '\'' +
+        ", prefix='" + prefix + '\'' +
         ", value='" + value + '\'' +
-        '}';
+        ", merchantCard=" + merchantCard +
+        ", valid=" + valid +
+        "} " + super.toString();
   }
 }

@@ -29,6 +29,9 @@ public class MediaResource implements Serializable{
   @JsonIgnore
   private boolean cachingEnabled = true;
 
+  @JsonIgnore
+  private ResourceDownloader downloader;
+
   public MediaResource() {
   }
 
@@ -39,6 +42,15 @@ public class MediaResource implements Serializable{
 
   public String getUrl() {
     return url;
+  }
+
+  public void setDownloader(ResourceDownloader downloader) {
+    this.downloader = downloader;
+  }
+
+  protected ResourceDownloader getDownloader() {
+//    return ClientContext.get().getResourceDownloader();
+    return downloader;
   }
 
   public void setUrl(String url) {
@@ -73,7 +85,7 @@ public class MediaResource implements Serializable{
    * Call {@link #isCached} before to determine if this is the case.
    */
   public void download() {
-    if (cachingEnabled) {
+    if (cachingEnabled && getDownloader() != null) {
       getDownloader().download(url);
       isCached = true;
     }
@@ -117,10 +129,11 @@ public class MediaResource implements Serializable{
       // force download if not cached
       download();
     }
-    return getDownloader().getInputStream(url, cachingEnabled);
-  }
 
-  protected ResourceDownloader getDownloader() {
-    return ClientContext.get().getResourceDownloader();
+    if (getDownloader() == null) {
+      return null;
+    }
+
+    return getDownloader().getInputStream(url, cachingEnabled);
   }
 }

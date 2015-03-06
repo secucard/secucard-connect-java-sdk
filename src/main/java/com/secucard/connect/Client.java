@@ -6,7 +6,9 @@ import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
+import com.secucard.connect.model.auth.Session;
 import com.secucard.connect.model.general.Event;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
@@ -163,7 +165,7 @@ public class Client extends AbstractService {
 
   private void startHeartBeat() {
     final int heartBeatSec = context.getConfig().getHeartBeatSec();
-    if (heartBeatSec != 0) {
+    if (context.getConfig().isStompEnabled()) {
       stopHeartBeat();
       stopHeartbeat = false;
       heartbeatInvoker = new Thread() {
@@ -172,17 +174,20 @@ public class Client extends AbstractService {
           if (LOG.isLoggable(Level.INFO)) {
             LOG.info("stomp heart beat started (" + heartBeatSec + "s).");
           }
+          StompChannel channel = (StompChannel) getStompChannel();
+
           while (!stopHeartbeat) {
             try {
-              ((StompChannel) getStompChannel()).ping();
-            } catch (Exception e) {
-              handleException(new SecuException("Error sending heart beat message.", e), null);
-              break;
+              channel.execute(Session.class, "me", "refresh", null, null, Result.class, null);
+            } catch (Throwable e) {
+              channel.close(null);
+              //ignore all just try to go on
             }
+
             try {
               Thread.sleep(heartBeatSec * 1000);
             } catch (InterruptedException e) {
-              break;
+              // ignore
             }
           }
           if (LOG.isLoggable(Level.INFO)) {

@@ -287,7 +287,11 @@ public abstract class StompChannelBase extends AbstractChannel {
     try {
       receipt = stompSupport.send(destination, body, headers, requestReceipt);
     } catch (Exception e) {
-      close(null);
+      try {
+        close(null);
+      } catch (Exception e1) {
+        // ignore
+      }
       SecuException exception = new SecuException("Error sending stomp message.", e);
       if (callback != null) {
         onFailed(callback, exception);

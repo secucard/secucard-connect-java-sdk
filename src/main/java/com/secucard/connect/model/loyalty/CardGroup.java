@@ -1,8 +1,12 @@
 package com.secucard.connect.model.loyalty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.SecuException;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Merchant;
+
+import java.net.MalformedURLException;
 
 public class CardGroup extends SecuObject {
   public static final String OBJECT = "loyalty.cardgroups";
@@ -16,12 +20,36 @@ public class CardGroup extends SecuObject {
   @JsonProperty("stock_warn_limit")
   private int stockWarnLimit;
 
-  @JsonProperty
   private Merchant merchant;
+
+  @JsonProperty("picture")
+  private String pictureUrl;
+
+  private MediaResource picture;
+
 
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public String getPictureUrl() {
+    return pictureUrl;
+  }
+
+  public void setPictureUrl(String pictureUrl) {
+    this.pictureUrl = pictureUrl;
+    if (pictureUrl != null) {
+      try {
+        this.picture = new MediaResource(pictureUrl);
+      } catch (MalformedURLException e) {
+        throw new SecuException("Invalid checkin picture URL");
+      }
+    }
+  }
+
+  public MediaResource getPicture() {
+    return picture;
   }
 
   public String getDisplayName() {

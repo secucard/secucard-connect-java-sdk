@@ -25,7 +25,6 @@ import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -291,7 +290,7 @@ public class VolleyChannel extends RestChannelBase {
         String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
         //TODO: Check why sometimes the response starts with \n
         if (jsonString.startsWith("\n")) {
-          jsonString = jsonString.replaceFirst("\n","");
+          jsonString = jsonString.replaceFirst("\n", "");
         }
         T result = jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));

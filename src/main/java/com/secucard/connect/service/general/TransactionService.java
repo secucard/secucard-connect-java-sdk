@@ -14,11 +14,20 @@ public class TransactionService extends AbstractService {
    * @param queryParams Query params to find the wanted transactions
    * @return A list of found transactions
    */
-  public ObjectList<Transaction> getStores(QueryParams queryParams, final Callback<ObjectList<Transaction>> callback) {
+  public ObjectList<Transaction> getTransactions(QueryParams queryParams, final Callback<ObjectList<Transaction>> callback) {
     try {
-      ObjectList<Transaction> objects = getRestChannel().findObjects(Transaction.class, queryParams,
+      return getRestChannel().findObjects(Transaction.class, queryParams,
               callback);
-      return objects;
+    } catch (Exception e) {
+      handleException(e, callback);
+    }
+    return null;
+  }
+
+  public Transaction getTransaction(String pid, final Callback<Transaction> callback) {
+    try {
+      return getRestChannel().getObject(Transaction.class, pid,
+              callback);
     } catch (Exception e) {
       handleException(e, callback);
     }

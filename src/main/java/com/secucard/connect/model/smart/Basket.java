@@ -42,7 +42,7 @@ public class Basket {
   public List getProductsWithText() {
     List merged = new ArrayList<>();
     for (Product product : products) {
-      String id = product.getId();
+      int id = product.getId();
       merged.add(product);
       for (Text text : texts) {
         if (text.getParentId().equals(id)) {

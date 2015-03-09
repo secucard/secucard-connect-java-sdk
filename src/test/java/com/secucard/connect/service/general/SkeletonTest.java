@@ -31,7 +31,7 @@ public class SkeletonTest extends AbstractServicesTest {
 
   @Override
   protected void executeTests() throws Exception {
-    testFind();
+//    testFind();
     testGet();
   }
 
@@ -66,18 +66,9 @@ public class SkeletonTest extends AbstractServicesTest {
     assertNotNull(skeleton);
     assertEquals(id, skeleton.getId());
 
-    service.getSkeleton(id, new Callback<Skeleton>() {
-      @Override
-      public void completed(Skeleton result) {
-        assertNotNull(result);
-      }
+    skeleton = service.getSkeleton(id, null);
 
-      @Override
-      public void failed(Throwable throwable) {
-        assumeNoException(throwable);
-      }
-    });
-
-    Thread.sleep(2000);
+    Thread.sleep(10000);
+    System.out.println("done");
   }
 }

@@ -16,19 +16,21 @@ public class Transaction extends SecuObject {
 
   @JsonProperty("device_source")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  Device deviceSource;
+  private Device deviceSource;
 
   @JsonProperty("target_device")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  Device targetDevice;
+  private Device targetDevice;
 
-  String status;
+  private String status;
 
-  Date created;
+  private Date created;
 
-  List<Ident> idents;
+  private Date updated;
 
-  Basket basket;
+  private List<Ident> idents;
+
+  private Basket basket;
 
   private String merchantRef;
 
@@ -46,6 +48,14 @@ public class Transaction extends SecuObject {
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public void setUpdated(Date updated) {
+    this.updated = updated;
   }
 
   public String getTransactionRef() {

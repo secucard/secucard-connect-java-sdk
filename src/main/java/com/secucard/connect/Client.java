@@ -237,7 +237,13 @@ public class Client extends AbstractService {
         @Override
         public void onEvent(Object event) {
           handleEvent(event);
-          context.getEventDispatcher().fireEvent(event);
+
+          // todo: merge both
+          if (event instanceof Event) {
+            context.getEventDispatcher().handleEvent((Event) event);
+          } else {
+            context.getEventDispatcher().fireEvent(event);
+          }
         }
       });
     }

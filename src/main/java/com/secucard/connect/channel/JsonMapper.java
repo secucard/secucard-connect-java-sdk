@@ -1,5 +1,6 @@
 package com.secucard.connect.channel;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,8 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +57,13 @@ public class JsonMapper {
     }
 
     return result;
+  }
+
+  public <T> T map(URL json, Class<T> type) throws IOException {
+    if (json == null) {
+      return null;
+    }
+    return objectMapper.readValue(json, type);
   }
 
   @SuppressWarnings({"unchecked"})
@@ -131,7 +141,16 @@ public class JsonMapper {
       if (dataType != null) {
         JsonNode data = tree.get(Event.DATA_PROPERTY);
         if (data != null) {
-          event.setData(objectMapper.reader(new DynamicTypeReference(List.class, dataType)).readValue(data));
+          Object obj = null;
+          try {
+            obj = objectMapper.reader(new DynamicTypeReference(List.class, dataType)).readValue(data);
+          } catch (IOException e) {
+
+          }
+
+          if (obj == null) {
+            event.setData(objectMapper.reader(new DynamicTypeReference(dataType)).readValue(data));
+          }
         }
       }
       return event;

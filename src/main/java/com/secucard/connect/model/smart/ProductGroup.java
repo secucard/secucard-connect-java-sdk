@@ -6,12 +6,12 @@ public class ProductGroup {
 
   private String desc;
 
-  private String level;
+  private int level;
 
   public ProductGroup() {
   }
 
-  public ProductGroup(String id, String desc, String level) {
+  public ProductGroup(String id, String desc, int level) {
     this.id = id;
     this.desc = desc;
     this.level = level;
@@ -33,11 +33,11 @@ public class ProductGroup {
     this.desc = desc;
   }
 
-  public String getLevel() {
+  public int getLevel() {
     return level;
   }
 
-  public void setLevel(String level) {
+  public void setLevel(int level) {
     this.level = level;
   }
 

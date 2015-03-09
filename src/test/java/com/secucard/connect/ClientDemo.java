@@ -176,14 +176,14 @@ public class ClientDemo {
 
     List<Ident> selectedIdents = Arrays.asList(ident);
 
-    List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages", "1"));
+    List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages", 1));
 
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.17", 1999, 7, groups));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", 999, 19, groups));
+    basket.addProduct(new Product(1, null, "3378", "5060215249804", "desc1", "5.17", 1999, 7, groups));
+    basket.addProduct(new Product(2, null, "34543", "5060215249805", "desc2", "1.5", 999, 19, groups));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", 219, 7, null));
+    basket.addProduct(new Product(3, null, "08070", "60215249807", "desc3", "20", 219, 7, null));
 //
     BasketInfo basketInfo = new BasketInfo(1, "EUR");
 
@@ -196,7 +196,7 @@ public class ClientDemo {
     String type = "demo"; // demo|auto|cash
     // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
 
-    TransactionResult result = transactionService.startTransaction(transaction.getId(), type, null);
+    Transaction result = transactionService.startTransaction(transaction.getId(), type, null);
     System.out.println("Transaction finished: " + result);
 
     client.disconnect();

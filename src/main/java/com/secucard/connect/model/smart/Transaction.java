@@ -1,5 +1,7 @@
 package com.secucard.connect.model.smart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 
@@ -13,22 +15,86 @@ public class Transaction extends SecuObject {
   private BasketInfo basketInfo;
 
   @JsonProperty("device_source")
-  Device deviceSource;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Device deviceSource;
 
   @JsonProperty("target_device")
-  Device targetDevice;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Device targetDevice;
 
-  String status;
+  private String status;
 
-  Date created;
+  private Date created;
 
-  List<Ident> idents;
+  private Date updated;
 
-  Basket basket;
+  private List<Ident> idents;
+
+  private Basket basket;
 
   private String merchantRef;
 
   private String transactionRef;
+
+  @JsonProperty("payment_method")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String paymentMethod;
+
+  @JsonProperty("receipt")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private List<ReceiptLine> receiptLines;
+
+  @JsonProperty("payment_requested")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String paymentRequested;
+
+  @JsonProperty("payment_executed")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String paymentExecuted;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String error;
+
+  public List<ReceiptLine> getReceiptLines() {
+    return receiptLines;
+  }
+
+  public void setReceiptLines(List<ReceiptLine> receiptLines) {
+    this.receiptLines = receiptLines;
+  }
+
+  public String getPaymentRequested() {
+    return paymentRequested;
+  }
+
+  public void setPaymentRequested(String paymentRequested) {
+    this.paymentRequested = paymentRequested;
+  }
+
+  public String getPaymentExecuted() {
+    return paymentExecuted;
+  }
+
+  public void setPaymentExecuted(String paymentExecuted) {
+    this.paymentExecuted = paymentExecuted;
+  }
+
+  public String getError() {
+    return error;
+  }
+
+  public void setError(String error) {
+    this.error = error;
+  }
+
+  public String getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(String paymentMethod) {
+    this.paymentMethod = paymentMethod;
+  }
+
 
   public Transaction() {
   }
@@ -42,6 +108,14 @@ public class Transaction extends SecuObject {
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public Date getUpdated() {
+    return updated;
+  }
+
+  public void setUpdated(Date updated) {
+    this.updated = updated;
   }
 
   public String getTransactionRef() {
@@ -116,15 +190,19 @@ public class Transaction extends SecuObject {
     this.basket = basket;
   }
 
+
   @Override
   public String toString() {
     return "Transaction{" +
         "basketInfo=" + basketInfo +
-        ", originDevice='" + deviceSource + '\'' +
+        ", deviceSource=" + deviceSource +
+        ", targetDevice=" + targetDevice +
         ", status='" + status + '\'' +
         ", created=" + created +
         ", idents=" + idents +
         ", basket=" + basket +
-        '}';
+        ", merchantRef='" + merchantRef + '\'' +
+        ", transactionRef='" + transactionRef + '\'' +
+        "} " + super.toString();
   }
 }

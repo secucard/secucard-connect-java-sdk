@@ -67,7 +67,6 @@ public class StoreService extends AbstractService {
     for (Object object : objects) {
       MediaResource picture = ((Store) object).getLogo();
       if (picture != null) {
-        picture.setDownloader(context.getResourceDownloader());
         if (!picture.isCached()) {
           picture.download();
         }

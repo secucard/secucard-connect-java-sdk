@@ -18,7 +18,7 @@ public class SkeletonService extends AbstractService {
     return new Invoker<Skeleton>() {
       @Override
       protected Skeleton handle(Callback<Skeleton> callback) {
-        return getChannel().getObject(Skeleton.class, id, callback);
+        return getRestChannel().getObject(Skeleton.class, id, callback);
       }
     }.invoke(callback);
   }

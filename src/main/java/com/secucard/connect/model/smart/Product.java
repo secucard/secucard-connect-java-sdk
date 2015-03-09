@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Product {
-  protected String id;
+  protected int id;
 
-  private String parent;
+  private Integer parent;
 
   private String articleNumber;
 
@@ -30,14 +30,15 @@ public class Product {
   public Product() {
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, String quantity, int priceOne, int tax,
-                 List<ProductGroup> productGroups) {
-    this(id, articleNumber, ean, desc, new BigDecimal(quantity), priceOne, tax, productGroups);
+  public Product(int id, Integer parent, String articleNumber, String ean, String desc, String quantity, int priceOne,
+                 int tax, List<ProductGroup> productGroups) {
+    this(id, parent, articleNumber, ean, desc, new BigDecimal(quantity), priceOne, tax, productGroups);
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, int priceOne,
-                 int tax, List<ProductGroup> groups) {
+  public Product(int id, Integer parent, String articleNumber, String ean, String desc, BigDecimal quantity,
+                 int priceOne, int tax, List<ProductGroup> groups) {
     this.id = id;
+    this.parent = parent;
     this.articleNumber = articleNumber;
     this.ean = ean;
     this.desc = desc;
@@ -47,11 +48,11 @@ public class Product {
     this.groups = groups;
   }
 
-  public String getParent() {
+  public Integer getParent() {
     return parent;
   }
 
-  public void setParent(String parent) {
+  public void setParent(Integer parent) {
     this.parent = parent;
   }
 
@@ -68,11 +69,11 @@ public class Product {
     groups.add(group);
   }
 
-  public String getId() {
+  public int getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(int id) {
     this.id = id;
   }
 

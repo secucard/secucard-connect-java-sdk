@@ -50,11 +50,6 @@ public class Message<T> extends Status {
     this.data = data;
   }
 
-  @JsonIgnore
-  public Status getStatusInfo(){
-    return new Status(getStatus(), getError(), getErrorDetails());
-  }
-
   public String getPid() {
     return pid;
   }
@@ -86,6 +81,6 @@ public class Message<T> extends Status {
         ", sid='" + sid + '\'' +
         ", query=" + query +
         ", data=" + data +
-        '}';
+        "} " + super.toString();
   }
 }

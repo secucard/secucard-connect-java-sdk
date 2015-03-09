@@ -2,8 +2,16 @@ package com.secucard.connect;
 
 import com.secucard.connect.model.transport.Status;
 
+/**
+ * General, basic client exception.
+ * Additional information may be contained in status field.
+ */
 public class SecuException extends RuntimeException {
-  private Status status;
+
+  /**
+   * Detailed error status.
+   */
+  protected Status status;
 
   public SecuException(Status status, Throwable throwable) {
     super(throwable);
@@ -33,4 +41,9 @@ public class SecuException extends RuntimeException {
     super(cause);
   }
 
+
+  @Override
+  public String toString() {
+    return ": " + status + "; " + super.toString();
+  }
 }

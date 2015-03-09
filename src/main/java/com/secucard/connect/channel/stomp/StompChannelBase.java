@@ -3,6 +3,7 @@ package com.secucard.connect.channel.stomp;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
 import com.secucard.connect.ConnectionException;
+import com.secucard.connect.ProductException;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
@@ -385,7 +386,7 @@ public abstract class StompChannelBase extends AbstractChannel {
 
     public void check(Message message) {
       if (hasError(message)) {
-        throw new SecuException(message.getError() + ", " + message.getErrorDetails());
+        throw translateError(message, null);
       }
     }
   }

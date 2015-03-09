@@ -103,7 +103,7 @@ public class SmartTest extends AbstractServicesTest {
 
     transaction = service.updateTransaction(transaction, null);
 
-    TransactionResult result = service.startTransaction(transaction.getId(), "demo", null);
+    Transaction result = service.startTransaction(transaction.getId(), "demo", null);
     assertNotNull(result);
   }
 }

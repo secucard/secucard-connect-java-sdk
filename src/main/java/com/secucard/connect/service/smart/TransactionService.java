@@ -39,9 +39,9 @@ public class TransactionService extends AbstractService {
    * @param type          The transaction type like "auto" or "cash".
    * @return The result data.
    */
-  public TransactionResult startTransaction(final String transactionId, final String type,
-                                            Callback<TransactionResult> callback) {
-    return execute(Transaction.class, transactionId, "start", type, null, TransactionResult.class,
+  public Transaction startTransaction(final String transactionId, final String type,
+                                            Callback<Transaction> callback) {
+    return execute(Transaction.class, transactionId, "start", type, null, Transaction.class,
         callback, ClientContext.STOMP);
   }
 }

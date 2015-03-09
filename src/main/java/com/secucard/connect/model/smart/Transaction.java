@@ -36,6 +36,66 @@ public class Transaction extends SecuObject {
 
   private String transactionRef;
 
+  @JsonProperty("payment_method")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String paymentMethod;
+
+  @JsonProperty("receipt")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private List<ReceiptLine> receiptLines;
+
+  @JsonProperty("payment_requested")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String paymentRequested;
+
+  @JsonProperty("payment_executed")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String paymentExecuted;
+
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String error;
+
+  public List<ReceiptLine> getReceiptLines() {
+    return receiptLines;
+  }
+
+  public void setReceiptLines(List<ReceiptLine> receiptLines) {
+    this.receiptLines = receiptLines;
+  }
+
+  public String getPaymentRequested() {
+    return paymentRequested;
+  }
+
+  public void setPaymentRequested(String paymentRequested) {
+    this.paymentRequested = paymentRequested;
+  }
+
+  public String getPaymentExecuted() {
+    return paymentExecuted;
+  }
+
+  public void setPaymentExecuted(String paymentExecuted) {
+    this.paymentExecuted = paymentExecuted;
+  }
+
+  public String getError() {
+    return error;
+  }
+
+  public void setError(String error) {
+    this.error = error;
+  }
+
+  public String getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(String paymentMethod) {
+    this.paymentMethod = paymentMethod;
+  }
+
+
   public Transaction() {
   }
 

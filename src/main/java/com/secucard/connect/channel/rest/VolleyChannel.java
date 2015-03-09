@@ -2,13 +2,7 @@ package com.secucard.connect.channel.rest;
 
 import android.content.Context;
 import android.util.Log;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.android.volley.*;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.RequestFuture;
@@ -21,6 +15,7 @@ import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
+import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
@@ -75,7 +70,7 @@ public class VolleyChannel extends RestChannelBase {
   public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
     String url = buildRequestUrl(type) + "?" + encodeQueryParams(queryParams);
     Request<ObjectList<T>> request = buildRequest(Request.Method.GET, url, null,
-            new DynamicTypeReference(ObjectList.class, type), callback);
+        new DynamicTypeReference(ObjectList.class, type), callback);
     putToQueue(request);
     return null;
   }
@@ -91,7 +86,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(object.getClass()),
-            callback);
+        callback);
     putToQueue(request);
     return null;
   }
@@ -108,7 +103,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.PUT, url, requestBody, new DynamicTypeReference(object.getClass()),
-            callback);
+        callback);
     putToQueue(request);
     return null;
   }
@@ -155,7 +150,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(returnType),
-            callback);
+        callback);
     putToQueue(request);
     return null;
   }
@@ -171,7 +166,7 @@ public class VolleyChannel extends RestChannelBase {
       return null;
     }
     Request request = buildRequest(Request.Method.POST, url, requestBody, new DynamicTypeReference(returnType),
-            callback);
+        callback);
     putToQueue(request);
     return null;
   }
@@ -183,7 +178,7 @@ public class VolleyChannel extends RestChannelBase {
     RequestFuture future = RequestFuture.newFuture();
     String requestBody = encodeQueryParams(parameters);
     ObjectJsonRequest<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody, headers,
-            new DynamicTypeReference(responseType), future, future) {
+        new DynamicTypeReference(responseType), future, future) {
       @Override
       public String getBodyContentType() {
         return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
@@ -273,13 +268,31 @@ public class VolleyChannel extends RestChannelBase {
       this(method, url, requestBody, headers, typeReference, new Response.Listener<T>() {
         @Override
         public void onResponse(T response) {
-          callback.completed(response);
+          onCompleted(callback, response);
         }
       }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-          error.printStackTrace();
-          callback.failed(error);
+          Exception ex;
+          if (error.networkResponse == null) {
+            ex = new SecuException("Error processing request.", error);
+          } else {
+            Status status = null;
+            if (error.networkResponse.data != null) {
+              // this could be an specific secucard server error
+              try {
+                status = jsonMapper.map(new String(error.networkResponse.data), Status.class);
+              } catch (IOException e) {
+              }
+            }
+            if (status == null) {
+              // no status info available, just a plain http error
+              ex = new HttpErrorException(error.networkResponse.statusCode);
+            } else {
+              ex = translateError(status, error.getCause());
+            }
+          }
+          onFailed(callback, ex);
         }
       });
     }
@@ -295,7 +308,7 @@ public class VolleyChannel extends RestChannelBase {
         T result = jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
       } catch (Exception e) {
-        return Response.error(new VolleyError(e));
+        return Response.error(new VolleyError("Error reading response data", e));
       }
     }
 

@@ -3,6 +3,7 @@ package com.secucard.connect.channel.stomp;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
 import com.secucard.connect.ConnectionException;
+import com.secucard.connect.ProductException;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
@@ -11,6 +12,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.auth.Token;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Message;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 import net.jstomplite.Config;
@@ -385,7 +387,7 @@ public abstract class StompChannelBase extends AbstractChannel {
 
     public void check(Message message) {
       if (hasError(message)) {
-        throw new SecuException(message.getError() + ", " + message.getErrorDetails());
+        throw translateError(message, null);
       }
     }
   }
@@ -427,11 +429,22 @@ public abstract class StompChannelBase extends AbstractChannel {
         // this is an STOMP event message, no direct correlation to a request
         Object event = null;
         try {
-          event = objectMapper.map(body);
-        } catch (IOException e) {
-          event = new Events.Error("STOMP message received but unable to convert: " + body + "; " + e.getMessage());
+          event = objectMapper.mapEvent(body);
+        } catch (Exception e) {
+          // ignore
         }
-        eventListener.onEvent(event);
+
+        if (event != null){
+          eventListener.onEvent(event);
+          return;
+        }
+
+        try {
+          event = objectMapper.map(body);
+          eventListener.onEvent(event);
+        } catch (Exception e) {
+          LOG.fine("STOMP message received but unable to convert: " + body + "; " + e.getMessage());
+        }
       }
     }
 

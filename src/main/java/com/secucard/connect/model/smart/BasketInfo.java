@@ -4,28 +4,28 @@ import java.math.BigDecimal;
 import java.util.Currency;
 
 public class BasketInfo {
-  private BigDecimal sum;
+  private int sum;
 
   private Currency currency;
 
   public BasketInfo() {
   }
 
-  public BasketInfo(BigDecimal sum, Currency currency) {
+  public BasketInfo(int sum, Currency currency) {
     this.sum = sum;
     this.currency = currency;
   }
 
-  public BasketInfo(String sum, String currencyCode) {
-    this.sum = new BigDecimal(sum);
+  public BasketInfo(int sum, String currencyCode) {
+    this.sum = sum;
     this.currency = Currency.getInstance(currencyCode);
   }
 
-  public BigDecimal getSum() {
+  public int getSum() {
     return sum;
   }
 
-  public void setSum(BigDecimal sum) {
+  public void setSum(int sum) {
     this.sum = sum;
   }
 

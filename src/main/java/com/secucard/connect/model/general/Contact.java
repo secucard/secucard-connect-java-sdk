@@ -11,43 +11,34 @@ import java.util.Date;
 public class Contact extends SecuObject {
   public static final String OBJECT = "general.contacts";
 
-  @JsonProperty
   private String name;
 
-  @JsonProperty
   private String forename;
 
   @JsonProperty
   private String surname;
 
-  @JsonProperty
   private String salutation;
 
-  @JsonProperty
   private String email;
 
   @JsonProperty("dob")
   @JsonIgnore
   private Date dateOfBirth;
 
-  @JsonProperty
   private String phone;
 
-  @JsonProperty
   private String mobile;
 
-  @JsonProperty
   private Address address;
 
   @JsonProperty("url_website")
   private String websiteUrl;
 
-
-  @JsonProperty("picture")
-  private String pictureUrl;
+  private String picture;
 
   @JsonIgnore
-  private MediaResource picture;
+  private MediaResource pictureObject;
 
 
   public String getName() {
@@ -130,19 +121,19 @@ public class Contact extends SecuObject {
     this.websiteUrl = websiteUrl;
   }
 
-  public MediaResource getPicture() {
+  public MediaResource getPictureObject() {
+    return pictureObject;
+  }
+
+  public String getPicture() {
     return picture;
   }
 
-  public String getPictureUrl() {
-    return pictureUrl;
-  }
-
-  public void setPictureUrl(String value) {
-    this.pictureUrl = value;
+  public void setPicture(String value) {
+    this.picture = value;
     if (value != null) {
       try {
-        this.picture = new MediaResource(value);
+        this.pictureObject = new MediaResource(value);
       } catch (MalformedURLException e) {
         // ignore here, value could be just an id as well
       }

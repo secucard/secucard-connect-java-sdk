@@ -20,14 +20,12 @@ public class CardGroup extends SecuObject {
   @JsonProperty("stock_warn_limit")
   private int stockWarnLimit;
 
-  @JsonProperty
   private Merchant merchant;
 
-  @JsonProperty("picture")
-  private String pictureUrl;
+  private String picture;
 
   @JsonIgnore
-  private MediaResource picture;
+  private MediaResource pictureObject;
 
   @Override
   public String getObject() {
@@ -66,19 +64,19 @@ public class CardGroup extends SecuObject {
     this.merchant = merchant;
   }
 
-  public MediaResource getPicture() {
+  public MediaResource getPictureObject() {
+    return pictureObject;
+  }
+
+  public String getPicture() {
     return picture;
   }
 
-  public String getPictureUrl() {
-    return pictureUrl;
-  }
-
-  public void setPictureUrl(String value) {
-    this.pictureUrl = value;
+  public void setPicture(String value) {
+    this.picture = value;
     if (value != null) {
       try {
-        this.picture = new MediaResource(value);
+        this.pictureObject = new MediaResource(value);
       } catch (MalformedURLException e) {
         // ignore here, value could be just an id as well
       }

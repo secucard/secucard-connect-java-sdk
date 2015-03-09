@@ -1,6 +1,7 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.ClientContext;
 import com.secucard.connect.model.smart.Transaction;
 import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.service.AbstractService;
@@ -41,6 +42,6 @@ public class TransactionService extends AbstractService {
   public TransactionResult startTransaction(final String transactionId, final String type,
                                             Callback<TransactionResult> callback) {
     return execute(Transaction.class, transactionId, "start", type, null, TransactionResult.class,
-        callback, null);
+        callback, ClientContext.STOMP);
   }
 }

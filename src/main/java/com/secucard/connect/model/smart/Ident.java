@@ -1,5 +1,6 @@
 package com.secucard.connect.model.smart;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.loyalty.MerchantCard;
 
@@ -18,6 +19,7 @@ public class Ident extends SecuObject {
 
   private String value;
 
+  @JsonProperty("merchantcard")
   private MerchantCard merchantCard;
 
   private boolean valid;

@@ -16,6 +16,13 @@ public class Status {
   @JsonProperty("error_description")
   private String errorDescription;
 
+  @JsonProperty("error_user")
+  private String errorUser;
+
+  private String code;
+
+  private String supportId;
+
   public Status() {
   }
 
@@ -57,6 +64,30 @@ public class Status {
     this.errorDescription = errorDescription;
   }
 
+  public String getErrorUser() {
+    return errorUser;
+  }
+
+  public void setErrorUser(String errorUser) {
+    this.errorUser = errorUser;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+  public String getSupportId() {
+    return supportId;
+  }
+
+  public void setSupportId(String supportId) {
+    this.supportId = supportId;
+  }
+
   @Override
   public String toString() {
     return "Status{" +
@@ -64,6 +95,9 @@ public class Status {
         ", error='" + error + '\'' +
         ", errorDetails='" + errorDetails + '\'' +
         ", errorDescription='" + errorDescription + '\'' +
+        ", errorUser='" + errorUser + '\'' +
+        ", code='" + code + '\'' +
+        ", supportId='" + supportId + '\'' +
         '}';
   }
 }

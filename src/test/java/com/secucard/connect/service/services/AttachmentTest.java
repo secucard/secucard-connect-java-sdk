@@ -21,8 +21,6 @@ public class AttachmentTest extends AbstractServicesTest {
     Attachment attachment = new Attachment(url, "jpg");
 
 //    client.getService(TestService.class).setContextToCurrentThread();
-    attachment.setDownloader(context.getResourceDownloader());
-
     DiskCache storage = (DiskCache) context.getDataStorage();
 
 

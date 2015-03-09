@@ -1,9 +1,11 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.ClientContext;
 import com.secucard.connect.event.EventHandler;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.MediaResource;
+import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.smart.Checkin;
@@ -34,7 +36,11 @@ public class CheckinService extends AbstractService {
    * Returns always null if a callback was provided, the callbacks methods return the result analogous.
    */
   public List<Checkin> getCheckins(Callback<List<Checkin>> callback) {
-    return getList(Checkin.class, null, callback, null);
+    return getList(Checkin.class, null, callback, ClientContext.STOMP);
+  }
+
+  public ObjectList<Checkin> getCheckinsList(Callback<ObjectList<Checkin>> callback) {
+    return getObjectList(Checkin.class, null, callback, ClientContext.STOMP);
   }
 
   /**
@@ -44,9 +50,8 @@ public class CheckinService extends AbstractService {
   @Override
   protected void postProcessObjects(List<?> objects) {
     for (Object object : objects) {
-      MediaResource picture = ((Checkin) object).getPicture();
+      MediaResource picture = ((Checkin) object).getPictureObject();
       if (picture != null) {
-        picture.setDownloader(context.getResourceDownloader());
         if (!picture.isCached()) {
           picture.download();
         }

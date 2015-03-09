@@ -7,7 +7,6 @@ import com.secucard.connect.model.general.Skeleton;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.general.SkeletonService;
 import com.secucard.connect.service.smart.CheckinService;
-import com.secucard.connect.service.smart.DeviceService;
 import com.secucard.connect.service.smart.IdentService;
 import com.secucard.connect.service.smart.TransactionService;
 
@@ -163,7 +162,7 @@ public class ClientDemo {
 
     // do a smart transaction  ----------------------------------------------------------------------------------------
 
-    // get services by class or by id, getting by class is typesafe
+    // get services by class or by id, getting by class is type safe
     TransactionService transactionService = client.getService("smart.transactions");
     IdentService identService = client.getService("smart/idents");
 
@@ -177,16 +176,16 @@ public class ClientDemo {
 
     List<Ident> selectedIdents = Arrays.asList(ident);
 
-    List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages"));
+    List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages", "1"));
 
     Basket basket = new Basket();
-    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.17", "19.99", "18.99", "EUR", groups));
-    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", "9.99", "2", "EUR", groups));
+    basket.addProduct(new Product("art1", "3378", "5060215249804", "desc1", "5.17", 1999, 7, groups));
+    basket.addProduct(new Product("art2", "34543", "5060215249805", "desc2", "1.5", 999, 19, groups));
     basket.addProduct(new Text("art2", "text1"));
     basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", "2.19", "50", "EUR", null));
+    basket.addProduct(new Product("art2", "08070", "60215249807", "desc3", "20", 219, 7, null));
 //
-    BasketInfo basketInfo = new BasketInfo("0.1", "EUR");
+    BasketInfo basketInfo = new BasketInfo(1, "EUR");
 
     Transaction newTrans = new Transaction(basketInfo, basket, selectedIdents);
     newTrans.setMerchantRef("merchant21");

@@ -18,7 +18,7 @@ public class TransactionService extends AbstractService {
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction createTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return create(transaction, callback, ClientContext.STOMP);
+    return create(transaction, callback, null);
   }
 
   /**
@@ -28,7 +28,7 @@ public class TransactionService extends AbstractService {
    * @return The updated transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction updateTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return update(transaction, callback, ClientContext.STOMP);
+    return update(transaction, callback, null);
   }
 
   /**

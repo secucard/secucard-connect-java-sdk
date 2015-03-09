@@ -9,6 +9,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -19,7 +20,7 @@ import java.net.URL;
  * Note: This is not a caching by LRU strategy or alike. If enabled the content will be
  * cached for new instances or when the URL of the instance was changed (its eventually the same).
  */
-public class MediaResource {
+public class MediaResource implements Serializable{
   private String url;
 
   @JsonIgnore

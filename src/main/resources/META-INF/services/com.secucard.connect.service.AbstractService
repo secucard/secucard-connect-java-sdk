@@ -9,6 +9,7 @@ com.secucard.connect.service.general.StoreService #{general.stores, general/stor
 com.secucard.connect.service.general.NewsService #{general.news, general/news}
 com.secucard.connect.service.general.TransactionService #{genaral.transactions, general/transactions}
 com.secucard.connect.service.general.AccountService #{general.accounts, general/accounts}
+com.secucard.connect.service.general.AccountDevicesService #{general.accountdevices, general/accountdevices}
 com.secucard.connect.service.services.IdentService #{services.idents, services/idents}
 com.secucard.connect.service.payment.CustomerService #{payment.customers, payment/customers}
 com.secucard.connect.service.payment.ContainerService #{payment.containers, payment/containers}
@@ -16,3 +17,4 @@ com.secucard.connect.service.smart.CheckinService #{smart.checkins, smart/checki
 com.secucard.connect.service.document.UploadService #{document.uploads, document/uploads}
 com.secucard.connect.service.payment.SecupayDebitService #{payment.secupaydebits, payment/secupaydebits}
 com.secucard.connect.service.general.apps.SecuAppService #{general.stores, general/stores}
+

@@ -13,7 +13,7 @@ public class Sale extends SecuObject {
   public static final String OBJECT = "loyalty.sales";
 
   @JsonProperty
-  private BigDecimal amount;
+  private int amount;
 
   @JsonProperty("last_change")
   private Date lastChange;
@@ -40,7 +40,7 @@ public class Sale extends SecuObject {
   private MerchantCard merchantcard;
 
   @JsonProperty("balance_amount")
-  private BigDecimal balanceAmount;
+  private int balanceAmount;
 
   @JsonProperty("balance_points")
   private int balancePoints;
@@ -55,11 +55,11 @@ public class Sale extends SecuObject {
     return OBJECT;
   }
 
-  public BigDecimal getAmount() {
+  public int getAmount() {
     return amount;
   }
 
-  public void setAmount(BigDecimal amount) {
+  public void setAmount(int amount) {
     this.amount = amount;
   }
 
@@ -135,11 +135,11 @@ public class Sale extends SecuObject {
     this.merchantcard = merchantcard;
   }
 
-  public BigDecimal getBalanceAmount() {
+  public int getBalanceAmount() {
     return balanceAmount;
   }
 
-  public void setBalanceAmount(BigDecimal balanceAmount) {
+  public void setBalanceAmount(int balanceAmount) {
     this.balanceAmount = balanceAmount;
   }
 

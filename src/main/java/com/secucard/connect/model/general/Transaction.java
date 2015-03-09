@@ -16,7 +16,7 @@ public class Transaction extends SecuObject {
 
   private Merchant merchant;
 
-  private BigDecimal amount;
+  private int amount;
 
   @JsonProperty("last_change")
   private Date lastChange;
@@ -40,11 +40,11 @@ public class Transaction extends SecuObject {
     this.merchant = merchant;
   }
 
-  public BigDecimal getAmount() {
+  public int getAmount() {
     return amount;
   }
 
-  public void setAmount(BigDecimal amount) {
+  public void setAmount(int amount) {
     this.amount = amount;
   }
 

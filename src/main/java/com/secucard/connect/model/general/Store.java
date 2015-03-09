@@ -85,7 +85,7 @@ public class Store extends SecuObject {
   private String urlWebsite;
 
   @JsonProperty("_balance")
-  private BigDecimal balance;
+  private int balance;
 
   @JsonProperty("_points")
   private int points;
@@ -276,11 +276,11 @@ public class Store extends SecuObject {
     this.news = news;
   }
 
-  public BigDecimal getBalance() {
+  public int getBalance() {
     return balance;
   }
 
-  public void setBalance(BigDecimal balance) {
+  public void setBalance(int balance) {
     this.balance = balance;
   }
 

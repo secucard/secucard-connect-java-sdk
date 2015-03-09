@@ -1,12 +1,41 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.general.AccountDevice;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.general.Transaction;
 import com.secucard.connect.service.AbstractService;
 
+import java.util.Map;
+
 public class TransactionService extends AbstractService {
+
+  public static final String ID = Transaction.OBJECT + Events.TYPE_ADDED;
+
+  public void onTransactionsChanged(final Callback<Transaction> callback) {
+    addOrRemoveEventHandler(ID, callback == null ? null : new TransactionsEventEventHandler(callback));
+  }
+
+  private class TransactionsEventEventHandler extends EventHandler<Transaction, Event> {
+    public TransactionsEventEventHandler(Callback<Transaction> callback) {
+      super(callback);
+    }
+
+    @Override
+    public boolean accept(Event event) {
+      return Events.TYPE_ADDED.equals(event.getType()) && Transaction.OBJECT.equals(event.getTarget());
+    }
+
+    @Override
+    public void handle(Event event) {
+      String id = ((Map) event.getData()).get("id").toString();
+      getTransaction(id, callback);
+    }
+  }
 
   /**
    * Return a list of transactions

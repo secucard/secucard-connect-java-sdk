@@ -3,6 +3,7 @@ package com.secucard.connect.service.smart;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.channel.JsonMapper;
+import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Assert;
@@ -84,6 +85,17 @@ public class SmartTest extends AbstractServicesTest {
 
   private void testTransaction() throws IOException {
     TransactionService service = client.getService("smart.transactions");
+    service.onCashierDisplayChanged(new Callback<Notification>() {
+      @Override
+      public void completed(Notification result) {
+        System.out.println(result);
+      }
+
+      @Override
+      public void failed(Throwable cause) {
+
+      }
+    });
 
     Basket basket = new Basket();
     basket.addProduct(new Product(1, null, "3378", "5060215249804", "desc1", "5.0", 1999, 19, null));

@@ -39,7 +39,7 @@ public class SmartTest extends AbstractServicesTest {
       public void completed(List<Checkin> checkins) {
         try {
           for (Checkin checkin : checkins) {
-            byte[] contents = checkin.getPicture().getContents();
+            byte[] contents = checkin.getPictureObject().getContents();
             Assert.assertTrue(contents.length > 0);
           }
         } catch (IOException e) {

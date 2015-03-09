@@ -15,10 +15,10 @@ public class Checkin extends SecuObject {
 
   private String customerName;
 
-  private String pictureUrl;
+  private String picture;
 
   @JsonIgnore
-  private MediaResource picture;
+  private MediaResource pictureObject;
 
   private Date created;
 
@@ -50,15 +50,15 @@ public class Checkin extends SecuObject {
     this.customerName = customerName;
   }
 
-  public String getPictureUrl() {
-    return pictureUrl;
+  public String getPicture() {
+    return picture;
   }
 
-  public void setPictureUrl(String pictureUrl) {
-    this.pictureUrl = pictureUrl;
-    if (pictureUrl != null) {
+  public void setPicture(String picture) {
+    this.picture = picture;
+    if (picture != null) {
       try {
-        this.picture = new MediaResource(pictureUrl);
+        this.pictureObject = new MediaResource(picture);
       } catch (MalformedURLException e) {
         throw new SecuException("Invalid checkin picture URL");
       }
@@ -73,8 +73,8 @@ public class Checkin extends SecuObject {
     this.created = created;
   }
 
-  public MediaResource getPicture() {
-    return picture;
+  public MediaResource getPictureObject() {
+    return pictureObject;
   }
 
   @Override
@@ -87,7 +87,7 @@ public class Checkin extends SecuObject {
   public String toString() {
     return "Checkin{" +
         "customerName='" + customerName + '\'' +
-        ", pictureUrl='" + pictureUrl + '\'' +
+        ", pictureUrl='" + picture + '\'' +
         ", created=" + created +
         "} " + super.toString();
   }

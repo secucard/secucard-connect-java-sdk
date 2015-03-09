@@ -1,10 +1,13 @@
 package com.secucard.connect.model.general;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +33,9 @@ public class News extends SecuObject {
 
   private String picture;
 
+  @JsonIgnore
+  private MediaResource pictureObject;
+
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = SecuObject.OBJECT_PROPERTY)
   @JsonSubTypes({
           @JsonSubTypes.Type(value = Merchant.class, name = Merchant.OBJECT)})
@@ -38,6 +44,21 @@ public class News extends SecuObject {
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public void setPicture(String value) {
+    this.picture = value;
+    if (value != null) {
+      try {
+        this.pictureObject = new MediaResource(value);
+      } catch (MalformedURLException e) {
+        // ignore here, value could be just an id as well
+      }
+    }
+  }
+
+  public MediaResource getPictureObject() {
+    return pictureObject;
   }
 
   public String getHeadline() {
@@ -90,10 +111,6 @@ public class News extends SecuObject {
 
   public String getPicture() {
     return picture;
-  }
-
-  public void setPicture(String picture) {
-    this.picture = picture;
   }
 
   public List<SecuObject> getRelated() {

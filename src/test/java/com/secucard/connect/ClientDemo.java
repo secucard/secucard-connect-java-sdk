@@ -92,7 +92,7 @@ public class ClientDemo {
       public void completed(List<Checkin> result) {
         // at this point  all pictures are downloaded
         // access binary content to create a image like:
-        InputStream is = result.get(0).getPicture().getInputStream();
+        InputStream is = result.get(0).getPictureObject().getInputStream();
       }
 
       @Override

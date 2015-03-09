@@ -50,7 +50,7 @@ public class CheckinService extends AbstractService {
   @Override
   protected void postProcessObjects(List<?> objects) {
     for (Object object : objects) {
-      MediaResource picture = ((Checkin) object).getPicture();
+      MediaResource picture = ((Checkin) object).getPictureObject();
       if (picture != null) {
         picture.setDownloader(context.getResourceDownloader());
         if (!picture.isCached()) {

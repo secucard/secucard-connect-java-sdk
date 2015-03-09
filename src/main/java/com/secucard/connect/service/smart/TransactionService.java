@@ -2,8 +2,11 @@ package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.ClientContext;
+import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.event.Events;
+import com.secucard.connect.model.general.Event;
+import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.Transaction;
-import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.service.AbstractService;
 
 /**
@@ -40,8 +43,29 @@ public class TransactionService extends AbstractService {
    * @return The result data.
    */
   public Transaction startTransaction(final String transactionId, final String type,
-                                            Callback<Transaction> callback) {
+                                      Callback<Transaction> callback) {
     return execute(Transaction.class, transactionId, "start", type, null, Transaction.class,
         callback, ClientContext.STOMP);
+  }
+
+  public void onCashierDisplayChanged(Callback<Notification> callback) {
+    addOrRemoveEventHandler(Events.TYPE_DISPLAY + Notification.OBJECT,
+        callback == null ? null : new NotificationEventEventHandler(callback));
+  }
+
+  private class NotificationEventEventHandler extends EventHandler<Notification, Event> {
+    public NotificationEventEventHandler(Callback<Notification> callback) {
+      super(callback);
+    }
+
+    @Override
+    public boolean accept(Event event) {
+      return Events.TYPE_DISPLAY.equals(event.getType()) && Notification.OBJECT.equals(event.getTarget());
+    }
+
+    @Override
+    public void handle(Event event) {
+      callback.completed((Notification) event.getData());
+    }
   }
 }

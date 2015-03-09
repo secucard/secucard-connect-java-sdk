@@ -11,6 +11,7 @@ public class Events {
 
   // event types
   public static final String TYPE_CHANGED = "changed";
+  public static final String TYPE_DISPLAY = "display";
 
   /**
    * Event listener registered for this type gets notified when the connection state of the client changes.

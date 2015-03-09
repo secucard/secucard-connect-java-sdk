@@ -1,5 +1,7 @@
 package com.secucard.connect.model.smart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 
@@ -13,9 +15,11 @@ public class Transaction extends SecuObject {
   private BasketInfo basketInfo;
 
   @JsonProperty("device_source")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   Device deviceSource;
 
   @JsonProperty("target_device")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
   Device targetDevice;
 
   String status;
@@ -116,15 +120,19 @@ public class Transaction extends SecuObject {
     this.basket = basket;
   }
 
+
   @Override
   public String toString() {
     return "Transaction{" +
         "basketInfo=" + basketInfo +
-        ", originDevice='" + deviceSource + '\'' +
+        ", deviceSource=" + deviceSource +
+        ", targetDevice=" + targetDevice +
         ", status='" + status + '\'' +
         ", created=" + created +
         ", idents=" + idents +
         ", basket=" + basket +
-        '}';
+        ", merchantRef='" + merchantRef + '\'' +
+        ", transactionRef='" + transactionRef + '\'' +
+        "} " + super.toString();
   }
 }

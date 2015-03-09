@@ -172,7 +172,8 @@ public class Client extends AbstractService {
   }
 
   private void startHeartBeat() {
-    final int heartBeatSec = context.getConfig().getHeartBeatSec();
+    final int heartBeatMs = context.getConfig().getHeartBeatSec() * 1000;
+    final int step = 500;
     if (context.getConfig().isStompEnabled()) {
       stopHeartBeat();
       stopHeartbeat = false;
@@ -180,11 +181,12 @@ public class Client extends AbstractService {
         @Override
         public void run() {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.info("stomp heart beat started (" + heartBeatSec + "s).");
+            LOG.info("stomp heart beat started (" + heartBeatMs + "s).");
           }
           StompChannel channel = (StompChannel) getStompChannel();
 
-          while (!stopHeartbeat) {
+          outer:
+          while (true) {
             try {
               channel.execute(Session.class, "me", "refresh", null, null, Result.class, null);
             } catch (Throwable e) {
@@ -195,12 +197,18 @@ public class Client extends AbstractService {
               //ignore all just try to go on
             }
 
-            try {
-              Thread.sleep(heartBeatSec * 1000);
-            } catch (InterruptedException e) {
-              // ignore
+            for (int i = 0; i < heartBeatMs; i += step) {
+              if (stopHeartbeat) {
+                break outer;
+              }
+              try {
+                Thread.sleep(step);
+              } catch (InterruptedException e) {
+                // ignore
+              }
             }
           }
+
           if (LOG.isLoggable(Level.INFO)) {
             LOG.info("stomp heart beat stopped");
           }

@@ -93,6 +93,7 @@ public class RestChannel extends RestChannelBase {
     Response response = builder.get();
 
     if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+      // no secucard api specific error expected here, just basic http error s
       throw new HttpErrorException(response.getStatus());
     }
 
@@ -251,19 +252,17 @@ public class RestChannel extends RestChannelBase {
           new InvocationCallback<Response>() {
             @Override
             public void completed(Response response) {
-              T result = null;
               try {
-                result = readEntity(response, entityType, ignoredStatus);
+                T result = readEntity(response, entityType, ignoredStatus);
+                onCompleted(callback, result);
               } catch (Exception e) {
-                failed(e);
-                return;
+                failed(translate(e));
               }
-              onCompleted(callback, result);
             }
 
             @Override
             public void failed(Throwable throwable) {
-              onFailed(callback, throwable);
+              onFailed(callback, translate(throwable));
             }
           });
     }
@@ -297,18 +296,23 @@ public class RestChannel extends RestChannelBase {
     Status status = null;
     if (throwable instanceof WebApplicationException) {
       Response response = ((WebApplicationException) throwable).getResponse();
+
+      // try if this is a regular server error and read error status
       try {
         status = mapEntity(response, new TypeReference<Status>() {
         });
       } catch (Exception e) {
-        // treat as no response
-        LOG.severe(e.getMessage());
+        // ignore
       }
+
+      if (status != null) {
+        return translateError(status, throwable);
+      }
+
+      // no specific information contained, treat as normal http error
+      return new HttpErrorException(throwable, response.getStatus());
     }
-    if (status != null) {
-      return new SecuException(status, throwable);
-    } else {
-      return new SecuException(throwable);
-    }
+
+    return new SecuException(throwable);
   }
 }

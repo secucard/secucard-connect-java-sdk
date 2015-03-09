@@ -1,6 +1,7 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.ClientContext;
 import com.secucard.connect.model.smart.Transaction;
 import com.secucard.connect.model.smart.TransactionResult;
 import com.secucard.connect.service.AbstractService;
@@ -17,7 +18,7 @@ public class TransactionService extends AbstractService {
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction createTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return create(transaction, callback, null);
+    return create(transaction, callback, ClientContext.STOMP);
   }
 
   /**
@@ -27,7 +28,7 @@ public class TransactionService extends AbstractService {
    * @return The updated transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction updateTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return update(transaction, callback, null);
+    return update(transaction, callback, ClientContext.STOMP);
   }
 
   /**
@@ -41,6 +42,6 @@ public class TransactionService extends AbstractService {
   public TransactionResult startTransaction(final String transactionId, final String type,
                                             Callback<TransactionResult> callback) {
     return execute(Transaction.class, transactionId, "start", type, null, TransactionResult.class,
-        callback, null);
+        callback, ClientContext.STOMP);
   }
 }

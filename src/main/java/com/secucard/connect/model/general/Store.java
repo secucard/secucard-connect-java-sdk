@@ -1,23 +1,37 @@
 package com.secucard.connect.model.general;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.general.components.AddressComponent;
+import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.general.components.OpenHours;
 import com.secucard.connect.model.loyalty.Program;
 
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.util.List;
 
 public class Store extends SecuObject {
   public static final String OBJECT = "general.stores";
 
-  public static final String CHECKIN_STATUS_DECLINED = "declined";
+  public static final String CHECKIN_STATUS_DECLINED_DISTANCE = "declined_distance";
+  public static final String CHECKIN_STATUS_DECLINED_NOTAVAIL = "declined_notavail";
   public static final String CHECKIN_STATUS_AVAILABLE = "available";
   public static final String CHECKIN_STATUS_CHECKED_IN = "checked_in";
 
   public static final String NEWS_STATUS_READ = "read";
   public static final String NEWS_STATUS_UNREAD = "unread";
 
+  @JsonProperty
+  private String source;
+
+  @JsonProperty
+  private String key;
+
+  @JsonProperty
+  private String hash;
 
   @JsonProperty
   private String name;
@@ -43,6 +57,9 @@ public class Store extends SecuObject {
   @JsonProperty("open_hours")
   private List<OpenHours> openHours;
 
+  @JsonProperty
+  private Geometry geometry;
+
   @JsonProperty("_geometry")
   private int distance;
 
@@ -52,6 +69,14 @@ public class Store extends SecuObject {
   @JsonProperty("address_formatted")
   private String addressFormatted;
 
+  @JsonProperty("address_components")
+  private List<AddressComponent> addressComponents;
+
+  @JsonProperty
+  private List<String> category;
+
+  @JsonProperty("category_main")
+  private String categoryMain;
 
   @JsonProperty("phone_number_formatted")
   private String phoneNumberFormatted;
@@ -71,9 +96,48 @@ public class Store extends SecuObject {
   @JsonProperty("_isDefault")
   private boolean isDefault;
 
+  @JsonProperty("facebook_id")
+  private String facebookId;
+
+  @JsonProperty("photo")
+  private List<String> pictureUrls;
+
+  @JsonProperty("photo_main")
+  private String logoUrl;
+
+  @JsonIgnore
+  private MediaResource logo;
+
+  @JsonProperty("has_beacon")
+  private Boolean hasBeacon;
+
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  public String getHash() {
+    return hash;
+  }
+
+  public void setHash(String hash) {
+    this.hash = hash;
   }
 
   public String getName() {
@@ -106,6 +170,30 @@ public class Store extends SecuObject {
 
   public void setNewsStatus(String newsStatus) {
     this.newsStatus = newsStatus;
+  }
+
+  public Geometry getGeometry() {
+    return geometry;
+  }
+
+  public void setGeometry(Geometry geometry) {
+    this.geometry = geometry;
+  }
+
+  public List<String> getCategory() {
+    return category;
+  }
+
+  public void setCategory(List<String> category) {
+    this.category = category;
+  }
+
+  public String getCategoryMain() {
+    return categoryMain;
+  }
+
+  public void setCategoryMain(String categoryMain) {
+    this.categoryMain = categoryMain;
   }
 
   public int getDistance() {
@@ -156,6 +244,14 @@ public class Store extends SecuObject {
     this.addressFormatted = addressFormatted;
   }
 
+  public List<AddressComponent> getAddressComponents() {
+    return addressComponents;
+  }
+
+  public void setAddressComponents(List<AddressComponent> addressComponents) {
+    this.addressComponents = addressComponents;
+  }
+
   public String getPhoneNumberFormatted() {
     return phoneNumberFormatted;
   }
@@ -204,11 +300,54 @@ public class Store extends SecuObject {
     this.program = program;
   }
 
-  public boolean getIsDefault() {
+  public boolean isDefault() {
     return isDefault;
   }
 
-  public void setIsDefault(boolean isDefault) {
+  public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  public String getFacebookId() {
+    return facebookId;
+  }
+
+  public void setFacebookId(String facebookId) {
+    this.facebookId = facebookId;
+  }
+
+  public List<String> getPictureUrls() {
+    return pictureUrls;
+  }
+
+  public void setPictureUrls(List<String> pictureUrls) {
+    this.pictureUrls = pictureUrls;
+  }
+
+  public MediaResource getLogo() {
+    return logo;
+  }
+
+  public String getLogoUrl() {
+    return logoUrl;
+  }
+
+  public void setLogoUrl(String value) {
+    this.logoUrl = value;
+    if (value != null) {
+      try {
+        this.logo = new MediaResource(value);
+      } catch (MalformedURLException e) {
+        // ignore here, value could be just an id as well
+      }
+    }
+  }
+
+  public Boolean getHasBeacon() {
+    return hasBeacon;
+  }
+
+  public void setHasBeacon(Boolean hasBeacon) {
+    this.hasBeacon = hasBeacon;
   }
 }

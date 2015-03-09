@@ -11,6 +11,11 @@ public class HttpErrorException extends RuntimeException {
     this.httpStatus = httpStatus;
   }
 
+  public HttpErrorException(Throwable cause, int httpStatus) {
+    super(cause);
+    this.httpStatus = httpStatus;
+  }
+
   public HttpErrorException(String message, int httpStatus) {
     super(message);
     this.httpStatus = httpStatus;

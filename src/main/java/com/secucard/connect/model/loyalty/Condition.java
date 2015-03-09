@@ -2,10 +2,11 @@ package com.secucard.connect.model.loyalty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Currency;
 
-public class Condition {
+public class Condition implements Serializable {
 
   public static final String BONUS_TYPE_PERCENT = "percent";
 

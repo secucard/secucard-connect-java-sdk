@@ -1,14 +1,16 @@
 package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 
 public class Product {
   protected String id;
+
+  private String parent;
 
   private String articleNumber;
 
@@ -18,30 +20,23 @@ public class Product {
 
   private BigDecimal quantity;
 
-  private BigDecimal priceOne;
+  private int priceOne;
 
-  private BigDecimal tax;
+  private int tax;
 
-  private Currency currency;
-
-  private List<ProductGroup> productGroups = new ArrayList<>();
+  @JsonProperty("group")
+  private List<ProductGroup> groups = new ArrayList<>();
 
   public Product() {
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, String quantity, String priceOne, String tax,
-                 String currency, List<ProductGroup> productGroups) {
-    this(id, articleNumber, ean, desc, new BigDecimal(quantity), new BigDecimal(priceOne), new BigDecimal(tax),
-        Currency.getInstance(currency), productGroups);
+  public Product(String id, String articleNumber, String ean, String desc, String quantity, int priceOne, int tax,
+                 List<ProductGroup> productGroups) {
+    this(id, articleNumber, ean, desc, new BigDecimal(quantity), priceOne, tax, productGroups);
   }
 
-  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, BigDecimal priceOne,
-                 BigDecimal tax, String currency, List<ProductGroup> productGroups) {
-    this(id, articleNumber, ean, desc, quantity, priceOne, tax, Currency.getInstance(currency), productGroups);
-  }
-
-  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, BigDecimal priceOne,
-                 BigDecimal tax, Currency currency, List<ProductGroup> productGroups) {
+  public Product(String id, String articleNumber, String ean, String desc, BigDecimal quantity, int priceOne,
+                 int tax, List<ProductGroup> groups) {
     this.id = id;
     this.articleNumber = articleNumber;
     this.ean = ean;
@@ -49,21 +44,28 @@ public class Product {
     this.quantity = quantity;
     this.priceOne = priceOne;
     this.tax = tax;
-    this.currency = currency;
-    this.productGroups = productGroups;
+    this.groups = groups;
   }
 
-  public List<ProductGroup> getProductGroups() {
-    return productGroups;
+  public String getParent() {
+    return parent;
   }
 
-  public void setProductGroups(List<ProductGroup> productGroups) {
-    this.productGroups = productGroups;
+  public void setParent(String parent) {
+    this.parent = parent;
+  }
+
+  public List<ProductGroup> getGroups() {
+    return groups;
+  }
+
+  public void setGroups(List<ProductGroup> groups) {
+    this.groups = groups;
   }
 
   @JsonIgnore
   public void addProductGroup(ProductGroup group) {
-    productGroups.add(group);
+    groups.add(group);
   }
 
   public String getId() {
@@ -106,42 +108,34 @@ public class Product {
     this.quantity = quantity;
   }
 
-  public BigDecimal getPriceOne() {
+  public int getPriceOne() {
     return priceOne;
   }
 
-  public void setPriceOne(BigDecimal priceOne) {
+  public void setPriceOne(int priceOne) {
     this.priceOne = priceOne;
   }
 
-  public BigDecimal getTax() {
+  public int getTax() {
     return tax;
   }
 
-  public void setTax(BigDecimal tax) {
+  public void setTax(int tax) {
     this.tax = tax;
-  }
-
-  public Currency getCurrency() {
-    return currency;
-  }
-
-  public void setCurrency(Currency currency) {
-    this.currency = currency;
   }
 
   @Override
   public String toString() {
     return "Product{" +
         "id='" + id + '\'' +
+        ", parent='" + parent + '\'' +
         ", articleNumber='" + articleNumber + '\'' +
         ", ean='" + ean + '\'' +
         ", desc='" + desc + '\'' +
         ", quantity=" + quantity +
         ", priceOne=" + priceOne +
         ", tax=" + tax +
-        ", currency=" + currency +
-        ", productGroups=" + productGroups +
+        ", productGroups=" + groups +
         '}';
   }
 }

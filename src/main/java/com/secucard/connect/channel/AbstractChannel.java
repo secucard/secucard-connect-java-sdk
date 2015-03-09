@@ -1,6 +1,10 @@
 package com.secucard.connect.channel;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.ProductException;
+import com.secucard.connect.SecuException;
+import com.secucard.connect.model.transport.Status;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.logging.Logger;
 
@@ -28,5 +32,12 @@ public abstract class AbstractChannel implements Channel {
         // ignore
       }
     }
+  }
+
+  protected RuntimeException translateError(Status status, Throwable cause) {
+    if (StringUtils.startsWithIgnoreCase(status.getError(), "product")) {
+      return new ProductException(status, cause);
+    }
+    return new SecuException(status, cause);
   }
 }

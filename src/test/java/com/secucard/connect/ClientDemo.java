@@ -196,7 +196,7 @@ public class ClientDemo {
     String type = "demo"; // demo|auto|cash
     // demo instructs the server to simulate a different (random) transaction for each invocation of startTransaction
 
-    TransactionResult result = transactionService.startTransaction(transaction.getId(), type, null);
+    Transaction result = transactionService.startTransaction(transaction.getId(), type, null);
     System.out.println("Transaction finished: " + result);
 
     client.disconnect();

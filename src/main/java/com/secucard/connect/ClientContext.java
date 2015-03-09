@@ -191,7 +191,7 @@ public class ClientContext {
     restChannel.setAuthProvider(this.authProvider);
     this.restChannel = restChannel;
 
-    ResourceDownloader downloader = new ResourceDownloader();
+    ResourceDownloader downloader = ResourceDownloader.get();
     downloader.setCache(dataStorage);
     downloader.setHttpClient(restChannel);
     this.resourceDownloader = downloader;

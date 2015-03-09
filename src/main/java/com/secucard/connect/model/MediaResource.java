@@ -29,9 +29,6 @@ public class MediaResource implements Serializable{
   @JsonIgnore
   private boolean cachingEnabled = true;
 
-  @JsonIgnore
-  private ResourceDownloader downloader;
-
   public MediaResource() {
   }
 
@@ -44,13 +41,9 @@ public class MediaResource implements Serializable{
     return url;
   }
 
-  public void setDownloader(ResourceDownloader downloader) {
-    this.downloader = downloader;
-  }
-
   protected ResourceDownloader getDownloader() {
 //    return ClientContext.get().getResourceDownloader();
-    return downloader;
+    return ResourceDownloader.get();
   }
 
   public void setUrl(String url) {

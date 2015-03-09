@@ -18,6 +18,15 @@ public class ResourceDownloader {
   private DataStorage cache;
   private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile("[\\/:*?\"<>|\\.&]+", Pattern.DOTALL);
 
+  private static final ResourceDownloader instance = new ResourceDownloader();
+
+  private ResourceDownloader() {
+  }
+
+  public static ResourceDownloader get() {
+    return instance;
+  }
+
   public void setHttpClient(RestChannelBase httpClient) {
     this.httpClient = httpClient;
   }

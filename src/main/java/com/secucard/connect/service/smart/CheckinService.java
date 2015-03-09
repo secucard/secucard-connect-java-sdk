@@ -52,7 +52,6 @@ public class CheckinService extends AbstractService {
     for (Object object : objects) {
       MediaResource picture = ((Checkin) object).getPictureObject();
       if (picture != null) {
-        picture.setDownloader(context.getResourceDownloader());
         if (!picture.isCached()) {
           picture.download();
         }

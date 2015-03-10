@@ -9,7 +9,7 @@ import java.util.Currency;
 public class Bonus implements Serializable {
 
 
-  private BigDecimal amount;
+  private int amount;
 
   /**
    * PTS or EUR
@@ -18,11 +18,11 @@ public class Bonus implements Serializable {
 
   private int balance;
 
-  public BigDecimal getAmount() {
+  public int getAmount() {
     return amount;
   }
 
-  public void setAmount(BigDecimal amount) {
+  public void setAmount(int amount) {
     this.amount = amount;
   }
 

@@ -1,5 +1,6 @@
 package com.secucard.connect.model.general;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.MediaResource;
@@ -23,7 +24,7 @@ public class Contact extends SecuObject {
   private String email;
 
   @JsonProperty("dob")
-  @JsonIgnore
+  @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ssZZZZZ")
   private Date dateOfBirth;
 
   private String phone;

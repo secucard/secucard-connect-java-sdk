@@ -1,6 +1,5 @@
 package com.secucard.connect.service.smart;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.Callback;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.model.general.Notification;
@@ -8,7 +7,6 @@ import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Assert;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -23,9 +21,9 @@ public class SmartTest extends AbstractServicesTest {
 
   @Override
   protected void executeTests() throws Exception {
-//    testIdents();
+    testIdents();
 //    testDevice();
-    testTransaction();
+//    testTransaction();
 //    testCheckins();
 
 //    Thread.sleep(3 * 60 * 1000);
@@ -69,6 +67,8 @@ public class SmartTest extends AbstractServicesTest {
 
   private void testIdents() {
     IdentService service = client.getService("smart/idents");
+
+    ident = service.readIdent("xxx", null);
 
     List<Ident> idents = service.getIdents(null);
     assertTrue(idents.size() > 0);

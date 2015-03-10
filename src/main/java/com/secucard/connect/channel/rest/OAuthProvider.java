@@ -195,21 +195,22 @@ public class OAuthProvider implements AuthProvider {
         deviceInfo, deviceCode);
     Map<String, String> headers = new HashMap<>();
     headers.put(HttpHeaders.USER_AGENT, userAgentProvider.getValue());
-    Integer ignored = null;
+    Integer ignoredHttpStatus = null;
     if (deviceCode != null) {
       // this is a device auth request and as long the user didn't enter the correct codes the
       // server will return 401 - it's part of the procedure in this case, so ignore
-      ignored = 401;
+      ignoredHttpStatus = 401;
     }
     try {
-      return restChannel.post(configuration.getOauthUrl(), parameters, headers, Token.class, ignored);
+      return restChannel.post(configuration.getOauthUrl(), parameters, headers, Token.class, ignoredHttpStatus);
     } catch (SecuException e) {
-      Status status = e.getStatus();
-      if (status == null) {
-        throw e;
+      if (e.getStatus() != null) {
+        throw new AuthException(e.getStatus());
       } else {
-        throw new AuthException(status.getError() + ", " + status.getErrorDescription());
+        throw new AuthException("Authorization failed.", e.getCause());
       }
+    } catch (Exception e){
+      throw new AuthException("Authorization failed.", e);
     }
   }
 
@@ -219,12 +220,13 @@ public class OAuthProvider implements AuthProvider {
     try {
       codes = restChannel.post(configuration.getOauthUrl(), parameters, null, DeviceAuthCode.class);
     } catch (SecuException e) {
-      Status status = e.getStatus();
-      if (status == null) {
-        throw e;
+      if (e.getStatus() != null) {
+        throw new AuthException(e.getStatus());
       } else {
-        throw new AuthException(status.getError() + ", " + status.getErrorDescription());
+        throw new AuthException("Authorization failed.", e.getCause());
       }
+    } catch (Exception e){
+      throw new AuthException("Authorization failed.", e);
     }
     if (StringUtils.isAnyBlank(codes.getDeviceCode(), codes.getUserCode(), codes.getVerificationUrl())) {
       throw new AuthException("Authorization failed, got no valid codes or URL.");

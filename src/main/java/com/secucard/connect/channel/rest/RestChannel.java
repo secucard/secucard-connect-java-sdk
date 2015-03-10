@@ -93,7 +93,7 @@ public class RestChannel extends RestChannelBase {
     Response response = builder.get();
 
     if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-      // no secucard api specific error expected here, just basic http error s
+      // no secucard api specific error expected here, just basic http error
       throw new HttpErrorException(response.getStatus());
     }
 

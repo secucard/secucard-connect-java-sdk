@@ -1,5 +1,7 @@
 package com.secucard.connect.service.general;
 
+import android.util.Log;
+
 import com.secucard.connect.Callback;
 import com.secucard.connect.event.EventHandler;
 import com.secucard.connect.event.Events;
@@ -21,6 +23,7 @@ public class AccountDevicesService extends AbstractService {
 
     @Override
     public boolean accept(Event event) {
+      Log.d("AccountDevicesService", "Event: "+event.toString());
       return Events.TYPE_CHANGED.equals(event.getType()) && AccountDevice.OBJECT.equals(event.getTarget());
     }
 

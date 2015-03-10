@@ -24,7 +24,7 @@ public class Contact extends SecuObject {
   private String email;
 
   @JsonProperty("dob")
-  @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ssZZZZZ")
+  @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
   private Date dateOfBirth;
 
   private String phone;

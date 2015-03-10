@@ -26,7 +26,6 @@ public class StoreService extends AbstractService {
         return getStompChannel().execute(Store.class, storeId, "checkin", sid, null, Result.class, callback);
       }
     }.invokeAndConvert(callback);
-
   }
 
   /**

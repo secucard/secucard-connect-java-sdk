@@ -197,7 +197,7 @@ public class VolleyChannel extends RestChannelBase {
 
   @Override
   public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers) {
-    return null;
+    return getClass().getClassLoader().getResourceAsStream("sam_dog.jpg");
   }
 
   private String buildRequestUrl(Class type, String... pathArgs) {

@@ -20,4 +20,8 @@ public class IdentService extends AbstractService {
   public List<Ident> getIdents(Callback<List<Ident>> callback) {
     return getList(Ident.class, null, callback, ClientContext.STOMP);
   }
+
+  public Ident readIdent(String id, Callback<Ident> callback) {
+    return execute(Ident.class, id, "read", null, null, Ident.class, callback, ClientContext.STOMP);
+  }
 }

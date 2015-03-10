@@ -7,7 +7,6 @@ import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.auth.Token;
-import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.storage.DataStorage;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,6 +27,7 @@ public class OAuthProvider implements AuthProvider {
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
   private final String id;
   private volatile boolean cancelAuth;
+  private boolean extendExpire = true;
 
   public OAuthProvider(String id, ClientConfiguration configuration) {
     this.id = id;
@@ -52,6 +52,14 @@ public class OAuthProvider implements AuthProvider {
 
   public void cancelAuth() {
     this.cancelAuth = true;
+  }
+
+  public void setExtendExpire(boolean extendExpire) {
+    this.extendExpire = extendExpire;
+  }
+
+  public boolean isExtendExpire() {
+    return extendExpire;
   }
 
   /**
@@ -80,6 +88,11 @@ public class OAuthProvider implements AuthProvider {
     Token token = getStoredToken();
 
     if (token != null && !token.isExpired()) {
+      if (extendExpire) {
+        // extend expire time on every token access, assuming the token is used, if not this could cause auth failure
+        token.setExpireTime();
+        storeToken(token);
+      }
       return token;
     }
 
@@ -209,7 +222,7 @@ public class OAuthProvider implements AuthProvider {
       } else {
         throw new AuthException("Authorization failed.", e.getCause());
       }
-    } catch (Exception e){
+    } catch (Exception e) {
       throw new AuthException("Authorization failed.", e);
     }
   }
@@ -225,7 +238,7 @@ public class OAuthProvider implements AuthProvider {
       } else {
         throw new AuthException("Authorization failed.", e.getCause());
       }
-    } catch (Exception e){
+    } catch (Exception e) {
       throw new AuthException("Authorization failed.", e);
     }
     if (StringUtils.isAnyBlank(codes.getDeviceCode(), codes.getUserCode(), codes.getVerificationUrl())) {

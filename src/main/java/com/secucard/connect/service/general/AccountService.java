@@ -4,9 +4,13 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.rest.RestChannelBase;
+import com.secucard.connect.event.EventHandler;
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Account;
+import com.secucard.connect.model.general.AccountDevice;
 import com.secucard.connect.model.general.BeaconEnvironment;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.general.Location;
 import com.secucard.connect.model.general.MerchantList;
 import com.secucard.connect.model.transport.Result;
@@ -16,6 +20,29 @@ import java.util.List;
 
 public class AccountService extends AbstractService {
 
+  public static final String TYPE_BEACON_MONITOR = "BeaconMonitor";
+
+  public static final String ID = Account.OBJECT + TYPE_BEACON_MONITOR;
+
+  public void onBeaconMonitor(final Callback<Event> callback) {
+    addOrRemoveEventHandler(ID, callback == null ? null : new AccountEventEventHandler(callback));
+  }
+
+  private class AccountEventEventHandler extends EventHandler<Event, Event> {
+    public AccountEventEventHandler(Callback<Event> callback) {
+      super(callback);
+    }
+
+    @Override
+    public boolean accept(Event event) {
+      return TYPE_BEACON_MONITOR.equals(event.getType()) && Account.OBJECT.equals(event.getTarget());
+    }
+
+    @Override
+    public void handle(Event event) {
+      callback.completed(event);
+    }
+  }
 
   /**
    * Creating a account.

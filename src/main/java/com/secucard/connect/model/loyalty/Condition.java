@@ -11,7 +11,7 @@ public class Condition implements Serializable {
   public static final String BONUS_TYPE_PERCENT = "percent";
 
   @JsonProperty("start_value")
-  private BigDecimal startValue;
+  private int startValue;
 
   /**
    * PTS or EUR
@@ -24,11 +24,11 @@ public class Condition implements Serializable {
   @JsonProperty("bonus_type")
   private String bonusType;
 
-  public BigDecimal getStartValue() {
+  public int getStartValue() {
     return startValue;
   }
 
-  public void setStartValue(BigDecimal startValue) {
+  public void setStartValue(int startValue) {
     this.startValue = startValue;
   }
 

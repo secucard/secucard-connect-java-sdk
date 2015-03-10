@@ -6,17 +6,16 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.AccountDevice;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.service.AbstractService;
-import org.glassfish.jersey.message.internal.HttpHeaderReader;
 
 public class AccountDevicesService extends AbstractService {
   public static final String ID = AccountDevice.OBJECT + Events.TYPE_CHANGED;
 
-  public void onAccountDevicesChanged(final Callback<AccountDevice> callback) {
+  public void onAccountDevicesChanged(final Callback<Event> callback) {
     addOrRemoveEventHandler(ID, callback == null ? null : new AccountDevicesEventEventHandler(callback));
   }
 
-  private class AccountDevicesEventEventHandler extends EventHandler<AccountDevice, Event> {
-    public AccountDevicesEventEventHandler(Callback<AccountDevice> callback) {
+  private class AccountDevicesEventEventHandler extends EventHandler<Event, Event> {
+    public AccountDevicesEventEventHandler(Callback<Event> callback) {
       super(callback);
     }
 
@@ -27,7 +26,7 @@ public class AccountDevicesService extends AbstractService {
 
     @Override
     public void handle(Event event) {
-      String e = event.getTarget();
+      callback.completed(event);
     }
   }
 }

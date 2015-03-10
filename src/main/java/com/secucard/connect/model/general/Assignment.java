@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class Assignment implements Serializable {
+
   private Date created;
 
   private String type;

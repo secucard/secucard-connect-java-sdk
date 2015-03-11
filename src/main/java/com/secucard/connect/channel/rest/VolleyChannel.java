@@ -1,7 +1,6 @@
 package com.secucard.connect.channel.rest;
 
 import android.content.Context;
-import android.util.Log;
 import com.android.volley.*;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
@@ -9,7 +8,6 @@ import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
-import com.secucard.connect.Client;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
@@ -18,6 +16,7 @@ import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -175,10 +174,11 @@ public class VolleyChannel extends RestChannelBase {
   @Override
   public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
                     Integer... ignoredState) {
-    RequestFuture future = RequestFuture.newFuture();
+    RequestFuture<T> future = RequestFuture.newFuture();
     String requestBody = encodeQueryParams(parameters);
-    ObjectJsonRequest<Token> request = new ObjectJsonRequest<Token>(Request.Method.POST, url, requestBody, headers,
+    ObjectJsonRequest<T> request = new ObjectJsonRequest<T>(Request.Method.POST, url, requestBody, headers,
         new DynamicTypeReference(responseType), future, future) {
+
       @Override
       public String getBodyContentType() {
         return "application/x-www-form-urlencoded; charset=" + getParamsEncoding();
@@ -188,16 +188,59 @@ public class VolleyChannel extends RestChannelBase {
     future.setRequest(putToQueue(request));
 
     try {
-      return (T) future.get();
+      return future.get();
     } catch (Exception e) {
-      Log.e(Client.class.getName(), "Error posting request", e);
+      RuntimeException exception = translate(e, ignoredState);
+      if (exception != null) {
+        throw exception;
+      }
     }
+
     return null;
   }
 
+  /**
+   * Just "wraps" retrieved response content in a stream.
+   * @param url
+   * @param parameters
+   * @param headers
+   * @return
+   */
   @Override
-  public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers) {
-    return getClass().getClassLoader().getResourceAsStream("logo.png");
+  public InputStream getStream(String url, Map<String, Object> parameters, final Map<String, String> headers) {
+//    final RequestFuture<InputStream> future = RequestFuture.newFuture();
+//    final String queryParams = encodeQueryParams(parameters);
+//    if (queryParams != null) {
+//      url += "?" + queryParams;
+//    }
+//    Request<InputStream> request = new Request<InputStream>(Request.Method.GET, url, future) {
+//
+//      @Override
+//      protected Response<InputStream> parseNetworkResponse(NetworkResponse response) {
+//        InputStream inputStream = new ByteArrayInputStream(response.data);
+//        return Response.success(inputStream, HttpHeaderParser.parseCacheHeaders(response));
+//      }
+//
+//      @Override
+//      protected void deliverResponse(InputStream response) {
+//        future.onResponse(response);
+//      }
+//
+//      @Override
+//      public Map<String, String> getHeaders() throws AuthFailureError {
+//        return headers == null ? super.getHeaders() : headers;
+//      }
+//    };
+//
+//    future.setRequest(putToQueue(request));
+//
+//    try {
+//      return future.get();
+//    } catch (Exception e) {
+//      throw translate(e);
+//    }
+      return getClass().getClassLoader().getResourceAsStream("logo.png");
+
   }
 
   private String buildRequestUrl(Class type, String... pathArgs) {
@@ -273,26 +316,7 @@ public class VolleyChannel extends RestChannelBase {
       }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-          Exception ex;
-          if (error.networkResponse == null) {
-            ex = new SecuException("Error processing request.", error);
-          } else {
-            Status status = null;
-            if (error.networkResponse.data != null) {
-              // this could be an specific secucard server error
-              try {
-                status = jsonMapper.map(new String(error.networkResponse.data), Status.class);
-              } catch (IOException e) {
-              }
-            }
-            if (status == null) {
-              // no status info available, just a plain http error
-              ex = new HttpErrorException(error.networkResponse.statusCode);
-            } else {
-              ex = translateError(status, error.getCause());
-            }
-          }
-          onFailed(callback, ex);
+          onFailed(callback, translate(error));
         }
       });
     }
@@ -300,11 +324,7 @@ public class VolleyChannel extends RestChannelBase {
     @Override
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
       try {
-        String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-        //TODO: Check why sometimes the response starts with \n
-        if (jsonString.startsWith("\n")) {
-          jsonString = jsonString.replaceFirst("\n", "");
-        }
+        String jsonString = new String(response.data, HttpHeaderParser.parseCharset(response.headers)).trim();
         T result = jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
       } catch (Exception e) {
@@ -316,5 +336,47 @@ public class VolleyChannel extends RestChannelBase {
     public Map<String, String> getHeaders() throws AuthFailureError {
       return headers == null ? super.getHeaders() : headers;
     }
+  }
+
+  protected RuntimeException translate(Throwable throwable, Integer... ignoredStates) {
+    RuntimeException ex;
+
+    VolleyError error = null;
+    if (throwable instanceof VolleyError) {
+      error = (VolleyError) throwable;
+    } else if (throwable.getCause() instanceof VolleyError) {
+      error = (VolleyError) throwable.getCause();
+    }
+
+    if (error != null) {
+      if (error.networkResponse == null) {
+        ex = new SecuException("Error processing request.", error);
+      } else {
+        if (ignoredStates != null) {
+          for (Integer state : ignoredStates) {
+            if (state != null && state == error.networkResponse.statusCode) {
+              return null;
+            }
+          }
+        }
+        Status status = null;
+        if (error.networkResponse.data != null) {
+          // this could be an specific secucard server error
+          try {
+            status = jsonMapper.map(new String(error.networkResponse.data), Status.class);
+          } catch (Exception e) {
+          }
+        }
+        if (status == null) {
+          // no status info available, just a plain http error
+          ex = new HttpErrorException(error.networkResponse.statusCode);
+        } else {
+          ex = translateError(status, error.getCause());
+        }
+      }
+    } else {
+      ex = new SecuException("Error processing request", throwable);
+    }
+    return ex;
   }
 }

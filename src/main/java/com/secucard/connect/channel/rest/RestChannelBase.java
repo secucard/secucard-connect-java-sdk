@@ -119,6 +119,9 @@ public abstract class RestChannelBase extends AbstractChannel {
   }
 
   protected String encodeQueryParams(Map<String, Object> queryParams) {
+    if (queryParams == null || queryParams.isEmpty()) {
+      return null;
+    }
     StringBuilder encodedParams = new StringBuilder();
     String paramsEncoding = "UTF-8";
     try {

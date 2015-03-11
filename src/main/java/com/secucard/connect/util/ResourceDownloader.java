@@ -47,7 +47,7 @@ public class ResourceDownloader {
     Exception ex = null;
     do {
       try {
-        stream = httpClient.getStream(url, null, null);
+        stream = getInputStream(url, false);
       } catch (Exception e) {
         // todo check out which exception are subject to retry, retry is disabled until
         stream = null;
@@ -82,7 +82,7 @@ public class ResourceDownloader {
         stream = cache.getStream(id);
       }
     } else {
-      stream = httpClient.getStream(url, null, null);
+      stream = httpClient.getStream(url, null, null, null);
     }
     return stream;
   }

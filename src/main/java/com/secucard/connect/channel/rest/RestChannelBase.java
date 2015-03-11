@@ -1,5 +1,6 @@
 package com.secucard.connect.channel.rest;
 
+import com.secucard.connect.Callback;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.AbstractChannel;
 import com.secucard.connect.channel.JsonMapper;
@@ -156,5 +157,6 @@ public abstract class RestChannelBase extends AbstractChannel {
   public abstract <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
                              Integer... ignoredState);
 
-  public abstract InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers);
+  public abstract InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers,
+                                        Callback<InputStream> callback);
 }

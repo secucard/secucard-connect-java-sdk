@@ -3,6 +3,7 @@ package com.secucard.connect.util;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.storage.DataStorage;
+
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
@@ -13,18 +14,25 @@ import java.util.regex.Pattern;
  * Later requests are served from the cache.
  */
 public class ResourceDownloader {
+  private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile("[\\/:*?\"<>|\\.&]+", Pattern.DOTALL);
+  private static final ResourceDownloader instance = new ResourceDownloader();
   boolean retry = false;
   private RestChannelBase httpClient;
   private DataStorage cache;
-  private static final Pattern INVALID_CHARS_PATTERN = Pattern.compile("[\\/:*?\"<>|\\.&]+", Pattern.DOTALL);
-
-  private static final ResourceDownloader instance = new ResourceDownloader();
 
   private ResourceDownloader() {
   }
 
   public static ResourceDownloader get() {
     return instance;
+  }
+
+  private static String createId(String url) {
+    String s = INVALID_CHARS_PATTERN.matcher(url).replaceAll("");
+    if (s.length() > 120) {
+      s = StringUtils.substring(s, 0, 120);
+    }
+    return s;
   }
 
   public void setHttpClient(RestChannelBase httpClient) {
@@ -47,7 +55,9 @@ public class ResourceDownloader {
     Exception ex = null;
     do {
       try {
-        stream = getInputStream(url, false);
+
+        stream = httpClient.getStream(url, null, null, null);
+
       } catch (Exception e) {
         // todo check out which exception are subject to retry, retry is disabled until
         stream = null;
@@ -82,16 +92,10 @@ public class ResourceDownloader {
         stream = cache.getStream(id);
       }
     } else {
+
       stream = httpClient.getStream(url, null, null, null);
+
     }
     return stream;
-  }
-
-  private static String createId(String url) {
-    String s = INVALID_CHARS_PATTERN.matcher(url).replaceAll("");
-    if (s.length() > 120) {
-      s = StringUtils.substring(s, 0, 120);
-    }
-    return s;
   }
 }

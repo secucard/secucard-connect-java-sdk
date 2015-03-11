@@ -1,9 +1,12 @@
 package com.secucard.connect.model.loyalty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Merchant;
 
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 
@@ -57,9 +60,27 @@ public class Customer extends SecuObject {
   @JsonProperty("dob")
   private Date dateOfBirth;
 
+  private String picture;
+
+  @JsonIgnore
+  private MediaResource pictureObject;
+
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public String getPicture() {
+    return picture;
+  }
+
+  public void setPicture(String value) {
+    picture = value;
+    pictureObject = MediaResource.create(picture);
+  }
+
+  public MediaResource getPictureObject() {
+    return pictureObject;
   }
 
   public Merchant getMerchant() {

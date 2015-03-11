@@ -56,13 +56,7 @@ public class Checkin extends SecuObject {
 
   public void setPicture(String picture) {
     this.picture = picture;
-    if (picture != null) {
-      try {
-        this.pictureObject = new MediaResource(picture);
-      } catch (MalformedURLException e) {
-        throw new SecuException("Invalid checkin picture URL");
-      }
-    }
+    pictureObject = MediaResource.create(picture);
   }
 
   public Date getCreated() {

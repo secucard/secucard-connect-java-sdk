@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
@@ -29,6 +30,7 @@ import java.util.Map;
 public class VolleyChannel extends RestChannelBase {
   protected final android.content.Context context;
   protected RequestQueue requestQueue;
+  private int requestTimeoutSec = 10;
 
   public VolleyChannel(String id, Context context, Configuration configuration) {
     super(configuration, id);
@@ -188,7 +190,7 @@ public class VolleyChannel extends RestChannelBase {
     future.setRequest(putToQueue(request));
 
     try {
-      return future.get();
+      return future.get(requestTimeoutSec, TimeUnit.SECONDS);
     } catch (Exception e) {
       RuntimeException exception = translate(e, ignoredState);
       if (exception != null) {
@@ -201,19 +203,45 @@ public class VolleyChannel extends RestChannelBase {
 
   /**
    * Just "wraps" retrieved response content in a stream.
+   *
    * @param url
    * @param parameters
    * @param headers
    * @return
    */
   @Override
-  public InputStream getStream(String url, Map<String, Object> parameters, final Map<String, String> headers) {
-    final RequestFuture<InputStream> future = RequestFuture.newFuture();
+  public InputStream getStream(String url, Map<String, Object> parameters, final Map<String, String> headers,
+                               final Callback<InputStream> callback) {
+
     final String queryParams = encodeQueryParams(parameters);
     if (queryParams != null) {
       url += "?" + queryParams;
     }
-    Request<InputStream> request = new Request<InputStream>(Request.Method.GET, url, future) {
+
+    final Response.Listener<InputStream> listener;
+    final Response.ErrorListener errorListener;
+    RequestFuture<InputStream> future = RequestFuture.newFuture();
+
+    if (callback == null) {
+      listener = future;
+      errorListener = future;
+    } else {
+      listener = new Response.Listener<InputStream>() {
+        @Override
+        public void onResponse(InputStream response) {
+          onCompleted(callback, response);
+        }
+      };
+
+      errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+          onFailed(callback, translate(error));
+        }
+      };
+    }
+
+    Request<InputStream> request = new Request<InputStream>(Request.Method.GET, url, errorListener) {
 
       @Override
       protected Response<InputStream> parseNetworkResponse(NetworkResponse response) {
@@ -223,7 +251,7 @@ public class VolleyChannel extends RestChannelBase {
 
       @Override
       protected void deliverResponse(InputStream response) {
-        future.onResponse(response);
+        listener.onResponse(response);
       }
 
       @Override
@@ -232,13 +260,18 @@ public class VolleyChannel extends RestChannelBase {
       }
     };
 
-    future.setRequest(putToQueue(request));
-
-    try {
-      return future.get();
-    } catch (Exception e) {
-      throw translate(e);
+    if (callback == null) {
+      future.setRequest(putToQueue(request));
+      try {
+        return future.get(requestTimeoutSec, TimeUnit.SECONDS);
+      } catch (Exception e) {
+        throw translate(e);
+      }
+    } else {
+      putToQueue(request);
     }
+
+    return null;
   }
 
   private String buildRequestUrl(Class type, String... pathArgs) {

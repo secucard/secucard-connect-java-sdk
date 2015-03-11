@@ -74,12 +74,6 @@ public class CardGroup extends SecuObject {
 
   public void setPicture(String value) {
     this.picture = value;
-    if (value != null) {
-      try {
-        this.pictureObject = new MediaResource(value);
-      } catch (MalformedURLException e) {
-        // ignore here, value could be just an id as well
-      }
-    }
+    pictureObject = MediaResource.create(picture);
   }
 }

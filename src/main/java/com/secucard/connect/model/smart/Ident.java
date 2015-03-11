@@ -2,6 +2,7 @@ package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.loyalty.Customer;
 import com.secucard.connect.model.loyalty.MerchantCard;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public class Ident extends SecuObject {
   private String prefix;
 
   private String value;
+
+  private Customer customer;
 
   @JsonProperty("merchantcard")
   private MerchantCard merchantCard;
@@ -63,6 +66,14 @@ public class Ident extends SecuObject {
       }
     }
     return null;
+  }
+
+  public Customer getCustomer() {
+    return customer;
+  }
+
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
   }
 
   public boolean isValid() {
@@ -130,6 +141,7 @@ public class Ident extends SecuObject {
         ", length=" + length +
         ", prefix='" + prefix + '\'' +
         ", value='" + value + '\'' +
+        ", customer=" + customer +
         ", merchantCard=" + merchantCard +
         ", valid=" + valid +
         "} " + super.toString();

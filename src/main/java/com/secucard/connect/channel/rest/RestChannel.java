@@ -78,7 +78,8 @@ public class RestChannel extends RestChannelBase {
 
 
   @Override
-  public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers) {
+  public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers,
+                               Callback<InputStream> callback) {
     WebTarget target = restClient.target(url);
     if (parameters != null) {
       for (Map.Entry<String, Object> entry : parameters.entrySet()) {

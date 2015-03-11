@@ -32,6 +32,17 @@ public class MediaResource implements Serializable{
   public MediaResource() {
   }
 
+  public static MediaResource create(String value) {
+    if (value != null) {
+      try {
+        return new MediaResource(value);
+      } catch (MalformedURLException e) {
+        // ignore here, value could be just an id as well
+      }
+    }
+    return null;
+  }
+
   public MediaResource(String url) throws MalformedURLException {
     new URL(url); // validate
     setUrl(url);

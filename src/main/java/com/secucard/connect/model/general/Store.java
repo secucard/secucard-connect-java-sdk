@@ -334,13 +334,7 @@ public class Store extends SecuObject {
 
   public void setLogoUrl(String value) {
     this.logoUrl = value;
-    if (value != null) {
-      try {
-        this.logo = new MediaResource(value);
-      } catch (MalformedURLException e) {
-        // ignore here, value could be just an id as well
-      }
-    }
+    logo = MediaResource.create(value);
   }
 
   public Boolean getHasBeacon() {

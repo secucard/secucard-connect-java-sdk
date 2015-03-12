@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 
-public class Token implements Serializable {
+public class TokenNew implements Serializable {
 
     @JsonProperty("access_token")
     private String accessToken;
@@ -16,7 +16,6 @@ public class Token implements Serializable {
     @JsonProperty("token_type")
     private String tokenType;
 
-    @JsonProperty
     private String scope;
 
     @JsonProperty("refresh_token")
@@ -25,12 +24,19 @@ public class Token implements Serializable {
     // UNIX timestamp of token expiring
     private Long expireTime;
 
-    public Token() {
+    // the original expire time of token when token was created, set only one time, never changes
+    private Long origExpireTime;
+
+    public TokenNew() {
     }
 
-    public Token(String accessToken, String refreshToken) {
+    public TokenNew(String accessToken, String refreshToken) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+    }
+
+    public Long getOrigExpireTime() {
+      return origExpireTime;
     }
 
     public Long getExpireTime() {
@@ -39,6 +45,9 @@ public class Token implements Serializable {
 
     public void setExpireTime() {
         this.expireTime = System.currentTimeMillis() + expiresIn * 1000;
+        if (origExpireTime == null){
+          origExpireTime = expireTime;
+        }
     }
 
     @JsonIgnore
@@ -86,15 +95,18 @@ public class Token implements Serializable {
         this.refreshToken = refreshToken;
     }
 
-    @Override
-    public String toString() {
-        return "Token{" +
-                "accessToken='" + accessToken + '\'' +
-                ", expiresIn=" + expiresIn +
-                ", tokenType='" + tokenType + '\'' +
-                ", scope='" + scope + '\'' +
-                ", refreshToken='" + refreshToken + '\'' +
-                ", expireTime=" + expireTime +
-                '}';
-    }
+
+
+  @Override
+  public String toString() {
+    return "Token{" +
+        "accessToken='" + accessToken + '\'' +
+        ", expiresIn=" + expiresIn +
+        ", tokenType='" + tokenType + '\'' +
+        ", scope='" + scope + '\'' +
+        ", refreshToken='" + refreshToken + '\'' +
+        ", expireTime=" + expireTime +
+        ", origExpireTime=" + origExpireTime +
+        '}';
+  }
 }

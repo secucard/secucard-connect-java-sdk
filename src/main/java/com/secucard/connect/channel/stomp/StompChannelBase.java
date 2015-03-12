@@ -72,7 +72,7 @@ public abstract class StompChannelBase extends AbstractChannel {
         return true;
       }
     }
-    return true;
+    return false;
   }
 
   void putMessage(String id, String body) {

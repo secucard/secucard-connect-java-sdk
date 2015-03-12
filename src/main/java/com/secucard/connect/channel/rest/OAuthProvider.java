@@ -8,6 +8,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.util.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -27,7 +28,8 @@ public class OAuthProvider implements AuthProvider {
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
   private final String id;
   private volatile boolean cancelAuth;
-  private boolean extendExpire = true;
+
+  private static final Log LOG = new Log(OAuthProvider.class);
 
   public OAuthProvider(String id, ClientConfiguration configuration) {
     this.id = id;
@@ -54,13 +56,6 @@ public class OAuthProvider implements AuthProvider {
     this.cancelAuth = true;
   }
 
-  public void setExtendExpire(boolean extendExpire) {
-    this.extendExpire = extendExpire;
-  }
-
-  public boolean isExtendExpire() {
-    return extendExpire;
-  }
 
   /**
    * Returns the client devices unique id like android id or UUID.
@@ -85,14 +80,19 @@ public class OAuthProvider implements AuthProvider {
 
   @Override
   public synchronized Token getToken() {
+    return getToken(true);
+  }
+
+  public synchronized Token getToken(boolean extend) {
     Token token = getStoredToken();
 
     if (token != null && !token.isExpired()) {
-      if (extendExpire) {
+      if (extend) {
         // extend expire time on every token access, assuming the token is used, if not this could cause auth failure
         token.setExpireTime();
         storeToken(token);
       }
+      LOG.debug("Stored token returned: ", token);
       return token;
     }
 
@@ -116,6 +116,7 @@ public class OAuthProvider implements AuthProvider {
           storeToken(token);
         }
       }
+      LOG.debug("Token refreshed and returned: ", token);
     } else {
       token = null;
     }
@@ -126,16 +127,21 @@ public class OAuthProvider implements AuthProvider {
         // perform a device auth
         DeviceAuthCode codes = requestCodes();
         EventDispatcher.fireEvent(codes, authEventListener, true);
+        LOG.debug("Retrieved codes for device auth: ", codes, ", now polling for auth.");
         token = pollToken(codes);
       } else {
         // get a new token depending on what credentials are available
         token = getToken(getClientCredentials(), getUserCredentials(), null, getDeviceId(), getDeviceInfo(), null);
       }
 
+      LOG.debug("New token retrieved: ", token);
+
       if (token != null) {
         // set new expire time and store
         token.setExpireTime();
         storeToken(token);
+      } else {
+        LOG.warn("Unable to retrieve token.");
       }
     }
 
@@ -282,7 +288,7 @@ public class OAuthProvider implements AuthProvider {
         parameters.put("code", deviceCode);
       }
     }
-
+    LOG.debug("Use OAuth parameters: ", parameters);
     return parameters;
   }
 }

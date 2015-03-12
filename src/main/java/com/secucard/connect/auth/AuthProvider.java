@@ -17,6 +17,8 @@ public interface AuthProvider {
    */
   Token getToken();
 
+  Token getToken(boolean extend);
+
   /**
    * Cancel a pending authorization request. Only useful for auth processes which involves token polling step.
    * Provider throws {@link com.secucard.connect.auth.AuthCanceledException} if successfully canceled.

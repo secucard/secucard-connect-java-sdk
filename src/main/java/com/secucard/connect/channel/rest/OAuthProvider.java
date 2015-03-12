@@ -28,7 +28,6 @@ public class OAuthProvider implements AuthProvider {
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
   private final String id;
   private volatile boolean cancelAuth;
-  private boolean extendExpire = true;
 
   private static final Log LOG = new Log(OAuthProvider.class);
 
@@ -57,13 +56,6 @@ public class OAuthProvider implements AuthProvider {
     this.cancelAuth = true;
   }
 
-  public void setExtendExpire(boolean extendExpire) {
-    this.extendExpire = extendExpire;
-  }
-
-  public boolean isExtendExpire() {
-    return extendExpire;
-  }
 
   /**
    * Returns the client devices unique id like android id or UUID.
@@ -88,10 +80,14 @@ public class OAuthProvider implements AuthProvider {
 
   @Override
   public synchronized Token getToken() {
+    return getToken(true);
+  }
+
+  public synchronized Token getToken(boolean extend) {
     Token token = getStoredToken();
 
     if (token != null && !token.isExpired()) {
-      if (extendExpire) {
+      if (extend) {
         // extend expire time on every token access, assuming the token is used, if not this could cause auth failure
         token.setExpireTime();
         storeToken(token);
@@ -213,7 +209,7 @@ public class OAuthProvider implements AuthProvider {
   }
 
   private Token getToken(ClientCredentials clientCredentials, UserCredentials userCredentials,
-                     String refreshToken, String deviceId, Map<String, String> deviceInfo, String deviceCode) {
+                         String refreshToken, String deviceId, Map<String, String> deviceInfo, String deviceCode) {
     Map<String, Object> parameters = createAuthParams(clientCredentials, userCredentials, refreshToken, deviceId,
         deviceInfo, deviceCode);
     Map<String, String> headers = new HashMap<>();
@@ -234,8 +230,8 @@ public class OAuthProvider implements AuthProvider {
       }
     } catch (Exception e) {
       throw new AuthException("Authorization failed.", e);
-      }
     }
+  }
 
   protected DeviceAuthCode requestCodes() {
     Map<String, Object> parameters = createAuthParams(getClientCredentials(), null, null, getDeviceId(), null, null);

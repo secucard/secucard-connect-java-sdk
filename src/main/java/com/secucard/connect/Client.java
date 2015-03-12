@@ -101,7 +101,7 @@ public class Client extends AbstractService {
     }
     try {
       getRestChannel().open(null); // init rest first since it does auth,
-      context.getAuthProvider().getToken(); // fetch token
+      context.getAuthProvider().getToken(false); // fetch token
       Channel sc = getStompChannel();
       if (sc != null) {
         sc.open(null);

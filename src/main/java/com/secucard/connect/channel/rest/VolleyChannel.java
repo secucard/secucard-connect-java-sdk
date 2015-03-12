@@ -212,64 +212,64 @@ public class VolleyChannel extends RestChannelBase {
   @Override
   public InputStream getStream(String url, Map<String, Object> parameters, final Map<String, String> headers,
                                final Callback<InputStream> callback) {
-
-    final String queryParams = encodeQueryParams(parameters);
-    if (queryParams != null) {
-      url += "?" + queryParams;
-    }
-
-    final Response.Listener<InputStream> listener;
-    final Response.ErrorListener errorListener;
-    RequestFuture<InputStream> future = RequestFuture.newFuture();
-
-    if (callback == null) {
-      listener = future;
-      errorListener = future;
-    } else {
-      listener = new Response.Listener<InputStream>() {
-        @Override
-        public void onResponse(InputStream response) {
-          onCompleted(callback, response);
-        }
-      };
-
-      errorListener = new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-          onFailed(callback, translate(error));
-        }
-      };
-    }
-
-    Request<InputStream> request = new Request<InputStream>(Request.Method.GET, url, errorListener) {
-
-      @Override
-      protected Response<InputStream> parseNetworkResponse(NetworkResponse response) {
-        InputStream inputStream = new ByteArrayInputStream(response.data);
-        return Response.success(inputStream, HttpHeaderParser.parseCacheHeaders(response));
-      }
-
-      @Override
-      protected void deliverResponse(InputStream response) {
-        listener.onResponse(response);
-      }
-
-      @Override
-      public Map<String, String> getHeaders() throws AuthFailureError {
-        return headers == null ? super.getHeaders() : headers;
-      }
-    };
-
-    if (callback == null) {
-      future.setRequest(putToQueue(request));
-      try {
-        return future.get(requestTimeoutSec, TimeUnit.SECONDS);
-      } catch (Exception e) {
-        throw translate(e);
-      }
-    } else {
-      putToQueue(request);
-    }
+//
+//    final String queryParams = encodeQueryParams(parameters);
+//    if (queryParams != null) {
+//      url += "?" + queryParams;
+//    }
+//
+//    final Response.Listener<InputStream> listener;
+//    final Response.ErrorListener errorListener;
+//    RequestFuture<InputStream> future = RequestFuture.newFuture();
+//
+//    if (callback == null) {
+//      listener = future;
+//      errorListener = future;
+//    } else {
+//      listener = new Response.Listener<InputStream>() {
+//        @Override
+//        public void onResponse(InputStream response) {
+//          onCompleted(callback, response);
+//        }
+//      };
+//
+//      errorListener = new Response.ErrorListener() {
+//        @Override
+//        public void onErrorResponse(VolleyError error) {
+//          onFailed(callback, translate(error));
+//        }
+//      };
+//    }
+//
+//    Request<InputStream> request = new Request<InputStream>(Request.Method.GET, url, errorListener) {
+//
+//      @Override
+//      protected Response<InputStream> parseNetworkResponse(NetworkResponse response) {
+//        InputStream inputStream = new ByteArrayInputStream(response.data);
+//        return Response.success(inputStream, HttpHeaderParser.parseCacheHeaders(response));
+//      }
+//
+//      @Override
+//      protected void deliverResponse(InputStream response) {
+//        listener.onResponse(response);
+//      }
+//
+//      @Override
+//      public Map<String, String> getHeaders() throws AuthFailureError {
+//        return headers == null ? super.getHeaders() : headers;
+//      }
+//    };
+//
+//    if (callback == null) {
+//      future.setRequest(putToQueue(request));
+//      try {
+//        return future.get(requestTimeoutSec, TimeUnit.SECONDS);
+//      } catch (Exception e) {
+//        throw translate(e);
+//      }
+//    } else {
+//      putToQueue(request);
+//    }
 
     return null;
   }

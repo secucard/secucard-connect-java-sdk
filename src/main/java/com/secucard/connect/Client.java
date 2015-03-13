@@ -13,8 +13,6 @@ import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
 
-import java.util.logging.Level;
-
 /**
  * Main entry to the Java Secucard Connect API.
  */
@@ -101,16 +99,19 @@ public class Client extends AbstractService {
     }
     try {
       getRestChannel().open(null); // init rest first since it does auth,
-      context.getAuthProvider().getToken(); // fetch token
+      context.getAuthProvider().getToken(false); // fetch token
       Channel sc = getStompChannel();
       if (sc != null) {
         sc.open(null);
         startHeartBeat();
+        Thread.sleep(500);
       }
       isConnected = true;
       context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(true));
     } catch (RuntimeException e) {
       throw e;
+    } catch (InterruptedException e) {
+      //ignore
     } catch (Throwable e) {
       throw new SecuException(e);
     }
@@ -180,9 +181,7 @@ public class Client extends AbstractService {
       heartbeatInvoker = new Thread() {
         @Override
         public void run() {
-          if (LOG.isLoggable(Level.INFO)) {
-            LOG.info("stomp heart beat started (" + heartBeatMs + "s).");
-          }
+          LOG.info("stomp heart beat started (", heartBeatMs, "s).");
           StompChannel channel = (StompChannel) getStompChannel();
 
           outer:
@@ -209,9 +208,7 @@ public class Client extends AbstractService {
             }
           }
 
-          if (LOG.isLoggable(Level.INFO)) {
-            LOG.info("stomp heart beat stopped");
-          }
+          LOG.info("stomp heart beat stopped");
         }
       };
       heartbeatInvoker.start();

@@ -15,6 +15,7 @@ import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
+import com.secucard.connect.util.Log;
 import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractService {
   protected ClientContext context;
-  protected final Logger LOG = Logger.getLogger(getClass().getName());
+  protected final Log LOG = new Log(getClass());
   protected EventListener serviceEventListener;
 
   public static enum Constant {

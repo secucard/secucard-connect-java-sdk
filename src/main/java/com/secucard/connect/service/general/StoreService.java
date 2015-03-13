@@ -50,7 +50,7 @@ public class StoreService extends AbstractService {
    * @return A list of found stores
    */
   public ObjectList<Store> getStores(QueryParams queryParams, final Callback<ObjectList<Store>> callback) {
-    return getObjectList(Store.class, queryParams, callback, ClientContext.REST);
+    return getRestChannel().findObjects(Store.class, queryParams, callback);
   }
 
   public List<Store> getStoreList(QueryParams queryParams, final Callback<List<Store>> callback) {
@@ -72,4 +72,5 @@ public class StoreService extends AbstractService {
       }
     }
   }
+
 }

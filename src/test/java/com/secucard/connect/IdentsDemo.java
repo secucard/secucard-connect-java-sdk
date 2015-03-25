@@ -1,6 +1,8 @@
 package com.secucard.connect;
 
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.model.general.Address;
+import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
@@ -42,15 +44,18 @@ public class IdentsDemo {
 
       Person p = new Person();
       p.setOwnerTransactionId(transactionId);
-      p.setFirstname("Hans");
-      p.setLastname("Dampf");
-      p.setCity("Berlin");
-      p.setZipcode("11011");
-      p.setGender(Person.GENDER_MALE);
-      p.setNationality(Locale.GERMANY);
-      p.setCountry(Locale.GERMANY);
-      p.setStreet("Platz der Republik 1");
-      p.setBirthdate(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1951"));
+      Contact c = new Contact();
+      c.setForename("Hans");
+      c.setSurname("Dampf");
+      c.setGender(Contact.GENDER_MALE);
+      c.setNationality(Locale.GERMANY);
+      c.setDateOfBirth(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1951"));
+      Address a = new Address();
+      a.setCity("Berlin");
+      a.setPostalCode("11011");
+      a.setCountry(Locale.GERMANY);
+      a.setStreet("Platz der Republik");
+      a.setStreetNumber("1");
 
       request.setOwnerTransactionId(transactionId);
       request.setType(IdentRequest.TYPE_PERSON);

@@ -1,6 +1,8 @@
 package com.secucard.connect.service.services;
 
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.model.general.Address;
+import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
@@ -9,7 +11,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,8 +30,8 @@ public class ServicesTest extends AbstractServicesTest {
     });
 //    testGetIdentRequest();
 //    testGetIdentResult();
-//    testIdent();
-    testEvents();
+    testIdent();
+//    testEvents();
   }
 
   public void testEvents() throws Exception {
@@ -124,19 +125,32 @@ public class ServicesTest extends AbstractServicesTest {
       newIr.setOwnerTransactionId(transactionId);
       Person p = new Person();
       p.setOwnerTransactionId(transactionId);
-      p.setFirstname("Hans");
-      p.setLastname("Dampf");
-      p.setCity("Berlin");
-      p.setZipcode("11011");
-      p.setGender(Person.GENDER_MALE);
-      p.setNationality(Locale.GERMANY);
-      p.setCountry(Locale.GERMANY);
-      p.setStreet("Platz der Republik 1");
-      Date date = new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1951");
-      p.setBirthdate(date);
+      Contact contact = new Contact();
+      Address address = new Address();
+      address.setCity("city");
+      address.setStreet("street");
+      address.setStreetNumber("number");
+      address.setCountry(Locale.GERMANY);
+      address.setPostalCode("88888");
+      contact.setAddress(address);
+      contact.setCompanyName("companyname");
+      contact.setDateOfBirth(new SimpleDateFormat("dd.MM.yyyy").parse("1.4.1888"));
+      contact.setEmail("email");
+      contact.setForename("forename");
+      contact.setSurname("surname");
+      contact.setPhone("110");
+      contact.setGender(Contact.GENDER_FEMALE);
+      contact.setName("name");
+      contact.setBirthPlace("birthplace");
+      contact.setMobile("12345");
+      contact.setNationality(Locale.GERMANY);
+      contact.setSalutation("salutation");
+      contact.setTitle("title");
+      contact.setUrlWebsite("url");
+      p.setContact(contact);
       newIr.addPerson(p);
       newIr = service.createIdentRequest(newIr, null);
-      assertEquals("Hans", newIr.getPersons().get(0).getFirstname());
+      assertEquals("forename", newIr.getPersons().get(0).getContact().getForename());
 
     } finally {
       client.disconnect();

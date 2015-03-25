@@ -1,6 +1,8 @@
 package com.secucard.connect.service.payment;
 
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.general.Address;
+import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.general.Merchant;
 import com.secucard.connect.model.payment.Container;
 import com.secucard.connect.model.payment.Customer;
@@ -10,6 +12,7 @@ import org.junit.Assert;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class PaymentTest extends AbstractServicesTest {
 
@@ -19,16 +22,30 @@ public class PaymentTest extends AbstractServicesTest {
     ContainerService containerService = client.getService(ContainerService.class);
 
     Customer customer = new Customer();
-    customer.setCity("city");
-    customer.setCompanyName("companyname");
-    customer.setDateOfBirth(new SimpleDateFormat("dd.MM.yyyy").parse("1.4.1888"));
-    customer.setEmail("email");
-    customer.setForeName("forename");
-    customer.setSurName("surname");
+    Contact contact = new Contact();
+    Address address = new Address();
+    address.setCity("city");
+    address.setStreet("street");
+    address.setStreetNumber("number");
+    address.setCountry(Locale.GERMANY);
+    address.setPostalCode("88888");
+    contact.setAddress(address);
+    contact.setCompanyName("companyname");
+    contact.setDateOfBirth(new SimpleDateFormat("dd.MM.yyyy").parse("1.4.1888"));
+    contact.setEmail("email");
+    contact.setForename("forename");
+    contact.setSurname("surname");
+    contact.setPhone("110");
+    contact.setGender(Contact.GENDER_FEMALE);
+    contact.setName("name");
+    contact.setBirthPlace("birthplace");
+    contact.setMobile("12345");
+    contact.setNationality(Locale.GERMANY);
+    contact.setSalutation("salutation");
+    contact.setTitle("title");
+    contact.setUrlWebsite("url");
+    customer.setContact(contact);
     customer.setMerchant(new Merchant());
-    customer.setPhone("110");
-    customer.setStreet("street");
-
     customer = customerService.createCustomer(customer, null);
     QueryParams queryParams = new QueryParams();
     queryParams.setQuery("id:" + customer.getId());
@@ -37,9 +54,9 @@ public class PaymentTest extends AbstractServicesTest {
 
 
     String name = "hans";
-    customer.setForeName(name);
+    customer.getContact().setForename(name);
     customer = customerService.updateCustomer(customer, null);
-    Assert.assertTrue(customer.getForeName().equals(name));
+    Assert.assertTrue(customer.getContact().getForename().equals(name));
 
 
     Container container = new Container();

@@ -5,42 +5,59 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.util.LocaleUtil;
 
-import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Locale;
 
 public class Contact extends SecuObject {
   public static final String OBJECT = "general.contacts";
+
+  public static final String GENDER_MALE = "MALE";
+  public static final String GENDER_FEMALE = "FEMALE";
+
+  private String salutation;
+
+  private String title;
 
   private String name;
 
   private String forename;
 
-  @JsonProperty
   private String surname;
 
-  private String salutation;
+  private String gender;
 
-  private String email;
+  private String nationality;  // ISO 3166 country code like DE
+
+  @JsonIgnore
+  private Locale nationalityLocale = null;
 
   @JsonProperty("dob")
   @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
   private Date dateOfBirth;
 
+  @JsonProperty("birthplace")
+  private String birthPlace;
+
+  @JsonProperty("companyname")
+  private String companyName;
+
+  private String email;
+
   private String phone;
 
   private String mobile;
 
-  private Address address;
+  private Address address = new Address();
 
   @JsonProperty("url_website")
-  private String websiteUrl;
+  private String urlWebsite;
 
   private String picture;
 
   @JsonIgnore
   private MediaResource pictureObject;
-
 
   public String getName() {
     return name;
@@ -49,6 +66,60 @@ public class Contact extends SecuObject {
   public void setName(String name) {
     this.name = name;
   }
+
+  public String getGender() {
+    return gender;
+  }
+
+  public void setGender(String gender) {
+    this.gender = gender;
+  }
+
+  public String getBirthPlace() {
+    return birthPlace;
+  }
+
+  public void setBirthPlace(String birthPlace) {
+    this.birthPlace = birthPlace;
+  }
+
+  public String getNationality() {
+    return nationality;
+  }
+
+  /**
+   * Returns a locale instance according to the persons nationality.
+   */
+  public Locale getNationalityLocale() {
+    return nationalityLocale;
+  }
+
+  /**
+   * Setting the nationality in ISO 3166 2 letter code.
+   * Case doesn't matter, will be corrected automatically.
+   *
+   * @param nationality The country code string.
+   */
+  @JsonProperty
+  public void setNationality(String nationality) {
+    Locale locale = LocaleUtil.toLocale(nationality, nationalityLocale);
+    if (locale == null) {
+      this.nationality = nationality;
+    } else {
+      setNationality(locale);
+    }
+  }
+
+
+  /**
+   * Set the ISO nationality code by using a locale instance which is less error-prone then using a string
+   */
+  @JsonIgnore
+  public void setNationality(Locale locale) {
+    nationalityLocale = locale;
+    this.nationality = locale.getCountry();
+  }
+
 
   public String getForename() {
     return forename;
@@ -114,12 +185,12 @@ public class Contact extends SecuObject {
     this.mobile = mobile;
   }
 
-  public String getWebsiteUrl() {
-    return websiteUrl;
+  public String getUrlWebsite() {
+    return urlWebsite;
   }
 
-  public void setWebsiteUrl(String websiteUrl) {
-    this.websiteUrl = websiteUrl;
+  public void setUrlWebsite(String urlWebsite) {
+    this.urlWebsite = urlWebsite;
   }
 
   public MediaResource getPictureObject() {
@@ -135,9 +206,47 @@ public class Contact extends SecuObject {
     pictureObject = MediaResource.create(picture);
   }
 
+  public String getCompanyName() {
+    return companyName;
+  }
+
+  public void setCompanyName(String companyName) {
+    this.companyName = companyName;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+
+  @Override
+  public String toString() {
+    return "Contact{" +
+        ", foreName='" + forename + '\'' +
+        ", companyName='" + companyName + '\'' +
+        ", surName='" + surname + '\'' +
+        ", title='" + title + '\'' +
+        ", salutation='" + salutation + '\'' +
+        ", gender='" + gender + '\'' +
+        ", email='" + email + '\'' +
+        ", dateOfBirth=" + dateOfBirth +
+        ", birthPlace='" + birthPlace + '\'' +
+        ", phone='" + phone + '\'' +
+        ", mobile='" + mobile + '\'' +
+        ", nationality='" + nationality + '\'' +
+        ", nationalityLocale=" + nationalityLocale +
+        ", address=" + address +
+        ", urlWebsite='" + urlWebsite + '\'' +
+        ", picture='" + picture + '\'' +
+        "} " + super.toString();
   }
 }

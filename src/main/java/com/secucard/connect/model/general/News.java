@@ -14,6 +14,9 @@ import java.util.List;
 public class News extends SecuObject {
   public static final String OBJECT = "general.news";
 
+  public static final String STATUS_READ = "read";
+  public static final String STATUS_UNREAD = "unread";
+
   @JsonProperty
   private String headline;
 
@@ -32,6 +35,9 @@ public class News extends SecuObject {
   private Date created;
 
   private String picture;
+
+  @JsonProperty("_account_read")
+  private String accountRead;
 
   @JsonIgnore
   private MediaResource pictureObject;
@@ -113,5 +119,13 @@ public class News extends SecuObject {
 
   public void setRelated(List<SecuObject> related) {
     this.related = related;
+  }
+
+  public String getAccountRead() {
+    return accountRead;
+  }
+
+  public void setAccountRead(String accountRead) {
+    this.accountRead = accountRead;
   }
 }

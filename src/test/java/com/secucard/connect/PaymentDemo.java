@@ -1,6 +1,8 @@
 package com.secucard.connect;
 
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.model.general.Address;
+import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.payment.Container;
 import com.secucard.connect.model.payment.Customer;
 import com.secucard.connect.model.payment.Data;
@@ -37,10 +39,14 @@ public class PaymentDemo {
     try {
 
       Customer customer = new Customer();
-      customer.setForeName("forename");
-      customer.setSurName("surname");
-      customer.setCity("city");
-      customer.setStreet("street");
+      Contact contact = new Contact();
+      contact.setForename("forename");
+      contact.setSurname("surname");
+      Address address = new Address();
+      address.setCity("city");
+      address.setStreet("street");
+      contact.setAddress(address);
+      customer.setContact(contact);
       // set more ...
 
       // create customer and get back filled up

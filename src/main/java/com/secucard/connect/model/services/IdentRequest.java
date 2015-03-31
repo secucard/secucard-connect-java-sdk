@@ -23,8 +23,6 @@ public class IdentRequest extends SecuObject {
 
   private Contract contract;
 
-  private Boolean demo;
-
   @JsonProperty("owner_transaction_id")
   private String ownerTransactionId;
 
@@ -36,14 +34,6 @@ public class IdentRequest extends SecuObject {
   @Override
   public String getObject() {
     return OBJECT;
-  }
-
-  public Boolean getDemo() {
-    return demo;
-  }
-
-  public void setDemo(Boolean demo) {
-    this.demo = demo;
   }
 
   public Contract getContract() {

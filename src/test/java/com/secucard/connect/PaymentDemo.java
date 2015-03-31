@@ -3,16 +3,13 @@ package com.secucard.connect;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Address;
 import com.secucard.connect.model.general.Contact;
-import com.secucard.connect.model.payment.Container;
-import com.secucard.connect.model.payment.Customer;
-import com.secucard.connect.model.payment.Data;
-import com.secucard.connect.model.payment.SecupayDebit;
+import com.secucard.connect.model.payment.*;
 import com.secucard.connect.service.payment.ContainerService;
 import com.secucard.connect.service.payment.CustomerService;
 import com.secucard.connect.service.payment.SecupayDebitService;
+import com.secucard.connect.service.payment.SecupayPrepayService;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Currency;
 
 public class PaymentDemo {
@@ -33,11 +30,11 @@ public class PaymentDemo {
     ContainerService containerService = client.getService(ContainerService.class);
     CustomerService customerService = client.getService(CustomerService.class);
     SecupayDebitService debitService = client.getService(SecupayDebitService.class);
+    SecupayPrepayService prepayService = client.getService(SecupayPrepayService.class);
 
     client.connect();
 
     try {
-
       Customer customer = new Customer();
       Contact contact = new Contact();
       contact.setForename("forename");
@@ -54,7 +51,8 @@ public class PaymentDemo {
 
       Container container = new Container();
       container.setType(Container.TYPE_BANK_ACCOUNT);
-      container.setPrivateData(new Data("forename surname","iban", "bic"));
+      container.setPrivateData(new Data("forename surname", "DE39840500001305123944", "HELADEF1RRS"));
+      container.setAssigned(customer);
 
       // create container and get back filled up
       container = containerService.createContainer(container, null);
@@ -62,17 +60,31 @@ public class PaymentDemo {
       SecupayDebit debit = new SecupayDebit();
       debit.setContainer(container);
       debit.setCustomer(customer);
-      debit.setAmount(new BigDecimal(99.99));
+      debit.setAmount(9999);
       debit.setCurrency(Currency.getInstance("EUR"));
       debit.setOrderId("order1");
       debit.setPurpose("food");
+//      debit.demo = "1";
 
       // pay, create transaction
       debit = debitService.createTransaction(debit, null);
-
       // process returned debit
 
-      assert(debit.getStatus().equalsIgnoreCase("ok"));
+      assert (debit.getStatus().equalsIgnoreCase(SecupayDebit.STATUS_ACCEPTED));
+
+      Boolean ok = debitService.cancelTransaction(debit.getId(), null);
+
+      SecupayPrepay prepay = new SecupayPrepay();
+      prepay.setCustomer(customer);
+      prepay.setAmount(77);
+//      prepay.demo = "1";
+      prepay = prepayService.createPrepay(prepay, null);
+
+      assert (prepay.getStatus().equalsIgnoreCase(SecupayPrepay.STATUS_ACCEPTED));
+
+      ok = prepayService.cancelTransaction(prepay.getId(), null);
+
+      System.out.println();
 
     } catch (Exception e) {
       e.printStackTrace();

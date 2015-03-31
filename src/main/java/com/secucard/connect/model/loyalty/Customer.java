@@ -10,7 +10,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 
-public class Customer extends SecuObject {
+public class  Customer extends SecuObject {
   public static final String OBJECT = "loyalty.customers";
 
   private Merchant merchant;

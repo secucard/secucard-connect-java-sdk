@@ -51,11 +51,12 @@ public class PaymentDemo {
 
       Container container = new Container();
       container.setType(Container.TYPE_BANK_ACCOUNT);
-      container.setPrivateData(new Data("forename surname", "DE39840500001305123944", "HELADEF1RRS"));
-      container.setAssigned(customer);
+      container.setPrivateData(new Data("forename surname", "iban", "bic"));
 
       // create container and get back filled up
       container = containerService.createContainer(container, null);
+
+      //  do debit transaction
 
       SecupayDebit debit = new SecupayDebit();
       debit.setContainer(container);
@@ -64,27 +65,34 @@ public class PaymentDemo {
       debit.setCurrency(Currency.getInstance("EUR"));
       debit.setOrderId("order1");
       debit.setPurpose("food");
-//      debit.demo = "1";
 
       // pay, create transaction
       debit = debitService.createTransaction(debit, null);
-      // process returned debit
+
+      // process returned debit...
 
       assert (debit.getStatus().equalsIgnoreCase(SecupayDebit.STATUS_ACCEPTED));
 
-      Boolean ok = debitService.cancelTransaction(debit.getId(), null);
+      // cancel this debit transaction
+      Boolean result = debitService.cancelTransaction(debit.getId(), null);
+
+      assert (Boolean.TRUE.equals(result));
+
+
+      //  do pre pay transaction
 
       SecupayPrepay prepay = new SecupayPrepay();
       prepay.setCustomer(customer);
       prepay.setAmount(77);
-//      prepay.demo = "1";
+
       prepay = prepayService.createPrepay(prepay, null);
 
       assert (prepay.getStatus().equalsIgnoreCase(SecupayPrepay.STATUS_ACCEPTED));
 
-      ok = prepayService.cancelTransaction(prepay.getId(), null);
+      // cancel this prepay transaction
+      result = prepayService.cancelTransaction(prepay.getId(), null);
 
-      System.out.println();
+      assert (Boolean.TRUE.equals(result));
 
     } catch (Exception e) {
       e.printStackTrace();

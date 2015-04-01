@@ -20,9 +20,19 @@ public class IdentResult extends SecuObject {
 
   private Date created;
 
+  private Contract contract;
+
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public Contract getContract() {
+    return contract;
+  }
+
+  public void setContract(Contract contract) {
+    this.contract = contract;
   }
 
   public IdentRequest getRequest() {

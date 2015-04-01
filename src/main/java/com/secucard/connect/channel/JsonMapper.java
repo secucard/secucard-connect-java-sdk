@@ -141,16 +141,20 @@ public class JsonMapper {
       if (dataType != null) {
         JsonNode data = tree.get(Event.DATA_PROPERTY);
         if (data != null) {
-          Object obj = null;
+          Object obj;
           try {
+            // first try object list
             obj = objectMapper.reader(new DynamicTypeReference(List.class, dataType)).readValue(data);
-          } catch (IOException e) {
-
+          } catch (Exception e) {
+            obj = null;
           }
 
           if (obj == null) {
-            event.setData(objectMapper.reader(new DynamicTypeReference(dataType)).readValue(data));
+            // second single object
+            obj = objectMapper.reader(new DynamicTypeReference(dataType)).readValue(data);
           }
+
+          event.setData(obj);
         }
       }
       return event;

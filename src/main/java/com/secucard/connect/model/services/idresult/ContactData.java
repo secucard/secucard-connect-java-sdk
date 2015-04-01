@@ -1,19 +1,16 @@
 package com.secucard.connect.model.services.idresult;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class ContactData {
-  @JsonProperty("mobilephone")
-  String mobilePhone;
+  String mobile;
 
   String email;
 
-  public String getMobilePhone() {
-    return mobilePhone;
+  public String getMobile() {
+    return mobile;
   }
 
-  public void setMobilePhone(String mobilePhone) {
-    this.mobilePhone = mobilePhone;
+  public void setMobile(String mobile) {
+    this.mobile = mobile;
   }
 
   public String getEmail() {
@@ -27,7 +24,7 @@ public class ContactData {
   @Override
   public String toString() {
     return "ContactData{" +
-        "mobilePhone='" + mobilePhone + '\'' +
+        "mobilePhone='" + mobile + '\'' +
         ", email='" + email + '\'' +
         '}';
   }

@@ -1,11 +1,14 @@
 package com.secucard.connect.model.services.idresult;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserData {
-  private Value birthday;
+  @JsonProperty("dob")
+  private Value dateOfBirth;
 
-  private Value firstname;
+  private Value forename;
 
-  private Value lastname;
+  private Value surname;
 
   private Address address;
 
@@ -23,28 +26,28 @@ public class UserData {
     this.gender = gender;
   }
 
-  public Value getBirthday() {
-    return birthday;
+  public Value getDateOfBirth() {
+    return dateOfBirth;
   }
 
-  public void setBirthday(Value birthday) {
-    this.birthday = birthday;
+  public void setDateOfBirth(Value dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 
-  public Value getFirstname() {
-    return firstname;
+  public Value getForename() {
+    return forename;
   }
 
-  public void setFirstname(Value firstname) {
-    this.firstname = firstname;
+  public void setForename(Value forename) {
+    this.forename = forename;
   }
 
-  public Value getLastname() {
-    return lastname;
+  public Value getSurname() {
+    return surname;
   }
 
-  public void setLastname(Value lastname) {
-    this.lastname = lastname;
+  public void setSurname(Value surname) {
+    this.surname = surname;
   }
 
   public Address getAddress() {
@@ -74,9 +77,9 @@ public class UserData {
   @Override
   public String toString() {
     return "UserData{" +
-        "birthday=" + birthday +
-        ", firstname=" + firstname +
-        ", lastname=" + lastname +
+        "birthday=" + dateOfBirth +
+        ", firstname=" + forename +
+        ", lastname=" + surname +
         ", address=" + address +
         ", birthplace=" + birthplace +
         ", nationality=" + nationality +

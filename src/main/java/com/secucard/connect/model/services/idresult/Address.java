@@ -3,7 +3,8 @@ package com.secucard.connect.model.services.idresult;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Address {
-  private Value zipcode;
+  @JsonProperty("postal_code")
+  private Value postalCode;
 
   private Value country;
 
@@ -11,15 +12,15 @@ public class Address {
 
   private Value street;
 
-  @JsonProperty("streetnumber")
+  @JsonProperty("street_number")
   private Value streetNumber;
 
-  public Value getZipcode() {
-    return zipcode;
+  public Value getPostalCode() {
+    return postalCode;
   }
 
-  public void setZipcode(Value zipcode) {
-    this.zipcode = zipcode;
+  public void setPostalCode(Value postalCode) {
+    this.postalCode = postalCode;
   }
 
   public Value getCountry() {
@@ -57,7 +58,7 @@ public class Address {
   @Override
   public String toString() {
     return "Address{" +
-        "zipcode=" + zipcode +
+        "zipcode=" + postalCode +
         ", country=" + country +
         ", city=" + city +
         ", street=" + street +

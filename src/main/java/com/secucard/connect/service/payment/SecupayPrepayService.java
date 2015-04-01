@@ -11,7 +11,7 @@ import com.secucard.connect.service.AbstractService;
 public class SecupayPrepayService extends AbstractService {
 
   /**
-   * Create a secupay pre pay transaction.
+   * Create a secupay prepay transaction.
    *
    * @param data     The prepay data.
    * @param callback Callback for async result processing.
@@ -22,9 +22,9 @@ public class SecupayPrepayService extends AbstractService {
   }
 
   /**
-   * Cancel an existing pre pay transaction.
+   * Cancel an existing prepay transaction.
    *
-   * @param id       The pre pay object id.
+   * @param id       The prepay object id.
    * @param callback Callback for async processing.
    * @return
    */

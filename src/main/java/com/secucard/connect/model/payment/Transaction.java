@@ -26,9 +26,6 @@ public abstract class Transaction extends SecuObject {
   @JsonProperty("trans_id")
   protected String transId;
 
-  @JsonProperty("trans_hash_id")
-  protected String transHashId;
-
   protected String status;
 
   @JsonProperty("transaction_status")
@@ -88,20 +85,6 @@ public abstract class Transaction extends SecuObject {
 
   public void setTransId(String transId) {
     this.transId = transId;
-  }
-
-  public String getTransHashId() {
-    return transHashId;
-  }
-
-  public void setTransHashId(String transHashId) {
-    this.transHashId = transHashId;
-    this.id = this.transHashId;   // no id here
-  }
-
-  @Override
-  public void setId(String id) {
-    // no id here
   }
 
   public String getStatus() {

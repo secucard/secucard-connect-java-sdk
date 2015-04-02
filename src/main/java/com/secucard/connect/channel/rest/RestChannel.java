@@ -10,6 +10,7 @@ import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
+import org.glassfish.jersey.client.ClientProperties;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
@@ -51,6 +52,8 @@ public class RestChannel extends RestChannelBase {
     // only used to auto map request entities to json,
     // response mapping back is done 'manually' because this provider lacks flexibility
     restClient.register(JacksonJsonProvider.class);
+    restClient.property(ClientProperties.CONNECT_TIMEOUT, 30 * 1000);
+    restClient.property(ClientProperties.READ_TIMEOUT, 3 * 60 * 1000);
   }
 
   @Override

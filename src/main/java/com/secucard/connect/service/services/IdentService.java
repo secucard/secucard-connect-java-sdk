@@ -96,17 +96,7 @@ public class IdentService extends AbstractService {
     return new ConvertingInvoker<ObjectList<IdentResult>, List<IdentResult>>() {
       @Override
       protected ObjectList<IdentResult> handle(Callback<ObjectList<IdentResult>> callback) {
-        StringBuilder query = new StringBuilder();
-        for (Iterator<String> iterator = identRequestIds.iterator(); iterator.hasNext(); ) {
-          String id = iterator.next();
-          query.append("request.id:").append(id);
-          if (iterator.hasNext()) {
-            query.append(" or ");
-          }
-        }
-        QueryParams params = new QueryParams();
-        params.setQuery(query.toString());
-        return getChannel().findObjects(IdentResult.class, params, callback);
+        return getIdentResultsByRequestsRaw(identRequestIds, callback, downloadAttachments);
       }
 
       @Override
@@ -114,13 +104,48 @@ public class IdentService extends AbstractService {
         if (objectList == null || objectList.getList() == null || objectList.getList().size() == 0) {
           return null;
         }
-        List<IdentResult> list = objectList.getList();
-        processAttachments(list, downloadAttachments);
-        return list;
+        return objectList.getList();
       }
     }.invokeAndConvert(callback);
   }
 
+  private ObjectList<IdentResult> getIdentResultsByRequestsRaw(List<String> requestIds,
+                                                               final Callback<ObjectList<IdentResult>> callback,
+                                                               final boolean downloadAttachments) {
+    StringBuilder query = new StringBuilder();
+    for (Iterator<String> iterator = requestIds.iterator(); iterator.hasNext(); ) {
+      String id = iterator.next();
+      query.append("request.id:").append(id);
+      if (iterator.hasNext()) {
+        query.append(" or ");
+      }
+    }
+    QueryParams params = new QueryParams();
+    params.setQuery(query.toString());
+    if (callback == null) {
+      ObjectList<IdentResult> list = context.getChannel(null).findObjects(IdentResult.class, params, null);
+      if (list != null) {
+        processAttachments(list.getList(), downloadAttachments);
+      }
+      return list;
+    } else {
+      context.getChannel(null).findObjects(IdentResult.class, params, new Callback<ObjectList<IdentResult>>() {
+        @Override
+        public void completed(ObjectList<IdentResult> result) {
+          if (result != null) {
+            processAttachments(result.getList(), downloadAttachments);
+          }
+          callback.completed(result);
+        }
+
+        @Override
+        public void failed(Throwable cause) {
+          callback.failed(cause);
+        }
+      });
+      return null;
+    }
+  }
 
   /**
    * Creates a new ident request.
@@ -267,17 +292,24 @@ public class IdentService extends AbstractService {
           ids.add(request.getId());
         }
       }
-      service.getIdentResultsByRequestIds(ids, new Callback<List<IdentResult>>() {
-        @Override
-        public void completed(List<IdentResult> result) {
-          IdentEventHandler.this.completed(result);
-        }
 
-        @Override
-        public void failed(Throwable cause) {
-          IdentEventHandler.this.failed(cause);
-        }
-      }, downloadAttachments(requests));
+      if (isAsync()) {
+        service.getIdentResultsByRequestsRaw(ids, new Callback<ObjectList<IdentResult>>() {
+          @Override
+          public void completed(ObjectList<IdentResult> result) {
+            IdentEventHandler.this.completed(result.getList());
+          }
+
+          @Override
+          public void failed(Throwable cause) {
+            IdentEventHandler.this.failed(cause);
+          }
+        }, downloadAttachments(requests));
+      } else {
+        ObjectList<IdentResult> list = service.getIdentResultsByRequestsRaw(ids, null, downloadAttachments(requests));
+        IdentEventHandler.this.completed(list.getList());
+      }
+
     }
 
     /**

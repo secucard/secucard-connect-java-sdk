@@ -117,7 +117,7 @@ public class EventDispatcher {
       if (handler.accept(event) && !handler.isDisabled()) {
         try {
           handler.handle(event);
-        } catch (Exception e) {
+        } catch (Throwable e) {
           handler.failed(e);
         }
         return true;

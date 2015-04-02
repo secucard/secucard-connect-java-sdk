@@ -19,6 +19,10 @@ public abstract class AbstractEventHandler<R, E> implements Callback<R> {
     return disabled;
   }
 
+  protected boolean isAsync(){
+    return true;
+  }
+
   /**
    * Sets if this event handler is disabled (no event processing) or not.
    */

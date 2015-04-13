@@ -49,8 +49,7 @@ public class TransactionService extends AbstractService {
   }
 
   public void onCashierDisplayChanged(Callback<Notification> callback) {
-    addOrRemoveEventHandler(Events.TYPE_DISPLAY + Notification.OBJECT,
-        callback == null ? null : new NotificationEventEventHandler(callback));
+    addOrRemoveEventHandler(Events.TYPE_DISPLAY + Notification.OBJECT, new NotificationEventEventHandler(callback), callback);
   }
 
   private class NotificationEventEventHandler extends EventHandler<Notification, Event> {
@@ -65,7 +64,7 @@ public class TransactionService extends AbstractService {
 
     @Override
     public void handle(Event event) {
-      callback.completed((Notification) event.getData());
+      completed((Notification) event.getData());
     }
   }
 }

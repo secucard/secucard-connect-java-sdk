@@ -1,18 +1,10 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.ClientContext;
-import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.event.EventHandler;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.event.Events;
-import com.secucard.connect.model.general.Account;
-import com.secucard.connect.model.general.AccountDevice;
-import com.secucard.connect.model.general.BeaconEnvironment;
-import com.secucard.connect.model.general.Event;
-import com.secucard.connect.model.general.Location;
-import com.secucard.connect.model.general.MerchantList;
+import com.secucard.connect.model.general.*;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
@@ -25,7 +17,7 @@ public class AccountService extends AbstractService {
   public static final String ID = Account.OBJECT + TYPE_BEACON_MONITOR;
 
   public void onBeaconMonitor(final Callback<Event> callback) {
-    addOrRemoveEventHandler(ID, callback == null ? null : new AccountEventEventHandler(callback));
+    addOrRemoveEventHandler(ID, new AccountEventEventHandler(callback), callback);
   }
 
   private class AccountEventEventHandler extends EventHandler<Event, Event> {
@@ -40,7 +32,7 @@ public class AccountService extends AbstractService {
 
     @Override
     public void handle(Event event) {
-      callback.completed(event);
+      completed(event);
     }
   }
 
@@ -123,7 +115,7 @@ public class AccountService extends AbstractService {
   public boolean updateLocation(String accountId, Location location) {
     try {
       Result result = getStompChannel().updateObject(Account.class, accountId, "location", null, location, Result.class,
-              null);
+          null);
       return Boolean.parseBoolean(result.getResult());
     } catch (Throwable e) {
       handleException(e, null);
@@ -141,7 +133,7 @@ public class AccountService extends AbstractService {
   public boolean updateBeacons(String accountId, List<BeaconEnvironment> beaconList) {
     try {
       Result result = getStompChannel().updateObject(Account.class, "me", "beaconEnvironment", null, beaconList, Result.class,
-              null);
+          null);
       return Boolean.parseBoolean(result.getResult());
     } catch (Throwable e) {
       handleException(e, null);
@@ -152,7 +144,7 @@ public class AccountService extends AbstractService {
   public boolean updateGCM(String accountId, Object objectArg) {
     try {
       Result result = getStompChannel().updateObject(Account.class, accountId, "gcm", null, objectArg, Result.class,
-              null);
+          null);
       return Boolean.parseBoolean(result.getResult());
     } catch (Throwable e) {
       handleException(e, null);

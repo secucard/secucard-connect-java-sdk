@@ -17,7 +17,7 @@ public class TransactionService extends AbstractService {
   public static final String ID = Transaction.OBJECT + Events.TYPE_ADDED;
 
   public void onTransactionsChanged(final Callback<Transaction> callback) {
-    addOrRemoveEventHandler(ID, callback == null ? null : new TransactionsEventEventHandler(callback));
+    addOrRemoveEventHandler(ID, new TransactionsEventEventHandler(callback), callback);
   }
 
   private class TransactionsEventEventHandler extends EventHandler<Transaction, Event> {
@@ -33,7 +33,7 @@ public class TransactionService extends AbstractService {
     @Override
     public void handle(Event event) {
       String id = ((Map) event.getData()).get("id").toString();
-      getTransaction(id, callback);
+      getTransaction(id, this);
     }
   }
 

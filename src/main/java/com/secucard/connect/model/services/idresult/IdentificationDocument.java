@@ -8,10 +8,31 @@ public class IdentificationDocument {
   @JsonProperty("dateissued")
   private Value dateIssued;
 
+  @JsonProperty("issuedby")
+  private Value issuedBy;
+
+  private Value number;
+
   private Value type;
 
   @JsonProperty("validuntil")
   private Value validUntil;
+
+  public Value getIssuedBy() {
+    return issuedBy;
+  }
+
+  public void setIssuedBy(Value issuedBy) {
+    this.issuedBy = issuedBy;
+  }
+
+  public Value getNumber() {
+    return number;
+  }
+
+  public void setNumber(Value number) {
+    this.number = number;
+  }
 
   public Value getCountry() {
     return country;
@@ -47,9 +68,11 @@ public class IdentificationDocument {
 
   @Override
   public String toString() {
-    return "IndentificationDocument{" +
+    return "IdentificationDocument{" +
         "country=" + country +
         ", dateIssued=" + dateIssued +
+        ", issuedBy=" + issuedBy +
+        ", number=" + number +
         ", type=" + type +
         ", validUntil=" + validUntil +
         '}';

@@ -17,7 +17,7 @@ public class CheckinService extends AbstractService {
   public static final String ID = IdentRequest.OBJECT + Events.TYPE_CHANGED;
 
   public void onCheckinsChanged(final Callback<List<Checkin>> callback) {
-    addOrRemoveEventHandler(ID, callback == null ? null : new CheckinsEventEventHandler(callback));
+    addOrRemoveEventHandler(ID, new CheckinsEventEventHandler(callback), callback);
   }
 
   /**
@@ -71,7 +71,7 @@ public class CheckinService extends AbstractService {
 
     @Override
     public void handle(Event event) {
-      getCheckins(callback);
+      getCheckins(this);
     }
   }
 }

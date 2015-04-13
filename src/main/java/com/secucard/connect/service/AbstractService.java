@@ -19,7 +19,6 @@ import com.secucard.connect.util.Log;
 import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public abstract class AbstractService {
   protected ClientContext context;
@@ -121,8 +120,9 @@ public abstract class AbstractService {
     context.getEventDispatcher().addEventHandler(id, handler);
   }
 
-  protected void addOrRemoveEventHandler(String id, AbstractEventHandler<?, Event> handler) {
-    if (handler == null) {
+  protected void addOrRemoveEventHandler(String id, AbstractEventHandler<?, Event> handler,
+                                         Callback<?> callback) {
+    if (callback == null) {
       removeEventHandler(id);
     } else {
       addEventHandler(id, handler);

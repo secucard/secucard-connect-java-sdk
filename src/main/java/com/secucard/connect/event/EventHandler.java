@@ -6,7 +6,7 @@ import com.secucard.connect.Callback;
  * Implementation which forwards to a provided Callback instance rather to implement the methods itself.
  */
 public abstract class EventHandler<R, E> extends AbstractEventHandler<R, E> {
-  protected final Callback<R> callback;
+  private final Callback<R> callback;
 
   public EventHandler(Callback<R> callback) {
     this.callback = callback;

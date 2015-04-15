@@ -6,6 +6,7 @@ import com.secucard.connect.ExceptionHandler;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.AbstractEventHandler;
+import com.secucard.connect.event.EventHandler;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
@@ -120,9 +121,17 @@ public abstract class AbstractService {
     context.getEventDispatcher().addEventHandler(id, handler);
   }
 
-  protected void addOrRemoveEventHandler(String id, AbstractEventHandler<?, Event> handler,
+  protected void addOrRemoveEventHandler(String id, EventHandler<?, Event> handler,
                                          Callback<?> callback) {
     if (callback == null) {
+      removeEventHandler(id);
+    } else {
+      addEventHandler(id, handler);
+    }
+  }
+
+  protected void addOrRemoveEventHandler(String id, AbstractEventHandler<?, Event> handler) {
+    if (handler == null) {
       removeEventHandler(id);
     } else {
       addEventHandler(id, handler);

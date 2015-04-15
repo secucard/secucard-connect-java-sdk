@@ -2,7 +2,7 @@ package com.secucard.connect.service.payment;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
-import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.event.AbstractEventHandler;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.payment.SecupayPrepay;
@@ -47,13 +47,18 @@ public class SecupayPrepayService extends AbstractService {
     }.invokeAndConvert(callback);
   }
 
-  public void onPrepayChanged(Callback<SecupayPrepay> callback) {
-    addOrRemoveEventHandler(SecupayPrepay.OBJECT + Events.TYPE_CHANGED, new SecuPrepayChangedEventHandler(callback), callback);
+  public void onSecuPrepayChanged(SecuPrepayChangedEventHandler handler) {
+    if (handler != null) {
+      handler.setService(this);
+    }
+    addOrRemoveEventHandler(SecupayPrepay.OBJECT + Events.TYPE_CHANGED, handler);
   }
 
-  private class SecuPrepayChangedEventHandler extends EventHandler<SecupayPrepay, Event> {
-    public SecuPrepayChangedEventHandler(Callback<SecupayPrepay> callback) {
-      super(callback);
+  public static abstract class SecuPrepayChangedEventHandler extends AbstractEventHandler<SecupayPrepay, Event> {
+    private SecupayPrepayService service;
+
+    public void setService(SecupayPrepayService service) {
+      this.service = service;
     }
 
     @Override
@@ -65,9 +70,29 @@ public class SecupayPrepayService extends AbstractService {
     public void handle(Event event) {
       List<SecupayPrepay> list = (List<SecupayPrepay>) event.getData();
       if (list == null || list.size() == 0) {
-        failed(new SecuException("Invalid event data, prepay id not found."));
+        SecuException exception = new SecuException("Invalid event data, prepay id not found.");
+        if (isAsync()) {
+          failed(exception);
+        } else {
+          throw exception;
+        }
       } else {
-        getTransaction(list.get(0).getId(), this);
+
+        if (isAsync()) {
+          service.getTransaction(list.get(0).getId(), new Callback<SecupayPrepay>() {
+            @Override
+            public void completed(SecupayPrepay result) {
+              SecuPrepayChangedEventHandler.this.completed(result);
+            }
+
+            @Override
+            public void failed(Throwable cause) {
+              SecuPrepayChangedEventHandler.this.failed(cause);
+            }
+          });
+        } else {
+          SecuPrepayChangedEventHandler.this.completed(service.getTransaction(list.get(0).getId(), null));
+        }
       }
     }
   }

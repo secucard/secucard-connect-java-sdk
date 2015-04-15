@@ -2,7 +2,7 @@ package com.secucard.connect.service.payment;
 
 import com.secucard.connect.Callback;
 import com.secucard.connect.SecuException;
-import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.event.AbstractEventHandler;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.payment.SecupayDebit;
@@ -47,14 +47,18 @@ public class SecupayDebitService extends AbstractService {
     }.invokeAndConvert(callback);
   }
 
-  public void onSecupayDebitChanged(Callback<SecupayDebit> callback) {
-    addOrRemoveEventHandler(SecupayDebit.OBJECT + Events.TYPE_CHANGED, new SecuDebitChangedEventHandler(callback),
-        callback);
+  public void onSecupayDebitChanged(SecuDebitChangedEventHandler handler) {
+    if (handler != null) {
+      handler.setService(this);
+    }
+    addOrRemoveEventHandler(SecupayDebit.OBJECT + Events.TYPE_CHANGED, handler);
   }
 
-  private class SecuDebitChangedEventHandler extends EventHandler<SecupayDebit, Event> {
-    public SecuDebitChangedEventHandler(Callback<SecupayDebit> callback) {
-      super(callback);
+  public static abstract class SecuDebitChangedEventHandler extends AbstractEventHandler<SecupayDebit, Event> {
+    private SecupayDebitService service;
+
+    public void setService(SecupayDebitService service) {
+      this.service = service;
     }
 
     @Override
@@ -66,9 +70,29 @@ public class SecupayDebitService extends AbstractService {
     public void handle(Event event) {
       List<SecupayDebit> list = (List<SecupayDebit>) event.getData();
       if (list == null || list.size() == 0) {
-        failed(new SecuException("Invalid event data, debit id not found."));
+        SecuException exception = new SecuException("Invalid event data, debit id not found.");
+        if (isAsync()) {
+          failed(exception);
+        } else {
+          throw exception;
+        }
       } else {
-        getTransaction(list.get(0).getId(), this);
+
+        if (isAsync()) {
+          service.getTransaction(list.get(0).getId(), new Callback<SecupayDebit>() {
+            @Override
+            public void completed(SecupayDebit result) {
+              SecuDebitChangedEventHandler.this.completed(result);
+            }
+
+            @Override
+            public void failed(Throwable cause) {
+              SecuDebitChangedEventHandler.this.failed(cause);
+            }
+          });
+        } else {
+          SecuDebitChangedEventHandler.this.completed(service.getTransaction(list.get(0).getId(), null));
+        }
       }
     }
   }

@@ -32,6 +32,16 @@ public class Status {
     this.errorDetails = errorDetails;
   }
 
+  public Status(Status other) {
+    this.status = other.status;
+    this.error = other.error;
+    this.errorDetails = other.errorDetails;
+    this.errorDescription = other.errorDescription;
+    this.errorUser = other.errorUser;
+    this.code = other.code;
+    this.supportId = other.supportId;
+  }
+
   public String getStatus() {
     return status;
   }

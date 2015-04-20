@@ -18,6 +18,10 @@ public class Log {
     log(Level.FINE, args);
   }
 
+  public void trace(Object... args) {
+    log(Level.FINEST, args);
+  }
+
   public void info(Object... args) {
     log(Level.INFO, args);
   }

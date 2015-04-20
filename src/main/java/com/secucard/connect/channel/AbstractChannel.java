@@ -6,6 +6,7 @@ import com.secucard.connect.SecuException;
 import com.secucard.connect.model.transport.Status;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class AbstractChannel implements Channel {
@@ -19,7 +20,7 @@ public abstract class AbstractChannel implements Channel {
       try {
         callback.failed(e);
       } catch (Exception e1) {
-        // ignore
+        LOG.log(Level.SEVERE, "Client error", e);
       }
     }
   }
@@ -29,7 +30,7 @@ public abstract class AbstractChannel implements Channel {
       try {
         callback.completed(result);
       } catch (Exception e) {
-        // ignore
+        LOG.log(Level.SEVERE, "Client error", e);
       }
     }
   }

@@ -2,7 +2,7 @@ package com.secucard.connect.auth;
 
 import com.secucard.connect.service.AbstractServicesTest;
 
-public class AuthTest extends AbstractServicesTest {
+public class DeviceAuthTest extends AbstractServicesTest {
 
   @Override
   public void test() throws Exception {

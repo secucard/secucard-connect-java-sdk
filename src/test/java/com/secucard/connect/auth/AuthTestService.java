@@ -13,6 +13,7 @@ import org.junit.Assume;
 
 
 public class AuthTestService extends TestService implements EventListener {
+
   public void deviceAuth() throws Exception {
     MyOAuthProvider ap = new MyOAuthProvider();
     getRestChannel().open(null);
@@ -25,6 +26,14 @@ public class AuthTestService extends TestService implements EventListener {
     getRestChannel().open(null);
     ap.test();
   }
+
+  public void clientIdAuth() throws Exception {
+    getRestChannel().open(null);
+    Token token = new MyOAuthProvider().getToken(false);
+    Assert.assertNotNull(token);
+  }
+
+
 
 
   private class MyOAuthProvider extends OAuthProvider {

@@ -3,6 +3,7 @@ package com.secucard.connect.service;
 import com.secucard.connect.Callback;
 import com.secucard.connect.ClientContext;
 import com.secucard.connect.ExceptionHandler;
+import com.secucard.connect.ServiceOperations;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.AbstractEventHandler;

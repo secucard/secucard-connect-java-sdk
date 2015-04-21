@@ -16,7 +16,6 @@ public class Token implements Serializable {
     @JsonProperty("token_type")
     private String tokenType;
 
-    @JsonProperty
     private String scope;
 
     @JsonProperty("refresh_token")
@@ -24,6 +23,9 @@ public class Token implements Serializable {
 
     // UNIX timestamp of token expiring
     private Long expireTime;
+
+    // the original expire time of token when token was created, set only one time, never changes
+    private Long origExpireTime;
 
     public Token() {
     }
@@ -33,12 +35,19 @@ public class Token implements Serializable {
         this.refreshToken = refreshToken;
     }
 
+    public Long getOrigExpireTime() {
+      return origExpireTime;
+    }
+
     public Long getExpireTime() {
         return expireTime;
     }
 
     public void setExpireTime() {
         this.expireTime = System.currentTimeMillis() + expiresIn * 1000;
+        if (origExpireTime == null){
+          origExpireTime = expireTime;
+        }
     }
 
     @JsonIgnore
@@ -86,15 +95,18 @@ public class Token implements Serializable {
         this.refreshToken = refreshToken;
     }
 
-    @Override
-    public String toString() {
-        return "Token{" +
-                "accessToken='" + accessToken + '\'' +
-                ", expiresIn=" + expiresIn +
-                ", tokenType='" + tokenType + '\'' +
-                ", scope='" + scope + '\'' +
-                ", refreshToken='" + refreshToken + '\'' +
-                ", expireTime=" + expireTime +
-                '}';
-    }
+
+
+  @Override
+  public String toString() {
+    return "Token{" +
+        "accessToken='" + accessToken + '\'' +
+        ", expiresIn=" + expiresIn +
+        ", tokenType='" + tokenType + '\'' +
+        ", scope='" + scope + '\'' +
+        ", refreshToken='" + refreshToken + '\'' +
+        ", expireTime=" + expireTime +
+        ", origExpireTime=" + origExpireTime +
+        '}';
+  }
 }

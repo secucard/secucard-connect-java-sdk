@@ -1,9 +1,7 @@
 package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.auth.AuthProvider;
-import com.secucard.connect.channel.AbstractChannel;
-import com.secucard.connect.channel.JsonMapper;
+import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.QueryParams;
 import org.apache.commons.lang3.StringUtils;
@@ -16,25 +14,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class RestChannelBase extends AbstractChannel {
+public abstract class RestChannelBase extends Channel {
   protected final Configuration configuration;
   protected boolean secure = true;
-  protected JsonMapper jsonMapper = JsonMapper.get();
-  protected String id;
-  protected AuthProvider authProvider;
 
   public RestChannelBase(Configuration configuration, String id) {
-    this.configuration = configuration;
     this.id = id;
+    this.configuration = configuration;
   }
 
   @Override
   public void setEventListener(EventListener listener) {
     throw new UnsupportedOperationException("Rest channel doesn't support listener.");
-  }
-
-  public void setAuthProvider(AuthProvider authProvider) {
-    this.authProvider = authProvider;
   }
 
   public void setSecure(boolean secure) {
@@ -159,4 +150,13 @@ public abstract class RestChannelBase extends AbstractChannel {
 
   public abstract InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers,
                                         Callback<InputStream> callback);
+
+
+  public static class Configuration {
+    protected final String baseUrl;
+
+    public Configuration(String baseUrl) {
+      this.baseUrl = baseUrl;
+    }
+  }
 }

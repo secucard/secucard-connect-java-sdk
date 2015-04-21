@@ -2,9 +2,10 @@ package com.secucard.connect;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.secucard.connect.auth.AppUserCredentials;
 import com.secucard.connect.auth.ClientCredentials;
-import com.secucard.connect.auth.UserCredentials;
-import com.secucard.connect.channel.stomp.Configuration;
+import com.secucard.connect.channel.rest.RestChannelBase;
+import com.secucard.connect.channel.stomp.StompChannel;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,8 +17,8 @@ import java.util.Properties;
  * Configuration data of the client.
  */
 public class ClientConfiguration {
-  private com.secucard.connect.channel.rest.Configuration restConfiguration;
-  private com.secucard.connect.channel.stomp.Configuration stompConfiguration;
+  private RestChannelBase.Configuration restConfiguration;
+  private StompChannel.Configuration stompConfiguration;
   private String defaultChannel;
   private int heartBeatSec;
   private boolean stompEnabled;
@@ -26,7 +27,7 @@ public class ClientConfiguration {
   private int authWaitTimeoutSec;
   private String oauthUrl;
   private ClientCredentials clientCredentials;
-  private UserCredentials userCredentials;
+  private AppUserCredentials userCredentials;
   private String deviceId;
   private String authType;
 
@@ -55,7 +56,7 @@ public class ClientConfiguration {
     authType = cfg.getProperty("auth.type");
     androidMode = Boolean.valueOf(cfg.getProperty("androidMode"));
 
-    stompConfiguration = new Configuration(
+    stompConfiguration = new StompChannel.Configuration(
         cfg.getProperty("stomp.host"),
         cfg.getProperty("stomp.virtualHost"),
         Integer.valueOf(cfg.getProperty("stomp.port")),
@@ -70,11 +71,10 @@ public class ClientConfiguration {
         Integer.valueOf(cfg.getProperty("stomp.socketTimeoutSec")),
         1000 * heartBeatSec);
 
-    restConfiguration = new com.secucard.connect.channel.rest.Configuration(
-        cfg.getProperty("rest.url"));
+    restConfiguration = new RestChannelBase.Configuration(cfg.getProperty("rest.url"));
   }
 
-  public void setUserCredentials(UserCredentials userCredentials) {
+  public void setUserCredentials(AppUserCredentials userCredentials) {
     this.userCredentials = userCredentials;
   }
 
@@ -152,11 +152,11 @@ public class ClientConfiguration {
     return cacheDir;
   }
 
-  public final com.secucard.connect.channel.rest.Configuration getRestConfiguration() {
+  public final RestChannelBase.Configuration getRestConfiguration() {
     return restConfiguration;
   }
 
-  public final com.secucard.connect.channel.stomp.Configuration getStompConfiguration() {
+  public final StompChannel.Configuration getStompConfiguration() {
     return stompConfiguration;
   }
 
@@ -176,7 +176,7 @@ public class ClientConfiguration {
     return clientCredentials;
   }
 
-  public UserCredentials getUserCredentials() {
+  public AppUserCredentials getUserCredentials() {
     return userCredentials;
   }
 

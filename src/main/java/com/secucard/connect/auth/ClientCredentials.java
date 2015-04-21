@@ -1,43 +1,40 @@
-/**
- * OAuthClientCredentials.java class file
- */
 package com.secucard.connect.auth;
 
-/**
- * Class that handles client credentials for authorization
- */
-public final class ClientCredentials {
+import java.util.Map;
 
-	private final String clientId;
-	private final String clientSecret;
+public class ClientCredentials extends OAuthCredentials {
+  private final String clientId;
+  private final String clientSecret;
 
-	/**
-	 * Constructor
-	 * @param clientId
-	 * @param clientSecret
-	 */
-	public ClientCredentials(String clientId, String clientSecret) {
-		super();
-		this.clientId = clientId;
-		this.clientSecret = clientSecret;
-	}
-
-  @Override
-  public String toString() {
-    return "OAuthClientCredentials{" +
-        "clientId='" + clientId + '\'' +
-        ", clientSecret='" + clientSecret + '\'' +
-        '}';
+  public ClientCredentials(ClientCredentials clientCredentials) {
+    this(clientCredentials.getClientId(), clientCredentials.getClientSecret());
+    setDeviceId(clientCredentials.getDeviceId());
+    setDeviceInfo(clientCredentials.getDeviceInfo());
   }
 
-  /**
-	 * Getters
-	 */
-	public String getClientId() {
-		return clientId;
-	}
+  public ClientCredentials(String clientId, String clientSecret) {
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+  }
 
-	public String getClientSecret() {
-		return clientSecret;
-	}
+  public String getClientId() {
+    return clientId;
+  }
+
+  public String getClientSecret() {
+    return clientSecret;
+  }
+
+  @Override
+  public String getGrantType() {
+    return "client_credentials";
+  }
+
+  @Override
+  public Map<String, Object> asMap() {
+    Map<String, Object> map = super.asMap();
+    map.put("client_id", clientId);
+    map.put("client_secret", clientSecret);
+    return map;
+  }
 }

@@ -1,52 +1,53 @@
 package com.secucard.connect.auth;
 
-import com.secucard.connect.channel.rest.OAuthProvider;
+import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.service.TestService;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.SimpleFileDataStorage;
 import junit.framework.Assert;
-import org.junit.Assume;
 
 
 public class AuthTestService extends TestService implements EventListener {
 
   public void deviceAuth() throws Exception {
     MyOAuthProvider ap = new MyOAuthProvider();
-    getRestChannel().open(null);
+    ClientConfiguration config = context.getConfig();
+    ap.setCredentials(new DeviceCredentials(config.getClientCredentials().getClientId(), config.getClientCredentials().getClientSecret(), config.getDeviceId()));
+    ap.clearCache();
     Token token = ap.getToken();
     Assert.assertNotNull(token);
   }
 
   public void deviceAuthStepped() throws Exception {
     MyOAuthProvider ap = new MyOAuthProvider();
-    getRestChannel().open(null);
-    ap.test();
+    getRestChannel().open();
+//    ap.test();
   }
 
   public void clientIdAuth() throws Exception {
-    getRestChannel().open(null);
-    Token token = new MyOAuthProvider().getToken(false);
+    getRestChannel().open();
+    MyOAuthProvider ap = new MyOAuthProvider();
+    ap.setCredentials(context.getConfig().getClientCredentials());
+    Token token = ap.getToken(false);
     Assert.assertNotNull(token);
   }
 
 
-
-
   private class MyOAuthProvider extends OAuthProvider {
     public MyOAuthProvider() throws Exception {
-      super("test", context.getConfig());
+      super("test", new OAuthProvider.Configuration(context.getConfig().getOauthUrl(),
+          context.getConfig().getDeviceId(), context.getConfig().getAuthWaitTimeoutSec(), true));
       setRestChannel((RestChannelBase) getRestChannel());
       DataStorage storage = new SimpleFileDataStorage("sccache");
       setDataStorage(storage);
       registerEventListener(AuthTestService.this);
     }
 
-    public void test() {
-      DeviceAuthCode codes = requestCodes();
+    /*public void test() {
+      DeviceAuthCode codes = requestCodes(c);
       Assert.assertNotNull(codes);
       System.out.println("### Got code: " + codes);
       Token token = null;
@@ -57,7 +58,7 @@ public class AuthTestService extends TestService implements EventListener {
       }
       Assert.assertNotNull(token);
       System.out.println("### Got token: " + token);
-    }
+    }*/
   }
 
   @Override

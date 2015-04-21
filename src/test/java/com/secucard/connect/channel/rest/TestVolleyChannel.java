@@ -7,10 +7,8 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.HurlStack;
-import com.secucard.connect.Callback;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.Executors;
 
 public class TestVolleyChannel extends VolleyChannel {
@@ -20,7 +18,7 @@ public class TestVolleyChannel extends VolleyChannel {
   }
 
   @Override
-  public void open(Callback callback) throws IOException {
+  public void open() {
     HttpStack stack;
 //      stack = new HttpClientStack(AndroidHttpClient.newInstance("volley/0, robolectric mockup test"));
     stack = new HurlStack();

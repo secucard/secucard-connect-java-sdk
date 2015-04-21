@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class RestChannel extends RestChannelBase {
   protected javax.ws.rs.client.Client restClient;
@@ -32,16 +33,10 @@ public class RestChannel extends RestChannelBase {
   }
 
   @Override
-  public void open(Callback callback) {
-    try {
-      // rest client should be initialized just one time, client is expensive
+  public synchronized void open() {
+    // rest client should be initialized just one time, client is expensive
+    if (restClient == null) {
       initClient();
-      onCompleted(callback, null);
-    } catch (Throwable e) {
-      if (callback == null) {
-        throw e;
-      }
-      onFailed(callback, e);
     }
   }
 
@@ -59,6 +54,7 @@ public class RestChannel extends RestChannelBase {
   @Override
   public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
                     Integer... ignoredState) {
+    open();
     Invocation.Builder builder = restClient.target(url).request(MediaType.APPLICATION_FORM_URLENCODED);
     if (headers != null) {
       builder.headers(new MultivaluedHashMap<String, Object>(headers));
@@ -83,6 +79,7 @@ public class RestChannel extends RestChannelBase {
   @Override
   public InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers,
                                Callback<InputStream> callback) {
+    open();
     WebTarget target = restClient.target(url);
     if (parameters != null) {
       for (Map.Entry<String, Object> entry : parameters.entrySet()) {
@@ -165,8 +162,10 @@ public class RestChannel extends RestChannelBase {
   public <T> T execute(String appId, String command, Object arg, Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
 
+    open();
+
     // todo: Cache targets?
-    WebTarget target = restClient.target(configuration.getBaseUrl());
+    WebTarget target = restClient.target(configuration.baseUrl);
 
     if (appId != null) {
       target = target.path(pathResolver.resolveAppId(appId, '/'));
@@ -183,28 +182,19 @@ public class RestChannel extends RestChannelBase {
 
 
   @Override
-  public void close(Callback callback) {
-    try {
-      restClient.close();
-      onCompleted(callback, null);
-    } catch (Throwable e) {
-      if (callback == null) {
-        throw e;
-      }
-      onFailed(callback, e);
-    }
+  public synchronized void close() {
+    restClient.close();
+    restClient = null;
   }
 
   // private -------------------------------------------------------------------------------------------------------------------
 
   private <T> Invocation.Builder builder(Class<T> type, Map<String, Object> queryParams, boolean secure,
                                          String... pathArgs) {
-    if (restClient == null) {
-      throw new IllegalStateException("REST client not initialized.");
-    }
+    open();
 
     // todo: Cache targets?
-    WebTarget target = restClient.target(configuration.getBaseUrl());
+    WebTarget target = restClient.target(configuration.baseUrl);
 
     if (type != null) {
       target = target.path(pathResolver.resolveType(type, '/'));
@@ -246,7 +236,7 @@ public class RestChannel extends RestChannelBase {
     if (callback == null) {
       Future<Response> future = invocation.submit();
       try {
-        Response response = future.get();
+        Response response = future.get(30, TimeUnit.SECONDS);
         result = readEntity(response, entityType, ignoredStatus);
       } catch (Throwable e) {
         throw translate(e);
@@ -310,6 +300,7 @@ public class RestChannel extends RestChannelBase {
       }
 
       if (status != null) {
+        //
         return translateError(status, throwable);
       }
 

@@ -1,7 +1,7 @@
 package com.secucard.connect.channel.rest;
 
 public class UserAgentProvider {
-  UserAgentProvider() {
+  public UserAgentProvider() {
   }
 
   public static String getValue() {

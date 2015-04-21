@@ -2,6 +2,9 @@ package com.secucard.connect.util;
 
 import java.util.HashMap;
 
+/**
+ * Puts data to thread locals and pulls them out again.
+ */
 public class ThreadLocalUtil {
 
   private final static ThreadLocal<ThreadVariables> THREAD_VARIABLES = new ThreadLocal<ThreadVariables>() {

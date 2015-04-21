@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.secucard.connect.channel.stomp;
+package com.secucard.connect.stomp;
 
 public class NoReceiptException extends RuntimeException {
   public NoReceiptException() {

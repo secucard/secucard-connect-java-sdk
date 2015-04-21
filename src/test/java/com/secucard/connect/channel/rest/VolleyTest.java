@@ -6,11 +6,12 @@ import android.content.Context;
 import com.secucard.connect.Callback;
 import com.secucard.connect.Client;
 import com.secucard.connect.ClientConfiguration;
-import com.secucard.connect.auth.UserCredentials;
-import com.secucard.connect.model.general.Skeleton;
+import com.secucard.connect.auth.OAuthProvider;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.model.general.Skeleton;
 import com.secucard.connect.service.AbstractServicesTest;
 import com.secucard.connect.service.TestService;
+import com.secucard.connect.storage.DiskCache;
 import junit.framework.Assert;
 import org.junit.Assume;
 import org.junit.Before;
@@ -18,6 +19,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.io.InputStream;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -33,7 +36,7 @@ public class VolleyTest extends AbstractServicesTest {
     initLogging();
 
     clientConfiguration = ClientConfiguration.fromProperties("config-volley.properties");
-    clientConfiguration.setUserCredentials(new UserCredentials("checkout@secucard.com", "checkout"));
+//    clientConfiguration.setUserCredentials(new UserCredentials("checkout@secucard.com", "checkout"));
     client = Client.create("test", clientConfiguration, new Application(), null);
     context = client.getService(TestService.class).getContext();
 
@@ -42,6 +45,7 @@ public class VolleyTest extends AbstractServicesTest {
         clientConfiguration.getRestConfiguration());
     OAuthProvider authProvider = (OAuthProvider) context.getAuthProvider();
     authProvider.setRestChannel(channel);
+    authProvider.setDataStorage(new DiskCache("/home/public/projects/secu/secuconnect/SecuConnect/sccache/test"));
     channel.setAuthProvider(authProvider);
   }
 
@@ -53,7 +57,13 @@ public class VolleyTest extends AbstractServicesTest {
   public static class TestActivity extends Activity {
     public void test() throws Exception {
       try {
-        channel.open(null);
+        channel.open();
+        String url = "https://connect.secucard.com/ds_g/dda378c077394ce074a5c0841ab4c44c4cda608d";
+        InputStream stream = channel.getStream(url, null, null, null);
+
+//        Object post = channel.post(url, null, null, null, 404);
+
+//        Object post = channel.post(url, null, null, null, 404);
 
         Callback callback = new Callback() {
           @Override
@@ -68,8 +78,9 @@ public class VolleyTest extends AbstractServicesTest {
         };
 
         QueryParams queryParams = new QueryParams();
-        queryParams.setOffset(2);
+        queryParams.setOffset(-2);
         queryParams.setCount(10);
+        queryParams.setQuery("id:12345");
         channel.findObjects(Skeleton.class, queryParams, callback);
 
 //      channel.getObject(Skeleton.class, "skl_60", callback);
@@ -82,10 +93,10 @@ public class VolleyTest extends AbstractServicesTest {
 
 //      channel.execute("21", "start", null, Result.class, callback);
 
-        Thread.sleep(3000);
+        Thread.sleep(10000);
 
       } finally {
-        channel.close(null);
+        channel.close();
       }
     }
   }

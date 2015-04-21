@@ -1,6 +1,6 @@
 package com.secucard.connect;
 
-import com.secucard.connect.auth.UserCredentials;
+import com.secucard.connect.auth.AppUserCredentials;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
@@ -60,7 +60,7 @@ public class Client extends AbstractService {
 
 
   public void setUserCredentials(String user, String pwd) {
-    context.getConfig().setUserCredentials(new UserCredentials(user, pwd));
+    context.getConfig().setUserCredentials(new AppUserCredentials(user, pwd));
   }
 
   /**
@@ -98,11 +98,11 @@ public class Client extends AbstractService {
       return;
     }
     try {
-      getRestChannel().open(null); // init rest first since it does auth,
+      getRestChannel().open(); // init rest first since it does auth,
       context.getAuthProvider().getToken(false); // fetch token
       Channel sc = getStompChannel();
       if (sc != null) {
-        sc.open(null);
+        sc.open();
         startHeartBeat();
         Thread.sleep(500);
       }
@@ -127,13 +127,13 @@ public class Client extends AbstractService {
       if (sc != null) {
         stopHeartBeat();
         try {
-          sc.close(null);
+          sc.close();
         } catch (Exception e) {
           // ignore
         }
       }
       try {
-        getRestChannel().close(null);
+        getRestChannel().close();
       } catch (Exception e) {
         // ignore
       }
@@ -190,7 +190,7 @@ public class Client extends AbstractService {
               channel.execute(Session.class, "me", "refresh", null, null, Result.class, null);
             } catch (Throwable e) {
               try {
-                channel.close(null);
+                channel.close();
               } catch (Exception e1) {
               }
               //ignore all just try to go on

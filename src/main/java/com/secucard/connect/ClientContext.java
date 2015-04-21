@@ -1,11 +1,10 @@
 package com.secucard.connect;
 
 import android.content.Context;
-import android.os.Build;
 import android.provider.Settings;
 import com.secucard.connect.auth.AuthProvider;
+import com.secucard.connect.auth.OAuthProvider;
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.channel.rest.OAuthProvider;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.VolleyChannel;
@@ -20,7 +19,6 @@ import com.secucard.connect.util.ThreadLocalUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -146,7 +144,8 @@ public class ClientContext {
       restChannel = new VolleyChannel(clientId, appContext, config.getRestConfiguration());
 
       // special auth provider for android, gets some additional information
-      authProvider = new OAuthProvider(clientId, config) {
+      authProvider = new OAuthProvider(clientId,
+          new OAuthProvider.Configuration(config.getOauthUrl(), config.getDeviceId(), config.getAuthWaitTimeoutSec(), true)) {
         @Override
         protected String getDeviceId() {
           String deviceId = super.getDeviceId();
@@ -179,7 +178,8 @@ public class ClientContext {
       }
 
       restChannel = new RestChannel(clientId, config.getRestConfiguration());
-      authProvider = new OAuthProvider(clientId, config);
+      authProvider = new OAuthProvider(clientId,
+          new OAuthProvider.Configuration(config.getOauthUrl(), config.getDeviceId(), config.getAuthWaitTimeoutSec(), true));
     }
 
     this.dataStorage = dataStorage;

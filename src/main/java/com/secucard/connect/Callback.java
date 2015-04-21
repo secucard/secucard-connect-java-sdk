@@ -21,4 +21,32 @@ public interface Callback<T> {
    * @param cause The fail cause.
    */
   void failed(Throwable cause);
+
+  /**
+   * Minimal callback which has no failure notification.
+   *
+   * @param <T>
+   */
+  public static interface Notify<T> {
+    void notify(T result);
+  }
+
+  /**
+   * Callback which combines result and failure notification in one method.
+   *
+   * @param <T> The result type.
+   */
+  public static abstract class Simple<T> implements Callback<T> {
+    @Override
+    public void completed(T result) {
+      completed(result, null);
+    }
+
+    @Override
+    public void failed(Throwable cause) {
+      completed(null, cause);
+    }
+
+    public abstract void completed(T result, Throwable error);
+  }
 }

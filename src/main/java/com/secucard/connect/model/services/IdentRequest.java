@@ -14,6 +14,9 @@ public class IdentRequest extends SecuObject {
 
   public static final String TYPE_PERSON = "person";
   public static final String TYPE_COMPANY = "company";
+  public static final String STATUS_REQUESTED = "requested";
+  public static final String STATUS_OK = "ok";
+  public static final String STATUS_FAILED = "failed";
 
   private String type;
 

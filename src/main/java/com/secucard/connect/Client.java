@@ -121,6 +121,13 @@ public class Client extends AbstractService {
     getAuthProvider().cancelAuth();
   }
 
+  /**
+   * Removes all stored access tokens from clients cache.
+   */
+  public void clearAuthCache() {
+    getAuthProvider().clearAuthCache();
+  }
+
   public synchronized void disconnect() {
     try {
       Channel sc = getStompChannel();

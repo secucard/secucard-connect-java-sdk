@@ -30,4 +30,9 @@ public interface AuthProvider {
    * process is done in multiple steps and user input is required.
    */
   void registerEventListener(EventListener eventListener);
+
+  /**
+   * Removes all stored access tokens from clients cache.
+   */
+  void clearAuthCache();
 }

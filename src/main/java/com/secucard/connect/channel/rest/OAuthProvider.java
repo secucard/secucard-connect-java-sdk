@@ -79,6 +79,11 @@ public class OAuthProvider implements AuthProvider {
   }
 
   @Override
+  public void clearAuthCache() {
+    storage.clear(getTokenStoreId(), null);
+  }
+
+  @Override
   public synchronized Token getToken() {
     return getToken(true);
   }

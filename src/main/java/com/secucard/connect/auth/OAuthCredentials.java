@@ -4,26 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class OAuthCredentials {
-  protected String deviceId;
-  protected Map<String, String> deviceInfo;
-
-  public String getDeviceId() {
-    return deviceId;
-  }
-
-  public void setDeviceId(String deviceId) {
-    this.deviceId = deviceId;
-  }
-
-  public Map<String, String> getDeviceInfo() {
-    return deviceInfo;
-  }
-
-  public void setDeviceInfo(Map<String, String> deviceInfo) {
-    this.deviceInfo = deviceInfo;
-  }
 
   public abstract String getGrantType();
+
+  /**
+   * Returns an id which uniquely identifies this instance in a way that same ids refer to the same credentials.
+   *
+   * @return The id as string.
+   */
+  public abstract String getId();
 
   public Map<String, Object> asMap() {
     HashMap<String, Object> map = new HashMap<>();

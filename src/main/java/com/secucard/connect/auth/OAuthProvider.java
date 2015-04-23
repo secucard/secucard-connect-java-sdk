@@ -1,6 +1,7 @@
 package com.secucard.connect.auth;
 
 import com.secucard.connect.SecuException;
+import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.UserAgentProvider;
 import com.secucard.connect.event.EventDispatcher;
@@ -13,6 +14,7 @@ import com.secucard.connect.util.ThreadSleep;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.HttpHeaders;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +33,9 @@ public class OAuthProvider implements AuthProvider {
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
   private final String id;
   private final Configuration configuration;
+  private String lastCredentialId;
+  private JsonMapper jsonMapper = JsonMapper.get();
+  private Token currentToken;  // kind of second level cache to avoid frequent token read
 
   protected static final Log LOG = new Log(OAuthProvider.class);
 
@@ -51,7 +56,6 @@ public class OAuthProvider implements AuthProvider {
     this.restChannel = restChannel;
   }
 
-
   @Override
   public void registerEventListener(EventListener eventListener) {
     authEventListener = eventListener;
@@ -61,27 +65,13 @@ public class OAuthProvider implements AuthProvider {
     this.cancelAuth = true;
   }
 
-  /**
-   * Returns the client devices unique id like android id or UUID.
-   * Gets it from config by default, override to retrieve it dynamically or whatever.
-   */
-  protected String getDeviceId() {
-    return configuration.deviceId;
-  }
-
-  /**
-   * Return additional device info like software version.
-   */
-  protected Map<String, String> getDeviceInfo() {
-    return null;
+  @Override
+  public Map<String, String> getAdditionalInfo() {
+    return configuration.deviceInfo;
   }
 
   public void authenticate() {
-    getToken(false);
-  }
-
-  public Token getToken() {
-    return getToken(true);
+    getToken();
   }
 
   /**
@@ -89,20 +79,19 @@ public class OAuthProvider implements AuthProvider {
    * The token is retrieved by accessing OAuth server initially once by using the provided credentials and cached for
    * later usage. This method also takes care of all aspects of the token validity, for example if the token is expired
    * and must be refreshed. So any client is supposed to use only this method when a token is needed, and must NOT store
-   * the token on its own or alike.
+   * the token on its own or alike. If the credentials change the token is retrieved new.
    *
    * @throws com.secucard.connect.auth.AuthException         If the authentication fails for some reason. The status
    *                                                         field may contain details about failure.
    * @throws com.secucard.connect.auth.AuthCanceledException If the authentication was canceled by the user.
    */
-  public synchronized Token getToken(boolean extendExpire) throws AuthException {
-
+  public synchronized Token getToken() throws AuthException {
     OAuthCredentials cr = this.credentials;
     if (cr == null) {
       throw new AuthException("Missing credentials");
     }
 
-    Token token = getCached();
+    Token token = getCached(cr.getId());
 
     boolean authenticate = false;
 
@@ -127,7 +116,7 @@ public class OAuthProvider implements AuthProvider {
       }
     } else {
       // we should have valid token in cache, no new auth necessary
-      if (extendExpire) {
+      if (configuration.extendExpire) {
         LOG.debug("Extend token expire time.");
         token.setExpireTime();
         cache(token);
@@ -138,6 +127,7 @@ public class OAuthProvider implements AuthProvider {
     if (authenticate) {
       token = authenticate(cr);
       token.setExpireTime();
+      token.setId(cr.getId());
       cache(token);
       LOG.debug("Return new token: ", token);
     }
@@ -150,23 +140,57 @@ public class OAuthProvider implements AuthProvider {
    */
   public synchronized void clearCache() {
     if (configuration.cacheToken) {
+      currentToken = null;
       storage.clear(getTokenChacheId(), null);
     }
   }
 
   private void cache(Token token) {
     if (configuration.cacheToken) {
-      storage.save(getTokenChacheId(), token);
+      try {
+        String str = jsonMapper.map(token);
+        // todo: encrypt token !!
+        storage.save(getTokenChacheId(), str);
+        currentToken = token;
+      } catch (IOException e) {
+        throw new IllegalArgumentException("Can't serialize token to JSON", e);
+      }
     }
   }
 
-  private Token getCached() {
-    if (configuration.cacheToken) {
-      return (Token) storage.get(getTokenChacheId());
+  private Token getCached(String id) {
+    if (!configuration.cacheToken) {
+      return null;
     }
+
+    if (currentToken != null && currentToken.getId().equals(id)) {
+      return currentToken;
+    }
+
+    currentToken = null;
+
+    try {
+      String str = (String) storage.get(getTokenChacheId());
+      if (str == null) {
+        return null;
+      }
+      Token token = jsonMapper.map(str, Token.class);
+      if (token.getId().equals(id)) {
+        currentToken = token;
+        return token;
+      } else {
+        clearCache();
+      }
+    } catch (Exception e) {
+      LOG.error("Error reading token.", e);
+    }
+
     return null;
   }
 
+  /**
+   * Returns the id used to put a token in the cache.
+   */
   private String getTokenChacheId() {
     return "token" + id;
   }
@@ -202,8 +226,8 @@ public class OAuthProvider implements AuthProvider {
       }
 
       DeviceCredentials dc = (DeviceCredentials) credentials;
-      dc.setDeviceId(null); // device id must not be set!
       dc.setDeviceCode(codes.getDeviceCode());
+      dc.setDeviceId(null); // device id must be empty for next auth. step!
 
       // this is a device auth request and as long the user didn't enter the correct codes the
       // server will return 401 - it's part of the procedure in this case, so ignore
@@ -256,10 +280,15 @@ public class OAuthProvider implements AuthProvider {
     return codes;
   }
 
-  protected  <T> T request(Class<T> resultType, OAuthCredentials credentials, Map<String, String> headers,
-                        Integer ignoredHttpStatus) {
+  protected <T> T request(Class<T> resultType, OAuthCredentials credentials, Map<String, String> headers,
+                          Integer ignoredHttpStatus) {
     try {
-      return restChannel.post(configuration.oauthUrl, credentials.asMap(), headers, resultType, ignoredHttpStatus);
+      Map<String, Object> parameters = credentials.asMap();
+      Map<String, String> info = getAdditionalInfo();
+      if (info != null) {
+        parameters.putAll(info);
+      }
+      return restChannel.post(configuration.oauthUrl, parameters, headers, resultType, ignoredHttpStatus);
     } catch (SecuException e) {
       // try to provide some more failure details
       if (e.getStatus() != null) {
@@ -273,31 +302,40 @@ public class OAuthProvider implements AuthProvider {
   }
 
   /**
-   * Refresh but just copy access token and time
+   * Refresh token, but copy ony access token and time of the refreshed token.
    *
-   * @param token
-   * @return
+   * @param token The token to refresh.
+   * @return The refreshed token data.
    */
   protected Token refresh(Token token, OAuthCredentials credentials) {
     LOG.debug("Refresh token: ", credentials);
     if (!(credentials instanceof ClientCredentials)) {
       throw new IllegalArgumentException("Invalid credentials type for refresh, need any ClientCredentials type");
     }
-    RefreshCredentials rc = new RefreshCredentials((ClientCredentials) credentials, token.getRefreshToken());
-    return authenticate(rc);
+    ClientCredentials cc = (ClientCredentials) credentials;
+    RefreshCredentials rc = new RefreshCredentials(cc.getClientId(), cc.getClientSecret(), token.getRefreshToken());
+    Token refreshToken = authenticate(rc);
+    token.setAccessToken(refreshToken.getAccessToken());
+    token.setExpiresIn(refreshToken.getExpiresIn());
+    if (StringUtils.isNotBlank(refreshToken.getRefreshToken())) {
+      token.setRefreshToken(refreshToken.getRefreshToken());
+    }
+    token.setExpireTime();
+    return token;
   }
 
   public static class Configuration {
     private boolean cacheToken = true;
     private int authWaitTimeoutSec;
-    private String deviceId;
     private String oauthUrl;
+    private boolean extendExpire = false;
+    private Map<String, String> deviceInfo;
 
-    public Configuration(String oauthUrl, String deviceId, int authWaitTimeoutSec, boolean cacheToken) {
+    public Configuration(String oauthUrl, int authWaitTimeoutSec, boolean cacheToken, Map<String, String> deviceInfo) {
       this.cacheToken = cacheToken;
       this.authWaitTimeoutSec = authWaitTimeoutSec;
-      this.deviceId = deviceId;
       this.oauthUrl = oauthUrl;
+      this.deviceInfo = deviceInfo;
     }
   }
 }

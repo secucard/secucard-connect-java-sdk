@@ -1,5 +1,6 @@
 package com.secucard.connect.service.custom;
 
+import com.secucard.connect.auth.AppUserCredentials;
 import com.secucard.connect.service.AbstractServicesTest;
 import junit.framework.Assert;
 
@@ -8,7 +9,7 @@ public class CustomServiceTest extends AbstractServicesTest {
   @Override
   public void before() throws Exception {
     super.before();
-    client.setUserCredentials("checkout@secucard.com", "checkout");
+//    context.getAuthProvider().setCredentials(new AppUserCredentials());"checkout@secucard.com", "checkout");
   }
 
   @Override

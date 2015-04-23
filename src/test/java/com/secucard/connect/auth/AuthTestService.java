@@ -6,6 +6,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.service.TestService;
 import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.storage.DiskCache;
 import com.secucard.connect.storage.SimpleFileDataStorage;
 import junit.framework.Assert;
 
@@ -30,8 +31,11 @@ public class AuthTestService extends TestService implements EventListener {
   public void clientIdAuth() throws Exception {
     getRestChannel().open();
     MyOAuthProvider ap = new MyOAuthProvider();
-    ap.setCredentials(context.getConfig().getClientCredentials());
-    Token token = ap.getToken(false);
+    ClientCredentials clientCredentials = context.getConfig().getClientCredentials();
+    ap.setCredentials(clientCredentials);
+    Token token = ap.getToken();
+//    ap.setCredentials(new ClientCredentials(clientCredentials.getClientId(), clientCredentials.getClientSecret() + "_"));
+//    token = ap.getToken();
     Assert.assertNotNull(token);
   }
 
@@ -39,9 +43,9 @@ public class AuthTestService extends TestService implements EventListener {
   private class MyOAuthProvider extends OAuthProvider {
     public MyOAuthProvider() throws Exception {
       super("test", new OAuthProvider.Configuration(context.getConfig().getOauthUrl(),
-          context.getConfig().getDeviceId(), context.getConfig().getAuthWaitTimeoutSec(), true));
+          context.getConfig().getAuthWaitTimeoutSec(), true, null));
       setRestChannel((RestChannelBase) getRestChannel());
-      DataStorage storage = new SimpleFileDataStorage("sccache");
+      DataStorage storage = new DiskCache("sccache-authtest");
       setDataStorage(storage);
       registerEventListener(AuthTestService.this);
     }

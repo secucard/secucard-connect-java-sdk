@@ -240,9 +240,7 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   private synchronized <T> Request<T> putToQueue(Request<T> request) {
-    if (requestQueue == null) {
-      open();
-    }
+    open();
     return requestQueue.add(request);
   }
 

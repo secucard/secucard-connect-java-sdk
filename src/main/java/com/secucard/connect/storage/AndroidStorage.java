@@ -3,7 +3,6 @@ package com.secucard.connect.storage;
 import android.content.SharedPreferences;
 import com.secucard.connect.channel.JsonMapper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -12,7 +11,6 @@ import java.util.Map;
  * and separate disk cache.
  */
 public class AndroidStorage extends DataStorage {
-  public static final String PREFIX = "#convertedbyme#";
   public static final String TIME_PREFIX = "#time#";
   private JsonMapper jsonMapper = JsonMapper.get();
   private final SharedPreferences sharedPreferences;
@@ -47,14 +45,7 @@ public class AndroidStorage extends DataStorage {
       editor.putBoolean(id, (Boolean) object);
       putTime(id, editor);
     } else {
-      // convert to string
-      String str;
-      try {
-        str = PREFIX + object.getClass().getCanonicalName() + ":" + jsonMapper.map(object);
-      } catch (IOException e) {
-        throw new DataStorageException("Error mapping object to JSON", e);
-      }
-      save(id, str, replace);
+      throw new DataStorageException("Can't store object of this type. Please provide String repesentation of the object");
     }
     editor.apply();
   }
@@ -65,36 +56,24 @@ public class AndroidStorage extends DataStorage {
 
   @Override
   public void save(String id, InputStream in, boolean replace) throws DataStorageException {
-    if (diskCache != null) {
-      diskCache.save(id, in, replace);
+    if (diskCache == null) {
+      throw new IllegalStateException("No disk cache set up to store the stream.");
     }
+    diskCache.save(id, in, replace);
   }
 
   @Override
   public Object get(String id) {
     Map<String, ?> all = sharedPreferences.getAll();
-    Object o = all.get(id);
-    if (o instanceof String) {
-      String str = (String) o;
-      if (str.contains(PREFIX)) {
-        int idx = str.indexOf(":");
-        String cname = str.substring(PREFIX.length(), idx);
-        try {
-          return jsonMapper.map(str.substring(idx + 1), Class.forName(cname));
-        } catch (IOException | ClassNotFoundException e) {
-          throw new DataStorageException("Error mapping JSON to object.", e);
-        }
-      }
-    }
-    return o;
+    return all.get(id);
   }
 
   @Override
   public InputStream getStream(String id) {
-    if (diskCache != null) {
-      return diskCache.getStream(id);
+    if (diskCache == null) {
+      throw new IllegalStateException("No disk cache set up to read the stream.");
     }
-    return null;
+    return diskCache.getStream(id);
   }
 
   @Override

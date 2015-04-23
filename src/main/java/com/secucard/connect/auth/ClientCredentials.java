@@ -3,14 +3,8 @@ package com.secucard.connect.auth;
 import java.util.Map;
 
 public class ClientCredentials extends OAuthCredentials {
-  private final String clientId;
-  private final String clientSecret;
-
-  public ClientCredentials(ClientCredentials clientCredentials) {
-    this(clientCredentials.getClientId(), clientCredentials.getClientSecret());
-    setDeviceId(clientCredentials.getDeviceId());
-    setDeviceInfo(clientCredentials.getDeviceInfo());
-  }
+  protected final String clientId;
+  protected final String clientSecret;
 
   public ClientCredentials(String clientId, String clientSecret) {
     this.clientId = clientId;
@@ -28,6 +22,11 @@ public class ClientCredentials extends OAuthCredentials {
   @Override
   public String getGrantType() {
     return "client_credentials";
+  }
+
+  @Override
+  public String getId() {
+    return getGrantType() + clientId + clientSecret;
   }
 
   @Override

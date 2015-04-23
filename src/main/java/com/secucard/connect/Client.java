@@ -1,7 +1,8 @@
 package com.secucard.connect;
 
-import com.secucard.connect.auth.AppUserCredentials;
+import com.secucard.connect.auth.OAuthCredentials;
 import com.secucard.connect.channel.Channel;
+import com.secucard.connect.channel.ExecutionListener;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.event.EventListener;
@@ -12,6 +13,13 @@ import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.util.Log;
+import com.secucard.connect.util.ThreadSleep;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Main entry to the Java Secucard Connect API.
@@ -22,10 +30,47 @@ public class Client extends AbstractService {
   private String id;
   private ServiceFactory serviceFactory;
   private boolean stopHeartbeat;
+  private final Timer disconnectTimer;
+  private TimerTask disconnectTimerTask;
+  private KeepAliveLoop keepAliveLoop;
 
+  private static final Log LOG = new Log(Client.class);
 
   private Client(final String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
-    init(id, configuration, runtimeContext, storage);
+    if (configuration == null) {
+      throw new SecuException("Configuration  must not be null.");
+    }
+
+    this.disconnectTimer = new Timer(true); // daemon thread needed
+    this.keepAliveLoop = new Client.KeepAliveLoop();
+
+    this.id = id;
+
+    context = ClientContextFactory.create(id, configuration, runtimeContext, storage);
+
+    serviceFactory = new ServiceFactory(context);
+    isConnected = false;
+
+    // set up STOMP event listening
+    Channel sc = getStompChannel();
+    if (sc != null) {
+      sc.setEventListener(new EventListener() {
+        @Override
+        public void onEvent(Object event) {
+          handleEvent(event);
+
+          // todo: merge both
+          if (event instanceof Event) {
+            context.getEventDispatcher().handleEvent((Event) event);
+          } else {
+            context.getEventDispatcher().fireEvent(event);
+          }
+        }
+      });
+    }
+
+    // simply throws all exceptions by default, can be overwritten by clients user
+    setExceptionHandler(new ThrowingExceptionHandler());
   }
 
 
@@ -58,11 +103,6 @@ public class Client extends AbstractService {
     return new Client(id, configuration, runtimeContext, storage);
   }
 
-
-  public void setUserCredentials(String user, String pwd) {
-    context.getConfig().setUserCredentials(new AppUserCredentials(user, pwd));
-  }
-
   /**
    * Getting a new service instance from this client.
    * The returned instance offers several business related operation.
@@ -85,6 +125,98 @@ public class Client extends AbstractService {
   }
 
   /**
+   * Disconnects all client connections after a given time and closed all resources.
+   *
+   * @param seconds The time after all connections should be closed.
+   * @return This client instance for method chaining.
+   */
+  public Client autoDisconnect(int seconds) {
+    if (disconnectTimerTask != null) {
+      disconnectTimerTask.cancel();
+    }
+    disconnectTimerTask = new DisconnectTimerTask();
+    disconnectTimer.schedule(disconnectTimerTask, seconds * 1000);
+    return this;
+  }
+
+
+  /**
+   * Connect to secucard server anonymously.
+   *
+   * @return This client instance, allowing fluent interface.
+   */
+  public Client connect() {
+    return connect(null, false);
+  }
+
+
+  /**
+   * Connect to secucard server.
+   *
+   * @param credentials The credentials to use. Pass null to connect anonymously.
+   * @param forceAuth   If true new authentication is forced using the credentials. If false client may use cached
+   *                    authentication token from previous attempts for this credential if it is still valid,
+   *                    avoiding a new authentication.
+   *                    Falls back to true if no authentication token is available.
+   * @return This client instance, allowing fluent interface.
+   */
+  public synchronized Client connect(OAuthCredentials credentials, boolean forceAuth) {
+    if (disconnectTimerTask != null) {
+      disconnectTimerTask.cancel();
+    }
+
+    ClientConfiguration configuration = context.getConfig();
+
+    if (isConnected) {
+      return this;
+    }
+
+    if (forceAuth) {
+      getAuthProvider().clearCache();
+    }
+
+    getAuthProvider().setCredentials(credentials);
+
+    if (credentials != null) {
+      // not anonymous, so check if provided or cached credentials are valid
+      try {
+        getAuthProvider().authenticate();
+      } catch (Throwable e) {
+        doDisconnect();
+        throw e;
+      }
+    }
+
+
+    if (!configuration.isStompEnabled()) {
+      // if stomp not enabled or no auth. - no keep alive, sop here
+      isConnected = true;
+//      connCallback.notify(true);
+      return this;
+    }
+
+
+    isConnected = true;
+
+    try {
+      getStompChannel().open();
+    } catch (Throwable t) {
+      doDisconnect();
+      throw new SecuException(t);
+    }
+
+    keepAliveLoop.await();
+
+    if (keepAliveLoop.exception == null) {
+//      connCallback.notify(true);
+      return this;
+    } else {
+      doDisconnect();
+      throw new SecuException(keepAliveLoop.exception);
+    }
+  }
+
+  /**
    * Initializes connects the client to the secucard server.<br/>
    * Throws {@link com.secucard.connect.auth.AuthException} if an error happens during authentication.<br/>
    * May also fire an event of type {@link com.secucard.connect.event.Events.AuthorizationFailed} if a STOMP auth.
@@ -93,13 +225,13 @@ public class Client extends AbstractService {
    * to help clean up resources.<br/>
    * If the client is successfully connected an event of type {@link com.secucard.connect.event.Events.ConnectionStateChanged} is fired.
    */
-  public synchronized void connect() {
+  public synchronized void connect_() {
     if (isConnected) {
       return;
     }
     try {
       getRestChannel().open(); // init rest first since it does auth,
-      context.getAuthProvider().getToken(false); // fetch token
+      context.getAuthProvider().getToken(); // fetch token
       Channel sc = getStompChannel();
       if (sc != null) {
         sc.open();
@@ -117,8 +249,52 @@ public class Client extends AbstractService {
     }
   }
 
+  /**
+   * Cancel pending authentication process.
+   */
   public void cancelAuth() {
     getAuthProvider().cancelAuth();
+  }
+
+  public void onConnectionStateChanged(Callback.Notify<Boolean> callback) {
+//    connCallback = callback;
+  }
+
+  public void onAuthFailed(Callback.Notify<Object> callback) {
+//    authFailedCallback = callback;
+  }
+
+  private void doDisconnect() {
+    if (disconnectTimerTask != null) {
+      disconnectTimerTask.cancel();
+      disconnectTimerTask = null;
+    }
+
+    isConnected = false;
+
+    if (keepAliveLoop != null && keepAliveLoop.isAlive()) {
+      try {
+        // wait until keep alive loop ended
+        keepAliveLoop.join();
+      } catch (InterruptedException e) {
+        // ignore
+      }
+    }
+    keepAliveLoop = null;
+
+    try {
+      getRestChannel().close();
+    } catch (Throwable e) {
+      LOG.error("error closing channel", e);
+    }
+
+    try {
+      getStompChannel().close();
+    } catch (Throwable e) {
+      LOG.error("error closing channel", e);
+    }
+
+//    connCallback.notify(false);
   }
 
   public synchronized void disconnect() {
@@ -143,6 +319,14 @@ public class Client extends AbstractService {
       isConnected = false;
       context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(false));
     }
+  }
+
+  /**
+   * Remove any authentication data from clients cache.
+   * After that a new authentication for any given credentials may be requested.
+   */
+  public void clearAuthentication() {
+    context.getAuthProvider().clearCache();
   }
 
   public boolean isConnected() {
@@ -225,37 +409,6 @@ public class Client extends AbstractService {
     }
   }
 
-  private void init(String id, ClientConfiguration config, Object runtimeContext, DataStorage storage) {
-    if (config == null) {
-      throw new SecuException("Configuration  must not be null.");
-    }
-
-    this.id = id;
-    context = new ClientContext(id, config, runtimeContext, storage);
-    serviceFactory = new ServiceFactory(context);
-    isConnected = false;
-
-    // set up STOMP event listening
-    Channel sc = getStompChannel();
-    if (sc != null) {
-      sc.setEventListener(new EventListener() {
-        @Override
-        public void onEvent(Object event) {
-          handleEvent(event);
-
-          // todo: merge both
-          if (event instanceof Event) {
-            context.getEventDispatcher().handleEvent((Event) event);
-          } else {
-            context.getEventDispatcher().fireEvent(event);
-          }
-        }
-      });
-    }
-
-    // simply throws all exceptions by default, can be overwritten by clients user
-    setExceptionHandler(new ThrowingExceptionHandler());
-  }
 
   /**
    * Handle events before dispatching to listeners.
@@ -278,6 +431,113 @@ public class Client extends AbstractService {
     @Override
     public void handle(Throwable exception) {
       throw new SecuException(exception);
+    }
+  }
+
+  /**
+   * Timer task to perform the automatic disconnect.
+   */
+  private class DisconnectTimerTask extends TimerTask {
+    @Override
+    public void run() {
+      Client.this.disconnect();
+    }
+  }
+
+  /**
+   * Sends a confirmations within an fixed interval that this client is alive.
+   * But is able to skip confirmation if other already confirmed this (setting isConfirmed to true).
+   */
+  private class KeepAliveLoop extends Thread implements ExecutionListener {
+    private CountDownLatch latch;
+    public Throwable exception;
+    public volatile boolean isConfirmed;
+
+
+    private KeepAliveLoop() {
+      setDaemon(true);
+    }
+
+    @Override
+    public void executed(Channel channel) {
+      isConfirmed = true;
+    }
+
+    public void await() {
+      latch = new CountDownLatch(1);
+      super.start();
+      try {
+        latch.await();
+      } catch (InterruptedException e) {
+      }
+    }
+
+    @Override
+    public void run() {
+      LOG.info("keep alive loop started");
+      outer:
+      while (isConnected) {
+        try {
+          getStompChannel().execute(Session.class, "me", "refresh", null, null, Result.class, null);
+          isConfirmed = false;
+          LOG.info("keep alive sent");
+        } catch (Throwable t) {
+          LOG.info("keep alive failed");
+          if (latch.getCount() != 0) {
+            // first invocation after connect, let client know something is going wrong
+            exception = t;
+            latch.countDown();
+            break;
+          }
+        }
+        latch.countDown();// let main thread go on
+
+        int step = 100;
+        int interval = 8000;
+        int count = 0;
+
+        new ThreadSleep() {
+          @Override
+          protected boolean reset() {
+            if (isConfirmed) {
+              isConfirmed = false;
+              return true;
+            }
+            return false;
+          }
+
+          @Override
+          protected boolean cancel() {
+            return !isConnected;
+          }
+        }.execute(8000, 100, TimeUnit.MILLISECONDS);
+
+
+        // wait for next interval
+        // reset wait counter if anybody confirmed for us
+        while (true) {
+          if (!isConnected) {
+            break outer;
+          }
+          try {
+            Thread.sleep(step);
+          } catch (InterruptedException e) {
+            // ignore
+          }
+
+          if (isConfirmed) {
+            count = 0;
+            isConfirmed = false;
+          }
+
+          count += step;
+          if (count >= interval) {
+            break;
+          }
+        }
+      }
+
+      LOG.info("keep alive loop ended");
     }
   }
 }

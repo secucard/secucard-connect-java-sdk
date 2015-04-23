@@ -6,30 +6,32 @@ public class AppUserCredentials extends ClientCredentials {
   private String userName;
   private String password;
 
-  public AppUserCredentials(String clientId, String clientSecret) {
-    super(clientId, clientSecret);
-  }
+  /**
+   * A unique device id like UUID. May be optional for some credential types.
+   */
+  protected String deviceId;
 
-  public AppUserCredentials(String clientId, String clientSecret, String userName, String password) {
+  public AppUserCredentials(String clientId, String clientSecret, String userName, String password, String deviceId) {
     super(clientId, clientSecret);
     this.userName = userName;
     this.password = password;
+    this.deviceId = deviceId;
   }
 
   public String getUserName() {
     return userName;
   }
 
-  public void setUserName(String userName) {
-    this.userName = userName;
-  }
-
   public String getPassword() {
     return password;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  public void setDeviceId(String deviceId) {
+    this.deviceId = deviceId;
+  }
+
+  public String getDeviceId() {
+    return deviceId;
   }
 
   @Override
@@ -38,16 +40,18 @@ public class AppUserCredentials extends ClientCredentials {
   }
 
   @Override
+  public String getId() {
+    return getGrantType() + clientId + clientSecret + userName + password + (deviceId == null ? "" : deviceId);
+  }
+
+  @Override
   public Map<String, Object> asMap() {
     Map<String, Object> map = super.asMap();
     map.put("username", userName);
     map.put("password", password);
-    if (deviceId != null) {
-      map.put("device", deviceId);
-    }
-    if (deviceInfo != null && !deviceInfo.isEmpty()) {
-      map.putAll(deviceInfo);
-    }
+    map.put("device", deviceId);
     return map;
   }
+
+
 }

@@ -1,7 +1,6 @@
 package com.secucard.connect.storage;
 
 import java.io.*;
-import java.net.URLEncoder;
 
 /**
  * File based store.

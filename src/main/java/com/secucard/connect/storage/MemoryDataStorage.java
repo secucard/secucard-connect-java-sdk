@@ -1,13 +1,12 @@
 package com.secucard.connect.storage;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MemoryDataStorage extends DataStorage implements Serializable {
-  private Map<String, Item> store = new ConcurrentHashMap<>();
-
+  private Map<String, Item> store = new HashMap<>();
 
   @Override
   public void save(String id, Object object, boolean replace) {
@@ -19,11 +18,11 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
     saveInternal(id, in, replace);
   }
 
-  public int size() {
+  public synchronized int size() {
     return store.size();
   }
 
-  protected boolean saveInternal(String id, Object object, boolean replace) {
+  synchronized boolean saveInternal(String id, Object object, boolean replace) {
     if (!replace && store.containsKey(id)) {
       return false;
     }
@@ -56,7 +55,7 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
     return getInternal(id);
   }
 
-  protected Object getInternal(String id) {
+  protected synchronized Object getInternal(String id) {
     Object o = null;
     Item item = store.get(id);
     if (item != null) {
@@ -75,7 +74,7 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
   }
 
   @Override
-  public void clear(String id, Long timestampMs) {
+  public synchronized void clear(String id, Long timestampMs) {
     if (id == null) {
       return;
     }
@@ -98,7 +97,7 @@ public class MemoryDataStorage extends DataStorage implements Serializable {
   }
 
   @Override
-  public void destroy() {
+  public synchronized void destroy() {
     store.clear();
   }
 

@@ -5,11 +5,11 @@ import java.io.*;
 /**
  * Writes objects and streams to disk.
  */
-public class DiskCache extends DataStorage implements Serializable {
-  private transient static final String OBJECTSTORE = "objectstore";
-  private transient File cacheDir;
-  private transient ObjectStore store;
-  private transient boolean bundleObjects = true; // bundle object to save in separate store and save store to disk
+public class DiskCache extends DataStorage {
+  private static final String OBJECTSTORE = "objectstore";
+  private File cacheDir;
+  private MemoryDataStorage store;
+  private boolean bundleObjects = true; // bundle object to save in separate store and save store to disk
 
   public DiskCache(String cacheDir) throws IOException {
     init(cacheDir);
@@ -17,6 +17,10 @@ public class DiskCache extends DataStorage implements Serializable {
 
   protected void init(String path) {
     cacheDir = new File(path);
+    createCacheDirs();
+  }
+
+  private void createCacheDirs() {
     cacheDir.mkdirs();
     if (!cacheDir.exists()) {
       throw new DataStorageException("Can't create directory " + cacheDir);
@@ -28,6 +32,18 @@ public class DiskCache extends DataStorage implements Serializable {
     if (!(object instanceof Serializable)) {
       throw new DataStorageException("Object to store must implement serializable");
     }
+
+    if (!object.getClass().getPackage().getName().startsWith("java")) {
+      // avoids serialization issues when version changed
+      throw new DataStorageException(
+          "Cannot store custom (not Java built in) types." +
+              " Please provide a Map or String representation of the object to save");
+    }
+
+    if (!cacheDir.exists()) {
+      createCacheDirs();
+    }
+
     ObjectOutputStream out = null;
     try {
       File path;
@@ -67,6 +83,10 @@ public class DiskCache extends DataStorage implements Serializable {
 
   @Override
   public synchronized void save(String id, InputStream in, boolean replace) throws DataStorageException {
+    if (!cacheDir.exists()) {
+      createCacheDirs();
+    }
+
     // always save streams as separate files
     File path = new File(cacheDir, id);
     if (path.exists() && !replace) {
@@ -96,7 +116,7 @@ public class DiskCache extends DataStorage implements Serializable {
   }
 
   @Override
-  public Object get(String id) {
+  public synchronized Object get(String id) {
     try {
       if (bundleObjects) {
         readStore();
@@ -113,7 +133,7 @@ public class DiskCache extends DataStorage implements Serializable {
   }
 
   @Override
-  public InputStream getStream(String id) {
+  public synchronized InputStream getStream(String id) {
     File path = new File(cacheDir, id);
     try {
       if (path.exists() && path.length() > 0) {
@@ -170,7 +190,7 @@ public class DiskCache extends DataStorage implements Serializable {
     }
   }
 
-  public int size() throws Exception {
+  public synchronized int size() throws Exception {
     if (!cacheDir.exists()) {
       return 0;
     }
@@ -192,7 +212,7 @@ public class DiskCache extends DataStorage implements Serializable {
     return size;
   }
 
-  public void destroy() {
+  public synchronized void destroy() {
     if (!cacheDir.exists()) {
       return;
     }
@@ -227,18 +247,10 @@ public class DiskCache extends DataStorage implements Serializable {
       // read from disk only if not exist yet
       File path = new File(cacheDir, OBJECTSTORE);
       if (path.exists() && path.length() > 0) {
-        store = (ObjectStore) new ObjectInputStream(new FileInputStream(path)).readObject();
+        store = (MemoryDataStorage) new ObjectInputStream(new FileInputStream(path)).readObject();
       } else {
-        store = new ObjectStore();
+        store = new MemoryDataStorage();
       }
-    }
-  }
-
-  private class ObjectStore extends MemoryDataStorage {
-
-    @Override
-    public boolean saveInternal(String id, Object object, boolean replace) {
-      return super.saveInternal(id, object, replace);
     }
   }
 }

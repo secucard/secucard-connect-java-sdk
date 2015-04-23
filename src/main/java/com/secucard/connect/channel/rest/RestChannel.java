@@ -183,8 +183,10 @@ public class RestChannel extends RestChannelBase {
 
   @Override
   public synchronized void close() {
-    restClient.close();
-    restClient = null;
+    if (restClient != null) {
+      restClient.close();
+      restClient = null;
+    }
   }
 
   // private -------------------------------------------------------------------------------------------------------------------

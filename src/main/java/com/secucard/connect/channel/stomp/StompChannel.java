@@ -133,7 +133,7 @@ public class StompChannel extends Channel {
    * Returns the token used as login + password for  STOMP connect.
    */
   protected String getToken() {
-    return authProvider.getToken(false).getAccessToken();
+    return authProvider.getToken().getAccessToken();
   }
 
   /**

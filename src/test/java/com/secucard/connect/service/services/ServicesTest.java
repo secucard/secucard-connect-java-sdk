@@ -7,16 +7,15 @@ import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idrequest.Person;
 import com.secucard.connect.service.AbstractServicesTest;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeNoException;
 
 public class ServicesTest extends AbstractServicesTest {
 
@@ -29,14 +28,20 @@ public class ServicesTest extends AbstractServicesTest {
       }
     });
 //    testGetIdentRequest();
-//    testGetIdentResult();
-    testIdent();
+    testGetIdentResult();
+//    testIdent();
 //    testEvents();
+  }
+
+  @Override
+  protected String getConfigString() {
+    return "auth.clientId=69bfc7183507823569d06ad81a40073a\n" +
+        "auth.clientSecret=ee5fb67afedda1c4eb863c73a940ec1fcea0d5b5a92f4cf1697c3d4f34b2fd8a";
   }
 
   public void testEvents() throws Exception {
 
-    final String json = "{\n" +
+    final String json1 = "{\n" +
         "    \"object\": \"event.pushes\",\n" +
         "    \"id\": \"XXX_XXXXXXXXXXX\",\n" +
         "    \"created\": \"2015-02-02T11:40:50+01:00\",\n" +
@@ -50,30 +55,45 @@ public class ServicesTest extends AbstractServicesTest {
         "    ]\n" +
         "}";
 
+    final String json = "{\"object\":\"event.pushes\",\"id\":\"evt_BU2Q47PHDBTHE3WQ84KJ78AWG284EN\",\"created\":\"2015-04-01T14:30:27+02:00\",\"target\":\"services.identrequests\",\"type\":\"changed\",\"data\":[{\"object\":\"services.identrequests\",\"id\":\"SIR_WDVT8TR5P2Y8QMAZB5GQGMWHNZXWA2\"}]}";
+
+    final List<String> list = new ArrayList<>();
     IdentService service = client.getService(IdentService.class);
 
     service.onIdentRequestChanged(new IdentService.IdentEventHandler() {
       @Override
       public boolean downloadAttachments(List<IdentRequest> requests) {
-        return false;
+        return true;
       }
 
       @Override
       public void completed(List<IdentResult> result) {
-        Assert.assertTrue(result.size() > 0);
+        list.add("");
+        System.err.println("### " + list.size() + " ### " + result);
+//        Assert.assertTrue(result.size() > 0);
       }
 
       @Override
       public void failed(Throwable cause) {
-        assumeNoException(cause);
+        cause.printStackTrace();
+//        assumeNoException(cause);
+      }
+
+      @Override
+      protected boolean isAsync() {
+        return true;
       }
     });
 
     client.connect();
 
     try {
-      client.handleEvent(json);
-      Thread.sleep(30000);
+      for (int i = 0; i < 1; i++) {
+        client.handleEvent(json);
+        Thread.sleep(100);
+      }
+      Thread.sleep(10000);
+      System.out.println(list.size());
     } finally {
       client.disconnect();
     }
@@ -103,7 +123,7 @@ public class ServicesTest extends AbstractServicesTest {
     try {
       client.connect();
       List<IdentResult> identResults = service.getIdentResults(null, null, true);
-      assertTrue(identResults.size() > 0);
+      assertTrue(identResults.size() > 0);  // SIR_2HBMSHU6N2Y9BRHFR5GQG0TSX8ZWAN
 
       String id = identResults.get(0).getId();
       IdentResult identResult = service.getIdentResult(id, null, true);
@@ -149,6 +169,7 @@ public class ServicesTest extends AbstractServicesTest {
       contact.setUrlWebsite("url");
       p.setContact(contact);
       newIr.addPerson(p);
+      newIr.demo = "1";
       newIr = service.createIdentRequest(newIr, null);
       assertEquals("forename", newIr.getPersons().get(0).getContact().getForename());
 

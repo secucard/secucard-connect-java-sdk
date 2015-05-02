@@ -1,7 +1,9 @@
 package com.secucard.connect.model.general;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.util.jackson.ObjectIdTypeResolver;
 
 import java.util.Date;
 
@@ -17,7 +19,9 @@ public class Event<T> extends SecuObject {
 
   private Date created;
 
-  private T data;
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = TARGET_PROPERTY)
+  @JsonTypeIdResolver(ObjectIdTypeResolver.class)
+  private T data = null;
 
   public String getTarget() {
     return target;

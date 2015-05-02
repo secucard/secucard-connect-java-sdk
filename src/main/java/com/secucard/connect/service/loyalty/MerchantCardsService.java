@@ -15,11 +15,11 @@ public class MerchantCardsService extends AbstractService {
    * @return List of merchant cards
    */
   public ObjectList<MerchantCard> getMerchantCards(QueryParams queryParams, Callback<ObjectList<MerchantCard>> callback) {
-    return super.getObjectList(MerchantCard.class, queryParams, callback, null);
+    return new ServiceTemplate().getList(MerchantCard.class, queryParams, callback);
   }
 
   public MerchantCard getMerchantCard(String id, Callback<MerchantCard> callback) {
-    return super.get(MerchantCard.class, id, callback, null);
+    return new ServiceTemplate().get(MerchantCard.class, id, callback);
   }
 
 }

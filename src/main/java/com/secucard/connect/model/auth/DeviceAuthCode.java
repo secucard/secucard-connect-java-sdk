@@ -2,6 +2,9 @@ package com.secucard.connect.model.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Container for authentication data requested during a OAuth device flow.
+ */
 public class DeviceAuthCode {
   @JsonProperty("device_code")
   private String deviceCode;

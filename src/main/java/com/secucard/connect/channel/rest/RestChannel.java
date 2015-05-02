@@ -7,7 +7,6 @@ import com.secucard.connect.SecuException;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 import org.glassfish.jersey.client.ClientProperties;
@@ -36,6 +35,7 @@ public class RestChannel extends RestChannelBase {
   public synchronized void open() {
     // rest client should be initialized just one time, client is expensive
     if (restClient == null) {
+      LOG.debug("REST channel initialized.");
       initClient();
     }
   }
@@ -72,6 +72,7 @@ public class RestChannel extends RestChannelBase {
       }
     }
     Invocation invocation = builder.buildPost(Entity.form(map));
+
     return getResponse(invocation, new DynamicTypeReference(responseType), null, ignoredState);
   }
 
@@ -106,56 +107,56 @@ public class RestChannel extends RestChannelBase {
   }
 
   @Override
-  public <T> T getObject(Class<T> type, String objectId, Callback<T> callback) {
-    Invocation invocation = builder(type, null, secure, objectId).buildGet();
+  public <T> T get(Class<T> type, String objectId, Callback<T> callback) {
+    Invocation invocation = builder(type, null, objectId).buildGet();
     return getResponse(invocation, new DynamicTypeReference(type), callback);
   }
 
   @Override
-  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
-    Invocation invocation = builder(type, queryParamsToMap(queryParams), secure).buildGet();
+  public <T> ObjectList<T> getList(Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
+    Invocation invocation = builder(type, queryParamsToMap(queryParams)).buildGet();
     return getResponse(invocation, new DynamicTypeReference(ObjectList.class, type), callback,
         Response.Status.NOT_FOUND.getStatusCode());
   }
 
   @Override
-  public <T> T createObject(T object, Callback<T> callback) {
+  public <T> T create(T object, Callback<T> callback) {
     Entity<T> entity = Entity.json(object);
-    Invocation invocation = builder(object.getClass(), null, secure).buildPost(entity);
+    Invocation invocation = builder(object.getClass(), null).buildPost(entity);
     return getResponse(invocation, new DynamicTypeReference(object.getClass()), callback);
   }
 
   @Override
-  public <T extends SecuObject> T updateObject(T object, Callback<T> callback) {
+  public <T extends SecuObject> T update(T object, Callback<T> callback) {
     Entity<T> entity = Entity.json(object);
-    Invocation invocation = builder(object.getClass(), null, secure, object.getId()).buildPut(entity);
+    Invocation invocation = builder(object.getClass(), null, object.getId()).buildPut(entity);
     return getResponse(invocation, new DynamicTypeReference(object.getClass()), callback);
   }
 
   @Override
-  public <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
-                            Class<T> returnType, Callback<T> callback) {
+  public <T> T update(Class product, String objectId, String action, String actionArg, Object arg,
+                      Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
-    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildPut(entity);
+    Invocation invocation = builder(product, null, objectId, action, actionArg).buildPut(entity);
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, Callback<?> callback) {
-    Invocation invocation = builder(type, null, secure, objectId).buildDelete();
+  public void delete(Class type, String objectId, Callback<?> callback) {
+    Invocation invocation = builder(type, null, objectId).buildDelete();
     getResponse(invocation, null, callback);
   }
 
   @Override
-  public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
-    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildDelete();
+  public void delete(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+    Invocation invocation = builder(product, null, objectId, action, actionArg).buildDelete();
     getResponse(invocation, null, callback);
   }
 
   @Override
   public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType, Callback<T> callback) {
     Entity entity = Entity.json(arg);
-    Invocation invocation = builder(product, null, secure, objectId, action, actionArg).buildPost(entity);
+    Invocation invocation = builder(product, null, objectId, action, actionArg).buildPost(entity);
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);
   }
 
@@ -186,13 +187,13 @@ public class RestChannel extends RestChannelBase {
     if (restClient != null) {
       restClient.close();
       restClient = null;
+      LOG.debug("REST channel closed.");
     }
   }
 
   // private -------------------------------------------------------------------------------------------------------------------
 
-  private <T> Invocation.Builder builder(Class<T> type, Map<String, Object> queryParams, boolean secure,
-                                         String... pathArgs) {
+  private <T> Invocation.Builder builder(Class<T> type, Map<String, Object> queryParams, String... pathArgs) {
     open();
 
     // todo: Cache targets?
@@ -222,18 +223,17 @@ public class RestChannel extends RestChannelBase {
   }
 
   private void setupAuth(Invocation.Builder builder) {
-    if (secure) {
-      Token token = authProvider.getToken();
-      if (token != null) {
-        MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
-        setAuthorizationHeader(headers, token.getAccessToken());
-        builder.headers(headers);
-      }
+    MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
+    setAuthorizationHeader(headers);
+    if (headers.size() > 0) {
+      builder.headers(headers);
     }
   }
 
   private <T> T getResponse(Invocation invocation, final TypeReference entityType, final Callback<T> callback,
                             final Integer... ignoredStatus) {
+
+    LOG.debug("Executing request for: ", entityType.getType().toString());
     T result = null;
     if (callback == null) {
       Future<Response> future = invocation.submit();
@@ -241,24 +241,26 @@ public class RestChannel extends RestChannelBase {
         Response response = future.get(30, TimeUnit.SECONDS);
         result = readEntity(response, entityType, ignoredStatus);
       } catch (Throwable e) {
-        throw translate(e);
+        throw new RuntimeException(translate(e));
       }
     } else {
       invocation.submit(
           new InvocationCallback<Response>() {
             @Override
             public void completed(Response response) {
+              T result;
               try {
-                T result = readEntity(response, entityType, ignoredStatus);
-                onCompleted(callback, result);
-              } catch (Exception e) {
-                failed(translate(e));
+                result = readEntity(response, entityType, ignoredStatus);
+              } catch (Throwable e) {
+                callback.failed(translate(e));
+                return;
               }
+              callback.completed(result);
             }
 
             @Override
             public void failed(Throwable throwable) {
-              onFailed(callback, translate(throwable));
+              callback.failed(translate(throwable));
             }
           });
     }
@@ -288,7 +290,7 @@ public class RestChannel extends RestChannelBase {
     return jsonMapper.map(response.readEntity(String.class), entityType);
   }
 
-  private RuntimeException translate(Throwable throwable) {
+  private Throwable translate(Throwable throwable) {
     Status status = null;
     if (throwable instanceof WebApplicationException) {
       Response response = ((WebApplicationException) throwable).getResponse();
@@ -310,6 +312,6 @@ public class RestChannel extends RestChannelBase {
       return new HttpErrorException(throwable, response.getStatus());
     }
 
-    return new SecuException(throwable);
+    return throwable;
   }
 }

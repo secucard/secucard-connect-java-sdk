@@ -1,6 +1,5 @@
 package com.secucard.connect.channel;
 
-import com.secucard.connect.Callback;
 import com.secucard.connect.ProductException;
 import com.secucard.connect.SecuException;
 import com.secucard.connect.ServiceOperations;
@@ -14,11 +13,12 @@ import org.apache.commons.lang3.StringUtils;
  * General base class for chanel implementations.
  */
 public abstract class Channel implements ServiceOperations {
+  public static final String STOMP = "stomp";
+  public static final String REST = "rest";
 
   protected PathResolver pathResolver = new PathResolver();
   protected final Log LOG = new Log(getClass());
-  protected ExecutionListener executionListener;
-  protected EventListener eventListener;
+  protected EventListener<Object> eventListener;
   protected JsonMapper jsonMapper = JsonMapper.get();
   protected String id;
   protected AuthProvider authProvider;
@@ -31,9 +31,11 @@ public abstract class Channel implements ServiceOperations {
 
   /**
    * Registers a listener which gets called when a server side or other event happens.
-   * Server side events are not supported on any type of channels, e.g. REST based channels!
+   * Server side events may not be supported by some channels, e.g. REST based channels!
+   *
+   * @param listener The listener to
    */
-  public void setEventListener(EventListener listener) {
+  public void setEventListener(EventListener<Object> listener) {
     eventListener = listener;
   }
 
@@ -46,26 +48,14 @@ public abstract class Channel implements ServiceOperations {
    */
   public abstract void close();
 
-  protected void onFailed(Callback callback, Throwable e) {
-    if (callback != null) {
-      try {
-        callback.failed(e);
-      } catch (Exception e1) {
-        LOG.error("Client error", e);
-      }
-    }
-  }
-
-  protected <T> void onCompleted(Callback<T> callback, T result) {
-    if (callback != null) {
-      try {
-        callback.completed(result);
-      } catch (Exception e) {
-        LOG.error("Client error", e);
-      }
-    }
-  }
-
+  /**
+   * Inspects the given status and returns an appropriate exception.
+   * At the moment only product related errors are recognized all other return an general exceptions.
+   *
+   * @param status The error status details.
+   * @param cause  The error cause.
+   * @return Translated exception instance witch cause attached as root cause.
+   */
   protected RuntimeException translateError(Status status, Throwable cause) {
     if (StringUtils.startsWithIgnoreCase(status.getError(), "product")) {
       return new ProductException(status, cause);

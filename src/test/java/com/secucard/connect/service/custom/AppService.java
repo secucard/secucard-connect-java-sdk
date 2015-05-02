@@ -1,10 +1,10 @@
 package com.secucard.connect.service.custom;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.model.general.Account;
 import com.secucard.connect.model.general.Location;
-import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.general.PublicMerchant;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.transport.Result;
@@ -22,22 +22,8 @@ public class AppService extends AbstractService {
   public void updateLocation() {
     final Location object = new Location(51, 55, 1);
 
-    Boolean result = new Result2BooleanInvoker() {
-      @Override
-      protected Result handle(Callback<Result> callback) throws Exception {
-        return getRestChannel().updateObject(Account.class, "me", "location", null, object, Result.class, null);
-      }
-    }.invokeAndConvert(new Callback<Boolean>() {
-      @Override
-      public void completed(Boolean result) {
-        System.out.println(result);
-      }
-
-      @Override
-      public void failed(Throwable throwable) {
-        throwable.printStackTrace();
-      }
-    });
+    Result result = new ServiceTemplate(Channel.REST).update(Account.class, "me", "location", null, object,
+        Result.class, null);
 
     System.out.println(result);
   }
@@ -54,9 +40,9 @@ public class AppService extends AbstractService {
 //    queryParams.addSortOrder("_geometry", QueryParams.SORT_ASC);
     queryParams.setGeoQuery(new QueryParams.GeoQuery("geometry", 51.175214, 14.027788, "1000m"));
     try {
-      return channel.findObjects(PublicMerchant.class, queryParams, null);
+      return channel.getList(PublicMerchant.class, queryParams, null);
     } catch (Exception e) {
-      handleException(e, null);
+      e.printStackTrace();
     }
     return null;
   }
@@ -67,7 +53,7 @@ public class AppService extends AbstractService {
 //      StompChannel channel = (StompChannel) getStompChannel();
       return channel.execute(appId, method, arg, returnType, callback);
     } catch (Exception e) {
-      handleException(e, callback);
+      e.printStackTrace();
     }
     return null;
   }

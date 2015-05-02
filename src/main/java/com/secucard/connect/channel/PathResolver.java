@@ -28,7 +28,7 @@ public class PathResolver {
     Annotation annotation = type.getAnnotation(ProductInfo.class);
     if (annotation == null) {
       try {
-        Field fields = type.getDeclaredField("OBJECT");
+        Field fields = type.getDeclaredField(SecuObject.OBJECT_FIELD);
         resourceId = (String) fields.get(null);
       } catch (Exception e) {
         throw new IllegalArgumentException("Type has no metadata annotated nor static OBJECT field: " + type);
@@ -60,7 +60,7 @@ public class PathResolver {
       }
       return path.substring(1);
     } catch (Exception e) {
-      throw new SecuException("Error building path for resource " + resourceId, e);
+      throw new RuntimeException("Error building path for resource " + resourceId, e);
     }
   }
 

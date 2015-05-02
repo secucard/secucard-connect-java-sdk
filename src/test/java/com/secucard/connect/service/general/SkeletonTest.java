@@ -1,41 +1,41 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.event.EventListener;
-import com.secucard.connect.event.Events;
+import com.secucard.connect.ExceptionHandler;
+import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.Skeleton;
 import com.secucard.connect.service.AbstractServicesTest;
 
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeNoException;
 
 public class SkeletonTest extends AbstractServicesTest {
   private SkeletonService service;
-  private List<Skeleton> skeletons;
+  private ObjectList<Skeleton> skeletons;
 
   @Override
   public void before() throws Exception {
     super.before();
     service = client.getService(SkeletonService.class);
-    client.setEventListener(Events.ConnectionStateChanged.class, new EventListener<Events.ConnectionStateChanged>() {
-      @Override
-      public void onEvent(Events.ConnectionStateChanged event) {
-        System.out.println("Client is connected: " + event.connected);
-      }
-    });
   }
 
   @Override
   protected void executeTests() throws Exception {
-//    testFind();
-    testGet();
+    testFind();
+//    testGet();
   }
 
   private void testFind() throws Exception {
+
+/*
+    client.setExceptionHandler(new ExceptionHandler() {
+      @Override
+      public void handle(Throwable exception) {
+        System.out.println();
+      }
+    });
+*/
     QueryParams queryParams = new QueryParams();
     queryParams.setOffset(1);
     queryParams.setCount(2);
@@ -43,20 +43,31 @@ public class SkeletonTest extends AbstractServicesTest {
     queryParams.addSortOrder("a", QueryParams.SORT_ASC);
     queryParams.addSortOrder("b", QueryParams.SORT_DESC);
     queryParams.setQuery("a:abc1? OR (b:*0 AND NOT c:???1??)");
-    service.getSkeletons(null, new Callback<List<Skeleton>>() {
+    Callback<ObjectList<Skeleton>> callback = new Callback<ObjectList<Skeleton>>() {
       @Override
-      public void completed(List<Skeleton> result) {
+      public void completed(ObjectList<Skeleton> result) {
         skeletons = result;
         assertNotNull(skeletons);
+        System.out.println(skeletons);
       }
 
       @Override
       public void failed(Throwable throwable) {
-        assumeNoException(throwable);
+        System.err.print("FAILED: ");
+        throwable.printStackTrace();
+//        assumeNoException(throwable);
       }
-    });
+    };
+    Object result = null;
+    try {
+      result = service.getSkeletons(null, callback);
+    } catch (Exception e) {
+      System.err.print("CATCH: ");
+      e.printStackTrace();
+    }
 
-    Thread.sleep(2000);
+    Thread.sleep(10000);
+    System.out.println(result);
   }
 
   private void testGet() throws Exception {

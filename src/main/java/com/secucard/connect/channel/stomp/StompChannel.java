@@ -10,11 +10,15 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
+import com.secucard.connect.model.auth.Session;
+import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.transport.Message;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.stomp.Frame;
 import com.secucard.connect.stomp.StompClient;
 import com.secucard.connect.stomp.StompException;
 import com.secucard.connect.util.Execution;
+import com.secucard.connect.util.ThreadSleep;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
 import java.io.IOException;
@@ -22,6 +26,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class StompChannel extends Channel {
   protected static final String HEADER_CORRELATION_ID = "correlation-id";
@@ -31,6 +38,7 @@ public class StompChannel extends Channel {
   protected final Configuration configuration;
   protected final StompClient stomp;
   protected String connectToken;
+  private volatile boolean isConfirmed;
 
   private final StatusHandler defaultStatusHandler = new StatusHandler() {
     @Override
@@ -59,13 +67,13 @@ public class StompChannel extends Channel {
   }
 
   @Override
-  public <T> T getObject(final Class<T> type, String objectId, final Callback<T> callback) {
+  public <T> T get(final Class<T> type, String objectId, final Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.GET, type), new Message<T>(objectId),
         new MessageTypeRef(type), callback);
   }
 
   @Override
-  public <T> ObjectList<T> findObjects(final Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
+  public <T> ObjectList<T> getList(final Class<T> type, QueryParams queryParams, Callback<ObjectList<T>> callback) {
     Message message = new Message();
     message.setQuery(queryParams);
 
@@ -83,32 +91,32 @@ public class StompChannel extends Channel {
   }
 
   @Override
-  public <T> T createObject(T object, Callback<T> callback) {
+  public <T> T create(T object, Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.ADD, object.getClass()),
         new Message<>(object), new MessageTypeRef(object.getClass()), callback);
   }
 
   @Override
-  public <T extends SecuObject> T updateObject(T object, Callback<T> callback) {
+  public <T extends SecuObject> T update(T object, Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.UPDATE, object.getClass()),
         new Message<>(object.getId(), object), new MessageTypeRef(object.getClass()), callback);
   }
 
   @Override
-  public <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
-                            Class<T> returnType, Callback<T> callback) {
+  public <T> T update(Class product, String objectId, String action, String actionArg, Object arg,
+                      Class<T> returnType, Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.UPDATE, product, action),
         new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback);
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, Callback callback) {
+  public void delete(Class type, String objectId, Callback callback) {
     sendMessage(new StandardDestination(StandardDestination.DELETE, type), new Message<>(objectId),
         new MessageTypeRef(type), callback);
   }
 
   @Override
-  public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+  public void delete(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
     sendMessage(new StandardDestination(StandardDestination.DELETE, product, action), new Message<>(objectId, actionArg),
         new MessageTypeRef(product), callback);
   }
@@ -130,14 +138,14 @@ public class StompChannel extends Channel {
   }
 
   /**
-   * Returns the token used as login + password for  STOMP connect.
+   * Provides the token used as login and password for  STOMP connect.
    */
   protected String getToken() {
-    return authProvider.getToken().getAccessToken();
+    return authProvider.getToken(false);
   }
 
   /**
-   * Returns login, password for  STOMP connect.
+   * Provides login, password for STOMP connect.
    */
   protected String[] getConnectCredentials() {
     return new String[]{configuration.userId, configuration.password};
@@ -247,11 +255,94 @@ public class StompChannel extends Channel {
 
     statusHandler.check(msg);
 
-    if (executionListener != null) {
-      executionListener.executed(this);
-    }
+    isConfirmed = true;
 
     return msg.getData();
+  }
+
+  /**
+   * Starts the session refresh loop thread. Blocks until the loop is really running and returns after that.
+   *
+   * @return Null if successfully started or an error if not.
+   */
+  public Throwable startSessionRefresh() {
+    final AtomicReference<Throwable> reference = new AtomicReference<>(null);
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        reference.set(runSessionRefresh(latch));
+        latch.countDown();
+      }
+    };
+
+    t.setDaemon(true);
+    t.start();
+
+    // let current thread
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      // ignore
+    }
+
+    // must return null if no error happened
+    return reference.get();
+  }
+
+  /**
+   * Sends a confirmations within an fixed interval that this client is alive.
+   * But is able to skip confirmation if other already confirmed this (setting isConfirmed to true).
+   * Always keeps trying to refresh next time even if an attempt failed.
+   *
+   * @param countDownLatch A latch to release if successfully executed.
+   */
+  private Throwable runSessionRefresh(CountDownLatch countDownLatch) {
+    LOG.info("Session refresh loop started.");
+    boolean initial = true;
+    do {
+      try {
+        execute(Session.class, "me", "refresh", null, null, Result.class, null);
+        isConfirmed = false;
+        LOG.info("Session refresh sent.");
+      } catch (Throwable t) {
+        LOG.info("Session refresh failed.");
+        if (initial) {
+          // first invocation after connect, let client know something is going wrong
+          return t;
+        }
+      }
+
+      // releases latch
+      if (initial) {
+        countDownLatch.countDown();
+        initial = false;
+      }
+
+
+      // sleep until next refresh, reset wait time if anybody confirmed session for us so we can sleep longer
+      // but cancel when not connected anymore
+      new ThreadSleep() {
+        @Override
+        protected boolean reset() {
+          if (isConfirmed) {
+            isConfirmed = false;
+            return true;
+          }
+          return false;
+        }
+
+        @Override
+        protected boolean cancel() {
+          return !stomp.isConnected();
+        }
+      }.execute(configuration.heartbeatMs, 500, TimeUnit.MILLISECONDS);
+    } while (stomp.isConnected());
+
+    LOG.info("Session refresh stopped.");
+
+    return null;
   }
 
 
@@ -374,43 +465,50 @@ public class StompChannel extends Channel {
     public void onMessage(Frame frame) {
       String correlationId = frame.getHeaders().get(HEADER_CORRELATION_ID);
       String body = frame.getBody();
+
+      if (body == null) {
+        return;
+      }
+
       if (correlationId != null) {
         synchronized (messages) {
           putMessage(correlationId, body, messages);
         }
-      }
-
-      if (eventListener != null && correlationId == null) {
+      } else if (eventListener != null) {
         // this is an STOMP event message, no direct correlation to a request
+        LOG.debug("STOMP event message received: ", body);
+
         Object event = null;
         try {
-          event = jsonMapper.mapEvent(body);
+          // we expect Event type at first
+          event = jsonMapper.map(body, Event.class);
         } catch (Exception e) {
           // ignore
         }
 
         if (event != null) {
           eventListener.onEvent(event);
-          return;
-        }
-
-        try {
-          event = jsonMapper.map(body);
-          eventListener.onEvent(event);
-        } catch (Exception e) {
-          LOG.debug("STOMP message received but unable to convert: ", body, "; ", e.getMessage());
+        } else {
+          // try to map into any known object
+          try {
+            event = jsonMapper.map(body);
+            eventListener.onEvent(event);
+          } catch (Exception e) {
+            LOG.error("STOMP message received but unable to convert: ", body, "; ", e.getMessage());
+          }
         }
       }
     }
 
     @Override
     public void onError(Frame frame) {
-      if (isConnectionError(frame.getHeaders(), frame.getBody())) {
-        eventListener.onEvent(new Events.AuthorizationFailed("STOMP authorization failed, reason: " + frame.getBody()));
+      if (eventListener == null) {
         return;
       }
 
-      if (eventListener != null) {
+      if (isConnectionError(frame.getHeaders(), frame.getBody())) {
+        eventListener.onEvent(new Events.AuthorizationFailed("STOMP authorization failed, reason: " + frame.getBody()));
+      } else {
         Map<String, String> headers = frame.getHeaders();
         headers.put("body", frame.getBody());
         eventListener.onEvent(new Events.Error("STOMP error happened.", headers));

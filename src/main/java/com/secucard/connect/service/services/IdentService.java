@@ -1,7 +1,7 @@
 package com.secucard.connect.service.services;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.event.AbstractEventHandler;
+import com.secucard.connect.event.EventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
@@ -26,10 +26,6 @@ import java.util.*;
 public class IdentService extends AbstractService {
   private boolean cacheAttachmentsEnabled = true;
 
-  public IdentService() {
-    serviceEventListener = new ServiceEventListener();
-  }
-
   /**
    * Set to true/false to globally enable/disable attachment caching when requested by methods of this service.
    * Caching is enabled by default but is only performed when requested in methods.
@@ -46,18 +42,8 @@ public class IdentService extends AbstractService {
    * @return If no callback provided the found ident requests, null if nothing was found.<br/>
    * Always null if a callback was provided, the callbacks methods are called analogous then.
    */
-  public List<IdentRequest> getIdentRequests(final QueryParams queryParams, Callback<List<IdentRequest>> callback) {
-    return new ConvertingInvoker<ObjectList<IdentRequest>, List<IdentRequest>>() {
-      @Override
-      protected ObjectList<IdentRequest> handle(Callback<ObjectList<IdentRequest>> callback) {
-        return getChannel().findObjects(IdentRequest.class, queryParams, callback);
-      }
-
-      @Override
-      protected List<IdentRequest> convert(ObjectList<IdentRequest> object) {
-        return object == null ? null : object.getList();
-      }
-    }.invokeAndConvert(callback);
+  public List<IdentRequest> getIdentRequests(QueryParams queryParams, Callback<List<IdentRequest>> callback) {
+    return new ServiceTemplate().getAsList(IdentRequest.class, queryParams, callback);
   }
 
   /**
@@ -70,12 +56,7 @@ public class IdentService extends AbstractService {
    * Always null if a callback was provided, the callbacks methods are called analogous then.
    */
   public IdentRequest getIdentRequest(final String id, Callback<IdentRequest> callback) {
-    return new Invoker<IdentRequest>() {
-      @Override
-      protected IdentRequest handle(Callback<IdentRequest> callback) {
-        return getChannel().getObject(IdentRequest.class, id, callback);
-      }
-    }.invoke(callback);
+    return new ServiceTemplate().get(IdentRequest.class, id, callback);
   }
 
   /**
@@ -93,27 +74,9 @@ public class IdentService extends AbstractService {
                                                        Callback<List<IdentResult>> callback,
                                                        final boolean downloadAttachments) {
     // todo: better avoid query and access by id?
-    return new ConvertingInvoker<ObjectList<IdentResult>, List<IdentResult>>() {
-      @Override
-      protected ObjectList<IdentResult> handle(Callback<ObjectList<IdentResult>> callback) {
-        return getIdentResultsByRequestsRaw(identRequestIds, callback, downloadAttachments);
-      }
 
-      @Override
-      protected List<IdentResult> convert(ObjectList<IdentResult> objectList) {
-        if (objectList == null || objectList.getList() == null || objectList.getList().size() == 0) {
-          return null;
-        }
-        return objectList.getList();
-      }
-    }.invokeAndConvert(callback);
-  }
-
-  private ObjectList<IdentResult> getIdentResultsByRequestsRaw(List<String> requestIds,
-                                                               final Callback<ObjectList<IdentResult>> callback,
-                                                               final boolean downloadAttachments) {
     StringBuilder query = new StringBuilder();
-    for (Iterator<String> iterator = requestIds.iterator(); iterator.hasNext(); ) {
+    for (Iterator<String> iterator = identRequestIds.iterator(); iterator.hasNext(); ) {
       String id = iterator.next();
       query.append("request.id:").append(id);
       if (iterator.hasNext()) {
@@ -122,29 +85,16 @@ public class IdentService extends AbstractService {
     }
     QueryParams params = new QueryParams();
     params.setQuery(query.toString());
-    if (callback == null) {
-      ObjectList<IdentResult> list = context.getChannel(null).findObjects(IdentResult.class, params, null);
-      if (list != null) {
-        processAttachments(list.getList(), downloadAttachments);
-      }
-      return list;
-    } else {
-      context.getChannel(null).findObjects(IdentResult.class, params, new Callback<ObjectList<IdentResult>>() {
-        @Override
-        public void completed(ObjectList<IdentResult> result) {
-          if (result != null) {
-            processAttachments(result.getList(), downloadAttachments);
-          }
-          callback.completed(result);
-        }
 
-        @Override
-        public void failed(Throwable cause) {
-          callback.failed(cause);
+    return new ServiceTemplate() {
+      @Override
+      protected void onResult(Object arg) {
+        ObjectList<IdentResult> list = (ObjectList<IdentResult>) arg;
+        if (list != null) {
+          processAttachments(list.getList(), downloadAttachments);
         }
-      });
-      return null;
-    }
+      }
+    }.getAsList(IdentResult.class, params, callback);
   }
 
   /**
@@ -157,12 +107,7 @@ public class IdentService extends AbstractService {
    * Always null if a callback was provided, the callbacks methods are called analogous then.
    */
   public IdentRequest createIdentRequest(final IdentRequest newIdentRequest, Callback<IdentRequest> callback) {
-    return new Invoker<IdentRequest>() {
-      @Override
-      protected IdentRequest handle(Callback<IdentRequest> callback) throws Exception {
-        return getChannel().createObject(newIdentRequest, callback);
-      }
-    }.invoke(callback);
+    return new ServiceTemplate().create(newIdentRequest, callback);
   }
 
   /**
@@ -180,22 +125,15 @@ public class IdentService extends AbstractService {
    */
   public List<IdentResult> getIdentResults(final QueryParams queryParams, Callback<List<IdentResult>> callback,
                                            final boolean downloadAttachments) {
-    return new ConvertingInvoker<ObjectList<IdentResult>, List<IdentResult>>() {
+    return new ServiceTemplate() {
       @Override
-      protected ObjectList<IdentResult> handle(Callback<ObjectList<IdentResult>> callback) {
-        return getChannel().findObjects(IdentResult.class, queryParams, callback);
-      }
-
-      @Override
-      protected List<IdentResult> convert(ObjectList<IdentResult> object) {
-        if (object == null) {
-          return null;
+      protected void onResult(Object arg) {
+        ObjectList<IdentResult> list = (ObjectList<IdentResult>) arg;
+        if (list != null) {
+          processAttachments(list.getList(), downloadAttachments);
         }
-        List<IdentResult> results = object.getList();
-        processAttachments(results, downloadAttachments);
-        return results;
       }
-    }.invokeAndConvert(callback);
+    }.getAsList(IdentResult.class, queryParams, callback);
   }
 
   /**
@@ -211,40 +149,28 @@ public class IdentService extends AbstractService {
    * Always null if a callback was provided, the callbacks methods are called analogous then.
    */
   public IdentResult getIdentResult(final String id, Callback<IdentResult> callback, final boolean downloadAttachments) {
-    return new Invoker<IdentResult>() {
+    return new ServiceTemplate() {
       @Override
-      protected IdentResult handle(Callback<IdentResult> callback) {
-        IdentResult result = getChannel().getObject(IdentResult.class, id, callback);
-        processAttachments(Arrays.asList(result), downloadAttachments);
-        return result;
+      protected void onResult(Object arg) {
+        processAttachments(Arrays.asList((IdentResult) arg), downloadAttachments);
       }
-    }.invoke(callback);
+    }.get(IdentResult.class, id, callback);
   }
 
   /**
    * Register an event handler, see {@link IdentEventHandler} for which event.<br/>
    * This handler will be called then when the event is passed to
-   * {@link com.secucard.connect.Client#handleEvent(String)}
+   * {@link com.secucard.connect.Client#handleEvent(String, boolean)}
    * The event is discarded if no handler is registered.<br/>
    * Note: Registering a handler multiple times just replaces the previous instance.
    *
    * @param handler The handler instance or null to remove the handler.
    */
   public void onIdentRequestChanged(IdentEventHandler handler) {
-    if (handler == null) {
-      removeEventHandler(IdentEventHandler.ID);
-    } else {
+    if (handler != null) {
       handler.setService(this);
-      addEventHandler(IdentEventHandler.ID, handler);
     }
-  }
-
-  /**
-   * Disable/enable idents request event handling.
-   * Default is enabled.
-   */
-  public void disableEventHandling(boolean disable) {
-    disableEventHandler(IdentEventHandler.ID, disable);
+    context.getEventDispatcher().registerListener(IdentEventHandler.ID, handler);
   }
 
   private void processAttachments(List<IdentResult> results, boolean cache) {
@@ -266,9 +192,10 @@ public class IdentService extends AbstractService {
    * Event handler for event type {@link Events#TYPE_CHANGED} and target {@link IdentRequest#OBJECT}, happening when
    * IdentRequests are approved. The handler retrieves and returns a list of belonging IdentResults and downloads the
    * containing attachments when required if such an event is passed to
-   * {@link com.secucard.connect.Client#handleEvent(String)}.
+   * {@link com.secucard.connect.Client#handleEvent(String, boolean)}.
    */
-  public static abstract class IdentEventHandler extends AbstractEventHandler<List<IdentResult>, Event> {
+  public static abstract class IdentEventHandler
+      extends EventHandlerCallback<Event<List<IdentRequest>>, List<IdentResult>> {
     public static final String ID = IdentRequest.OBJECT + Events.TYPE_CHANGED;
     private IdentService service;
 
@@ -277,12 +204,13 @@ public class IdentService extends AbstractService {
     }
 
     @Override
-    public final boolean accept(Event event) {
+    public boolean accept(Event<List<IdentRequest>> event) {
       return IdentRequest.OBJECT.equals(event.getTarget()) && Events.TYPE_CHANGED.equals(event.getType());
     }
 
-    public final synchronized void handle(Event event) {
-      List<IdentRequest> requests = (List<IdentRequest>) event.getData();
+    @Override
+    protected List<IdentResult> process(Event<List<IdentRequest>> event) {
+      List<IdentRequest> requests = event.getData();
       List<String> ids;
       if (requests == null) {
         ids = Collections.emptyList();
@@ -293,23 +221,7 @@ public class IdentService extends AbstractService {
         }
       }
 
-      if (isAsync()) {
-        service.getIdentResultsByRequestsRaw(ids, new Callback<ObjectList<IdentResult>>() {
-          @Override
-          public void completed(ObjectList<IdentResult> result) {
-            IdentEventHandler.this.completed(result.getList());
-          }
-
-          @Override
-          public void failed(Throwable cause) {
-            IdentEventHandler.this.failed(cause);
-          }
-        }, downloadAttachments(requests));
-      } else {
-        ObjectList<IdentResult> list = service.getIdentResultsByRequestsRaw(ids, null, downloadAttachments(requests));
-        IdentEventHandler.this.completed(list.getList());
-      }
-
+      return service.getIdentResultsByRequestIds(ids, null, downloadAttachments(requests));
     }
 
     /**

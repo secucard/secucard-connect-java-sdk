@@ -1,11 +1,9 @@
 package com.secucard.connect.service.general.apps;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.ClientContext;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.Store;
-import com.secucard.connect.model.loyalty.Card;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
@@ -18,8 +16,8 @@ public class SecuAppService extends AbstractService {
    * @param argObject Object with Store ID and Merchant ID
    * @return The merchant with the given ID or null if not found
    */
-  public ObjectList<Store> getMerchant(String appId, Object argObject, Callback callback) {
-    return execute(appId, "getMerchantDetails", argObject, StoreList.class, callback, ClientContext.REST);
+  public StoreList getMerchant(String appId, Object argObject, Callback<StoreList> callback) {
+    return new ServiceTemplate().execute(appId, "getMerchantDetails", argObject, StoreList.class, callback);
   }
 
   /**
@@ -29,28 +27,25 @@ public class SecuAppService extends AbstractService {
    * @param arg   Arguments to filter list
    * @return List of merchants
    */
-  public ObjectList<Store> getMerchants(String appId, QueryParams arg, final Callback callback) {
-
-    return execute(appId, "getMyMerchants", arg, StoreList.class, callback, ClientContext.REST);
-
+  public StoreList getMerchants(String appId, QueryParams arg, final Callback<StoreList> callback) {
+    return new ServiceTemplate().execute(appId, "getMyMerchants", arg, StoreList.class, callback);
   }
 
   /**
    * Add card to account
    *
-   * @param appId App ID
-   * @param argObject Arguments with cardnumber and pin
+   * @param appId     App ID
+   * @param argObject Arguments with card number and pin
    * @return True if card added successfully, else false
    */
-  public Boolean addCard(final String appId, final Object argObject, Callback callback) {
-    return new Result2BooleanInvoker() {
-      @Override
-      protected Result handle(Callback<Result> callback) throws Exception {
-        return execute(appId, "addCard", argObject, Result.class, callback, ClientContext.REST);
-      }
-    }.invokeAndConvert(callback);
+  public Boolean addCard(final String appId, final Object argObject, Callback<Boolean> callback) {
+    return new ServiceTemplate().executeToBoolean(appId, "addCard", argObject, Result.class, callback);
   }
 
+  /**
+   * Just needed to allow parametrized type as result type in execute(...).
+   * todo: refactor the type arg
+   */
   public static class StoreList extends ObjectList<Store> {
 
   }

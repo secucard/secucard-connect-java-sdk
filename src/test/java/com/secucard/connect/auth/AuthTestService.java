@@ -3,11 +3,9 @@ package com.secucard.connect.auth;
 import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.service.TestService;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.storage.DiskCache;
-import com.secucard.connect.storage.SimpleFileDataStorage;
 import junit.framework.Assert;
 
 
@@ -17,8 +15,8 @@ public class AuthTestService extends TestService implements EventListener {
     MyOAuthProvider ap = new MyOAuthProvider();
     ClientConfiguration config = context.getConfig();
     ap.setCredentials(new DeviceCredentials(config.getClientCredentials().getClientId(), config.getClientCredentials().getClientSecret(), config.getDeviceId()));
-    ap.clearCache();
-    Token token = ap.getToken();
+    ap.clearToken();
+    String  token = ap.getToken(false);
     Assert.assertNotNull(token);
   }
 
@@ -29,11 +27,12 @@ public class AuthTestService extends TestService implements EventListener {
   }
 
   public void clientIdAuth() throws Exception {
+
     getRestChannel().open();
     MyOAuthProvider ap = new MyOAuthProvider();
     ClientCredentials clientCredentials = context.getConfig().getClientCredentials();
     ap.setCredentials(clientCredentials);
-    Token token = ap.getToken();
+    String  token = ap.getToken(false);
 //    ap.setCredentials(new ClientCredentials(clientCredentials.getClientId(), clientCredentials.getClientSecret() + "_"));
 //    token = ap.getToken();
     Assert.assertNotNull(token);

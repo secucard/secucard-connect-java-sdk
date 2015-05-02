@@ -2,6 +2,7 @@ package com.secucard.connect;
 
 import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 import com.secucard.connect.auth.OAuthProvider;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.RestChannelBase;
@@ -16,7 +17,6 @@ import com.secucard.connect.util.ResourceDownloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +28,12 @@ public class ClientContextFactory {
   public static ClientContext create(String clientId, ClientConfiguration config, Object runtimeContext,
                                      DataStorage dataStorage) {
 
+    ClientContext ctx = new ClientContext();
+
     OAuthProvider authProvider;
     RestChannelBase restChannel;
+
+    ctx.deviceId = config.getDeviceId();
 
     if (config.isAndroidMode()) {
 
@@ -58,6 +62,10 @@ public class ClientContextFactory {
       authProvider = new OAuthProvider(clientId,
           new OAuthProvider.Configuration(config.getOauthUrl(), config.getAuthWaitTimeoutSec(), true, info));
 
+      if (ctx.deviceId == null) {
+        ctx.deviceId = Settings.Secure.getString(appContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+      }
+
     } else {
       if (dataStorage == null) {
         if (config.getCacheDir() == null) {
@@ -75,7 +83,6 @@ public class ClientContextFactory {
       authProvider = new OAuthProvider(clientId,
           new OAuthProvider.Configuration(config.getOauthUrl(), config.getAuthWaitTimeoutSec(), true, null));
     }
-    ClientContext ctx = new ClientContext();
 
     ctx.dataStorage = dataStorage;
 

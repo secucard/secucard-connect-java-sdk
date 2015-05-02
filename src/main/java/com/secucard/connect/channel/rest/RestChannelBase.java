@@ -1,9 +1,11 @@
 package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.QueryParams;
+import com.secucard.connect.util.ThreadLocalUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -129,8 +131,20 @@ public abstract class RestChannelBase extends Channel {
     }
   }
 
+  /**
+   * Adds auth headers if the secure setting is set and not "anonymous" thread local is passed.
+   *
+   * @param headers The header map to add to.
+   */
   @SuppressWarnings({"unchecked"})
-  protected void setAuthorizationHeader(Map headers, String token) {
+  protected void setAuthorizationHeader(Map headers) {
+    Boolean anonymous = (Boolean) ThreadLocalUtil.get("anonymous");
+    if ((anonymous != null && anonymous.equals(Boolean.TRUE)) || !secure) {
+      return;
+    }
+
+    String token = authProvider.getToken(false);
+
     if (token != null) {
       String key = "Authorization";
       String value = "Bearer " + token;

@@ -34,11 +34,14 @@ public abstract class Execution<T> {
       Thread t = new Thread() {
         @Override
         public void run() {
+          T result;
           try {
-            callback.completed(Execution.this.execute());
+            result = Execution.this.execute();
           } catch (Throwable e) {
             callback.failed(e);
+            return;
           }
+          callback.completed(result);
         }
       };
       t.setDaemon(true);

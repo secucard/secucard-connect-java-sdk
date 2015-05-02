@@ -78,18 +78,13 @@ public class ServicesTest extends AbstractServicesTest {
         cause.printStackTrace();
 //        assumeNoException(cause);
       }
-
-      @Override
-      protected boolean isAsync() {
-        return true;
-      }
     });
 
     client.connect();
 
     try {
       for (int i = 0; i < 1; i++) {
-        client.handleEvent(json);
+        client.handleEvent(json, false);
         Thread.sleep(100);
       }
       Thread.sleep(10000);
@@ -118,7 +113,6 @@ public class ServicesTest extends AbstractServicesTest {
   private void testGetIdentResult() throws Exception {
     IdentService service = client.getService(IdentService.class);
 
-    service.getServiceEventListener().onEvent("Event");
 
     try {
       client.connect();

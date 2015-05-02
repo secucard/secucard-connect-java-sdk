@@ -11,26 +11,27 @@ import java.util.List;
 public class ContainerService extends AbstractService {
 
   public List<Container> getContainers(QueryParams queryParams, final Callback<List<Container>> callback) {
-    return getList(Container.class, queryParams, callback, null);
+    return new ServiceTemplate().getAsList(Container.class, queryParams, callback);
   }
 
   public Container createContainer(final Container container, Callback<Container> callback) {
-    return create(container, callback, null);
+    return new ServiceTemplate().create(container, callback);
   }
 
   public Container updateContainer(final Container container, Callback<Container> callback) {
-    return update(container, callback, null);
+    return new ServiceTemplate().update(container, callback);
   }
 
   public Container updateContainerAssignment(final String containerId, final String customerId, Callback<Container> callback) {
-    return execute(Container.class, containerId, "assign", customerId, new Customer(), Container.class, callback, null);
+    return new ServiceTemplate().execute(Container.class, containerId, "assign", customerId, new Customer(),
+        Container.class, callback);
   }
 
   public void deleteContainerAssignment(final String containerId, Callback<Void> callback) {
-    delete(Container.class, containerId, "assign", null, callback, null);
+    new ServiceTemplate().delete(Container.class, containerId, "assign", null, callback);
   }
 
   public void deleteContainer(final String id, Callback<Void> callback) {
-    delete(Container.class, id, callback, null);
+    new ServiceTemplate().delete(Container.class, id, callback);
   }
 }

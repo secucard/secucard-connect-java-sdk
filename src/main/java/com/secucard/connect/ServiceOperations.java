@@ -22,7 +22,7 @@ public interface ServiceOperations {
    * @param callback   The callback for async invocation.
    * @return The object, never null. An exception is thrown if the id is unknown.
    */
-  <T> T getObject(Class<T> targetType, String objectId, Callback<T> callback);
+  <T> T get(Class<T> targetType, String objectId, Callback<T> callback);
 
   /**
    * Retrieves a collection of objects (resources) of a given type according to a given query.<br/>
@@ -34,7 +34,7 @@ public interface ServiceOperations {
    * @param callback    The callback for async invocation.
    * @return The object, null if nothing found.
    */
-  <T> ObjectList<T> findObjects(Class<T> targetType, QueryParams queryParams, Callback<ObjectList<T>> callback);
+  <T> ObjectList<T> getList(Class<T> targetType, QueryParams queryParams, Callback<ObjectList<T>> callback);
 
   /**
    * Creating an object.<br/>
@@ -47,7 +47,7 @@ public interface ServiceOperations {
    * @return The actual created object, never null. Throws exception if object cannot be created. May contain additional
    * or corrected data, like id.  So using this object later on instead the provided is necessary.
    */
-  <T> T createObject(T object, Callback<T> callback);
+  <T> T create(T object, Callback<T> callback);
 
   /**
    * Updating an object.<br/>
@@ -60,7 +60,7 @@ public interface ServiceOperations {
    * @return The actual updated object, never null. Throws exception if object cannot be updated. May contain additional
    * or corrected data, like id.  So using this object later on instead the provided is necessary.
    */
-  <T extends SecuObject> T updateObject(T object, Callback<T> callback);
+  <T extends SecuObject> T update(T object, Callback<T> callback);
 
   /**
    * Updating an object.<br/>
@@ -78,8 +78,8 @@ public interface ServiceOperations {
    * updated. May contain additional or corrected data, like id. So using this object later on instead the provided is
    * necessary.
    */
-  <T> T updateObject(Class targetType, String objectId, String action, String actionArg, Object arg,
-                     Class<T> returnType, Callback<T> callback);
+  <T> T update(Class targetType, String objectId, String action, String actionArg, Object arg,
+               Class<T> returnType, Callback<T> callback);
 
 
   /**
@@ -91,7 +91,7 @@ public interface ServiceOperations {
    * @param objectId   Id of the resource to delete.
    * @param callback   The callback for async invocation.
    */
-  void deleteObject(Class targetType, String objectId, Callback<?> callback);
+  void delete(Class targetType, String objectId, Callback<?> callback);
 
 
   /**
@@ -105,7 +105,7 @@ public interface ServiceOperations {
    * @param actionArg  Additional argument to the action, optional.
    * @param callback   The callback for async invocation.
    */
-  void deleteObject(Class targetType, String objectId, String action, String actionArg, Callback<?> callback);
+  void delete(Class targetType, String objectId, String action, String actionArg, Callback<?> callback);
 
   /**
    * Execute an action.<br/>

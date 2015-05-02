@@ -1,8 +1,9 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.ClientContext;
-import com.secucard.connect.event.EventHandler;
+import com.secucard.connect.channel.Channel;
+import com.secucard.connect.event.AbstractEventListener;
+import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.general.Notification;
@@ -21,7 +22,7 @@ public class TransactionService extends AbstractService {
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction createTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return create(transaction, callback, null);
+    return new ServiceTemplate(Channel.STOMP).create(transaction, callback);
   }
 
   /**
@@ -31,7 +32,7 @@ public class TransactionService extends AbstractService {
    * @return The updated transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction updateTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return update(transaction, callback, null);
+    return new ServiceTemplate(Channel.STOMP).update(transaction, callback);
   }
 
   /**
@@ -44,27 +45,27 @@ public class TransactionService extends AbstractService {
    */
   public Transaction startTransaction(final String transactionId, final String type,
                                       Callback<Transaction> callback) {
-    return execute(Transaction.class, transactionId, "start", type, null, Transaction.class,
-        callback, ClientContext.STOMP);
+    return new ServiceTemplate(Channel.STOMP).execute(Transaction.class, transactionId, "start", type, null,
+        Transaction.class, callback);
   }
 
   public void onCashierDisplayChanged(Callback<Notification> callback) {
-    addOrRemoveEventHandler(Events.TYPE_DISPLAY + Notification.OBJECT, new NotificationEventEventHandler(callback), callback);
-  }
+    AbstractEventListener listener = null;
 
-  private class NotificationEventEventHandler extends EventHandler<Notification, Event> {
-    public NotificationEventEventHandler(Callback<Notification> callback) {
-      super(callback);
+    if (callback != null) {
+      listener = new DelegatingEventHandlerCallback<Event<Notification>, Notification>(callback) {
+        @Override
+        public boolean accept(Event event) {
+          return Events.TYPE_DISPLAY.equals(event.getType()) && Notification.OBJECT.equals(event.getTarget());
+        }
+
+        @Override
+        protected Notification process(Event<Notification> event) {
+          return event.getData();
+        }
+      };
     }
 
-    @Override
-    public boolean accept(Event event) {
-      return Events.TYPE_DISPLAY.equals(event.getType()) && Notification.OBJECT.equals(event.getTarget());
-    }
-
-    @Override
-    public void handle(Event event) {
-      completed((Notification) event.getData());
-    }
+    context.getEventDispatcher().registerListener(Events.TYPE_DISPLAY + Notification.OBJECT, listener);
   }
 }

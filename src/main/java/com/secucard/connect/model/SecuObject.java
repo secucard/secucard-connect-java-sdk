@@ -5,11 +5,14 @@ import java.io.Serializable;
 public abstract class SecuObject implements Serializable {
   // Name of properties of this object, avoids direct string usage.
   public static final String OBJECT_PROPERTY = "object";
+  public static final String OBJECT_FIELD = "OBJECT";
   public static final String ID_PROPERTY = "id";
 
   protected String id;
 
   private String object;
+
+  //public String demo; // todo: remove in release, just for testing purposes!
 
   /**
    * Returns the unique resource/object/product identifier, all lowercase.<br/>

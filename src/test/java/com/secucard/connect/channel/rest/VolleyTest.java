@@ -81,7 +81,7 @@ public class VolleyTest extends AbstractServicesTest {
         queryParams.setOffset(-2);
         queryParams.setCount(10);
         queryParams.setQuery("id:12345");
-        channel.findObjects(Skeleton.class, queryParams, callback);
+        channel.getList(Skeleton.class, queryParams, callback);
 
 //      channel.getObject(Skeleton.class, "skl_60", callback);
 

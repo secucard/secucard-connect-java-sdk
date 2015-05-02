@@ -4,6 +4,7 @@ import com.secucard.connect.model.annotation.ProductInfo;
 
 import java.util.List;
 
+// todo: this is very superfluous, replace with ObjectList
 @ProductInfo(resourceId = "publicmerchants.aroundme")
 public class MerchantList {
 

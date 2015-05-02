@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -26,38 +27,36 @@ import java.util.concurrent.TimeUnit;
 public class OAuthProvider implements AuthProvider {
   public volatile boolean cancelAuth;
   private OAuthCredentials credentials;
-  private RestChannelBase httpClient;
   private EventListener authEventListener;
-  private RestChannelBase restChannel;
+  private RestChannelBase http;
   private DataStorage storage;
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
-  private final String id;
+  private final String instanceId;
   private final Configuration configuration;
-  private String lastCredentialId;
   private JsonMapper jsonMapper = JsonMapper.get();
-  private Token currentToken;  // kind of second level cache to avoid frequent token read
+  private Token currentToken;  // the current obtained token, may be persisted
 
   protected static final Log LOG = new Log(OAuthProvider.class);
 
   public OAuthProvider(String id, Configuration configuration) {
     this.configuration = configuration;
-    this.id = id;
+    this.instanceId = id;
   }
 
-  public void setCredentials(OAuthCredentials credentials) {
+  public synchronized void setCredentials(OAuthCredentials credentials) {
     this.credentials = credentials;
   }
 
-  public void setDataStorage(DataStorage dataStorage) {
+  public synchronized void setDataStorage(DataStorage dataStorage) {
     this.storage = dataStorage;
   }
 
-  public void setRestChannel(RestChannelBase restChannel) {
-    this.restChannel = restChannel;
+  public synchronized void setRestChannel(RestChannelBase restChannel) {
+    this.http = restChannel;
   }
 
   @Override
-  public void registerEventListener(EventListener eventListener) {
+  public synchronized void registerEventListener(EventListener eventListener) {
     authEventListener = eventListener;
   }
 
@@ -70,28 +69,23 @@ public class OAuthProvider implements AuthProvider {
     return configuration.deviceInfo;
   }
 
-  public void authenticate() {
-    getToken();
-  }
-
-  /**
-   * Returns a valid OAuth token.
-   * The token is retrieved by accessing OAuth server initially once by using the provided credentials and cached for
-   * later usage. This method also takes care of all aspects of the token validity, for example if the token is expired
-   * and must be refreshed. So any client is supposed to use only this method when a token is needed, and must NOT store
-   * the token on its own or alike. If the credentials change the token is retrieved new.
-   *
-   * @throws com.secucard.connect.auth.AuthException         If the authentication fails for some reason. The status
-   *                                                         field may contain details about failure.
-   * @throws com.secucard.connect.auth.AuthCanceledException If the authentication was canceled by the user.
-   */
-  public synchronized Token getToken() throws AuthException {
-    OAuthCredentials cr = this.credentials;
-    if (cr == null) {
+  public synchronized String getToken(boolean forceAuth) throws AuthException {
+    if (credentials == null) {
       throw new AuthException("Missing credentials");
     }
 
-    Token token = getCached(cr.getId());
+    if (credentials instanceof AnonymousCredentials) {
+      return null;
+    }
+
+    Token token = getCurrent();
+
+    // check if token matches the current credentials
+    if (token != null && !token.getId().equals(credentials.getId())) {
+      LOG.debug("Credentials changed, current token invalid, must obtain new.");
+      clearToken();
+      token = null;
+    }
 
     boolean authenticate = false;
 
@@ -100,17 +94,18 @@ public class OAuthProvider implements AuthProvider {
       authenticate = true;
     } else if (token.isExpired()) {
       // try refresh if just expired, authenticate new if no refresh possible or failed
-      LOG.debug("Token expired.");
-      clearCache();
+      LOG.debug("Token expired: ", token.getExpireTime() == null ? "null" : new Date(token.getExpireTime()),
+          ", original: ", token.getOrigExpireTime() == null ? "null" : new Date(token.getOrigExpireTime()));
+      clearToken();
       if (token.getRefreshToken() == null) {
-        LOG.debug("No token refresh possible, try authenticate new.");
+        LOG.debug("No token refresh possible, try obtain new.");
         authenticate = true;
       } else {
         try {
-          token = refresh(token, cr);
-          cache(token);
+          token = refresh(token, credentials);
+          setCurrentToken(token);
         } catch (Throwable t) {
-          LOG.debug("Token refresh failed, try authenticate new.", t);
+          LOG.debug("Token refresh failed, try obtain new.", t);
           authenticate = true;
         }
       }
@@ -119,83 +114,78 @@ public class OAuthProvider implements AuthProvider {
       if (configuration.extendExpire) {
         LOG.debug("Extend token expire time.");
         token.setExpireTime();
-        cache(token);
+        setCurrentToken(token);
       }
-      LOG.debug("Return cached token: ", token);
+      LOG.debug("Return current token: ", token);
     }
 
     if (authenticate) {
-      token = authenticate(cr);
+      // credential auth is needed but only if allowed
+      if (!forceAuth && credentials instanceof DeviceCredentials) {
+        throw new AuthException("Invalid or no auth token, please authenticate again.");
+      }
+      token = authenticate(credentials);
       token.setExpireTime();
-      token.setId(cr.getId());
-      cache(token);
+      token.setId(credentials.getId());
+      setCurrentToken(token);
       LOG.debug("Return new token: ", token);
     }
 
-    return token;
+    return token.getAccessToken();
   }
 
-  /**
-   * Clear token from cache.
-   */
-  public synchronized void clearCache() {
+  public synchronized void clearToken() {
+    currentToken = null;
     if (configuration.cacheToken) {
-      currentToken = null;
       storage.clear(getTokenChacheId(), null);
     }
   }
 
-  private void cache(Token token) {
+  /**
+   * Set the current token, also persist to cache.
+   */
+  private void setCurrentToken(Token token) {
+    currentToken = token;
     if (configuration.cacheToken) {
       try {
         String str = jsonMapper.map(token);
         // todo: encrypt token !!
         storage.save(getTokenChacheId(), str);
-        currentToken = token;
       } catch (IOException e) {
-        throw new IllegalArgumentException("Can't serialize token to JSON", e);
+        throw new IllegalArgumentException("Can't serialize token to JSON.", e);
       }
     }
   }
 
-  private Token getCached(String id) {
-    if (!configuration.cacheToken) {
-      return null;
-    }
-
-    if (currentToken != null && currentToken.getId().equals(id)) {
-      return currentToken;
-    }
-
-    currentToken = null;
-
-    try {
-      String str = (String) storage.get(getTokenChacheId());
-      if (str == null) {
-        return null;
+  /**
+   * Return the current token, try load from cache before.
+   */
+  private Token getCurrent() {
+    if (currentToken == null) {
+      // check if token exist in cache  and load
+      if (configuration.cacheToken) {
+        try {
+          String str = (String) storage.get(getTokenChacheId());
+          if (str != null) {
+            currentToken = jsonMapper.map(str, Token.class);
+          }
+        } catch (Exception e) {
+          LOG.error("Error reading token.", e);
+        }
       }
-      Token token = jsonMapper.map(str, Token.class);
-      if (token.getId().equals(id)) {
-        currentToken = token;
-        return token;
-      } else {
-        clearCache();
-      }
-    } catch (Exception e) {
-      LOG.error("Error reading token.", e);
     }
 
-    return null;
+    return currentToken;
   }
 
   /**
    * Returns the id used to put a token in the cache.
    */
   private String getTokenChacheId() {
-    return "token" + id;
+    return "token" + instanceId;
   }
 
-  protected Token authenticate(OAuthCredentials credentials) {
+  private Token authenticate(OAuthCredentials credentials) {
     LOG.debug("Authenticate credentials: ", credentials.asMap());
 
     Map<String, String> headers = new HashMap<>();
@@ -207,7 +197,6 @@ public class OAuthProvider implements AuthProvider {
     boolean deviceAuth = credentials instanceof DeviceCredentials;
 
     if (deviceAuth) {
-
       DeviceAuthCode codes = requestCodes(credentials, headers);
 
       EventDispatcher.fireEvent(codes, authEventListener, true);
@@ -254,10 +243,10 @@ public class OAuthProvider implements AuthProvider {
 
       if (token == null && deviceAuth) {
         // not authenticated yet
-        EventDispatcher.fireEvent(EVENT_CODE_AUTH_PENDING, authEventListener, false);
+        EventDispatcher.fireEvent(EVENT_AUTH_PENDING, authEventListener, true);
       } else if (token != null) {
         if (deviceAuth) {
-          EventDispatcher.fireEvent(EVENT_CODE_AUTH_OK, authEventListener, false);
+          EventDispatcher.fireEvent(EVENT_AUTH_OK, authEventListener, true);
         }
         return token;
       }
@@ -288,7 +277,7 @@ public class OAuthProvider implements AuthProvider {
       if (info != null) {
         parameters.putAll(info);
       }
-      return restChannel.post(configuration.oauthUrl, parameters, headers, resultType, ignoredHttpStatus);
+      return http.post(configuration.oauthUrl, parameters, headers, resultType, ignoredHttpStatus);
     } catch (SecuException e) {
       // try to provide some more failure details
       if (e.getStatus() != null) {

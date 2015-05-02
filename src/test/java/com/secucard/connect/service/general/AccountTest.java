@@ -22,7 +22,7 @@ public class AccountTest extends AbstractServicesTest {
 
     AccountService service = client.getService(AccountService.class);
 
-    service.setMerchantsChangedListener(new EventListener<MerchantList>() {
+    service.onMerchantsChanged(new EventListener<MerchantList>() {
       @Override
       public void onEvent(MerchantList event) {
         result = event;

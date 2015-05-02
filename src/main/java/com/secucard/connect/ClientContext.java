@@ -11,9 +11,6 @@ import com.secucard.connect.util.ThreadLocalUtil;
  * Context instance holding all necessary beans used in client in services.
  */
 public class ClientContext {
-  public static final String STOMP = "stomp";
-  public static final String REST = "rest";
-
   protected DataStorage dataStorage;
   protected Channel restChannel;
   protected Channel stompChannel;
@@ -23,7 +20,16 @@ public class ClientContext {
   protected ExceptionHandler exceptionHandler;
   protected Object runtimeContext;
   protected ResourceDownloader resourceDownloader;
+
+  /**
+   * Dispatches business event to registered listeners.
+   */
   protected EventDispatcher eventDispatcher;
+
+  /**
+   * An unique id (UUID) identifying the device we are running on.
+   */
+  protected String deviceId;
 
   /**
    * Obtain the current client context instance..
@@ -52,6 +58,10 @@ public class ClientContext {
     return clientId;
   }
 
+  public String getDeviceId() {
+    return deviceId;
+  }
+
   public ExceptionHandler getExceptionHandler() {
     return exceptionHandler;
   }
@@ -72,7 +82,8 @@ public class ClientContext {
    * Return a channel to the given name.
    *
    * @param name The channel name or null for default channel.
-   *             Valid names are: {@link ClientContext#STOMP}, {@link ClientContext#REST}.
+   *             Valid names are: {@link com.secucard.connect.channel.Channel#STOMP},
+   *             {@link com.secucard.connect.channel.Channel#REST}.
    * @return Null if the requested channel is not available or disabled by config, the channel instance else.
    * @throws java.lang.IllegalArgumentException if the name is not valid.
    */
@@ -81,11 +92,11 @@ public class ClientContext {
       name = config.getDefaultChannel();
     }
 
-    if (REST.equals(name)) {
+    if (Channel.REST.equals(name)) {
       return restChannel;
     }
 
-    if (STOMP.equals(name)) {
+    if (Channel.STOMP.equals(name)) {
       return stompChannel;
     }
 

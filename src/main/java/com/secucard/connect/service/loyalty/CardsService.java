@@ -3,13 +3,9 @@ package com.secucard.connect.service.loyalty;
 import com.secucard.connect.Callback;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
-import com.secucard.connect.model.general.Store;
 import com.secucard.connect.model.loyalty.Card;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class CardsService extends AbstractService {
 
@@ -20,12 +16,8 @@ public class CardsService extends AbstractService {
    * @return The card with the given ID or null if not found
    */
   public Card getCard(String id, Callback<Card> callback) {
-    try {
-      return getRestChannel().getObject(Card.class, id, callback);
-    } catch (Exception e) {
-      handleException(e, callback);
-    }
-    return null;
+    return new ServiceTemplate().get(Card.class, id, callback);
+
   }
 
   /**
@@ -35,7 +27,7 @@ public class CardsService extends AbstractService {
    * @return List of cards
    */
   public ObjectList<Card> getCards(QueryParams queryParams, final Callback<ObjectList<Card>> callback) {
-    return getRestChannel().findObjects(Card.class, queryParams, callback);
+    return new ServiceTemplate().getList(Card.class, queryParams, callback);
   }
 
   /**
@@ -45,18 +37,11 @@ public class CardsService extends AbstractService {
    * @return Assigned card
    */
   public Boolean assignUser(final String cardNumber, final Object pin, Callback<Boolean> callback) {
-    return new Result2BooleanInvoker() {
-      @Override
-      protected Result handle(Callback<Result> callback) throws Exception {
-        return getRestChannel().execute(Card.class, cardNumber, "assignUser", "me", pin, Result.class, callback);
-      }
-    }.invokeAndConvert(callback);
-
+    return new ServiceTemplate().executeToBoolean(Card.class, cardNumber, "assignUser", "me", pin, Result.class,
+        callback);
   }
 
-  public Boolean deleteUserFromCard(final String cardNumber, Callback<Boolean> callback) {
-    getRestChannel().deleteObject(Card.class, cardNumber, "assignUser", "me", callback);
-
-    return true;
+  public void deleteUserFromCard(final String cardNumber, Callback<Boolean> callback) {
+    new ServiceTemplate().delete(Card.class, cardNumber, "assignUser", "me", callback);
   }
 }

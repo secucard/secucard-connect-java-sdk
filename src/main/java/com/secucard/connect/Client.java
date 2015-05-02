@@ -1,40 +1,34 @@
 package com.secucard.connect;
 
-import com.secucard.connect.auth.OAuthCredentials;
-import com.secucard.connect.channel.Channel;
-import com.secucard.connect.channel.ExecutionListener;
+import com.secucard.connect.auth.*;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
-import com.secucard.connect.model.auth.Session;
 import com.secucard.connect.model.general.Event;
-import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 import com.secucard.connect.service.ServiceFactory;
 import com.secucard.connect.storage.DataStorage;
+import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
-import com.secucard.connect.util.ThreadSleep;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Main entry to the Java Secucard Connect API.
  */
 public class Client extends AbstractService {
   protected volatile boolean isConnected;
-  private Thread heartbeatInvoker;
   private String id;
   private ServiceFactory serviceFactory;
-  private boolean stopHeartbeat;
   private final Timer disconnectTimer;
+  private Callback.Notify<Boolean> connCallback;
   private TimerTask disconnectTimerTask;
-  private KeepAliveLoop keepAliveLoop;
-
   private static final Log LOG = new Log(Client.class);
+  private EventListener authEventListener;
 
   private Client(final String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
     if (configuration == null) {
@@ -42,7 +36,6 @@ public class Client extends AbstractService {
     }
 
     this.disconnectTimer = new Timer(true); // daemon thread needed
-    this.keepAliveLoop = new Client.KeepAliveLoop();
 
     this.id = id;
 
@@ -51,20 +44,13 @@ public class Client extends AbstractService {
     serviceFactory = new ServiceFactory(context);
     isConnected = false;
 
-    // set up STOMP event listening
-    Channel sc = getStompChannel();
-    if (sc != null) {
-      sc.setEventListener(new EventListener() {
+    // set up channel event listening
+    // REST based channels don't support events
+    if (getStompChannel() != null) {
+      getStompChannel().setEventListener(new EventListener<Object>() {
         @Override
         public void onEvent(Object event) {
-          handleEvent(event);
-
-          // todo: merge both
-          if (event instanceof Event) {
-            context.getEventDispatcher().handleEvent((Event) event);
-          } else {
-            context.getEventDispatcher().fireEvent(event);
-          }
+          handleChannelEvents(event);
         }
       });
     }
@@ -75,12 +61,36 @@ public class Client extends AbstractService {
 
 
   /**
+   * Register a listener which gets notified about authentication related events.
+   * 3 different event objects will delivered, all related to the device authorization process which
+   * is performed in multiple steps:<br/>
+   * {@link com.secucard.connect.auth.AuthProvider#EVENT_AUTH_PENDING} <br/>
+   * {@link com.secucard.connect.auth.AuthProvider#EVENT_AUTH_OK}<br/>
+   * {@link com.secucard.connect.model.auth.DeviceAuthCode}
+   * <p/>
+   * So registering makes not sense if this auth type is not used.
+   *
+   * @param listener The listener instance. Pass null to unregister.
+   */
+  public void onAuthenticationEven(EventListener listener) {
+    getAuthProvider().registerEventListener(listener);
+  }
+
+  /**
    * Creating the client using no runtime context and storage.
    *
    * @see #Client(String, ClientConfiguration, Object, com.secucard.connect.storage.DataStorage)
    */
   public static Client create(String id, ClientConfiguration configuration) {
     return new Client(id, configuration, null, null);
+  }
+
+  public static Client create(String id, String path) throws IOException {
+    return new Client(id, ClientConfiguration.fromProperties(path), null, null);
+  }
+
+  public static Client create(String id, InputStream inputStream) throws IOException {
+    return new Client(id, ClientConfiguration.fromStream(inputStream), null, null);
   }
 
   /**
@@ -125,146 +135,122 @@ public class Client extends AbstractService {
   }
 
   /**
-   * Disconnects all client connections after a given time and closed all resources.
-   *
-   * @param seconds The time after all connections should be closed.
-   * @return This client instance for method chaining.
-   */
-  public Client autoDisconnect(int seconds) {
-    if (disconnectTimerTask != null) {
-      disconnectTimerTask.cancel();
-    }
-    disconnectTimerTask = new DisconnectTimerTask();
-    disconnectTimer.schedule(disconnectTimerTask, seconds * 1000);
-    return this;
-  }
-
-
-  /**
    * Connect to secucard server anonymously.
-   *
-   * @return This client instance, allowing fluent interface.
    */
-  public Client connect() {
-    return connect(null, false);
+  public void connectAnonymous(Callback<Void> callback) {
+    connect(new AnonymousCredentials(), false, callback);
   }
 
+  /**
+   * Connect to secucard server using stored credential information from client configuration.
+   */
+  public void connect(Callback<Void> callback) {
+    connect(null, false, callback);
+  }
 
   /**
-   * Connect to secucard server.
+   * Like {@link #connect(com.secucard.connect.auth.OAuthCredentials, boolean, Callback)},
+   * but passing null
+   */
+  public void connect() {
+    connect(null, false, null);
+  }
+
+  /**
+   * Connect to secucard using the given credentials.
    *
    * @param credentials The credentials to use. Pass null to connect anonymously.
+   */
+  public void connect(OAuthCredentials credentials, Callback<Void> callback) {
+    connect(credentials, false, callback);
+  }
+
+  /**
+   * Connect to secucard using the given credentials.
+   * Returns immediately if a callback is provided, else blocks until completion.
+   * The client can be considered as connected when this method succeeded either by callback or by returning.
+   * Calling this method has no effect when the client is in connected state, call {@link #disconnect()} before.
+   * All resources are closed properly if the method fails, no need to call disconnect in that case.
+   * Any timeout set by {@link #autoDisconnect(int)}) is cleared when this method is called.
+   *
+   * @param credentials The credentials to use. Pass null to use credentials from config.
    * @param forceAuth   If true new authentication is forced using the credentials. If false client may use cached
    *                    authentication token from previous attempts for this credential if it is still valid,
    *                    avoiding a new authentication.
    *                    Falls back to true if no authentication token is available.
-   * @return This client instance, allowing fluent interface.
+   * @param callback    Callback to get notified when the connection attempt succeeded or failed. See "Throws" section
+   *                    to get details about the exceptions passed on failure.
+   * @throws com.secucard.connect.auth.AuthException         If the authentication failed for some reason,
+   *                                                         check exception details.
+   * @throws com.secucard.connect.auth.AuthCanceledException If the authentication was canceled by request.
    */
-  public synchronized Client connect(OAuthCredentials credentials, boolean forceAuth) {
+  public void connect(final OAuthCredentials credentials, final boolean forceAuth, Callback<Void> callback) {
+    new Execution<Void>() {
+      @Override
+      protected Void execute() {
+        connect(credentials, forceAuth);
+        return null;
+      }
+    }.start(callback);
+  }
+
+  private synchronized void connect(OAuthCredentials credentials, boolean forceAuth) {
+    if (isConnected) {
+      return;
+    }
+
     if (disconnectTimerTask != null) {
       disconnectTimerTask.cancel();
     }
 
-    ClientConfiguration configuration = context.getConfig();
-
-    if (isConnected) {
-      return this;
-    }
 
     if (forceAuth) {
-      getAuthProvider().clearCache();
+      getAuthProvider().clearToken();
+    }
+
+    if (credentials == null) {
+      credentials = getCredentialsFromConfig();
     }
 
     getAuthProvider().setCredentials(credentials);
 
-    if (credentials != null) {
-      // not anonymous, so check if provided or cached credentials are valid
-      try {
-        getAuthProvider().authenticate();
-      } catch (Throwable e) {
-        doDisconnect();
-        throw e;
+    try {
+      // strict auth triggering only here on connect!
+      getAuthProvider().getToken(true);
+    } catch (Throwable t) {
+      disconnect(true);
+      if (t instanceof AuthException) {
+        clearAuthentication();
+        throw t;
+      }
+      throw new SecuException("Unknow error authenticating the credentials.", t);
+    }
+
+    // STOMP not allowed in anonymous mode
+    if (context.config.isStompEnabled() && !(credentials instanceof AnonymousCredentials)) {
+      Throwable throwable = ((StompChannel) getStompChannel()).startSessionRefresh();
+      if (throwable != null) {
+        disconnect(true);
+        throw new SecuException("Error executing session refresh.", throwable);
       }
     }
-
-
-    if (!configuration.isStompEnabled()) {
-      // if stomp not enabled or no auth. - no keep alive, sop here
-      isConnected = true;
-//      connCallback.notify(true);
-      return this;
-    }
-
 
     isConnected = true;
 
-    try {
-      getStompChannel().open();
-    } catch (Throwable t) {
-      doDisconnect();
-      throw new SecuException(t);
-    }
-
-    keepAliveLoop.await();
-
-    if (keepAliveLoop.exception == null) {
-//      connCallback.notify(true);
-      return this;
-    } else {
-      doDisconnect();
-      throw new SecuException(keepAliveLoop.exception);
+    if (connCallback != null) {
+      connCallback.notify(true);
     }
   }
 
-  /**
-   * Initializes connects the client to the secucard server.<br/>
-   * Throws {@link com.secucard.connect.auth.AuthException} if an error happens during authentication.<br/>
-   * May also fire an event of type {@link com.secucard.connect.event.Events.AuthorizationFailed} if a STOMP auth.
-   * problem or similar happens.
-   * In both cases, or in general when a exception was thrown by this method, it's a good idea to call {@link #disconnect()}
-   * to help clean up resources.<br/>
-   * If the client is successfully connected an event of type {@link com.secucard.connect.event.Events.ConnectionStateChanged} is fired.
-   */
-  public synchronized void connect_() {
-    if (isConnected) {
+  public void disconnect() {
+    disconnect(false);
+  }
+
+  private synchronized void disconnect(boolean force) {
+    if (!force && !isConnected) {
       return;
     }
-    try {
-      getRestChannel().open(); // init rest first since it does auth,
-      context.getAuthProvider().getToken(); // fetch token
-      Channel sc = getStompChannel();
-      if (sc != null) {
-        sc.open();
-        startHeartBeat();
-        Thread.sleep(500);
-      }
-      isConnected = true;
-      context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(true));
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (InterruptedException e) {
-      //ignore
-    } catch (Throwable e) {
-      throw new SecuException(e);
-    }
-  }
 
-  /**
-   * Cancel pending authentication process.
-   */
-  public void cancelAuth() {
-    getAuthProvider().cancelAuth();
-  }
-
-  public void onConnectionStateChanged(Callback.Notify<Boolean> callback) {
-//    connCallback = callback;
-  }
-
-  public void onAuthFailed(Callback.Notify<Object> callback) {
-//    authFailedCallback = callback;
-  }
-
-  private void doDisconnect() {
     if (disconnectTimerTask != null) {
       disconnectTimerTask.cancel();
       disconnectTimerTask = null;
@@ -272,61 +258,58 @@ public class Client extends AbstractService {
 
     isConnected = false;
 
-    if (keepAliveLoop != null && keepAliveLoop.isAlive()) {
-      try {
-        // wait until keep alive loop ended
-        keepAliveLoop.join();
-      } catch (InterruptedException e) {
-        // ignore
-      }
-    }
-    keepAliveLoop = null;
-
     try {
       getRestChannel().close();
     } catch (Throwable e) {
       LOG.error("error closing channel", e);
     }
 
-    try {
-      getStompChannel().close();
-    } catch (Throwable e) {
-      LOG.error("error closing channel", e);
+    if (context.config.isStompEnabled()) {
+      try {
+        getStompChannel().close();
+      } catch (Throwable e) {
+        LOG.error("error closing channel", e);
+      }
     }
 
-//    connCallback.notify(false);
+    if (connCallback != null) {
+      connCallback.notify(false);
+    }
+    isConnected = false;
   }
 
-  public synchronized void disconnect() {
-    try {
-      Channel sc = getStompChannel();
-      if (sc != null) {
-        stopHeartBeat();
-        try {
-          sc.close();
-        } catch (Exception e) {
-          // ignore
-        }
-      }
-      try {
-        getRestChannel().close();
-      } catch (Exception e) {
-        // ignore
-      }
-      clear();
-      // todo: clear data store?
-    } finally {
-      isConnected = false;
-      context.getEventDispatcher().fireEvent(new Events.ConnectionStateChanged(false));
+
+  /**
+   * Disconnects all client connections after a given time and closed all resources.
+   *
+   * @param seconds The time after all connections should be closed.
+   */
+  public synchronized void autoDisconnect(int seconds) {
+    if (disconnectTimerTask != null) {
+      disconnectTimerTask.cancel();
     }
+    disconnectTimerTask = new DisconnectTimerTask();
+    disconnectTimer.schedule(disconnectTimerTask, seconds * 1000);
+  }
+
+  /**
+   * Cancel pending authentication process triggered by connect() call.
+   * Must be called from another thread like connect().
+   */
+  public void cancelAuth() {
+    getAuthProvider().cancelAuth();
+  }
+
+  public void onConnectionStateChanged(Callback.Notify<Boolean> callback) {
+    connCallback = callback;
   }
 
   /**
    * Remove any authentication data from clients cache.
-   * After that a new authentication for any given credentials may be requested.
+   * After that a new authentication for any given credentials is performed.
    */
   public void clearAuthentication() {
-    context.getAuthProvider().clearCache();
+    context.getAuthProvider().clearToken();
   }
 
   public boolean isConnected() {
@@ -338,92 +321,65 @@ public class Client extends AbstractService {
    * in a service callback hook method. The caller doesn't need to know anything about the provided event, all
    * handling is done internally. See the service for  specific event handling callback methods, prefixed with "on".<br/>
    * For processing of some events additional input beside the given event data is needed. In this cases a custom
-   * {@link com.secucard.connect.event.AbstractEventHandler} implementation must be provided.
+   * {@link com.secucard.connect.event.EventListener} implementation must be provided.
    *
-   * @param json Contains the event data.
+   * @param json  Contains the event data.
+   * @param async If true the event processing by a handler is performed in a new thread causing this method to return
+   *              immediately. False to handle in the main thread which will cause this method to block.
    * @return True if the event could be handled, false if no appropriate handler could be found and the event is not
    * handled.
-   * @throws com.secucard.connect.SecuException if the given string provides no proper event data.
+   * @throws com.secucard.connect.SecuException if the given JSON contains no valid event data.
    */
-  public synchronized boolean handleEvent(String json) {
+  public synchronized boolean handleEvent(String json, boolean async) {
     Event event;
     try {
-      event = JsonMapper.get().mapEvent(json);
+      event = JsonMapper.get().map(json, Event.class);
     } catch (Exception e) {
       throw new SecuException("Error processing event, invalid event data.", e);
     }
 
-    return context.getEventDispatcher().handleEvent(event);
+    return context.getEventDispatcher().dispatch(event, async);
   }
 
-  private void startHeartBeat() {
-    final int heartBeatMs = context.getConfig().getHeartBeatSec() * 1000;
-    final int step = 500;
-    if (context.getConfig().isStompEnabled()) {
-      stopHeartBeat();
-      stopHeartbeat = false;
-      heartbeatInvoker = new Thread() {
-        @Override
-        public void run() {
-          LOG.info("stomp heart beat started (", heartBeatMs, "s).");
-          StompChannel channel = (StompChannel) getStompChannel();
-
-          outer:
-          while (true) {
-            try {
-              channel.execute(Session.class, "me", "refresh", null, null, Result.class, null);
-            } catch (Throwable e) {
-              try {
-                channel.close();
-              } catch (Exception e1) {
-              }
-              //ignore all just try to go on
-            }
-
-            for (int i = 0; i < heartBeatMs; i += step) {
-              if (stopHeartbeat) {
-                break outer;
-              }
-              try {
-                Thread.sleep(step);
-              } catch (InterruptedException e) {
-                // ignore
-              }
-            }
-          }
-
-          LOG.info("stomp heart beat stopped");
-        }
-      };
-      heartbeatInvoker.start();
-    }
+  public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+    context.setExceptionHandler(exceptionHandler);
   }
-
-  private void stopHeartBeat() {
-    if (heartbeatInvoker != null) {
-      stopHeartbeat = true;
-      try {
-        heartbeatInvoker.join();
-      } catch (InterruptedException e) {
-      }
-    }
-  }
-
 
   /**
-   * Handle events before dispatching to listeners.
+   * Handle events from channels.
+   * Dispatches to registered service event listeners to handle business related events
+   * after filtering out and handling technical events.
    */
-  private void handleEvent(Object event) {
+  private void handleChannelEvents(Object event) {
     // just log STOMP connection for now
     if (Events.STOMP_CONNECTED.equals(event)) {
       LOG.info("Connected to STOMP server.");
     } else if (Events.STOMP_DISCONNECTED.equals(event)) {
       LOG.info("Disconnected from STOMP server.");
+    } else {
+      context.getEventDispatcher().dispatch(event, false);
     }
   }
 
-  public void setExceptionHandler(ExceptionHandler exceptionHandler) {
-    context.setExceptionHandler(exceptionHandler);
+  /**
+   * Obtains credentials stored in configuration.
+   *
+   * @return Instances of ClientCredentials or DeviceCredentials, null if no credentials set up.
+   */
+  private OAuthCredentials getCredentialsFromConfig() {
+    ClientCredentials credentials = context.config.getClientCredentials();
+    if (credentials == null) {
+      throw new AuthException("No client credentials found in configuration.");
+    }
+
+    if ("device".equalsIgnoreCase(context.config.getAuthType())) {
+      if (context.deviceId == null) {
+        throw new AuthException("No credentials found in configuration");
+      }
+      credentials = new DeviceCredentials(credentials.getClientId(), credentials.getClientSecret(),
+          context.getDeviceId());
+    }
+    return credentials;
   }
 
 
@@ -444,100 +400,5 @@ public class Client extends AbstractService {
     }
   }
 
-  /**
-   * Sends a confirmations within an fixed interval that this client is alive.
-   * But is able to skip confirmation if other already confirmed this (setting isConfirmed to true).
-   */
-  private class KeepAliveLoop extends Thread implements ExecutionListener {
-    private CountDownLatch latch;
-    public Throwable exception;
-    public volatile boolean isConfirmed;
 
-
-    private KeepAliveLoop() {
-      setDaemon(true);
-    }
-
-    @Override
-    public void executed(Channel channel) {
-      isConfirmed = true;
-    }
-
-    public void await() {
-      latch = new CountDownLatch(1);
-      super.start();
-      try {
-        latch.await();
-      } catch (InterruptedException e) {
-      }
-    }
-
-    @Override
-    public void run() {
-      LOG.info("keep alive loop started");
-      outer:
-      while (isConnected) {
-        try {
-          getStompChannel().execute(Session.class, "me", "refresh", null, null, Result.class, null);
-          isConfirmed = false;
-          LOG.info("keep alive sent");
-        } catch (Throwable t) {
-          LOG.info("keep alive failed");
-          if (latch.getCount() != 0) {
-            // first invocation after connect, let client know something is going wrong
-            exception = t;
-            latch.countDown();
-            break;
-          }
-        }
-        latch.countDown();// let main thread go on
-
-        int step = 100;
-        int interval = 8000;
-        int count = 0;
-
-        new ThreadSleep() {
-          @Override
-          protected boolean reset() {
-            if (isConfirmed) {
-              isConfirmed = false;
-              return true;
-            }
-            return false;
-          }
-
-          @Override
-          protected boolean cancel() {
-            return !isConnected;
-          }
-        }.execute(8000, 100, TimeUnit.MILLISECONDS);
-
-
-        // wait for next interval
-        // reset wait counter if anybody confirmed for us
-        while (true) {
-          if (!isConnected) {
-            break outer;
-          }
-          try {
-            Thread.sleep(step);
-          } catch (InterruptedException e) {
-            // ignore
-          }
-
-          if (isConfirmed) {
-            count = 0;
-            isConfirmed = false;
-          }
-
-          count += step;
-          if (count >= interval) {
-            break;
-          }
-        }
-      }
-
-      LOG.info("keep alive loop ended");
-    }
-  }
 }

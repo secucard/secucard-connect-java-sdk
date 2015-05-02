@@ -119,7 +119,7 @@ public class IdentsDemo {
           }
         ]} */
 
-      boolean ok = client.handleEvent(jsonEventData);
+      boolean ok = client.handleEvent(jsonEventData, false);
       // done
 
     } finally {

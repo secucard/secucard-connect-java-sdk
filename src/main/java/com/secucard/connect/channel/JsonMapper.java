@@ -1,26 +1,16 @@
 package com.secucard.connect.channel;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.annotation.ProductInfo;
-import com.secucard.connect.model.general.Event;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
-import org.apache.commons.lang3.StringUtils;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import com.secucard.connect.util.jackson.ObjectIdTypeResolver;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Utility class for mapping JSON to objects and back.
@@ -29,8 +19,6 @@ import java.util.Set;
  */
 public class JsonMapper {
   protected ObjectMapper objectMapper = new ObjectMapper();
-
-  protected static final TypeMap TYPE_REGISTRY = new TypeMap();
 
   private static final JsonMapper instance = new JsonMapper();
 
@@ -91,7 +79,7 @@ public class JsonMapper {
 
   /**
    * Tries to map a JSON string into {@link com.secucard.connect.model.SecuObject}.
-   * If not possible an instance of Map is returned or the JSON string itself.
+   * If not possible an instance of Map is returned.
    */
   public Object map(String json) throws IOException {
     Map map = map(json, Map.class);
@@ -99,103 +87,15 @@ public class JsonMapper {
       return json;
     }
 
-    Class type = null;
-    TypeReference typeReference = null;
-
-    Object objectId = map.get("object");
+    Object objectId = map.get(SecuObject.OBJECT_PROPERTY);
 
     if (objectId != null) {
-      type = TYPE_REGISTRY.getType((String) objectId);
+      Class type = ObjectIdTypeResolver.getType((String) objectId);
       if (type != null) {
-        typeReference = new DynamicTypeReference(type);
+        return map(json, new DynamicTypeReference(type));
       }
-    }
-
-    if (objectId != null && StringUtils.equalsIgnoreCase("general.events", (String) objectId)) {
-      type = TYPE_REGISTRY.getType((String) objectId);
-      if (type != null) {
-        typeReference = new DynamicTypeReference(Event.class, type);
-      }
-    }
-
-
-    if (type != null) {
-      return map(json, typeReference);
     }
 
     return map;
-  }
-
-  public Event mapEvent(String json) throws IOException {
-    Map map = map(json, Map.class);
-    if (map == null) {
-      return null;
-    }
-
-    JsonNode tree = objectMapper.readTree(json);
-
-    JsonNode object = tree.get(SecuObject.OBJECT_PROPERTY);
-    if (object != null && object.textValue().startsWith(Event.OBJECT_PROPERTY_PREFIX)) {
-      Event event = objectMapper.readValue(json, Event.class);
-      Class dataType = TYPE_REGISTRY.getType(event.getTarget());
-      if (dataType != null) {
-        JsonNode data = tree.get(Event.DATA_PROPERTY);
-        if (data != null) {
-          Object obj;
-          try {
-            // first try object list
-            obj = objectMapper.reader(new DynamicTypeReference(List.class, dataType)).readValue(data);
-          } catch (Exception e) {
-            obj = null;
-          }
-
-          if (obj == null) {
-            // second single object
-            obj = objectMapper.reader(new DynamicTypeReference(dataType)).readValue(data);
-          }
-
-          event.setData(obj);
-        }
-      }
-      return event;
-    }
-
-    return null;
-  }
-
-  /**
-   * Collects all classes annotated with {@link com.secucard.connect.model.annotation.ProductInfo}
-   * for JSON deserialization purposes.
-   */
-  protected static class TypeMap extends HashMap<String, Class<?>> {
-    {
-      // todo: maybe better to change to inspecting byte code instead, because this instantiates each class
-      Reflections reflections = new Reflections("com.secucard.connect.model", new SubTypesScanner(false));
-      Set<Class<?>> types = reflections.getSubTypesOf(Object.class);
-      for (Class<?> type : types) {
-        String resourceId;
-        ProductInfo annotation = type.getAnnotation(ProductInfo.class);
-        if (annotation != null) {
-          resourceId = annotation.resourceId();
-        } else {
-          try {
-            resourceId = (String) type.getField("OBJECT").get(null);
-          } catch (Exception e) {
-            resourceId = null;
-          }
-        }
-
-        if (resourceId != null) {
-          put(resourceId.toLowerCase(), type);
-        }
-      }
-    }
-
-    public Class getType(String typeString) {
-      if (typeString == null) {
-        return null;
-      }
-      return get(typeString.toLowerCase());
-    }
   }
 }

@@ -10,18 +10,18 @@ import java.util.List;
 public class CustomerService extends AbstractService {
 
   public List<Customer> getCustomers(QueryParams queryParams, final Callback<List<Customer>> callback) {
-    return getList(Customer.class, queryParams, callback, null);
+    return new ServiceTemplate().getAsList(Customer.class, queryParams, callback);
   }
 
   public Customer createCustomer(final Customer customer, Callback<Customer> callback) {
-    return create(customer, callback, null);
+    return new ServiceTemplate().create(customer, callback);
   }
 
   public Customer updateCustomer(final Customer customer, Callback<Customer> callback) {
-    return update(customer, callback, null);
+    return new ServiceTemplate().update(customer, callback);
   }
 
   public void deleteCustomer(final String id, Callback callback) {
-    delete(Customer.class, id, callback, null);
+    new ServiceTemplate().delete(Customer.class, id, callback);
   }
 }

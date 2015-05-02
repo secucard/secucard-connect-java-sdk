@@ -1,7 +1,6 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.ClientContext;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
@@ -9,6 +8,7 @@ import com.secucard.connect.model.general.Store;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class StoreService extends AbstractService {
@@ -20,12 +20,7 @@ public class StoreService extends AbstractService {
    * @return True if successfully updated, false else.
    */
   public boolean checkIn(final String storeId, final String sid, Callback<Boolean> callback) {
-    return new Result2BooleanInvoker() {
-      @Override
-      protected Result handle(Callback<Result> callback) throws Exception {
-        return getStompChannel().execute(Store.class, storeId, "checkin", sid, null, Result.class, callback);
-      }
-    }.invokeAndConvert(callback);
+    return new ServiceTemplate().executeToBoolean(Store.class, storeId, "checkin", sid, null, Result.class, callback);
   }
 
   /**
@@ -35,12 +30,8 @@ public class StoreService extends AbstractService {
    * @return True if successfully updated, false else.
    */
   public boolean setDefault(final String storeId, Callback<Boolean> callback) {
-    return new Result2BooleanInvoker() {
-      @Override
-      protected Result handle(Callback<Result> callback) throws Exception {
-        return getRestChannel().execute(Store.class, storeId, "setDefault", null, null, Result.class, callback);
-      }
-    }.invokeAndConvert(callback);
+    return new ServiceTemplate().executeToBoolean(Store.class, storeId, "setDefault", null, null, Result.class,
+        callback);
   }
 
   /**
@@ -50,21 +41,33 @@ public class StoreService extends AbstractService {
    * @return A list of found stores
    */
   public ObjectList<Store> getStores(QueryParams queryParams, final Callback<ObjectList<Store>> callback) {
-    return getRestChannel().findObjects(Store.class, queryParams, callback);
-  }
-
-  public List<Store> getStoreList(QueryParams queryParams, final Callback<List<Store>> callback) {
-    return getList(Store.class, queryParams, callback, ClientContext.REST);
+    return new ServiceTemplate() {
+      @Override
+      protected void onResult(Object arg) {
+        ObjectList<Store> stores = (ObjectList<Store>) arg;
+        if (stores != null && stores.getList() != null) {
+          processStore(stores.getList());
+        }
+      }
+    }.getList(Store.class, queryParams, callback);
   }
 
   public Store getStore(String pid, QueryParams queryParams, Callback<Store> callback) {
-    return get(Store.class, pid, callback, ClientContext.REST);
+    return new ServiceTemplate() {
+      @Override
+      protected void onResult(Object arg) {
+        Store store = (Store) arg;
+        if (store != null) {
+          processStore(Arrays.asList(store));
+        }
+      }
+    }.get(Store.class, pid, callback);
   }
 
-  @Override
-  protected void postProcessObjects(List<?> objects) {
-    for (Object object : objects) {
-      MediaResource picture = ((Store) object).getLogo();
+  private void processStore(List<Store> stores) {
+    setContext();
+    for (Store object : stores) {
+      MediaResource picture = object.getLogo();
       if (picture != null) {
         if (!picture.isCached()) {
           picture.download();
@@ -72,5 +75,6 @@ public class StoreService extends AbstractService {
       }
     }
   }
+
 
 }

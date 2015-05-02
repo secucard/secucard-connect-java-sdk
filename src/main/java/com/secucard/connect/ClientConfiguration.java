@@ -4,6 +4,7 @@ package com.secucard.connect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.secucard.connect.auth.AppUserCredentials;
 import com.secucard.connect.auth.ClientCredentials;
+import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.stomp.StompChannel;
 
@@ -44,7 +45,7 @@ public class ClientConfiguration {
     if (stompEnabled) {
       defaultChannel = cfg.getProperty("defaultChannel");
     } else {
-      defaultChannel = ClientContext.REST;
+      defaultChannel = Channel.REST;
     }
 
     heartBeatSec = Integer.valueOf(cfg.getProperty("heartBeatSec"));

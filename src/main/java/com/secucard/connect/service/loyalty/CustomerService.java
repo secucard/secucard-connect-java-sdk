@@ -15,6 +15,6 @@ public class CustomerService extends AbstractService {
    * give id was invalid.
    */
   public Customer getCustomer(String id, Callback<Customer> callback) {
-    return super.get(Customer.class, id, callback, null);
+    return new ServiceTemplate().get(Customer.class, id, callback);
   }
 }

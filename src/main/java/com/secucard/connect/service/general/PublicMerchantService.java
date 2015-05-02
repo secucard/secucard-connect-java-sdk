@@ -6,8 +6,6 @@ import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.PublicMerchant;
 import com.secucard.connect.service.AbstractService;
 
-import java.util.List;
-
 public class PublicMerchantService extends AbstractService {
 
   /**
@@ -17,7 +15,7 @@ public class PublicMerchantService extends AbstractService {
    * @return The public merchant with the given ID or null if not found
    */
   public PublicMerchant getPublicMerchant(String id, Callback<PublicMerchant> callback) {
-    return get(PublicMerchant.class, id, callback, null);
+    return new ServiceTemplate().get(PublicMerchant.class, id, callback);
   }
 
   /*
@@ -37,7 +35,7 @@ public class PublicMerchantService extends AbstractService {
    * @return List of public merchants
    */
   public ObjectList<PublicMerchant> getPublicMerchants(QueryParams queryParams, final Callback<ObjectList<PublicMerchant>> callback) {
-    return getObjectList(PublicMerchant.class, queryParams, callback, null);
+    return new ServiceTemplate().getList(PublicMerchant.class, queryParams, callback);
   }
 
   /*

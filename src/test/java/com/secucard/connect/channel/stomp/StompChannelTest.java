@@ -48,7 +48,7 @@ public class StompChannelTest {
     });
 
     try {
-      sc.findObjects(Skeleton.class, null, new Callback<ObjectList<Skeleton>>() {
+      sc.getList(Skeleton.class, null, new Callback<ObjectList<Skeleton>>() {
         @Override
         public void completed(ObjectList<Skeleton> result) {
           System.out.println("COMPLETED: " + result);
@@ -62,8 +62,8 @@ public class StompChannelTest {
       Thread.sleep(10 * 1000);
 
       // simulating token change an forcing reconnect
-      ap.clearCache();
-      ObjectList<Skeleton> objects = sc.findObjects(Skeleton.class, null, null);
+      ap.clearToken();
+      ObjectList<Skeleton> objects = sc.getList(Skeleton.class, null, null);
 
       Assert.assertNotNull(objects);
     } finally {

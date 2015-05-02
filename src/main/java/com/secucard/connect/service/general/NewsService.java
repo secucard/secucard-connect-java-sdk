@@ -16,7 +16,7 @@ public class NewsService extends AbstractService {
    * @return A list of found news
    */
   public ObjectList<News> getNews(QueryParams queryParams, final Callback<ObjectList<News>> callback) {
-    return getRestChannel().findObjects(News.class, queryParams, callback);
+    return new ServiceTemplate().getList(News.class, queryParams, callback);
   }
 
   /**
@@ -26,11 +26,6 @@ public class NewsService extends AbstractService {
    * @return True if successfully updated, false else.
    */
   public Boolean markRead(final String pid, Callback<Boolean> callback) {
-    return new Result2BooleanInvoker() {
-      @Override
-      protected Result handle(Callback<Result> callback) throws Exception {
-        return getRestChannel().execute(News.class, pid, "markRead", null, null, Result.class, callback);
-      }
-    }.invokeAndConvert(callback);
+    return new ServiceTemplate().executeToBoolean(News.class, pid, "markRead", null, null, Result.class, callback);
   }
 }

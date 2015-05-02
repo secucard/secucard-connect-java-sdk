@@ -1,13 +1,7 @@
 package com.secucard.connect.service.smart;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.secucard.connect.Callback;
-import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.model.MediaResource;
-import com.secucard.connect.model.auth.Token;
-import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.*;
 import com.secucard.connect.service.AbstractServicesTest;
@@ -17,7 +11,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -76,7 +69,7 @@ public class SmartTest extends AbstractServicesTest {
       }
     });
 
-    boolean b = client.handleEvent(json);
+    boolean b = client.handleEvent(json, false);
     Assert.assertTrue(b);
 
     Thread.sleep(5 * 60 * 1000);

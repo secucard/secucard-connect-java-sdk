@@ -14,7 +14,7 @@ public class UploadService extends AbstractService {
    */
   public Document uploadDocument(Document base64EncodeDocument, Callback<Document> callback) {
 
-    return getRestChannel().execute(Document.class, null, null, null, base64EncodeDocument, Document.class, callback);
+    return new ServiceTemplate().execute(Document.class, null, null, null, base64EncodeDocument, Document.class, callback);
   }
 
 }

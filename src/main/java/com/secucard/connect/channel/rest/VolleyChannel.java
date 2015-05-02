@@ -8,11 +8,9 @@ import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
-import com.secucard.connect.SecuException;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
-import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
@@ -58,7 +56,7 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public <T> T getObject(Class<T> type, String objectId, Callback<T> callback) {
+  public <T> T get(Class<T> type, String objectId, Callback<T> callback) {
     String url = buildRequestUrl(type, objectId);
     Request<T> request = buildRequest(Request.Method.GET, url, null, new DynamicTypeReference(type), callback);
     putToQueue(request);
@@ -66,7 +64,7 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public <T> ObjectList<T> findObjects(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
+  public <T> ObjectList<T> getList(Class<T> type, QueryParams queryParams, final Callback<ObjectList<T>> callback) {
     String url = buildRequestUrl(type) + "?" + encodeQueryParams(queryParams);
     Request<ObjectList<T>> request = buildRequest(Request.Method.GET, url, null,
         new DynamicTypeReference(ObjectList.class, type), callback);
@@ -75,7 +73,7 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public <T> T createObject(T object, Callback<T> callback) {
+  public <T> T create(T object, Callback<T> callback) {
     String url = buildRequestUrl(object.getClass());
     String requestBody;
     try {
@@ -92,7 +90,7 @@ public class VolleyChannel extends RestChannelBase {
 
 
   @Override
-  public <T extends SecuObject> T updateObject(T object, Callback<T> callback) {
+  public <T extends SecuObject> T update(T object, Callback<T> callback) {
     String url = buildRequestUrl(object.getClass(), object.getId());
     String requestBody;
     try {
@@ -108,8 +106,8 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public <T> T updateObject(Class product, String objectId, String action, String actionArg, Object arg,
-                            Class<T> returnType, Callback<T> callback) {
+  public <T> T update(Class product, String objectId, String action, String actionArg, Object arg,
+                      Class<T> returnType, Callback<T> callback) {
     String url = buildRequestUrl(product, objectId, action, actionArg);
     String requestBody;
     try {
@@ -124,14 +122,14 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public void deleteObject(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+  public void delete(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
     String url = buildRequestUrl(product, objectId, action, actionArg);
     Request request = buildRequest(Request.Method.DELETE, url, null, new DynamicTypeReference(product), callback);
     putToQueue(request);
   }
 
   @Override
-  public void deleteObject(Class type, String objectId, Callback<?> callback) {
+  public void delete(Class type, String objectId, Callback<?> callback) {
     String url = buildRequestUrl(type, objectId);
     Request request = buildRequest(Request.Method.DELETE, url, null, new DynamicTypeReference(type), callback);
     putToQueue(request);
@@ -190,9 +188,9 @@ public class VolleyChannel extends RestChannelBase {
     try {
       return future.get(requestTimeoutSec, TimeUnit.SECONDS);
     } catch (Exception e) {
-      RuntimeException exception = translate(e, ignoredState);
-      if (exception != null) {
-        throw exception;
+      Throwable throwable = translate(e, ignoredState);
+      if (throwable != null) {
+        throw new RuntimeException(throwable);
       }
     }
 
@@ -228,15 +226,10 @@ public class VolleyChannel extends RestChannelBase {
 
   private <T> ObjectJsonRequest<T> buildRequest(int method, String url, String requestBody, TypeReference typeReference,
                                                 Callback<T> callback) {
-    Map<String, String> headers = null;
-    if (secure) {
-      Token token = authProvider.getToken();
-      if (token != null) {
-        headers = new HashMap<>();
-        setAuthorizationHeader(headers, token.getAccessToken());
-      }
-    }
-    return new ObjectJsonRequest<>(method, url, requestBody, headers, typeReference, callback);
+    Map<String, String> headers = new HashMap<>();
+    setAuthorizationHeader(headers);
+    return new ObjectJsonRequest<>(method, url, requestBody, headers.size() == 0 ? null : headers, typeReference,
+        callback);
   }
 
   private synchronized <T> Request<T> putToQueue(Request<T> request) {
@@ -267,12 +260,12 @@ public class VolleyChannel extends RestChannelBase {
       this(method, url, requestBody, headers, typeReference, new Response.Listener<T>() {
         @Override
         public void onResponse(T response) {
-          onCompleted(callback, response);
+          callback.completed(response);
         }
       }, new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError error) {
-          onFailed(callback, translate(error));
+          callback.failed(translate(error));
         }
       });
     }
@@ -294,7 +287,7 @@ public class VolleyChannel extends RestChannelBase {
     }
   }
 
-  protected RuntimeException translate(Throwable throwable, Integer... ignoredStates) {
+  protected Throwable translate(Throwable throwable, Integer... ignoredStates) {
     RuntimeException ex;
 
     VolleyError error = null;
@@ -306,7 +299,7 @@ public class VolleyChannel extends RestChannelBase {
 
     if (error != null) {
       if (error.networkResponse == null) {
-        ex = new SecuException("Error processing request.", error);
+        ex = new RuntimeException("Error processing request.", error);
       } else {
         if (ignoredStates != null) {
           for (Integer state : ignoredStates) {
@@ -330,9 +323,9 @@ public class VolleyChannel extends RestChannelBase {
           ex = translateError(status, error.getCause());
         }
       }
-    } else {
-      ex = new SecuException("Error processing request", throwable);
+      return ex;
     }
-    return ex;
+
+    return throwable;
   }
 }

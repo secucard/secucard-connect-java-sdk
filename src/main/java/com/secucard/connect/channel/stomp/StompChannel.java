@@ -116,7 +116,7 @@ public class StompChannel extends Channel {
   }
 
   @Override
-  public void delete(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+  public void delete(Class product, String objectId, String action, String actionArg, Callback callback) {
     sendMessage(new StandardDestination(StandardDestination.DELETE, product, action), new Message<>(objectId, actionArg),
         new MessageTypeRef(product), callback);
   }

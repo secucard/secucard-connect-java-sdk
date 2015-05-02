@@ -91,7 +91,7 @@ public interface ServiceOperations {
    * @param objectId   Id of the resource to delete.
    * @param callback   The callback for async invocation.
    */
-  void delete(Class targetType, String objectId, Callback<?> callback);
+  void delete(Class targetType, String objectId, Callback<Void> callback);
 
 
   /**
@@ -105,7 +105,7 @@ public interface ServiceOperations {
    * @param actionArg  Additional argument to the action, optional.
    * @param callback   The callback for async invocation.
    */
-  void delete(Class targetType, String objectId, String action, String actionArg, Callback<?> callback);
+  void delete(Class targetType, String objectId, String action, String actionArg, Callback<Void> callback);
 
   /**
    * Execute an action.<br/>

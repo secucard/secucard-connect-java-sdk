@@ -195,21 +195,24 @@ public abstract class AbstractService {
     }
 
     @Override
-    public <T> T get(Class<T> targetType, String objectId, Callback<T> callback) {
-      return null;
+    public <T> T get(final Class<T> targetType, final String objectId, Callback<T> callback) {
+      return execute(new ChannelInvocation<T>() {
+        @Override
+        public T doInContext(Channel channel, Callback<T> resultCallback) {
+          return channel.get(targetType, objectId, resultCallback);
+        }
+      }, callback);
     }
 
     @Override
     public <T> ObjectList<T> getList(final Class<T> targetType, final QueryParams queryParams,
                                      final Callback<ObjectList<T>> callback) {
-      ChannelInvocation<ObjectList<T>> inv = new ChannelInvocation<ObjectList<T>>() {
+      return execute(new ChannelInvocation<ObjectList<T>>() {
         @Override
         public ObjectList<T> doInContext(Channel channel, Callback<ObjectList<T>> resultCallback) {
           return channel.getList(targetType, queryParams, resultCallback);
         }
-      };
-
-      return execute(inv, callback);
+      }, callback);
     }
 
     public <T> List<T> getAsList(final Class<T> targetType, final QueryParams queryParams,
@@ -223,33 +226,71 @@ public abstract class AbstractService {
     }
 
     @Override
-    public <T> T create(T object, Callback<T> callback) {
-      return null;
-    }
-
-    @Override
-    public <T extends SecuObject> T update(T object, Callback<T> callback) {
-      return null;
-    }
-
-    @Override
-    public <T> T update(Class targetType, String objectId, String action, String actionArg, Object arg,
-                        Class<T> returnType, Callback<T> callback) {
-      return null;
-    }
-
-    public Boolean updateToBoolean(Class targetType, String objectId, String action, String actionArg, Object arg,
-                                   Class<Result> returnType, Callback<Boolean> callback) {
-      return null;
-    }
-
-    @Override
-    public void delete(Class targetType, String objectId, Callback<?> callback) {
+    public <T> T create(final T object, Callback<T> callback) {
+      return execute(new ChannelInvocation<T>() {
+        @Override
+        public T doInContext(Channel channel, Callback<T> resultCallback) {
+          return channel.create(object, resultCallback);
+        }
+      }, callback);
 
     }
 
     @Override
-    public void delete(Class targetType, String objectId, String action, String actionArg, Callback<?> callback) {
+    public <T extends SecuObject> T update(final T object, Callback<T> callback) {
+      return execute(new ChannelInvocation<T>() {
+        @Override
+        public T doInContext(Channel channel, Callback<T> resultCallback) {
+          return channel.update(object, resultCallback);
+        }
+      }, callback);
+
+    }
+
+    @Override
+    public <T> T update(final Class targetType, final String objectId, final String action, final String actionArg,
+                        final Object arg, final Class<T> returnType, Callback<T> callback) {
+      return execute(new ChannelInvocation<T>() {
+        @Override
+        public T doInContext(Channel channel, Callback<T> resultCallback) {
+          return channel.update(targetType, objectId, action, actionArg, arg, returnType, resultCallback);
+        }
+      }, callback);
+
+    }
+
+    public Boolean updateToBoolean(final Class targetType, final String objectId, final String action,
+                                   final String actionArg, final Object arg, final Class<Result> returnType,
+                                   Callback<Boolean> callback) {
+      return executeToBoolean(new ChannelInvocation<Result>() {
+        @Override
+        public Result doInContext(Channel channel, Callback<Result> resultCallback) {
+          return channel.update(targetType, objectId, action, actionArg, arg, returnType, resultCallback);
+        }
+      }, callback);
+    }
+
+    @Override
+    public void delete(final Class targetType, final String objectId, Callback<Void> callback) {
+      execute(new ChannelInvocation<Void>() {
+        @Override
+        public Void doInContext(Channel channel, Callback<Void> resultCallback) {
+          channel.delete(targetType, objectId, resultCallback);
+          return null;
+        }
+      }, callback);
+    }
+
+    @Override
+    public void delete(final Class targetType, final String objectId, final String action, final String actionArg,
+                       Callback<Void> callback) {
+      execute(new ChannelInvocation<Void>() {
+        @Override
+        public Void doInContext(Channel channel, Callback<Void> resultCallback) {
+          channel.delete(targetType, objectId, action, actionArg, resultCallback);
+          return null;
+        }
+      }, callback);
     }
 
     @Override
@@ -275,13 +316,25 @@ public abstract class AbstractService {
     }
 
     @Override
-    public <T> T execute(String appId, String action, Object arg, Class<T> returnType, Callback<T> callback) {
-      return null;
+    public <T> T execute(final String appId, final String action, final Object arg, final Class<T> returnType,
+                         Callback<T> callback) {
+      return execute(new ChannelInvocation<T>() {
+        @Override
+        public T doInContext(Channel channel, Callback<T> resultCallback) {
+          return channel.execute(appId, action, arg, returnType, resultCallback);
+        }
+      }, callback);
     }
 
-    public Boolean executeToBoolean(String appId, String action, Object arg, Class<Result> returnType,
-                                    Callback<Boolean> callback) {
-      return null;
+    public Boolean executeToBoolean(final String appId, final String action, final Object arg,
+                                    final Class<Result> returnType, Callback<Boolean> callback) {
+      return executeToBoolean(new ChannelInvocation<Result>() {
+        @Override
+        public Result doInContext(Channel channel, Callback<Result> resultCallback) {
+          return channel.execute(appId, action, arg, returnType, resultCallback);
+        }
+      }, callback);
+
     }
   }
 

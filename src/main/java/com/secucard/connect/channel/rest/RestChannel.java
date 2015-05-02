@@ -142,19 +142,20 @@ public class RestChannel extends RestChannelBase {
   }
 
   @Override
-  public void delete(Class type, String objectId, Callback<?> callback) {
+  public void delete(Class type, String objectId, Callback<Void> callback) {
     Invocation invocation = builder(type, null, objectId).buildDelete();
     getResponse(invocation, null, callback);
   }
 
   @Override
-  public void delete(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+  public void delete(Class product, String objectId, String action, String actionArg, Callback<Void> callback) {
     Invocation invocation = builder(product, null, objectId, action, actionArg).buildDelete();
     getResponse(invocation, null, callback);
   }
 
   @Override
-  public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType, Callback<T> callback) {
+  public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
+                       Callback<T> callback) {
     Entity entity = Entity.json(arg);
     Invocation invocation = builder(product, null, objectId, action, actionArg).buildPost(entity);
     return getResponse(invocation, new DynamicTypeReference(returnType), callback);

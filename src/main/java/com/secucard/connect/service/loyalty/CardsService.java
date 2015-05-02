@@ -41,7 +41,7 @@ public class CardsService extends AbstractService {
         callback);
   }
 
-  public void deleteUserFromCard(final String cardNumber, Callback<Boolean> callback) {
+  public void deleteUserFromCard(final String cardNumber, Callback<Void> callback) {
     new ServiceTemplate().delete(Card.class, cardNumber, "assignUser", "me", callback);
   }
 }

@@ -122,14 +122,14 @@ public class VolleyChannel extends RestChannelBase {
   }
 
   @Override
-  public void delete(Class product, String objectId, String action, String actionArg, Callback<?> callback) {
+  public void delete(Class product, String objectId, String action, String actionArg, Callback callback) {
     String url = buildRequestUrl(product, objectId, action, actionArg);
     Request request = buildRequest(Request.Method.DELETE, url, null, new DynamicTypeReference(product), callback);
     putToQueue(request);
   }
 
   @Override
-  public void delete(Class type, String objectId, Callback<?> callback) {
+  public void delete(Class type, String objectId, Callback callback) {
     String url = buildRequestUrl(type, objectId);
     Request request = buildRequest(Request.Method.DELETE, url, null, new DynamicTypeReference(type), callback);
     putToQueue(request);

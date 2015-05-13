@@ -51,7 +51,7 @@ public class PaymentDemo {
 
       Container container = new Container();
       container.setType(Container.TYPE_BANK_ACCOUNT);
-      container.setPrivateData(new Data("forename surname", "iban", "bic"));
+      container.setPrivateData(new Data("iban"));
 
       // create container and get back filled up
       container = containerService.createContainer(container, null);
@@ -61,7 +61,7 @@ public class PaymentDemo {
       SecupayDebit debit = new SecupayDebit();
       debit.setContainer(container);
       debit.setCustomer(customer);
-      debit.setAmount(9999);
+      debit.setAmount(1);
       debit.setCurrency(Currency.getInstance("EUR"));
       debit.setOrderId("order1");
       debit.setPurpose("food");

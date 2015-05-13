@@ -61,7 +61,7 @@ public class PaymentTest extends AbstractServicesTest {
 
     Container container = new Container();
     container.setType(Container.TYPE_BANK_ACCOUNT);
-    container.setPrivateData(new Data("owner", "iban", "bic"));
+    container.setPrivateData(new Data("iban"));
 
 
     container = containerService.createContainer(container, null);
@@ -72,7 +72,7 @@ public class PaymentTest extends AbstractServicesTest {
 
 
     String owner = "owner2";
-    container.setPrivateData(new Data(owner, "iban2", "bic2"));
+    container.setPrivateData(new Data("iban2"));
     container = containerService.updateContainer(container, null);
     Assert.assertTrue(container.getPublicData().getOwner().equals(owner));
 

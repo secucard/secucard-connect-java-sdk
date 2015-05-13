@@ -1,5 +1,8 @@
 package com.secucard.connect.model.payment;
 
+/**
+ * Holds payment container details.
+ */
 public class  Data {
   private String owner;
 
@@ -7,13 +10,13 @@ public class  Data {
 
   private String bic;
 
+  private String bankname;
+
   public Data() {
   }
 
-  public Data(String owner, String iban, String bic) {
-    this.owner = owner;
+  public Data(String iban) {
     this.iban = iban;
-    this.bic = bic;
   }
 
   public String getOwner() {
@@ -40,6 +43,13 @@ public class  Data {
     this.bic = bic;
   }
 
+  public String getBankname() {
+    return bankname;
+  }
+
+  public void setBankname(String bankname) {
+    this.bankname = bankname;
+  }
 
   @Override
   public String toString() {
@@ -47,6 +57,7 @@ public class  Data {
         "owner='" + owner + '\'' +
         ", iban='" + iban + '\'' +
         ", bic='" + bic + '\'' +
+        ", bankname='" + bankname + '\'' +
         '}';
   }
 }

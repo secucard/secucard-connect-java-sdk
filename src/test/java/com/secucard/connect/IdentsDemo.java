@@ -20,7 +20,7 @@ public class IdentsDemo {
     final Client client = Client.create("identdemo", cfg);
 
     // setting any instance as a receiver for events the client produces, optional for this use case
-    client.setEventListener(new EventListener() {
+    client.onEvent(new EventListener() {
       @Override
       public void onEvent(Object event) {
         System.out.println("Got event: " + event);

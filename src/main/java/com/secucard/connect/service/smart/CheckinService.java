@@ -4,7 +4,6 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.ObjectList;
@@ -34,7 +33,7 @@ public class CheckinService extends AbstractService {
       };
     }
 
-    context.getEventDispatcher().registerListener(IdentRequest.OBJECT + Events.TYPE_CHANGED, listener);
+    getEventDispatcher().registerListener(IdentRequest.OBJECT + Events.TYPE_CHANGED, listener);
   }
 
   /**

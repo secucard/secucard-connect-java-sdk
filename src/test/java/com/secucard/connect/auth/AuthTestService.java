@@ -46,7 +46,7 @@ public class AuthTestService extends TestService implements EventListener {
       setRestChannel((RestChannelBase) getRestChannel());
       DataStorage storage = new DiskCache("sccache-authtest");
       setDataStorage(storage);
-      registerEventListener(AuthTestService.this);
+      registerListener(AuthTestService.this);
     }
 
     /*public void test() {

@@ -1,7 +1,6 @@
 package com.secucard.connect.channel.rest;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.QueryParams;
@@ -168,9 +167,11 @@ public abstract class RestChannelBase extends Channel {
 
   public static class Configuration {
     protected final String baseUrl;
+    protected final int responseTimeoutSec;
 
-    public Configuration(String baseUrl) {
+    public Configuration(String baseUrl, int responseTimeoutSec) {
       this.baseUrl = baseUrl;
+      this.responseTimeoutSec = responseTimeoutSec;
     }
   }
 }

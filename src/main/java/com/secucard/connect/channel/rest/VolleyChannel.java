@@ -8,6 +8,7 @@ import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
+import com.secucard.connect.ServerErrorException;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
@@ -187,10 +188,14 @@ public class VolleyChannel extends RestChannelBase {
 
     try {
       return future.get(requestTimeoutSec, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      Throwable throwable = translate(e, ignoredState);
-      if (throwable != null) {
-        throw new RuntimeException(throwable);
+    } catch (Throwable e) {
+      Throwable trans = translate(e, ignoredState);
+      if (trans != null) {
+        if (trans instanceof RuntimeException) {
+          throw (RuntimeException) trans;
+        } else {
+          throw new RuntimeException("Error executing request.", trans);
+        }
       }
     }
 
@@ -277,7 +282,7 @@ public class VolleyChannel extends RestChannelBase {
         T result = jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
       } catch (Exception e) {
-        return Response.error(new VolleyError("Error reading response data", e));
+        return Response.error(new VolleyError("Error reading response data.", e));
       }
     }
 
@@ -287,8 +292,10 @@ public class VolleyChannel extends RestChannelBase {
     }
   }
 
+  /**
+   * Inspect the throwable and skip the ignores http status codes and/or extract error details.
+   */
   protected Throwable translate(Throwable throwable, Integer... ignoredStates) {
-    RuntimeException ex;
 
     VolleyError error = null;
     if (throwable instanceof VolleyError) {
@@ -297,35 +304,28 @@ public class VolleyChannel extends RestChannelBase {
       error = (VolleyError) throwable.getCause();
     }
 
-    if (error != null) {
-      if (error.networkResponse == null) {
-        ex = new RuntimeException("Error processing request.", error);
-      } else {
-        if (ignoredStates != null) {
-          for (Integer state : ignoredStates) {
-            if (state != null && state == error.networkResponse.statusCode) {
-              return null;
-            }
+    if (error != null && error.networkResponse != null) {
+      if (ignoredStates != null) {
+        for (Integer state : ignoredStates) {
+          if (state != null && state == error.networkResponse.statusCode) {
+            return null;
           }
-        }
-        Status status = null;
-        if (error.networkResponse.data != null) {
-          // this could be an specific secucard server error
-          try {
-            status = jsonMapper.map(new String(error.networkResponse.data), Status.class);
-          } catch (Exception e) {
-          }
-        }
-        if (status == null) {
-          // no status info available, just a plain http error
-          ex = new HttpErrorException(error.networkResponse.statusCode);
-        } else {
-          ex = translateError(status, error.getCause());
         }
       }
-      return ex;
+      if (error.networkResponse.data != null) {
+        // this could be an specific secucard server error
+        try {
+          Status status = jsonMapper.map(new String(error.networkResponse.data), Status.class);
+          return new ServerErrorException(status, error.getCause());
+        } catch (Exception e) {
+        }
+
+        // wrap as http error
+        return new HttpErrorException(error.networkResponse.statusCode);
+      }
     }
 
+    // else any reason
     return throwable;
   }
 }

@@ -2,7 +2,6 @@ package com.secucard.connect;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.secucard.connect.auth.AppUserCredentials;
 import com.secucard.connect.auth.ClientCredentials;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.channel.rest.RestChannelBase;
@@ -18,73 +17,58 @@ import java.util.Properties;
  * Configuration data of the client.
  */
 public class ClientConfiguration {
-  private RestChannelBase.Configuration restConfiguration;
-  private StompChannel.Configuration stompConfiguration;
-  private String defaultChannel;
-  private int heartBeatSec;
-  private boolean stompEnabled;
-  private String cacheDir;
-  private boolean androidMode;
-  private int authWaitTimeoutSec;
-  private String oauthUrl;
-  private ClientCredentials clientCredentials;
-  private AppUserCredentials userCredentials;
-  private String deviceId;
-  private String authType;
+  private final RestChannelBase.Configuration restConfiguration;
+  private final StompChannel.Configuration stompConfiguration;
+  private final String defaultChannel;
+  private final int heartBeatSec;
+  private final boolean stompEnabled;
+  private final String cacheDir;
+  private final boolean androidMode;
+  private final int authWaitTimeoutSec;
+  private final String oauthUrl;
+  private final ClientCredentials clientCredentials;
+  private final String deviceId;
+  private final String authType;
 
   private ClientConfiguration(Properties properties) {
     try {
-      init(properties);
+      stompEnabled = Boolean.valueOf(properties.getProperty("stompEnabled"));
+      if (stompEnabled) {
+        defaultChannel = properties.getProperty("defaultChannel").toUpperCase();
+      } else {
+        defaultChannel = Channel.REST;
+      }
+
+      heartBeatSec = Integer.valueOf(properties.getProperty("heartBeatSec"));
+      cacheDir = properties.getProperty("cacheDir");
+      authWaitTimeoutSec = Integer.valueOf(properties.getProperty("auth.waitTimeoutSec"));
+      oauthUrl = properties.getProperty("auth.oauthUrl");
+      clientCredentials = new ClientCredentials(properties.getProperty("auth.clientId"), properties.getProperty("auth.clientSecret"));
+      deviceId = properties.getProperty("device");
+      authType = properties.getProperty("auth.type");
+      androidMode = Boolean.valueOf(properties.getProperty("androidMode"));
+
+      stompConfiguration = new StompChannel.Configuration(
+          properties.getProperty("stomp.host"),
+          properties.getProperty("stomp.virtualHost"),
+          Integer.valueOf(properties.getProperty("stomp.port")),
+          properties.getProperty("stomp.destination"),
+          properties.getProperty("stomp.user"),
+          properties.getProperty("stomp.password"),
+          Boolean.valueOf(properties.getProperty("stomp.ssl")),
+          properties.getProperty("stomp.replyQueue"),
+          Integer.valueOf(properties.getProperty("stomp.connTimeoutSec")),
+          Integer.valueOf(properties.getProperty("stomp.messageTimeoutSec")),
+          Integer.valueOf(properties.getProperty("stomp.maxMessageAgeSec")),
+          Integer.valueOf(properties.getProperty("stomp.socketTimeoutSec")),
+          1000 * heartBeatSec,
+          Boolean.valueOf(properties.getProperty("stomp.disconnectOnError")));
+
+      restConfiguration = new RestChannelBase.Configuration(properties.getProperty("rest.url"),
+          Integer.valueOf(properties.getProperty("rest.responseTimeoutSec")));
     } catch (Exception e) {
-      throw new SecuException("Error loading configuration", e);
+      throw new IllegalStateException("Can't load client configuration.", e);
     }
-  }
-
-  private void init(Properties cfg) throws Exception {
-    stompEnabled = Boolean.valueOf(cfg.getProperty("stompEnabled"));
-    if (stompEnabled) {
-      defaultChannel = cfg.getProperty("defaultChannel");
-    } else {
-      defaultChannel = Channel.REST;
-    }
-
-    heartBeatSec = Integer.valueOf(cfg.getProperty("heartBeatSec"));
-    cacheDir = cfg.getProperty("cacheDir");
-    authWaitTimeoutSec = Integer.valueOf(cfg.getProperty("auth.waitTimeoutSec"));
-    oauthUrl = cfg.getProperty("auth.oauthUrl");
-    clientCredentials = new ClientCredentials(cfg.getProperty("auth.clientId"), cfg.getProperty("auth.clientSecret"));
-    deviceId = cfg.getProperty("device");
-    authType = cfg.getProperty("auth.type");
-    androidMode = Boolean.valueOf(cfg.getProperty("androidMode"));
-
-    stompConfiguration = new StompChannel.Configuration(
-        cfg.getProperty("stomp.host"),
-        cfg.getProperty("stomp.virtualHost"),
-        Integer.valueOf(cfg.getProperty("stomp.port")),
-        cfg.getProperty("stomp.destination"),
-        cfg.getProperty("stomp.user"),
-        cfg.getProperty("stomp.password"),
-        Boolean.valueOf(cfg.getProperty("stomp.ssl")),
-        cfg.getProperty("stomp.replyQueue"),
-        Integer.valueOf(cfg.getProperty("stomp.connTimeoutSec")),
-        Integer.valueOf(cfg.getProperty("stomp.messageTimeoutSec")),
-        Integer.valueOf(cfg.getProperty("stomp.maxMessageAgeSec")),
-        Integer.valueOf(cfg.getProperty("stomp.socketTimeoutSec")),
-        1000 * heartBeatSec);
-
-    restConfiguration = new RestChannelBase.Configuration(cfg.getProperty("rest.url"));
-  }
-
-  public void setUserCredentials(AppUserCredentials userCredentials) {
-    this.userCredentials = userCredentials;
-  }
-
-  public void setClientCredentials(ClientCredentials clientCredentials) {
-    this.clientCredentials = clientCredentials;
-  }
-
-  public void setDeviceId(String deviceId) {
-    this.deviceId = deviceId;
   }
 
   /**
@@ -175,10 +159,6 @@ public class ClientConfiguration {
 
   public ClientCredentials getClientCredentials() {
     return clientCredentials;
-  }
-
-  public AppUserCredentials getUserCredentials() {
-    return userCredentials;
   }
 
   public String getDeviceId() {

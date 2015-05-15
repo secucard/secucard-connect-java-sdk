@@ -1,19 +1,13 @@
 package com.secucard.connect.event;
 
-import com.secucard.connect.model.general.Event;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Registers event handlers or listeners and dispatches events to them.
  */
 public class EventDispatcher {
-
   // event type to listener map
-  protected Map<Class, EventListener> event2Listener = new ConcurrentHashMap<>();
-  protected Map<String, EventListener> stringEvent2Listener = new ConcurrentHashMap<>();
   private final Map<Object, EventListener> listeners = new HashMap<>();
 
   private boolean allowMultipleListener = false;
@@ -84,41 +78,6 @@ public class EventDispatcher {
       }
     }
     return count > 0;
-  }
-
-  public <T> void setEventListener(String type, EventListener<T> listener) {
-    stringEvent2Listener.put(type, listener);
-  }
-
-  /**
-   * Delivers a given event to multiple event listeners registered to this instance. A listener is called when mapped to
-   * the type of event or event id or to event id {@link Events#ANY}.
-   * Calling the listener happens in this method callers thread or in a new thread depending on the given parameter.
-   * In the first case the method returns not until the listener method is completely executed.
-   * The latter cases causes this method to return immediately instead of waiting for the listener to proceed.
-   * <p/>
-   * * @param async Async execution or not.
-   */
-  public void fireEvent(Object event, boolean async) {
-    for (Map.Entry<String, EventListener> entry : stringEvent2Listener.entrySet()) {
-      String key = entry.getKey();
-      if (key.equals(Events.ANY) || event instanceof String && key.equalsIgnoreCase((String) event)) {
-        fireEvent(event, entry.getValue(), async);
-      }
-    }
-
-    for (Map.Entry<Class, EventListener> entry : event2Listener.entrySet()) {
-      Class<?> listenerType = entry.getKey();
-      Class<?> eventType = event.getClass();
-      if (event instanceof Event) {
-        // unwrap event type and data
-        event = ((Event) event).getData();
-        eventType = event.getClass();
-      }
-      if (listenerType.equals(eventType)) {
-        fireEvent(event, entry.getValue(), async);
-      }
-    }
   }
 
   /**

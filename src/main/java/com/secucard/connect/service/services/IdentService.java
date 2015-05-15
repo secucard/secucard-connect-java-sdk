@@ -36,11 +36,13 @@ public class IdentService extends AbstractService {
 
   /**
    * Returns a list of ident request objects according to the given query parameters.
+   * No exception is thrown when a callback was provided.
    *
    * @param queryParams A set of parameters a ident request must match.
    * @param callback    Callback for asynchronous handling.
-   * @return If no callback provided the found ident requests, null if nothing was found.<br/>
-   * Always null if a callback was provided, the callbacks methods are called analogous then.
+   * @return The ident requests or null if a callback was provided.
+   * @throws com.secucard.connect.ServiceException     If an error happens executing the service.
+   * @throws com.secucard.connect.ServerErrorException If the service could not be executed by the secucard server.
    */
   public List<IdentRequest> getIdentRequests(QueryParams queryParams, Callback<List<IdentRequest>> callback) {
     return new ServiceTemplate().getAsList(IdentRequest.class, queryParams, callback);
@@ -48,12 +50,13 @@ public class IdentService extends AbstractService {
 
   /**
    * Returns a single ident request object.
+   * No exception is thrown when a callback was provided.
    *
    * @param id       The id of the ident request.
    * @param callback Callback for asynchronous handling.
-   * @return If no callback was provided the requested ident request, throws {@link com.secucard.connect.SecuException}
-   * if no ident request can be found for the given id.<br/>
-   * Always null if a callback was provided, the callbacks methods are called analogous then.
+   * @return The ident request or null if a callback was provided.
+   * @throws com.secucard.connect.ServiceException     If an error happens executing the service.
+   * @throws com.secucard.connect.ServerErrorException If the service could not be executed by the secucard server.
    */
   public IdentRequest getIdentRequest(final String id, Callback<IdentRequest> callback) {
     return new ServiceTemplate().get(IdentRequest.class, id, callback);
@@ -61,14 +64,16 @@ public class IdentService extends AbstractService {
 
   /**
    * Returns a ident result for a given  ident request ids.
+   * No exception is thrown when a callback was provided.
    *
    * @param identRequestIds     The request ids to get the results for.
    * @param callback            Callback for asynchronous handling.
    * @param downloadAttachments Set to true if attachments should be completely downloaded before returning.
    *                            Note: Depending on the number of returned persons + attachments this may be a lot!
    *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
-   * @return If no callback was provided the requested ident result or null if no ident result can be found for the given id.<br/>
-   * Always null if a callback was provided, the callbacks methods are called analogous then.
+   * @return The ident results or null if a callback was provided.
+   * @throws com.secucard.connect.ServiceException     If an error happens executing the service.
+   * @throws com.secucard.connect.ServerErrorException If the service could not be executed by the secucard server.
    */
   public List<IdentResult> getIdentResultsByRequestIds(final List<String> identRequestIds,
                                                        Callback<List<IdentResult>> callback,
@@ -99,12 +104,13 @@ public class IdentService extends AbstractService {
 
   /**
    * Creates a new ident request.
+   * No exception is thrown when a callback was provided.
    *
    * @param newIdentRequest The data for the ident request to create.
    * @param callback        Callback for asynchronous handling.
-   * @return If a callback was provided the newly created ident request, throws {@link com.secucard.connect.SecuException}
-   * if no ident request could be created for the given data.<br/>
-   * Always null if a callback was provided, the callbacks methods are called analogous then.
+   * @return The created ident request or null if a callback was provided.
+   * @throws com.secucard.connect.ServiceException     If an error happens executing the service.
+   * @throws com.secucard.connect.ServerErrorException If the service could not be executed by the secucard server.
    */
   public IdentRequest createIdentRequest(final IdentRequest newIdentRequest, Callback<IdentRequest> callback) {
     return new ServiceTemplate().create(newIdentRequest, callback);
@@ -114,14 +120,16 @@ public class IdentService extends AbstractService {
    * Returns a list of ident result objects according to the given query parameters.
    * Supports also the optional download and caching of all attachments before returning.
    * This will speed up clients access to them but involves increasing memory usage.
+   * No exception is thrown when a callback was provided.
    *
    * @param queryParams         A set of parameters a ident result must match.
    * @param callback            Callback for asynchronous handling.
    * @param downloadAttachments Set to true if attachments should be completely downloaded before returning.
    *                            Note: Depending on the number of returned results + persons + attachments this may be a lot!
    *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
-   * @return If no callback was provided the found ident results, null if nothing was found.<br/>
-   * Always null if a callback was provided, the callbacks methods are called analogous then.
+   * @return The ident results or null if a callback was provided.
+   * @throws com.secucard.connect.ServiceException     If an error happens executing the service.
+   * @throws com.secucard.connect.ServerErrorException If the service could not be executed by the secucard server.
    */
   public List<IdentResult> getIdentResults(final QueryParams queryParams, Callback<List<IdentResult>> callback,
                                            final boolean downloadAttachments) {
@@ -138,15 +146,16 @@ public class IdentService extends AbstractService {
 
   /**
    * Returns a single ident result object.
+   * No exception is thrown when a callback was provided.
    *
    * @param id                  The
    * @param callback            Callback for asynchronous handling.
    * @param downloadAttachments Set to true if attachments should be completely downloaded before returning.
    *                            Note: Depending on the number of returned persons + attachments this may be a lot!
    *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
-   * @return If no callback was provided the requested ident result, throws {@link com.secucard.connect.SecuException}
-   * if no ident result can be found for the given id.<br/>
-   * Always null if a callback was provided, the callbacks methods are called analogous then.
+   * @return The ident result or null if a callback was provided.
+   * @throws com.secucard.connect.ServiceException     If an error happens executing the service.
+   * @throws com.secucard.connect.ServerErrorException If the service could not be executed by the secucard server.
    */
   public IdentResult getIdentResult(final String id, Callback<IdentResult> callback, final boolean downloadAttachments) {
     return new ServiceTemplate() {
@@ -170,7 +179,7 @@ public class IdentService extends AbstractService {
     if (handler != null) {
       handler.setService(this);
     }
-    context.getEventDispatcher().registerListener(IdentEventHandler.ID, handler);
+    getEventDispatcher().registerListener(IdentEventHandler.ID, handler);
   }
 
   private void processAttachments(List<IdentResult> results, boolean cache) {

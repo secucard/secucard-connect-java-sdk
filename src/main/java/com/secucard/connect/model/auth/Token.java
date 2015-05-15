@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 
 public class Token implements Serializable {
+  private static final long serialVersionUID = -5667703098179982024L;
 
   @JsonProperty("access_token")
   private String accessToken;

@@ -15,6 +15,9 @@
  */
 package com.secucard.connect.stomp;
 
+/**
+ * Indicates that no receipt for a message was received in time.
+ */
 public class NoReceiptException extends RuntimeException {
   public NoReceiptException() {
   }

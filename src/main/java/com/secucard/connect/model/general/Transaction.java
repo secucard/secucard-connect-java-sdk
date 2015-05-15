@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.loyalty.Sale;
 
-import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
 

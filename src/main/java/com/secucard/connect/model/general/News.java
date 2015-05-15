@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.List;
 

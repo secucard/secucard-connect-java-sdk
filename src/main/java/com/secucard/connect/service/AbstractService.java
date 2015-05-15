@@ -1,13 +1,10 @@
 package com.secucard.connect.service;
 
-import com.secucard.connect.Callback;
-import com.secucard.connect.ClientContext;
-import com.secucard.connect.ExceptionHandler;
-import com.secucard.connect.ServiceOperations;
+import com.secucard.connect.*;
+import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.event.EventListener;
-import com.secucard.connect.event.Events;
+import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
@@ -51,6 +48,11 @@ public abstract class AbstractService {
     return context.getAuthProvider();
   }
 
+
+  protected EventDispatcher getEventDispatcher() {
+    return context.getEventDispatcher();
+  }
+
   /**
    * Assign client context to current thread of execution so it can be accessed from objects not having a
    * reference to the client.
@@ -74,10 +76,15 @@ public abstract class AbstractService {
 
   }
 
-  public void setEventListener(final EventListener eventListener) {
-    context.getEventDispatcher().setEventListener(Events.ANY, eventListener);
+  /**
+   * Wrapping all exceptions in ServiceException except server errors and auth errors.
+   */
+  private RuntimeException translate(Throwable throwable) {
+    if (!(throwable instanceof ServerErrorException) && !(throwable instanceof AuthException)) {
+      return new ServiceException("Error executing " + getClass().getSimpleName(), throwable);
+    }
+    return (RuntimeException) throwable;
   }
-
 
   /**
    * Class to use when accessing any service operation.
@@ -111,13 +118,6 @@ public abstract class AbstractService {
     protected void onResult(Object arg) {
     }
 
-    protected void handleFailure(Throwable throwable) {
-      ExceptionHandler exceptionHandler = context.getExceptionHandler();
-      if (exceptionHandler != null) {
-        exceptionHandler.handle(throwable);
-      }
-    }
-
     /**
      * Execute channel operation implemented as a invocation action.
      * This allows for implementing arbitrary channel operations within an context of a specific channel and result
@@ -134,14 +134,14 @@ public abstract class AbstractService {
       Callback<T> proxyCallback = callback == null ? null : new Callback<T>() {
         @Override
         public void completed(T result) {
+          ThreadLocalUtil.set("anonymous", null);
           onResult(result);
           callback.completed(result);
         }
 
         @Override
         public void failed(Throwable cause) {
-          handleFailure(cause);
-          callback.failed(cause);
+          fail(cause, callback);
         }
       };
 
@@ -150,23 +150,35 @@ public abstract class AbstractService {
       }
 
       try {
-        T result = invocation.doInContext(context.getChannel(channel), proxyCallback);
+        Channel ch = context.getChannel(this.channel);
+        if (ch == null) {
+          throw new ServiceException("Can't use " + AbstractService.this.getClass().getSimpleName() + " with " + this.channel);
+        }
+        T result = invocation.doInContext(ch, proxyCallback);
         if (callback == null) {
+          ThreadLocalUtil.set("anonymous", null);
           onResult(result);
           return result;
         }
       } catch (Throwable t) {
-        handleFailure(t);
-        if (callback == null) {
-          throw t;
-        } else {
-          callback.failed(t);
-        }
-      } finally {
-        ThreadLocalUtil.set("anonymous", null);
+        fail(t, callback);
       }
 
       return null;
+    }
+
+    private void fail(Throwable t, Callback callback) {
+      RuntimeException re = translate(t);
+      ThreadLocalUtil.set("anonymous", null);
+      if (context.getExceptionHandler() == null) {
+        if (callback == null) {
+          throw re;
+        } else {
+          callback.failed(re);
+        }
+      } else {
+        context.getExceptionHandler().handle(re);
+      }
     }
 
     private <T> List<T> executeToList(ChannelInvocation<ObjectList<T>> inv, final Callback<List<T>> callback) {

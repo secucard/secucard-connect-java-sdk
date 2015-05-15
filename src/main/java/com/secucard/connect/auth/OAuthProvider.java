@@ -1,7 +1,6 @@
 package com.secucard.connect.auth;
 
-import com.secucard.connect.SecuException;
-import com.secucard.connect.channel.JsonMapper;
+import com.secucard.connect.ServerErrorException;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.UserAgentProvider;
 import com.secucard.connect.event.EventDispatcher;
@@ -14,7 +13,6 @@ import com.secucard.connect.util.ThreadSleep;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.HttpHeaders;
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,11 +27,10 @@ public class OAuthProvider implements AuthProvider {
   private OAuthCredentials credentials;
   private EventListener authEventListener;
   private RestChannelBase http;
-  private DataStorage storage;
+  protected DataStorage storage;
   private UserAgentProvider userAgentProvider = new UserAgentProvider();
   private final String instanceId;
   private final Configuration configuration;
-  private JsonMapper jsonMapper = JsonMapper.get();
   private Token currentToken;  // the current obtained token, may be persisted
 
   protected static final Log LOG = new Log(OAuthProvider.class);
@@ -56,7 +53,7 @@ public class OAuthProvider implements AuthProvider {
   }
 
   @Override
-  public synchronized void registerEventListener(EventListener eventListener) {
+  public synchronized void registerListener(EventListener eventListener) {
     authEventListener = eventListener;
   }
 
@@ -148,11 +145,9 @@ public class OAuthProvider implements AuthProvider {
     currentToken = token;
     if (configuration.cacheToken) {
       try {
-        String str = jsonMapper.map(token);
-        // todo: encrypt token !!
-        storage.save(getTokenChacheId(), str);
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Can't serialize token to JSON.", e);
+        storeToken(getTokenChacheId(), currentToken);
+      } catch (Exception e) {
+        throw new IllegalArgumentException("Can't store token.", e);
       }
     }
   }
@@ -165,10 +160,7 @@ public class OAuthProvider implements AuthProvider {
       // check if token exist in cache  and load
       if (configuration.cacheToken) {
         try {
-          String str = (String) storage.get(getTokenChacheId());
-          if (str != null) {
-            currentToken = jsonMapper.map(str, Token.class);
-          }
+          currentToken = getStoredToken(getTokenChacheId());
         } catch (Exception e) {
           LOG.error("Error reading token.", e);
         }
@@ -176,6 +168,14 @@ public class OAuthProvider implements AuthProvider {
     }
 
     return currentToken;
+  }
+
+  protected void storeToken(String id, Token token) throws Exception {
+    storage.save(id, token);
+  }
+
+  protected Token getStoredToken(String id) throws Exception {
+    return (Token) storage.get(id);
   }
 
   /**
@@ -232,7 +232,7 @@ public class OAuthProvider implements AuthProvider {
           @Override
           protected boolean cancel() {
             if (cancelAuth) {
-              throw new AuthCanceledException("Authorization canceled by request.");
+              throw new AuthCanceledException("Authentication canceled by request.");
             }
             return false;
           }
@@ -243,10 +243,10 @@ public class OAuthProvider implements AuthProvider {
 
       if (token == null && deviceAuth) {
         // not authenticated yet
-        EventDispatcher.fireEvent(EVENT_AUTH_PENDING, authEventListener, true);
+        EventDispatcher.fireEvent(Events.EVENT_AUTH_PENDING, authEventListener, true);
       } else if (token != null) {
         if (deviceAuth) {
-          EventDispatcher.fireEvent(EVENT_AUTH_OK, authEventListener, true);
+          EventDispatcher.fireEvent(Events.EVENT_AUTH_OK, authEventListener, true);
         }
         return token;
       }
@@ -254,7 +254,7 @@ public class OAuthProvider implements AuthProvider {
     } while (System.currentTimeMillis() < timeout);
 
     if (deviceAuth) {
-      throw new AuthCanceledException("Authorization canceled by timeout or authorization code was expired.");
+      throw new AuthCanceledException("Authentication canceled by timeout or authentication code was expired.");
     }
 
     throw new IllegalStateException("Unexpected failure of authentication.");
@@ -264,7 +264,7 @@ public class OAuthProvider implements AuthProvider {
     DeviceAuthCode codes = request(DeviceAuthCode.class, credentials, headers, null);
 
     if (StringUtils.isAnyBlank(codes.getDeviceCode(), codes.getUserCode(), codes.getVerificationUrl())) {
-      throw new AuthException("Authorization failed, got no valid codes or URL.");
+      throw new AuthException("Authentication failed, got no valid codes or URL.");
     }
     return codes;
   }
@@ -278,15 +278,13 @@ public class OAuthProvider implements AuthProvider {
         parameters.putAll(info);
       }
       return http.post(configuration.oauthUrl, parameters, headers, resultType, ignoredHttpStatus);
-    } catch (SecuException e) {
+    } catch (ServerErrorException e) {
       // try to provide some more failure details
-      if (e.getStatus() != null) {
-        throw new AuthException(e.getStatus());
+      if (e.getStatus() == null) {
+        throw e;
       } else {
-        throw new AuthException("Authorization failed.", e.getCause());
+        throw new AuthException(e.getStatus());
       }
-    } catch (Exception e) {
-      throw new AuthException("Authorization failed.", e);
     }
   }
 

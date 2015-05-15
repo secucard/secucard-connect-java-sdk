@@ -1,6 +1,5 @@
 package com.secucard.connect.model.transport;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.secucard.connect.model.QueryParams;
 

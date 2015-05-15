@@ -1,9 +1,8 @@
 package com.secucard.connect.util;
 
-import com.secucard.connect.SecuException;
+import com.secucard.connect.ServiceException;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.storage.DataStorage;
-
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
@@ -66,7 +65,7 @@ public class ResourceDownloader {
     } while (retry && stream == null && count++ < 2);
 
     if (ex != null) {
-      throw new SecuException("Unable to download resource from " + url, ex);
+      throw new ServiceException("Unable to download resource from " + url, ex);
     }
 
     if (stream != null) {

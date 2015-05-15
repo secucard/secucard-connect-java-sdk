@@ -1,4 +1,4 @@
 com.secucard.connect.service.custom.AppService
-com.secucard.connect.service.general.SkeletonService
+com.secucard.connect.service.general.SkeletonService #{general.news, general/news}
 com.secucard.connect.auth.AuthTestService
 com.secucard.connect.service.TestService

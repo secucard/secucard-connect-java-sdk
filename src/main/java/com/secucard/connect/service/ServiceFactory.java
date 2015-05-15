@@ -2,7 +2,6 @@ package com.secucard.connect.service;
 
 import com.secucard.connect.ClientConfiguration;
 import com.secucard.connect.ClientContext;
-import com.secucard.connect.SecuException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -17,7 +16,7 @@ public class ServiceFactory {
     ClientConfiguration config = context.getConfig();
 
     if (config == null) {
-      throw new SecuException("Configuration  must not be null.");
+      throw new IllegalStateException("Configuration must not be null.");
     }
 
     ServiceLoader<AbstractService> loader = ServiceLoader.load(AbstractService.class, getClassLoader());
@@ -30,7 +29,6 @@ public class ServiceFactory {
 
     getService("*"); // fetch service ids
   }
-
 
   public <T extends AbstractService> T getService(String serviceId) {
     Class<T> serviceClass = null;

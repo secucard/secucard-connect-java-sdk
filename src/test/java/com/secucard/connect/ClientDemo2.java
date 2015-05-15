@@ -48,7 +48,7 @@ public class ClientDemo2 {
     }
 
     // set up event listener, especially required to handle auth events!
-    client.setEventListener(new EventListener() {
+    client.onEvent(new EventListener() {
       @Override
       public void onEvent(Object event) {
         System.out.println("Got event: " + event);
@@ -72,7 +72,7 @@ public class ClientDemo2 {
     // set an optional global exception handler - all exceptions thrown by service methods end up here
     // if not set each method throws as usual, its up to the developer to catch accordingly
     // if callback are used all exceptions go to the failed method
-    client.setExceptionHandler(new ExceptionHandler() {
+    client.setServiceExceptionHandler(new ExceptionHandler() {
       @Override
       public void handle(Throwable exception) {
         System.err.println("Error happened:");

@@ -1,10 +1,9 @@
 package com.secucard.connect.service.payment;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.SecuException;
+import com.secucard.connect.ServiceException;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.payment.SecupayDebit;
@@ -59,7 +58,7 @@ public class SecupayDebitService extends AbstractService {
         protected SecupayDebit process(Event<List<SecupayDebit>> event) {
           List<SecupayDebit> list = event.getData();
           if (list == null || list.size() == 0) {
-            throw new SecuException("Invalid event data, debit id not found.");
+            throw new ServiceException("Invalid event data, missing debit ids.");
           } else {
             return getTransaction(list.get(0).getId(), null);
           }
@@ -67,7 +66,7 @@ public class SecupayDebitService extends AbstractService {
       };
     }
 
-    context.getEventDispatcher().registerListener(SecupayDebit.OBJECT + Events.TYPE_CHANGED, listener);
+    getEventDispatcher().registerListener(SecupayDebit.OBJECT + Events.TYPE_CHANGED, listener);
   }
 
 }

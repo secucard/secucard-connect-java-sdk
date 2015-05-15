@@ -2,6 +2,7 @@ package com.secucard.connect.auth;
 
 
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.model.auth.DeviceAuthCode;
 
 import java.util.Map;
 
@@ -11,8 +12,32 @@ import java.util.Map;
  * maintain just a single access token at a time.
  */
 public interface AuthProvider {
-  public static final String EVENT_AUTH_OK = "AUTH_OK";
-  public static final String EVENT_AUTH_PENDING = "AUTH_PENDING";
+
+
+  /**
+   * Define events fired by this provider.
+   *
+   * @see #EVENT_AUTH_OK
+   * @see #EVENT_AUTH_PENDING
+   * @see #EVENT_TYPE_DEVICE_CODES
+   */
+  public abstract static class Events {
+
+    /**
+     * Fired when an authentication succeeded.
+     */
+    public static final String EVENT_AUTH_OK = "AUTH_OK";
+
+    /**
+     * Fired when an authentication is pending.
+     */
+    public static final String EVENT_AUTH_PENDING = "AUTH_PENDING";
+
+    /**
+     * Instances are fired to provide obtained device codes to the user.
+     */
+    public static final Class<DeviceAuthCode> EVENT_TYPE_DEVICE_CODES = DeviceAuthCode.class;
+  }
 
   /**
    * Sets the current credentials for which a token should be obtained.
@@ -59,8 +84,9 @@ public interface AuthProvider {
   /**
    * Registering a listener which gets notified about events during the auth process.
    * This is for example the case when a auth. process is done in multiple steps and user input is required.
+   * The lister may receive the events defined by {@link com.secucard.connect.auth.AuthProvider.Events}
    */
-  void registerEventListener(EventListener eventListener);
+  void registerListener(EventListener eventListener);
 
 
   /**

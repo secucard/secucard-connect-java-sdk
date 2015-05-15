@@ -1,6 +1,5 @@
 package com.secucard.connect.channel;
 
-import com.secucard.connect.SecuException;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.annotation.ProductInfo;
 import org.apache.commons.lang3.StringUtils;

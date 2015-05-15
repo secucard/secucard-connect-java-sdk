@@ -260,7 +260,7 @@ public class StompClient {
     boolean found = false;
     long maxWaitTime = System.currentTimeMillis() + config.receiptTimeoutSec * 1000;
     outer:
-    while (System.currentTimeMillis() <= maxWaitTime) {
+    while (System.currentTimeMillis() <= maxWaitTime && connected) {
       synchronized (receipts) {
         Iterator<String> it = receipts.iterator();
         while (it.hasNext()) {
@@ -273,6 +273,7 @@ public class StompClient {
         }
       }
 
+      LOG.trace("waiting for receipt: ", receiptId);
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
@@ -281,7 +282,7 @@ public class StompClient {
     }
 
     if (!found) {
-      if (disconnectOnError) {
+      if (connected && disconnectOnError) {
         try {
           disconnect();
         } catch (Throwable t) {
@@ -530,7 +531,7 @@ public class StompClient {
 
     /**
      * Called when a error frame was received.
-     * If {@link Config#disconnectOnError} is true (default: false) the connection will be closed
+     * If {@link Config#disconnectOnError} is true the connection will be closed
      * before.
      */
     void onError(Frame frame);
@@ -544,9 +545,15 @@ public class StompClient {
   }
 
   public static class Config {
-    private final boolean disconnectOnSENDReceiptTimeout; // send disconnect when a SEND receipt times out
-    private final boolean requestSENDReceipt; // request a receipt on SEND
-    private final boolean requestDISCONNECTReceipt; // request a receipt on DISCONNECT
+    // send DISCONNECT when a SEND receipt times out
+    private final boolean disconnectOnSENDReceiptTimeout = true;
+
+    // request a receipt on SEND
+    private final boolean requestSENDReceipt = true;
+
+    // request a receipt on DISCONNECT
+    private final boolean requestDISCONNECTReceipt = false;
+
     private final String host;
     private final int port;
     private final String virtualHost;
@@ -581,9 +588,6 @@ public class StompClient {
       this.receiptTimeoutSec = receiptTimeoutSec;
       this.connectionTimeoutSec = connectionTimeoutSec;
       this.disconnectOnError = disconnectOnError;
-      disconnectOnSENDReceiptTimeout = true;
-      requestSENDReceipt = true;
-      requestDISCONNECTReceipt = false;
     }
 
     public Config(String host, int port, String virtualHost, String login, String password, int heartbeatMs,

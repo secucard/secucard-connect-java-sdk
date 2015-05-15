@@ -13,7 +13,7 @@ public class AccountTest extends AbstractServicesTest {
   protected void executeTests() throws Exception {
 
     result = null;
-    client.setEventListener(new EventListener() {
+    client.onEvent(new EventListener() {
       @Override
       public void onEvent(Object event) {
         System.out.println(event);

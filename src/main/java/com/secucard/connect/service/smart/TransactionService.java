@@ -66,6 +66,6 @@ public class TransactionService extends AbstractService {
       };
     }
 
-    context.getEventDispatcher().registerListener(Events.TYPE_DISPLAY + Notification.OBJECT, listener);
+    getEventDispatcher().registerListener(Events.TYPE_DISPLAY + Notification.OBJECT, listener);
   }
 }

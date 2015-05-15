@@ -9,7 +9,7 @@ import com.secucard.connect.service.AbstractService;
 public class AccountDevicesService extends AbstractService {
 
   public void onAccountDevicesChanged(AccountDevicesListener listener) {
-    context.getEventDispatcher().registerListener(AccountDevice.OBJECT + Events.TYPE_CHANGED, listener);
+    getEventDispatcher().registerListener(AccountDevice.OBJECT + Events.TYPE_CHANGED, listener);
   }
 
   public static abstract class AccountDevicesListener extends AbstractEventListener<Event<AccountDevice>> {

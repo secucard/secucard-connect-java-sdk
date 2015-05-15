@@ -4,7 +4,6 @@ import com.secucard.connect.Callback;
 import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.EventListener;
-import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.*;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
@@ -13,8 +12,10 @@ import java.util.List;
 
 public class AccountService extends AbstractService {
 
+  public static final String EVENT_TYPE_BEACON_MONITOR = "BeaconMonitor";
+
   public void onBeaconMonitor(AccountEventListener listener) {
-    context.getEventDispatcher().registerListener(Account.OBJECT + Events.TYPE_BEACON_MONITOR, listener);
+    getEventDispatcher().registerListener(Account.OBJECT + EVENT_TYPE_BEACON_MONITOR, listener);
   }
 
   /**
@@ -91,14 +92,14 @@ public class AccountService extends AbstractService {
    * Set to null to remove a listener.
    */
   public void onMerchantsChanged(EventListener<MerchantList> listener) {
-    context.getEventDispatcher().registerListener(MerchantList.class, listener);
+    getEventDispatcher().registerListener(MerchantList.class, listener);
   }
 
 
   public static abstract class AccountEventListener extends AbstractEventListener<Event<Account>> {
     @Override
     public boolean accept(Event<Account> event) {
-      return Events.TYPE_BEACON_MONITOR.equals(event.getType()) && Account.OBJECT.equals(event.getTarget());
+      return EVENT_TYPE_BEACON_MONITOR.equals(event.getType()) && Account.OBJECT.equals(event.getTarget());
     }
   }
 }

@@ -41,7 +41,11 @@ public class JsonMapper {
     if (String.class.equals(type)) {
       result = (T) json.trim();
     } else {
-      result = objectMapper.readValue(json, typeReference);
+      try {
+        result = objectMapper.readValue(json, typeReference);
+      } catch (IOException e) {
+        throw new JsonMappingException(json, e);
+      }
     }
 
     return result;

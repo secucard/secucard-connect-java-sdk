@@ -3,7 +3,8 @@ package com.secucard.connect.channel.rest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.secucard.connect.Callback;
-import com.secucard.connect.SecuException;
+import com.secucard.connect.ServerErrorException;
+import com.secucard.connect.channel.JsonMappingException;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -96,7 +98,7 @@ public class RestChannel extends RestChannelBase {
 
     if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
       // no secucard api specific error expected here, just basic http error
-      throw new HttpErrorException(response.getStatus());
+      throw new WebApplicationException(response.getStatus());
     }
 
     Object entity = response.getEntity();
@@ -239,10 +241,10 @@ public class RestChannel extends RestChannelBase {
     if (callback == null) {
       Future<Response> future = invocation.submit();
       try {
-        Response response = future.get(30, TimeUnit.SECONDS);
+        Response response = future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
         result = readEntity(response, entityType, ignoredStatus);
       } catch (Throwable e) {
-        throw new RuntimeException(translate(e));
+        throw translate(e);
       }
     } else {
       invocation.submit(
@@ -268,7 +270,8 @@ public class RestChannel extends RestChannelBase {
     return result;
   }
 
-  private <T> T readEntity(Response response, TypeReference entityType, Integer... ignoredStatus) throws IOException {
+  private <T> T readEntity(Response response, TypeReference entityType, Integer... ignoredStatus)
+      throws WebApplicationException, IOException {
     for (Integer st : ignoredStatus) {
       if (st != null && response.getStatus() == st) {
         // ignore exception and return null
@@ -288,15 +291,19 @@ public class RestChannel extends RestChannelBase {
   }
 
   private <T> T mapEntity(Response response, TypeReference entityType) throws IOException {
-    return jsonMapper.map(response.readEntity(String.class), entityType);
+    String json = response.readEntity(String.class);
+    return jsonMapper.map(json, entityType);
   }
 
-  private Throwable translate(Throwable throwable) {
-    Status status = null;
+  /**
+   * Unwrapping and translating throwable.
+   */
+  private RuntimeException translate(Throwable throwable) {
+    // check if this is a regular server error and read error status
     if (throwable instanceof WebApplicationException) {
       Response response = ((WebApplicationException) throwable).getResponse();
 
-      // try if this is a regular server error and read error status
+      Status status = null;
       try {
         status = mapEntity(response, new TypeReference<Status>() {
         });
@@ -305,14 +312,25 @@ public class RestChannel extends RestChannelBase {
       }
 
       if (status != null) {
-        //
-        return translateError(status, throwable);
+        return new ServerErrorException(status, throwable);
+      } else {
+        return new HttpErrorException("Request failed.", throwable, response.getStatus());
       }
-
-      // no specific information contained, treat as normal http error
-      return new HttpErrorException(throwable, response.getStatus());
     }
 
-    return throwable;
+    if (throwable instanceof JsonMappingException) {
+      return new ServerErrorException("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
+    }
+
+    if (throwable instanceof ExecutionException) {
+      throwable = throwable.getCause();
+    }
+
+    if (throwable instanceof RuntimeException) {
+      return (RuntimeException) throwable;
+    }
+
+    // just wrap in any runtime ex
+    return new RuntimeException("Error executing request.", throwable);
   }
 }

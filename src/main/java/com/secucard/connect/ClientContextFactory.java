@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
 import com.secucard.connect.auth.OAuthProvider;
+import com.secucard.connect.auth.android.AnroidOAuthProvider;
 import com.secucard.connect.channel.rest.RestChannel;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.VolleyChannel;
@@ -46,7 +47,7 @@ public class ClientContextFactory {
         try {
           diskCache = new DiskCache(path);
         } catch (IOException e) {
-          throw new SecuException("Error creating file storage: " + path, e);
+          throw new IllegalStateException("Can't creating file storage: " + path, e);
         }
 
         dataStorage = new AndroidStorage(appContext.getSharedPreferences("secuconnect", Context.MODE_PRIVATE),
@@ -59,7 +60,7 @@ public class ClientContextFactory {
       Map<String, String> info = new HashMap<>();
       info.put("", Build.VERSION.CODENAME);
 
-      authProvider = new OAuthProvider(clientId,
+      authProvider = new AnroidOAuthProvider(clientId,
           new OAuthProvider.Configuration(config.getOauthUrl(), config.getAuthWaitTimeoutSec(), true, info));
 
       if (ctx.deviceId == null) {
@@ -74,7 +75,7 @@ public class ClientContextFactory {
           try {
             dataStorage = new DiskCache(config.getCacheDir() + File.separator + clientId);
           } catch (IOException e) {
-            throw new SecuException("Error creating file storage: " + config.getCacheDir(), e);
+            throw new IllegalStateException("Can't creating file storage: " + config.getCacheDir(), e);
           }
         }
       }

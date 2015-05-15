@@ -9,8 +9,6 @@ import com.secucard.connect.model.general.components.Geometry;
 import com.secucard.connect.model.general.components.OpenHours;
 import com.secucard.connect.model.loyalty.Program;
 
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.util.List;
 
 public class Store extends SecuObject {

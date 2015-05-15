@@ -3,6 +3,7 @@ package com.secucard.connect;
 import com.secucard.connect.auth.*;
 import com.secucard.connect.channel.JsonMapper;
 import com.secucard.connect.channel.stomp.StompChannel;
+import com.secucard.connect.channel.stomp.StompEvents;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
@@ -25,14 +26,12 @@ public class Client extends AbstractService {
   private String id;
   private ServiceFactory serviceFactory;
   private final Timer disconnectTimer;
-  private Callback.Notify<Boolean> connCallback;
   private TimerTask disconnectTimerTask;
   private static final Log LOG = new Log(Client.class);
-  private EventListener authEventListener;
 
   private Client(final String id, ClientConfiguration configuration, Object runtimeContext, DataStorage storage) {
     if (configuration == null) {
-      throw new SecuException("Configuration  must not be null.");
+      throw new IllegalArgumentException("Configuration must not be null.");
     }
 
     this.disconnectTimer = new Timer(true); // daemon thread needed
@@ -54,26 +53,69 @@ public class Client extends AbstractService {
         }
       });
     }
-
-    // simply throws all exceptions by default, can be overwritten by clients user
-    setExceptionHandler(new ThrowingExceptionHandler());
   }
 
-
   /**
-   * Register a listener which gets notified about authentication related events.
-   * 3 different event objects will delivered, all related to the device authorization process which
-   * is performed in multiple steps:<br/>
-   * {@link com.secucard.connect.auth.AuthProvider#EVENT_AUTH_PENDING} <br/>
-   * {@link com.secucard.connect.auth.AuthProvider#EVENT_AUTH_OK}<br/>
-   * {@link com.secucard.connect.model.auth.DeviceAuthCode}
+   * Register a single generic listener to get notified on multiple events:<br/>
+   * - {@link #onConnectionStateChanged(com.secucard.connect.event.EventListener)}<br/>
+   * - {@link #onServerError(com.secucard.connect.event.EventListener)}<br/>
+   * - {@link #onAuthEvent(com.secucard.connect.event.EventListener)} <br/>
+   * - {@link #onAuthorizationFailed(com.secucard.connect.event.EventListener)} <br/>
    * <p/>
-   * So registering makes not sense if this auth type is not used.
+   * You can use both (single or multiple variants) - but only one listener is allowed per event and so the last
+   * invocation of the method always overwrites earlier ones.
    *
    * @param listener The listener instance. Pass null to unregister.
    */
-  public void onAuthenticationEven(EventListener listener) {
-    getAuthProvider().registerEventListener(listener);
+  @SuppressWarnings("unchecked")
+  public void onEvent(final EventListener listener) {
+    onConnectionStateChanged(listener);
+    onAuthorizationFailed(listener);
+    onAuthEvent(listener);
+    onServerError(listener);
+  }
+
+  /**
+   * Get notified when {@link Events.ConnectionStateChanged} happens.
+   *
+   * @see #onEvent(com.secucard.connect.event.EventListener)
+   */
+  public void onConnectionStateChanged(EventListener<Events.ConnectionStateChanged> listener) {
+    getEventDispatcher().registerListener(Events.ConnectionStateChanged.class, listener);
+  }
+
+  /**
+   * Get notified when {@link StompEvents.Error} happens.
+   * Note: This indicates an unexpected and unrecoverable error condition, so this client is closed automatically when
+   * config property "stomp.disconnectOnError" is set to true (default).
+   * Event is usually only for informative purposes, all the important client stuff is already done.
+   *
+   * @see #onEvent(com.secucard.connect.event.EventListener)
+   */
+  public void onServerError(EventListener<StompEvents.Error> listener) {
+    getEventDispatcher().registerListener(StompEvents.Error.class, listener);
+  }
+
+  /**
+   * Get notified when {@link StompEvents.AuthorizationFailed} happens.
+   * Note: Should usually not happen since all auth issues are signaled by throwing exceptions when connecting
+   * this client! This indicates an unexpected and unrecoverable error condition, so this client is closed automatically
+   * when config property "stomp.disconnectOnError" is set to true (default).
+   * Event is usually only for informative purposes, all the important client stuff is already done.
+   *
+   * @see #onEvent(com.secucard.connect.event.EventListener)
+   */
+  public void onAuthorizationFailed(EventListener<StompEvents.AuthorizationFailed> listener) {
+    getEventDispatcher().registerListener(StompEvents.AuthorizationFailed.class, listener);
+  }
+
+  /**
+   * Get notified when one of {@link AuthProvider.Events} happens.
+   *
+   * @see #onEvent(com.secucard.connect.event.EventListener)
+   */
+  public void onAuthEvent(EventListener listener) {
+    getAuthProvider().registerListener(listener);
   }
 
   /**
@@ -115,51 +157,58 @@ public class Client extends AbstractService {
 
   /**
    * Getting a new service instance from this client.
-   * The returned instance offers several business related operation.
+   * The returned instance offers several business operations.
    * All returned services operate on the same resources of the client.
+   * If a service method throws an exception or, in case of callback usage, the callback fails it is
+   * recommended to call {@link #disconnect()} to close all connections are release all resources.
    *
    * @param serviceClass The actual service type.
    * @param <T>          The service type.
    * @return The service instance or null if not found.
+   * @see #setServiceExceptionHandler(ExceptionHandler) how to setup central excepetion handling.
    */
   public <T extends AbstractService> T getService(Class<T> serviceClass) {
     return serviceFactory.getService(serviceClass);
   }
 
+
   public <T extends AbstractService> T getService(String serviceId) {
     return serviceFactory.getService(serviceId);
   }
 
+  /**
+   * Returns this client unique ID.
+   */
   public String getId() {
     return id;
   }
 
   /**
-   * Connect to secucard server anonymously.
+   * Like {@link #connect(com.secucard.connect.auth.OAuthCredentials, boolean, Callback)}
+   * but uses AnonymousCredentials , forceAuth = false.
    */
   public void connectAnonymous(Callback<Void> callback) {
     connect(new AnonymousCredentials(), false, callback);
   }
 
   /**
-   * Connect to secucard server using stored credential information from client configuration.
+   * Like {@link #connect(com.secucard.connect.auth.OAuthCredentials, boolean, Callback)}
+   * but no credentials and uses forceAuth = false.
    */
   public void connect(Callback<Void> callback) {
     connect(null, false, callback);
   }
 
   /**
-   * Like {@link #connect(com.secucard.connect.auth.OAuthCredentials, boolean, Callback)},
-   * but passing null
+   * Like {@link #connect(com.secucard.connect.auth.OAuthCredentials, boolean, Callback)}
+   * but uses no credentials, forceAuth = false and no callback.
    */
   public void connect() {
     connect(null, false, null);
   }
 
   /**
-   * Connect to secucard using the given credentials.
-   *
-   * @param credentials The credentials to use. Pass null to connect anonymously.
+   * Like {@link #connect(com.secucard.connect.auth.OAuthCredentials, boolean, Callback)} but uses forceAuth = false.
    */
   public void connect(OAuthCredentials credentials, Callback<Void> callback) {
     connect(credentials, false, callback);
@@ -180,9 +229,9 @@ public class Client extends AbstractService {
    *                    Falls back to true if no authentication token is available.
    * @param callback    Callback to get notified when the connection attempt succeeded or failed. See "Throws" section
    *                    to get details about the exceptions passed on failure.
-   * @throws com.secucard.connect.auth.AuthException         If the authentication failed for some reason,
-   *                                                         check exception details.
-   * @throws com.secucard.connect.auth.AuthCanceledException If the authentication was canceled by request.
+   * @throws AuthException   If the authentication failed for some reason, check exception details. May be an instance of
+   *                         AuthCanceledException if the authentication was canceled by {@link #cancelAuth()}.
+   * @throws ClientException If an unexpected error happens.
    */
   public void connect(final OAuthCredentials credentials, final boolean forceAuth, Callback<Void> callback) {
     new Execution<Void>() {
@@ -203,7 +252,6 @@ public class Client extends AbstractService {
       disconnectTimerTask.cancel();
     }
 
-
     if (forceAuth) {
       getAuthProvider().clearToken();
     }
@@ -223,7 +271,7 @@ public class Client extends AbstractService {
         clearAuthentication();
         throw t;
       }
-      throw new SecuException("Unknow error authenticating the credentials.", t);
+      throw new ClientException("Error while authenticating the credentials.", t);
     }
 
     // STOMP not allowed in anonymous mode
@@ -231,15 +279,17 @@ public class Client extends AbstractService {
       Throwable throwable = ((StompChannel) getStompChannel()).startSessionRefresh();
       if (throwable != null) {
         disconnect(true);
-        throw new SecuException("Error executing session refresh.", throwable);
+        if (throwable instanceof AuthException) {
+          clearAuthentication();
+          throw (AuthException) throwable;
+        }
+        throw new ClientException("Error executing session refresh.", throwable);
       }
     }
 
     isConnected = true;
 
-    if (connCallback != null) {
-      connCallback.notify(true);
-    }
+    getEventDispatcher().dispatch(new Events.ConnectionStateChanged(true), false);
   }
 
   public void disconnect() {
@@ -250,6 +300,7 @@ public class Client extends AbstractService {
     if (!force && !isConnected) {
       return;
     }
+    LOG.info("Disconnect client.");
 
     if (disconnectTimerTask != null) {
       disconnectTimerTask.cancel();
@@ -261,28 +312,26 @@ public class Client extends AbstractService {
     try {
       getRestChannel().close();
     } catch (Throwable e) {
-      LOG.error("error closing channel", e);
+      LOG.error("Error closing channel.", e);
     }
-
     if (context.config.isStompEnabled()) {
       try {
         getStompChannel().close();
       } catch (Throwable e) {
-        LOG.error("error closing channel", e);
+        LOG.error("Error closing channel.", e);
       }
     }
 
-    if (connCallback != null) {
-      connCallback.notify(false);
-    }
+    getEventDispatcher().dispatch(new Events.ConnectionStateChanged(false), false);
     isConnected = false;
   }
 
 
   /**
-   * Disconnects all client connections after a given time and closed all resources.
+   * Disconnects all client connections after a given time and closes all resources.
+   * This can be useful to allow the client to listen for incoming events only for a certain period of time.
    *
-   * @param seconds The time after all connections should be closed.
+   * @param seconds The time after this client should be closed.
    */
   public synchronized void autoDisconnect(int seconds) {
     if (disconnectTimerTask != null) {
@@ -300,10 +349,6 @@ public class Client extends AbstractService {
     getAuthProvider().cancelAuth();
   }
 
-  public void onConnectionStateChanged(Callback.Notify<Boolean> callback) {
-    connCallback = callback;
-  }
-
   /**
    * Remove any authentication data from clients cache.
    * After that a new authentication for any given credentials is performed.
@@ -312,6 +357,11 @@ public class Client extends AbstractService {
     context.getAuthProvider().clearToken();
   }
 
+  /**
+   * Gives an indication if this client is connected or not.
+   *
+   * @see #onConnectionStateChanged(com.secucard.connect.event.EventListener)
+   */
   public boolean isConnected() {
     return isConnected;
   }
@@ -328,20 +378,28 @@ public class Client extends AbstractService {
    *              immediately. False to handle in the main thread which will cause this method to block.
    * @return True if the event could be handled, false if no appropriate handler could be found and the event is not
    * handled.
-   * @throws com.secucard.connect.SecuException if the given JSON contains no valid event data.
+   * @throws ClientException if the given JSON contains no valid event data.
    */
   public synchronized boolean handleEvent(String json, boolean async) {
     Event event;
     try {
       event = JsonMapper.get().map(json, Event.class);
     } catch (Exception e) {
-      throw new SecuException("Error processing event, invalid event data.", e);
+      throw new ClientException("Error processing event, invalid event data.", e);
     }
 
-    return context.getEventDispatcher().dispatch(event, async);
+    return getEventDispatcher().dispatch(event, async);
   }
 
-  public void setExceptionHandler(ExceptionHandler exceptionHandler) {
+  /**
+   * Set an handler which receives all exceptions thrown by any service method or if a service callback is used the
+   * exception the callback would receive. The {@link com.secucard.connect.Callback#failed(Throwable)} is NOT called in
+   * the latter case.
+   * By default no handler is set, that means all exceptions are thrown or returned by the callback.
+   *
+   * @param exceptionHandler The handler to set.
+   */
+  public void setServiceExceptionHandler(ExceptionHandler exceptionHandler) {
     context.setExceptionHandler(exceptionHandler);
   }
 
@@ -351,13 +409,22 @@ public class Client extends AbstractService {
    * after filtering out and handling technical events.
    */
   private void handleChannelEvents(Object event) {
+    Class<?> eventClass = event.getClass();
     // just log STOMP connection for now
-    if (Events.STOMP_CONNECTED.equals(event)) {
+    if (StompEvents.STOMP_CONNECTED.equals(event)) {
       LOG.info("Connected to STOMP server.");
-    } else if (Events.STOMP_DISCONNECTED.equals(event)) {
+    } else if (StompEvents.STOMP_DISCONNECTED.equals(event)) {
       LOG.info("Disconnected from STOMP server.");
     } else {
-      context.getEventDispatcher().dispatch(event, false);
+      if (StompEvents.Error.class.equals(eventClass) || StompEvents.AuthorizationFailed.class.equals(eventClass)) {
+        if (context.getConfig().getStompConfiguration().isDisconnectOnError()) {
+          // since this means a unexpected error and the stomp connection is closed anyway it makes no sense
+          // to stay online
+          disconnect();
+        }
+      } else {
+        getEventDispatcher().dispatch(event, false);
+      }
     }
   }
 
@@ -369,25 +436,17 @@ public class Client extends AbstractService {
   private OAuthCredentials getCredentialsFromConfig() {
     ClientCredentials credentials = context.config.getClientCredentials();
     if (credentials == null) {
-      throw new AuthException("No client credentials found in configuration.");
+      throw new ClientException("No client credentials found in configuration.");
     }
 
     if ("device".equalsIgnoreCase(context.config.getAuthType())) {
       if (context.deviceId == null) {
-        throw new AuthException("No credentials found in configuration");
+        throw new ClientException("No credentials found in configuration");
       }
       credentials = new DeviceCredentials(credentials.getClientId(), credentials.getClientSecret(),
           context.getDeviceId());
     }
     return credentials;
-  }
-
-
-  private static class ThrowingExceptionHandler implements ExceptionHandler {
-    @Override
-    public void handle(Throwable exception) {
-      throw new SecuException(exception);
-    }
   }
 
   /**
@@ -396,9 +455,8 @@ public class Client extends AbstractService {
   private class DisconnectTimerTask extends TimerTask {
     @Override
     public void run() {
+      LOG.info("Auto disconnect client.");
       Client.this.disconnect();
     }
   }
-
-
 }

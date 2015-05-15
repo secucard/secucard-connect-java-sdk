@@ -1,5 +1,9 @@
 package com.secucard.connect.channel.rest;
 
+/**
+ * Exception indicating a HTTP request failed.
+ * The {@link #getHttpStatus()} returns the HTTP status code.
+ */
 public class HttpErrorException extends RuntimeException {
   private int httpStatus;
 

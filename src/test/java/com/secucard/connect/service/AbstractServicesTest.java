@@ -18,13 +18,14 @@ public class AbstractServicesTest {
   public void before() throws Exception {
     initLogging();
 
-    // todo: enable changing default channel programmatically in config to test other channels
+    // todo: enable changing default channel in config to test other channels
     String  cfg = getConfigString();
     if (cfg == null) {
       clientConfiguration = ClientConfiguration.fromProperties(getConfigPath());
     } else {
       clientConfiguration = ClientConfiguration.fromStream(new ByteArrayInputStream(cfg.getBytes()));
     }
+
 
     client = Client.create("test", clientConfiguration);
 

@@ -1,10 +1,9 @@
 package com.secucard.connect.service.payment;
 
 import com.secucard.connect.Callback;
-import com.secucard.connect.SecuException;
+import com.secucard.connect.ServerErrorException;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.payment.SecupayPrepay;
@@ -58,7 +57,7 @@ public class SecupayPrepayService extends AbstractService {
         protected SecupayPrepay process(Event<List<SecupayPrepay>> event) {
           List<SecupayPrepay> list = event.getData();
           if (list == null || list.size() == 0) {
-            throw new SecuException("Invalid event data, prepay id not found.");
+            throw new ServerErrorException("Invalid event data, prepay id not found.");
           } else {
             return getTransaction(list.get(0).getId(), null);
           }
@@ -66,6 +65,6 @@ public class SecupayPrepayService extends AbstractService {
       };
     }
 
-    context.getEventDispatcher().registerListener(SecupayPrepay.OBJECT + Events.TYPE_CHANGED, listener);
+    getEventDispatcher().registerListener(SecupayPrepay.OBJECT + Events.TYPE_CHANGED, listener);
   }
 }

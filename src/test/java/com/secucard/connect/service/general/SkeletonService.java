@@ -1,6 +1,7 @@
 package com.secucard.connect.service.general;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.channel.Channel;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.Skeleton;
@@ -19,7 +20,7 @@ public class SkeletonService extends AbstractService {
   }
 
   public ObjectList<Skeleton> getSkeletons(final QueryParams queryParams, Callback<ObjectList<Skeleton>> callback) {
-    return new ServiceTemplate().getList(Skeleton.class, queryParams, callback);
+    return new ServiceTemplate(Channel.STOMP).getList(Skeleton.class, queryParams, callback);
   }
 
   public List<Skeleton> getSkeletonsAsList(final QueryParams queryParams, final Callback<List<Skeleton>> callback) {
@@ -35,7 +36,7 @@ public class SkeletonService extends AbstractService {
     return new ServiceTemplate(null, true) {
       @Override
       protected void onResult(Object arg) {
-        throw new RuntimeException("hahahaha!");
+        throw new RuntimeException("ha!!!");
       }
     }.getList(Skeleton.class, queryParams, callback);
   }

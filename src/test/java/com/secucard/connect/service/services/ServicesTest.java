@@ -21,7 +21,7 @@ public class ServicesTest extends AbstractServicesTest {
 
   @Test
   public void test() throws Exception {
-    client.setEventListener(new EventListener() {
+    client.onEvent(new EventListener() {
       @Override
       public void onEvent(Object event) {
         System.out.println(event);

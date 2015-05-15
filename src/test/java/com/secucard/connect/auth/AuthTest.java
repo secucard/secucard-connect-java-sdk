@@ -9,7 +9,7 @@ public class AuthTest extends AbstractServicesTest {
   @Override
   public void before() throws Exception {
     super.before();
-    client.onAuthenticationEven(new EventListener() {
+    client.onEvent(new EventListener() {
       @Override
       public void onEvent(Object event) {
         System.out.println("AUTH EVENT: " + event);

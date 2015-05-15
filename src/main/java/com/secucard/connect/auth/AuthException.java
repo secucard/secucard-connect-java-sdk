@@ -3,7 +3,7 @@ package com.secucard.connect.auth;
 import com.secucard.connect.model.transport.Status;
 
 /**
- * Exception thrown when authentication, authorization errors happen.
+ * Indicates that an authentication or authorization error happened.
  * Get details from status property.
  */
 public class AuthException extends RuntimeException {

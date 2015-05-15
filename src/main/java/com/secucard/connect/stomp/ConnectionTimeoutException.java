@@ -15,6 +15,9 @@
  */
 package com.secucard.connect.stomp;
 
+/**
+ * Indicates that the STOMP connection could not be established within a given time.
+ */
 public class ConnectionTimeoutException extends RuntimeException {
   public ConnectionTimeoutException() {
   }

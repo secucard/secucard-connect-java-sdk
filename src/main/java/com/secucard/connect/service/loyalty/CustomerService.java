@@ -11,7 +11,7 @@ public class CustomerService extends AbstractService {
    *
    * @param id       Th customers id.
    * @param callback Callback for async processing.
-   * @return The customer object. Never null, a {@link com.secucard.connect.ProductException} is thrown instead if the
+   * @return The customer object. Never null, a {@link com.secucard.connect.ServerErrorException} is thrown instead if the
    * give id was invalid.
    */
   public Customer getCustomer(String id, Callback<Customer> callback) {

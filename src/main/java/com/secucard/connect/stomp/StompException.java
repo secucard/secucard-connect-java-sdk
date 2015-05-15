@@ -19,7 +19,7 @@ import java.util.Map;
 
 
 /**
- * Exception wrapping a stomp server error.
+ * Exception wrapping a STOMP error frame.
  */
 public class StompException extends RuntimeException {
   private String body;

@@ -1,13 +1,11 @@
 package com.secucard.connect.model.smart;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.secucard.connect.SecuException;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Account;
 import com.secucard.connect.model.loyalty.Customer;
 
-import java.net.MalformedURLException;
 import java.util.Date;
 
 public class Checkin extends SecuObject {

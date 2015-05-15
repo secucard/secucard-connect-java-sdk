@@ -3,7 +3,6 @@ package com.secucard.connect.service.general;
 import com.secucard.connect.Callback;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
-import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
@@ -33,7 +32,7 @@ public class TransactionService extends AbstractService {
       };
     }
 
-    context.getEventDispatcher().registerListener(Transaction.OBJECT + Events.TYPE_ADDED, listener);
+    getEventDispatcher().registerListener(Transaction.OBJECT + Events.TYPE_ADDED, listener);
   }
 
   /**

@@ -6,8 +6,6 @@ import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.general.Merchant;
 
-import java.net.MalformedURLException;
-
 public class CardGroup extends SecuObject {
   public static final String OBJECT = "loyalty.cardgroups";
 

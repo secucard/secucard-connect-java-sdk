@@ -33,13 +33,6 @@ public class DiskCache extends DataStorage {
       throw new DataStorageException("Object to store must implement serializable");
     }
 
-    if (!object.getClass().getPackage().getName().startsWith("java")) {
-      // avoids serialization issues when version changed
-      throw new DataStorageException(
-          "Cannot store custom (not Java built in) types." +
-              " Please provide a Map or String representation of the object to save");
-    }
-
     if (!cacheDir.exists()) {
       createCacheDirs();
     }

@@ -2,11 +2,10 @@ package com.secucard.connect.channel.stomp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.Callback;
-import com.secucard.connect.ConnectionException;
+import com.secucard.connect.ServerErrorException;
 import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.auth.AuthProvider;
 import com.secucard.connect.channel.Channel;
-import com.secucard.connect.event.Events;
 import com.secucard.connect.model.ObjectList;
 import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.SecuObject;
@@ -52,7 +51,7 @@ public class StompChannel extends Channel {
     this.id = id;
     StompClient.Config stompCfg = new StompClient.Config(cfg.host, cfg.port, cfg.virtualHost,
         cfg.userId, cfg.password, cfg.heartbeatMs, cfg.useSsl, cfg.socketTimeoutSec,
-        cfg.messageTimeoutSec, cfg.connectionTimeoutSec);
+        cfg.messageTimeoutSec, cfg.connectionTimeoutSec, cfg.disconnectOnError);
     stomp = new StompClient(id, stompCfg, new DefaultEventListner());
   }
 
@@ -156,7 +155,7 @@ public class StompChannel extends Channel {
    * If the connection fails all resources are closed.
    *
    * @param token The token used as login/password. May be null.
-   * @throws java.lang.IllegalStateException           If no connect credentials available.
+   * @throws IllegalStateException                     If no connect credentials available.
    * @throws com.secucard.connect.auth.AuthException   If the provided credentials are invalid.
    * @throws com.secucard.connect.stomp.StompException If any STOMP related error happens.
    */
@@ -172,10 +171,10 @@ public class StompChannel extends Channel {
       stomp.connect(credentials[0], credentials[1]);
     } catch (StompException e) {
       if (isConnectionError(e.getHeaders(), e.getBody())) {
-        throw new AuthException("Authorization failed: " + e.getBody());
+        throw new AuthException("Invalid connect credentials provided - authorization failed." + e.getBody());
       }
     }
-    eventListener.onEvent(Events.STOMP_CONNECTED);
+    eventListener.onEvent(StompEvents.STOMP_CONNECTED);
   }
 
   private <T> T sendMessage(StandardDestination destinationSpec, Object arg, TypeReference returnType,
@@ -206,13 +205,9 @@ public class StompChannel extends Channel {
         stomp.disconnect();
       } catch (Throwable t) {
         // just log...
-        LOG.info("Error disconnecting due ", t);
+        LOG.info("Error disconnecting.", t);
       }
-      try {
-        connect(token);
-      } catch (Exception e) {
-        throw new ConnectionException("Error reconnecting before send.", e);
-      }
+      connect(token);
     }
 
     String corrId = createCorrelationId();
@@ -236,7 +231,7 @@ public class StompChannel extends Channel {
     } catch (UnsupportedEncodingException e) {
       // should not happen
     } catch (IOException e) {
-      throw new RuntimeException("Error marshalling data message data", e);
+      throw new RuntimeException("Error marshalling data message data.", e);
     }
 
     stomp.send(destinationSpec.toString(), body, header);
@@ -407,7 +402,7 @@ public class StompChannel extends Channel {
     }
 
     if (msg == null) {
-      throw new MessageTimeoutException("No answer for " + id + " received in time.");
+      throw new MessageTimeoutException("No answer for " + id + " received within " + configuration.maxMessageAgeSec + "s.");
     }
 
     return msg;
@@ -452,7 +447,7 @@ public class StompChannel extends Channel {
 
     public void check(Message message) {
       if (hasError(message)) {
-        throw translateError(message, null);
+        throw new ServerErrorException(message);
       }
     }
   }
@@ -507,18 +502,20 @@ public class StompChannel extends Channel {
       }
 
       if (isConnectionError(frame.getHeaders(), frame.getBody())) {
-        eventListener.onEvent(new Events.AuthorizationFailed("STOMP authorization failed, reason: " + frame.getBody()));
+        // provide more details
+        eventListener.onEvent(new StompEvents.AuthorizationFailed(
+            "Invalid credentials, STOMP authorization failed, reason: " + frame.getBody()));
       } else {
         Map<String, String> headers = frame.getHeaders();
         headers.put("body", frame.getBody());
-        eventListener.onEvent(new Events.Error("STOMP error happened.", headers));
+        eventListener.onEvent(new StompEvents.Error("STOMP error happened.", headers));
       }
     }
 
     @Override
     public void onDisconnect() {
       if (eventListener != null) {
-        eventListener.onEvent(Events.STOMP_DISCONNECTED);
+        eventListener.onEvent(StompEvents.STOMP_DISCONNECTED);
       }
     }
   }
@@ -589,7 +586,7 @@ public class StompChannel extends Channel {
     private final String virtualHost;
     private final int heartbeatMs;
     private final boolean useSsl;
-    private final boolean autoConnect;
+    private final boolean disconnectOnError;
     private final String userId;
     private final String replyQueue;
     private final int connectionTimeoutSec;
@@ -602,7 +599,8 @@ public class StompChannel extends Channel {
                          String basicDestination,
                          String userId, String password,
                          boolean useSsl, String replyQueue, int connectionTimeoutSec,
-                         int messageTimeoutSec, int maxMessageAgeSec, int socketTimeoutSec, int heartbeatMs) {
+                         int messageTimeoutSec, int maxMessageAgeSec, int socketTimeoutSec, int heartbeatMs,
+                         boolean disconnectOnError) {
       this.host = host;
       this.port = port;
       this.password = password;
@@ -615,12 +613,16 @@ public class StompChannel extends Channel {
       this.messageTimeoutSec = messageTimeoutSec;
       this.maxMessageAgeSec = maxMessageAgeSec;
       this.socketTimeoutSec = socketTimeoutSec;
-      this.autoConnect = true;
+      this.disconnectOnError = disconnectOnError;
 
       if (!basicDestination.endsWith("/")) {
         basicDestination += "/";
       }
       this.basicDestination = basicDestination;
+    }
+
+    public boolean isDisconnectOnError() {
+      return disconnectOnError;
     }
   }
 }

@@ -2,14 +2,9 @@ package com.secucard.connect.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.secucard.connect.ClientContext;
 import com.secucard.connect.util.ResourceDownloader;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 

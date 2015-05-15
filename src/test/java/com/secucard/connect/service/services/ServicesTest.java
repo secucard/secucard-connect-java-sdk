@@ -163,7 +163,7 @@ public class ServicesTest extends AbstractServicesTest {
       contact.setUrlWebsite("url");
       p.setContact(contact);
       newIr.addPerson(p);
-      newIr.demo = "1";
+//      newIr.demo = "1";
       newIr = service.createIdentRequest(newIr, null);
       assertEquals("forename", newIr.getPersons().get(0).getContact().getForename());
 

@@ -51,7 +51,7 @@ public class PaymentDemo {
 
       Container container = new Container();
       container.setType(Container.TYPE_BANK_ACCOUNT);
-      container.setPrivateData(new Data("forename surname", "iban", "bic"));
+      container.setPrivateData(new Data("iban"));
 
       // create container and get back filled up
       container = containerService.createContainer(container, null);

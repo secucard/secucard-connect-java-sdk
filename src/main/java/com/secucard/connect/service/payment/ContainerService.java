@@ -14,6 +14,19 @@ public class ContainerService extends AbstractService {
     return new ServiceTemplate().getAsList(Container.class, queryParams, callback);
   }
 
+  /**
+   * Creating a payment container.
+   * The container data must at least provide a valid IBAN in private data!
+   * See {@link com.secucard.connect.model.payment.Data}, all other data is optional.
+   * Returns validated and completed container data on success.
+   * Throws exception when validation failed, see "throws" section.
+   *
+   * @param container The payment container data.
+   * @param callback  Callback to get notified when completed or failed.
+   * @return The validated and completed data like Container.publicData.
+   * @throws com.secucard.connect.ServerErrorException if a error happens. Status.errorDetails has the reason,
+   *                                                   like "invalid iban and bic combination".
+   */
   public Container createContainer(final Container container, Callback<Container> callback) {
     return new ServiceTemplate().create(container, callback);
   }

@@ -10,6 +10,11 @@ import java.util.List;
 
 public class IdentResult extends SecuObject {
   public static final String OBJECT = "services.identresults";
+  public static final String STATUS_OK = "ok";
+  public static final String STATUS_FAILED = "failed";
+  public static final String STATUS_PRELIMINARY_OK = "ok_preliminary";
+  public static final String STATUS_PRELIMINARY_FAILED = "failed_preliminary";
+
 
   private IdentRequest request;
 

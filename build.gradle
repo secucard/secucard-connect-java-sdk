@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion = '21.1.2'
+
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 21
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile 'com.mcxiaoke.volley:library:1.0.15'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.5.1'
+    compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.5.1'
+    compile("org.glassfish.jersey.core:jersey-client:2.17") {
+        exclude module: 'javax.inject'
+    }
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'org.reflections:reflections:0.9.9'
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    compile 'com.google.android:android:4.1.1.4'
+}

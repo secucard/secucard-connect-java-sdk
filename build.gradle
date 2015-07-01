@@ -14,6 +14,7 @@ android {
     }
     lintOptions {
         abortOnError false
+        checkReleaseBuilds false;
     }
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
@@ -23,7 +24,7 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
     }
-    buildToolsVersion '22.0.1'
+
 }
 
 dependencies {
@@ -37,4 +38,7 @@ dependencies {
     compile 'org.reflections:reflections:0.9.9'
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
     compile 'com.google.android:android:4.1.1.4'
+
+//    testCompile 'junit:junit:4.12'
+//    testCompile 'org.robolectric:robolectric:2.4'
 }

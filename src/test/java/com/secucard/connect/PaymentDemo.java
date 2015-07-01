@@ -4,10 +4,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.general.Address;
 import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.payment.*;
-import com.secucard.connect.service.payment.ContainerService;
-import com.secucard.connect.service.payment.CustomerService;
-import com.secucard.connect.service.payment.SecupayDebitService;
-import com.secucard.connect.service.payment.SecupayPrepayService;
+import com.secucard.connect.service.payment.*;
 
 import java.io.IOException;
 import java.util.Currency;
@@ -31,10 +28,14 @@ public class PaymentDemo {
     CustomerService customerService = client.getService(CustomerService.class);
     SecupayDebitService debitService = client.getService(SecupayDebitService.class);
     SecupayPrepayService prepayService = client.getService(SecupayPrepayService.class);
+    ContractService contractService = client.getService(ContractService.class);
 
     client.connect();
 
     try {
+
+
+
       Customer customer = new Customer();
       Contact contact = new Contact();
       contact.setForename("forename");
@@ -55,6 +56,14 @@ public class PaymentDemo {
 
       // create container and get back filled up
       container = containerService.createContainer(container, null);
+
+      // clone contract
+      CloneParams params = new CloneParams();
+      params.setProject("project");
+      params.setAllowTransactions(true);
+      params.setPushUrl("url");
+      params.setPaymentData(new Data("iban", "owner"));
+      Contract contract = contractService.cloneContract("PCR_XXX", params, null);
 
       //  do debit transaction
 
@@ -93,7 +102,6 @@ public class PaymentDemo {
       result = prepayService.cancelTransaction(prepay.getId(), null);
 
       assert (Boolean.TRUE.equals(result));
-
     } catch (Exception e) {
       e.printStackTrace();
     } finally {

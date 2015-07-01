@@ -19,6 +19,11 @@ public class  Data {
     this.iban = iban;
   }
 
+  public Data(String iban, String owner) {
+    this.iban = iban;
+    this.owner = owner;
+  }
+
   public String getOwner() {
     return owner;
   }

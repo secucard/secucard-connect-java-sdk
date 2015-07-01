@@ -18,6 +18,7 @@ com.secucard.connect.service.services.IdentService #{services.idents, services/i
 
 com.secucard.connect.service.payment.CustomerService #{payment.customers, payment/customers}
 com.secucard.connect.service.payment.ContainerService #{payment.containers, payment/containers}
+com.secucard.connect.service.payment.ContractService #{payment.contracts, payment/contracts}
 com.secucard.connect.service.payment.SecupayDebitService #{payment.secupaydebits, payment/secupaydebits}
 com.secucard.connect.service.payment.SecupayPrepayService #{payment.secupayprepays, payment/secupayprepays}
 

@@ -33,7 +33,7 @@ public class CheckinService extends AbstractService {
       };
     }
 
-    getEventDispatcher().registerListener(IdentRequest.OBJECT + Events.TYPE_CHANGED, listener);
+    getEventDispatcher().registerListener(Checkin.OBJECT + Events.TYPE_CHANGED, listener);
   }
 
   /**

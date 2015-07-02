@@ -275,6 +275,7 @@ public class RestChannel extends RestChannelBase {
     for (Integer st : ignoredStatus) {
       if (st != null && response.getStatus() == st) {
         // ignore exception and return null
+        LOG.debug("Ignored error response: ", response.getStatus(), ", ", response.readEntity(String.class));
         return null;
       }
     }

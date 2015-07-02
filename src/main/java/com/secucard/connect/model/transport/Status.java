@@ -8,19 +8,25 @@ public class Status {
 
   private String status;
 
+  // the error class
   private String error;
 
+  //the error message
   @JsonProperty("error_details")
   private String errorDetails;
 
+  // ???
   @JsonProperty("error_description")
   private String errorDescription;
 
+  // a error message for the user
   @JsonProperty("error_user")
   private String errorUser;
 
+  // the unique error code
   private String code;
 
+  // a unique error id support purposes
   private String supportId;
 
   public Status() {

@@ -41,6 +41,13 @@ public class Message<T> extends Status {
     this.data = data;
   }
 
+  public Message(String pid, String sid, QueryParams query, T data) {
+    this.pid = pid;
+    this.sid = sid;
+    this.query = query;
+    this.data = data;
+  }
+
   public T getData() {
     return data;
   }

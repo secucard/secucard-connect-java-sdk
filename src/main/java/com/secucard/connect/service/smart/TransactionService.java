@@ -53,9 +53,10 @@ public class TransactionService extends AbstractService {
     AbstractEventListener listener = null;
 
     if (callback != null) {
-      listener = new DelegatingEventHandlerCallback<Event<Notification>, Notification>(callback) {
+      listener = new DelegatingEventHandlerCallback<Notification, Notification>(callback) {
+
         @Override
-        public boolean accept(Event event) {
+        public boolean accept(Event<Notification> event) {
           return Events.TYPE_DISPLAY.equals(event.getType()) && Notification.OBJECT.equals(event.getTarget());
         }
 

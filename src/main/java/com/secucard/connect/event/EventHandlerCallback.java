@@ -1,6 +1,7 @@
 package com.secucard.connect.event;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.model.general.Event;
 
 /**
  * Event listener which receives an event and processes it by executing arbitrary operations.
@@ -12,7 +13,7 @@ import com.secucard.connect.Callback;
 public abstract class EventHandlerCallback<E, R> extends AbstractEventListener<E> implements Callback<R> {
 
   @Override
-  public void onEvent(E event) {
+  public void onEvent(Event<E> event) {
     try {
       completed(process(event));
     } catch (Throwable t) {
@@ -26,7 +27,7 @@ public abstract class EventHandlerCallback<E, R> extends AbstractEventListener<E
    * @param event The event data.
    * @return The processing result.
    */
-  protected abstract R process(E event);
+  protected abstract R process(Event<E> event);
 
   /**
    * Gets called when the processing result is ready.

@@ -12,7 +12,7 @@ public class AccountDevicesService extends AbstractService {
     getEventDispatcher().registerListener(AccountDevice.OBJECT + Events.TYPE_CHANGED, listener);
   }
 
-  public static abstract class AccountDevicesListener extends AbstractEventListener<Event<AccountDevice>> {
+  public static abstract class AccountDevicesListener extends AbstractEventListener<AccountDevice> {
     @Override
     public boolean accept(Event<AccountDevice> event) {
       return Events.TYPE_CHANGED.equals(event.getType()) && AccountDevice.OBJECT.equals(event.getTarget());

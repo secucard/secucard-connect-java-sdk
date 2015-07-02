@@ -1,12 +1,14 @@
 package com.secucard.connect.event;
 
+import com.secucard.connect.model.general.Event;
+
 /**
  * A listener which gets notified when any kind of event happens and is able to tell
  * if an event of certain type would be accepted at all.
  *
  * @param <T> The actual event type.
  */
-public abstract class AbstractEventListener<T> implements EventListener<T> {
+public abstract class AbstractEventListener<T> implements EventListener<Event<T>> {
 
   /**
    * Specifies if the given event will be processed by the listener.
@@ -16,5 +18,5 @@ public abstract class AbstractEventListener<T> implements EventListener<T> {
    * @param event The event data.
    * @return True if accepted else false.
    */
-  public abstract boolean accept(T event);
+  public abstract boolean accept(Event<T> event);
 }

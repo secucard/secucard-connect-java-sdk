@@ -47,7 +47,7 @@ public class SecupayDebitService extends AbstractService {
     AbstractEventListener listener = null;
 
     if (callback != null) {
-      listener = new DelegatingEventHandlerCallback<Event<List<SecupayDebit>>, SecupayDebit>(callback) {
+      listener = new DelegatingEventHandlerCallback<List<SecupayDebit>, SecupayDebit>(callback) {
 
         @Override
         public boolean accept(Event event) {

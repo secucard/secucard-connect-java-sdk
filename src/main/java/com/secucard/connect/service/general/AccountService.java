@@ -96,7 +96,7 @@ public class AccountService extends AbstractService {
   }
 
 
-  public static abstract class AccountEventListener extends AbstractEventListener<Event<Account>> {
+  public static abstract class AccountEventListener extends AbstractEventListener<Account> {
     @Override
     public boolean accept(Event<Account> event) {
       return EVENT_TYPE_BEACON_MONITOR.equals(event.getType()) && Account.OBJECT.equals(event.getTarget());

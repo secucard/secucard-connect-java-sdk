@@ -1,5 +1,7 @@
 package com.secucard.connect.event;
 
+import com.secucard.connect.model.general.Event;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,8 +65,8 @@ public class EventDispatcher {
     for (Map.Entry<Object, EventListener> entry : listeners.entrySet()) {
       boolean accept = false;
       EventListener listener = entry.getValue();
-      if (listener instanceof AbstractEventListener) {
-        accept = ((AbstractEventListener) listener).accept(event);
+      if (listener instanceof AbstractEventListener && event instanceof Event) {
+        accept = ((AbstractEventListener) listener).accept((Event) event);
       } else {
         accept = event.getClass().equals(entry.getKey());
       }

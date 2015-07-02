@@ -47,7 +47,7 @@ public class SecupayPrepayService extends AbstractService {
     AbstractEventListener listener = null;
 
     if (callback != null) {
-      listener = new DelegatingEventHandlerCallback<Event<List<SecupayPrepay>>, SecupayPrepay>(callback) {
+      listener = new DelegatingEventHandlerCallback<List<SecupayPrepay>, SecupayPrepay>(callback) {
         @Override
         public boolean accept(Event event) {
           return Events.TYPE_CHANGED.equals(event.getType()) && SecupayPrepay.OBJECT.equals(event.getTarget());

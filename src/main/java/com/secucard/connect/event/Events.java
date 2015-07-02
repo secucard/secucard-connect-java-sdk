@@ -11,7 +11,7 @@ public abstract class Events {
   public static final String TYPE_DISPLAY = "display";
 
   /**
-   * Is fired when the connection state of the client changes.
+   * Fired when the connection state of the client changes.
    */
   public static final class ConnectionStateChanged {
     public boolean connected;

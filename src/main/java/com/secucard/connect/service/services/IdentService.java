@@ -204,7 +204,7 @@ public class IdentService extends AbstractService {
    * {@link com.secucard.connect.Client#handleEvent(String, boolean)}.
    */
   public static abstract class IdentEventHandler
-      extends EventHandlerCallback<Event<List<IdentRequest>>, List<IdentResult>> {
+      extends EventHandlerCallback<List<IdentRequest>, List<IdentResult>> {
     public static final String ID = IdentRequest.OBJECT + Events.TYPE_CHANGED;
     private IdentService service;
 

@@ -505,6 +505,8 @@ public class StompChannel extends Channel {
         // provide more details
         eventListener.onEvent(new StompEvents.AuthorizationFailed(
             "Invalid credentials, STOMP authorization failed, reason: " + frame.getBody()));
+
+        // should not happen!
       } else {
         Map<String, String> headers = frame.getHeaders();
         headers.put("body", frame.getBody());

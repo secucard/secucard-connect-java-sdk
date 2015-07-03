@@ -8,12 +8,18 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.Transaction;
+import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
 /**
  * The Smart Product operations.
  */
 public class TransactionService extends AbstractService {
+
+
+  public Transaction get(String id, Callback<Transaction> callback) {
+    return new ServiceTemplate(Channel.STOMP).get(Transaction.class, id, callback);
+  }
 
   /**
    * Creating a transaction.
@@ -69,4 +75,17 @@ public class TransactionService extends AbstractService {
 
     getEventDispatcher().registerListener(Events.TYPE_DISPLAY + Notification.OBJECT, listener);
   }
+
+  /**
+   * Cancel an existing transaction.
+   *
+   * @param id       The debit object id.
+   * @param callback Callback for async processing.
+   * @return
+   */
+  public Boolean cancel(final String id, Callback<Boolean> callback) {
+    return new ServiceTemplate(Channel.STOMP).executeToBoolean(Transaction.class, id, "cancel", null, null,
+        Result.class, callback);
+  }
+
 }

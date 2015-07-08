@@ -80,7 +80,6 @@ public class OAuthProvider implements AuthProvider {
     // check if token matches the current credentials
     if (token != null && !token.getId().equals(credentials.getId())) {
       LOG.debug("Credentials changed, current token invalid, must obtain new.");
-      clearToken();
       token = null;
     }
 
@@ -93,7 +92,6 @@ public class OAuthProvider implements AuthProvider {
       // try refresh if just expired, authenticate new if no refresh possible or failed
       LOG.debug("Token expired: ", token.getExpireTime() == null ? "null" : new Date(token.getExpireTime()),
           ", original: ", token.getOrigExpireTime() == null ? "null" : new Date(token.getOrigExpireTime()));
-      clearToken();
       if (token.getRefreshToken() == null) {
         LOG.debug("No token refresh possible, try obtain new.");
         authenticate = true;

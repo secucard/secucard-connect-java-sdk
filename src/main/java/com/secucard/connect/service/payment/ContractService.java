@@ -7,6 +7,10 @@ import com.secucard.connect.service.AbstractService;
 
 public class ContractService extends AbstractService {
 
+  public Contract cloneMyContract(CloneParams params, Callback<Contract> callback) {
+    return cloneContract("me", params, callback);
+  }
+
   public Contract cloneContract(String contractId, CloneParams params, Callback<Contract> callback) {
     return execute(Contract.class, contractId, "clone", null, params, Contract.class, callback, null);
   }

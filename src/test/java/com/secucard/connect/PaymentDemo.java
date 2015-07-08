@@ -57,13 +57,15 @@ public class PaymentDemo {
       // create container and get back filled up
       container = containerService.createContainer(container, null);
 
-      // clone contract
+      // clone contract either mine or another contract when allowed
       CloneParams params = new CloneParams();
       params.setProject("project");
       params.setAllowTransactions(true);
       params.setPushUrl("url");
       params.setPaymentData(new Data("iban", "owner"));
-      Contract contract = contractService.cloneContract("PCR_XXX", params, null);
+      Contract contract = contractService.cloneMyContract(params, null);
+      // or
+      contract = contractService.cloneContract("contract-id", params, null);
 
       //  do debit transaction
 

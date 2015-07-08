@@ -10,6 +10,15 @@ import java.util.List;
 public class Transaction extends SecuObject {
   public static final String OBJECT = "smart.transactions";
 
+  public static final String STATUS_CREATED = "created";
+  public static final String STATUS_CANCELED = "canceled";
+  public static final String STATUS_FINISHED = "finished";
+  public static final String STATUS_ABORTED = "aborted";
+  public static final String STATUS_FAILED = "failed";
+  public static final String STATUS_TIMEOUT = "timeout";
+  public static final String STATUS_OK = "ok";
+
+
   @JsonProperty("basket_info")
   private BasketInfo basketInfo;
 
@@ -198,10 +207,16 @@ public class Transaction extends SecuObject {
         ", targetDevice=" + targetDevice +
         ", status='" + status + '\'' +
         ", created=" + created +
+        ", updated=" + updated +
         ", idents=" + idents +
         ", basket=" + basket +
         ", merchantRef='" + merchantRef + '\'' +
         ", transactionRef='" + transactionRef + '\'' +
+        ", paymentMethod='" + paymentMethod + '\'' +
+        ", receiptLines=" + receiptLines +
+        ", paymentRequested='" + paymentRequested + '\'' +
+        ", paymentExecuted='" + paymentExecuted + '\'' +
+        ", error='" + error + '\'' +
         "} " + super.toString();
   }
 }

@@ -12,8 +12,6 @@ import java.util.StringTokenizer;
  * Builds the URL like resource path according to the ProductInfo annotation of a secucard api type.
  */
 public class PathResolver {
-  PathResolver() {
-  }
 
   /**
    * Returns the resource path.
@@ -22,7 +20,7 @@ public class PathResolver {
    * @param separator The path separator character, like '/' or '.'
    * @return The path as a string.
    */
-  public String resolveType(Class type, char separator) {
+  public static String resolveType(Class type, char separator) {
     String resourceId;
     Annotation annotation = type.getAnnotation(ProductInfo.class);
     if (annotation == null) {
@@ -35,22 +33,22 @@ public class PathResolver {
     } else {
       resourceId = ((ProductInfo) annotation).resourceId();
     }
-    return resolve(resourceId, separator);
+    return resolveId(resourceId, separator);
   }
 
-  public String resolveType(Object object, char separator) {
+  public static String resolveType(Object object, char separator) {
     if (object instanceof SecuObject) {
       String objectId = ((SecuObject) object).getObject();
       if (StringUtils.isNotBlank(objectId)) {
-        return resolve(objectId, separator);
+        return resolveId(objectId, separator);
       }
     }
     return resolveType(object.getClass(), separator);
   }
 
-  private static String resolve(String resourceId, char separator) {
+  public static String resolveId(String id, char separator) {
     try {
-      StringTokenizer st = new StringTokenizer(resourceId, ".");
+      StringTokenizer st = new StringTokenizer(id, ".");
       String path = "";
       while (st.hasMoreTokens()) {
         char[] chars = st.nextToken().toCharArray();
@@ -59,7 +57,7 @@ public class PathResolver {
       }
       return path.substring(1);
     } catch (Exception e) {
-      throw new RuntimeException("Error building path for resource " + resourceId, e);
+      throw new RuntimeException("Error building path for resource " + id, e);
     }
   }
 
@@ -70,7 +68,7 @@ public class PathResolver {
    * @param separator
    * @return
    */
-  public String resolveAppId(String appId, char separator) {
+  public static String resolveAppId(String appId, char separator) {
     String path = "General" + separator + "Apps";
     if (appId != null) {
       path += separator + appId;

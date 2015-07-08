@@ -81,7 +81,7 @@ public class TransactionService extends AbstractService {
    *
    * @param id       The debit object id.
    * @param callback Callback for async processing.
-   * @return
+   * @return True if ok false else.
    */
   public Boolean cancel(final String id, Callback<Boolean> callback) {
     return new ServiceTemplate(Channel.STOMP).executeToBoolean(Transaction.class, id, "cancel", null, null,

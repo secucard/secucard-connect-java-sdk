@@ -72,7 +72,13 @@ public class Frame {
     // read body
     if (contentLength > 0) {
       char[] buf = new char[contentLength];
-      reader.read(buf, 0, contentLength);
+      int len = contentLength;
+      int offset = 0;
+      while (len > 0) {
+        int read = reader.read(buf, offset, len);
+        offset += read;
+        len -= read;
+      }
       body = new String(buf).trim();
     } else {
       StringBuilder sb = new StringBuilder();

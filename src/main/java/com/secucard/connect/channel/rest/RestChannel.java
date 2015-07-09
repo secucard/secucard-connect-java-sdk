@@ -54,8 +54,7 @@ public class RestChannel extends RestChannelBase {
   }
 
   @Override
-  public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
-                    Integer... ignoredState) {
+  public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType) {
     open();
     Invocation.Builder builder = restClient.target(url).request(MediaType.APPLICATION_FORM_URLENCODED);
     if (headers != null) {
@@ -74,8 +73,22 @@ public class RestChannel extends RestChannelBase {
       }
     }
     Invocation invocation = builder.buildPost(Entity.form(map));
+    try {
+      Future<Response> future = invocation.submit();
+      Response response = future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
+      if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+        throw new WebApplicationException(response);
+      }
+      return mapEntity(response, new DynamicTypeReference<T>(responseType));
+    } catch (Throwable e) {
+      if (e instanceof WebApplicationException) {
+        Response response = ((WebApplicationException) e).getResponse();
+        Map entity = response.readEntity(Map.class);
+        throw new HttpErrorException("Request failed.", e, response.getStatus(), entity);
+      }
 
-    return getResponse(invocation, new DynamicTypeReference(responseType), null, ignoredState);
+      throw new RuntimeException("Error executing request", e);
+    }
   }
 
 
@@ -299,7 +312,7 @@ public class RestChannel extends RestChannelBase {
   /**
    * Unwrapping and translating throwable.
    */
-  private RuntimeException translate(Throwable throwable) {
+  private <T> RuntimeException translate(Throwable throwable) {
     // check if this is a regular server error and read error status
     if (throwable instanceof WebApplicationException) {
       Response response = ((WebApplicationException) throwable).getResponse();
@@ -313,7 +326,8 @@ public class RestChannel extends RestChannelBase {
       }
 
       if (status != null) {
-        return new ServerErrorException(status, throwable);
+        return new ServerErrorException(status.getCode(), status.getErrorDetails(), status.getErrorUser(),
+            status.getError(), status.getSupportId(), throwable);
       } else {
         return new HttpErrorException("Request failed.", throwable, response.getStatus());
       }

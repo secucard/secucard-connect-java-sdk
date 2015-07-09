@@ -8,16 +8,12 @@ public class Status {
 
   private String status;
 
-  // the error class
+  // the error class or error type
   private String error;
 
   //the error message
   @JsonProperty("error_details")
   private String errorDetails;
-
-  // ???
-  @JsonProperty("error_description")
-  private String errorDescription;
 
   // a error message for the user
   @JsonProperty("error_user")
@@ -42,7 +38,6 @@ public class Status {
     this.status = other.status;
     this.error = other.error;
     this.errorDetails = other.errorDetails;
-    this.errorDescription = other.errorDescription;
     this.errorUser = other.errorUser;
     this.code = other.code;
     this.supportId = other.supportId;
@@ -70,14 +65,6 @@ public class Status {
 
   public void setErrorDetails(String errorDetails) {
     this.errorDetails = errorDetails;
-  }
-
-  public String getErrorDescription() {
-    return errorDescription;
-  }
-
-  public void setErrorDescription(String errorDescription) {
-    this.errorDescription = errorDescription;
   }
 
   public String getErrorUser() {
@@ -110,7 +97,6 @@ public class Status {
         "status='" + status + '\'' +
         ", error='" + error + '\'' +
         ", errorDetails='" + errorDetails + '\'' +
-        ", errorDescription='" + errorDescription + '\'' +
         ", errorUser='" + errorUser + '\'' +
         ", code='" + code + '\'' +
         ", supportId='" + supportId + '\'' +

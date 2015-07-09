@@ -15,6 +15,7 @@ import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.util.jackson.DynamicTypeReference;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -169,10 +170,8 @@ public class VolleyChannel extends RestChannelBase {
     return null;
   }
 
-
   @Override
-  public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
-                    Integer... ignoredState) {
+  public <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType) {
     RequestFuture<T> future = RequestFuture.newFuture();
     String requestBody = encodeQueryParams(parameters);
     ObjectJsonRequest<T> request = new ObjectJsonRequest<T>(Request.Method.POST, url, requestBody, headers,
@@ -188,18 +187,28 @@ public class VolleyChannel extends RestChannelBase {
 
     try {
       return future.get(requestTimeoutSec, TimeUnit.SECONDS);
-    } catch (Throwable e) {
-      Throwable trans = translate(e, ignoredState);
-      if (trans != null) {
-        if (trans instanceof RuntimeException) {
-          throw (RuntimeException) trans;
-        } else {
-          throw new RuntimeException("Error executing request.", trans);
+    } catch (Throwable throwable) {
+      VolleyError error = null;
+      if (throwable instanceof VolleyError) {
+        error = (VolleyError) throwable;
+      } else if (throwable.getCause() instanceof VolleyError) {
+        error = (VolleyError) throwable.getCause();
+      }
+
+      if (error != null && error.networkResponse != null) {
+        Map map = null;
+        try {
+          map = jsonMapper.map(new String(error.networkResponse.data), Map.class);
+        } catch (IOException e) {
+          // ignore
         }
+        throw new HttpErrorException(error.networkResponse.statusCode, map);
+      } else if (throwable instanceof RuntimeException) {
+        throw (RuntimeException) throwable;
+      } else {
+        throw new RuntimeException("Error executing request.", throwable);
       }
     }
-
-    return null;
   }
 
   @Override
@@ -316,7 +325,8 @@ public class VolleyChannel extends RestChannelBase {
         // this could be an specific secucard server error
         try {
           Status status = jsonMapper.map(new String(error.networkResponse.data), Status.class);
-          return new ServerErrorException(status, error.getCause());
+          return new ServerErrorException(status.getCode(), status.getErrorDetails(), status.getErrorUser(),
+              status.getError(), status.getSupportId(), error.getCause());
         } catch (Exception e) {
         }
 

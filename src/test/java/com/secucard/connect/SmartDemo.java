@@ -3,10 +3,11 @@ package com.secucard.connect;
 import com.secucard.connect.auth.AuthCanceledException;
 import com.secucard.connect.auth.AuthException;
 import com.secucard.connect.event.EventListener;
+import com.secucard.connect.event.Events;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.auth.DeviceAuthCode;
 import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.*;
-import com.secucard.connect.model.transport.Status;
 import com.secucard.connect.service.smart.CheckinService;
 import com.secucard.connect.service.smart.IdentService;
 import com.secucard.connect.service.smart.TransactionService;
@@ -48,6 +49,14 @@ public class SmartDemo {
       }
     });
 
+    // override above
+    client.onConnectionStateChanged(new EventListener<Events.ConnectionStateChanged>() {
+      @Override
+      public void onEvent(Events.ConnectionStateChanged event) {
+        System.out.println(event.connected ? "### ON" : "### OFF");
+      }
+    });
+
     // set an optional global exception handler - all exceptions thrown by service methods end up here
     // if not set each method throws as usual, its up to the developer to catch accordingly
     // if callback are used all exceptions go to the failed method
@@ -74,6 +83,7 @@ public class SmartDemo {
       e.printStackTrace();
       return;
     }
+
 
     // cancel pending device auth if necessary
     // client will throw  AuthCanceledException
@@ -135,34 +145,41 @@ public class SmartDemo {
     });
 
     try {
+
+      if (true) {
+
+        while (true) {
+          QueryParams queryParams = new QueryParams();
+          queryParams.setCount(6);
+//          List<Transaction> list = transactionService.getList(queryParams, null);
+          Thread.sleep(60000);
+        }
+      }
+
       // select an ident
       List<Ident> availableIdents = identService.getIdents(null);
       if (availableIdents == null) {
         throw new RuntimeException("No idents found.");
       }
+
       Ident ident = Ident.find("smi_1", availableIdents);
       ident.setValue("pdo28hdal");
 
-      List<Ident> selectedIdents = Arrays.asList(ident);
-
-      List<ProductGroup> groups = Arrays.asList(new ProductGroup("group1", "beverages", 1));
-
       Basket basket = new Basket();
-      basket.addProduct(new Product(1, null, "3378", "5060215249804", "desc1", "5", 1999, 7, groups));
-//    basket.addProduct(new Product(2, null, "34543", "5060215249805", "desc2", "1.5", 999, 19, groups));
-//    basket.addProduct(new Text("art2", "text1"));
-//    basket.addProduct(new Text("art2", "text2"));
-//    basket.addProduct(new Product(3, null, "08070", "60215249807", "desc3", "20", 219, 7, null));
-
+      basket.addProduct(
+          new Product(1, null, "3378", "5060215249804", "desc1", "1", 1, 20, Arrays.asList(new ProductGroup("group1", "beverages", 1)))
+      );
       BasketInfo basketInfo = new BasketInfo(1, "EUR");
 
-      Transaction newTrans = new Transaction(basketInfo, basket, selectedIdents);
-      newTrans.setMerchantRef("merchant21");
-      newTrans.setTransactionRef("transaction99");
+      Transaction newTrans = new Transaction(basketInfo, basket, Arrays.asList(ident));
 
       Transaction transaction = transactionService.createTransaction(newTrans, null);
+      assert (transaction.getStatus().equals(Transaction.STATUS_CREATED));
+
 
       // you may edit some transaction data and update
+      newTrans.setMerchantRef("merchant");
+      transaction.setTransactionRef("trans1");
       transaction = transactionService.updateTransaction(transaction, null);
 
       // demo|auto|cash, demo instructs the server to simulate a different (random) transaction for each invocation of
@@ -170,6 +187,7 @@ public class SmartDemo {
       String type = "demo";
 
       transaction = transactionService.startTransaction(transaction.getId(), type, null);
+      assert (transaction.getStatus().equals(Transaction.STATUS_OK));
 
       System.out.println("### Transaction started: " + transaction);
 
@@ -183,26 +201,22 @@ public class SmartDemo {
     } catch (Exception e) {
       if (e instanceof ServerErrorException) {
         ServerErrorException err = (ServerErrorException) e;
-        Status status = err.getStatus();
-        if (status != null && status.getErrorUser() != null) {
+        if (err.getUserMessage() != null) {
           // display to the user, so he may fix
-          System.err.println("### " + status.getErrorUser());
-        } else if (status != null && status.getSupportId() != null) {
-          // display generic message
-          System.err.println("### Unexpected error happened, please contact ... and provide this id: " + status.getSupportId());
+          System.err.println("### " + err.getUserMessage());
+        } else if (err.getSupportId() != null) {
+          System.err.println("### Unexpected error happened, please contact ... for assistance and provide this id: "
+              + err.getSupportId());
         } else {
           System.err.println("### Unexpected error happened, please contact ... for assistance.");
         }
       } else {
         System.err.println("### Unexpected error happened, please contact ... for assistance.");
       }
-
       e.printStackTrace();
 
     } finally {
       client.disconnect();
     }
-
   }
-
 }

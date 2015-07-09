@@ -1,11 +1,12 @@
 package com.secucard.connect.auth;
 
-import com.secucard.connect.ServerErrorException;
+import com.secucard.connect.channel.rest.HttpErrorException;
 import com.secucard.connect.channel.rest.RestChannelBase;
 import com.secucard.connect.channel.rest.UserAgentProvider;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.model.auth.DeviceAuthCode;
+import com.secucard.connect.model.auth.Error;
 import com.secucard.connect.model.auth.Token;
 import com.secucard.connect.storage.DataStorage;
 import com.secucard.connect.util.Log;
@@ -237,16 +238,20 @@ public class OAuthProvider implements AuthProvider {
         }.execute(pollInterval, 1, TimeUnit.SECONDS);
       }
 
-      Token token = request(Token.class, credentials, headers, ignoredHttpStatus);
-
-      if (token == null && deviceAuth) {
-        // not authenticated yet
-        EventDispatcher.fireEvent(Events.EVENT_AUTH_PENDING, authEventListener, true);
-      } else if (token != null) {
+      Object result = request(Token.class, credentials, headers);
+      if (result instanceof Error) {
+        Error err = (Error) result;
+        if (deviceAuth && err.getStatus() == 401 && err.getError().equalsIgnoreCase("authorization_pending")) {
+          // not authenticated yet
+          EventDispatcher.fireEvent(Events.EVENT_AUTH_PENDING, authEventListener, true);
+        } else {
+          throw new AuthException(err.getError(), err.getErrorDescription());
+        }
+      } else if (result instanceof Token) {
         if (deviceAuth) {
           EventDispatcher.fireEvent(Events.EVENT_AUTH_OK, authEventListener, true);
         }
-        return token;
+        return (Token) result;
       }
 
     } while (System.currentTimeMillis() < timeout);
@@ -259,30 +264,32 @@ public class OAuthProvider implements AuthProvider {
   }
 
   protected DeviceAuthCode requestCodes(OAuthCredentials credentials, Map<String, String> headers) {
-    DeviceAuthCode codes = request(DeviceAuthCode.class, credentials, headers, null);
-
-    if (StringUtils.isAnyBlank(codes.getDeviceCode(), codes.getUserCode(), codes.getVerificationUrl())) {
-      throw new AuthException("Authentication failed, got no valid codes or URL.");
+    Object response = request(DeviceAuthCode.class, credentials, headers);
+    if (response instanceof Error) {
+      Error error = (Error) response;
+      throw new AuthException(error.getError(), error.getErrorDescription());
+    } else {
+      return (DeviceAuthCode) response;
     }
-    return codes;
   }
 
-  protected <T> T request(Class<T> resultType, OAuthCredentials credentials, Map<String, String> headers,
-                          Integer ignoredHttpStatus) {
+  protected <T> Object request(Class<T> type, OAuthCredentials credentials, Map<String, String> headers) {
     try {
       Map<String, Object> parameters = credentials.asMap();
       Map<String, String> info = getAdditionalInfo();
       if (info != null) {
         parameters.putAll(info);
       }
-      return http.post(configuration.oauthUrl, parameters, headers, resultType, ignoredHttpStatus);
-    } catch (ServerErrorException e) {
-      // try to provide some more failure details
-      if (e.getStatus() == null) {
-        throw e;
+      return http.post(configuration.oauthUrl, parameters, headers, type);
+    } catch (HttpErrorException e) {
+      Map<String, String> entity = e.getEntity();
+      if (entity != null && entity.get("error") != null) {
+        return new Error(entity.get("error"), entity.get("error_description"), e.getHttpStatus());
       } else {
-        throw new AuthException(e.getStatus());
+        throw new AuthException(e);
       }
+    } catch (Exception e) {
+      throw new AuthException(e);
     }
   }
 

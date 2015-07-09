@@ -38,6 +38,8 @@ public class StompChannel extends Channel {
   protected final StompClient stomp;
   protected String connectToken;
   private volatile boolean isConfirmed;
+  private volatile boolean stopRefresh;
+  private Thread refreshThread;
 
   private final StatusHandler defaultStatusHandler = new StatusHandler() {
     @Override
@@ -62,13 +64,14 @@ public class StompChannel extends Channel {
 
   @Override
   public synchronized void close() {
+    stopRefresh = true;
     stomp.disconnect();
   }
 
   @Override
   public <T> T get(final Class<T> type, String objectId, final Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.GET, type), new Message<T>(objectId),
-        new MessageTypeRef(type), callback);
+        new MessageTypeRef(type), callback, null);
   }
 
   @Override
@@ -86,50 +89,56 @@ public class StompChannel extends Channel {
     };
 
     return sendMessage(new StandardDestination(StandardDestination.GET, type), message, new MessageListTypeRef(type),
-        statusHandler, callback);
+        statusHandler, callback, null);
   }
 
   @Override
   public <T> T create(T object, Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.ADD, object.getClass()),
-        new Message<>(object), new MessageTypeRef(object.getClass()), callback);
+        new Message<>(object), new MessageTypeRef(object.getClass()), callback, null);
   }
 
   @Override
   public <T extends SecuObject> T update(T object, Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.UPDATE, object.getClass()),
-        new Message<>(object.getId(), object), new MessageTypeRef(object.getClass()), callback);
+        new Message<>(object.getId(), object), new MessageTypeRef(object.getClass()), callback, null);
   }
 
   @Override
   public <T> T update(Class product, String objectId, String action, String actionArg, Object arg,
                       Class<T> returnType, Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.UPDATE, product, action),
-        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback);
+        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, null);
   }
 
   @Override
   public void delete(Class type, String objectId, Callback callback) {
     sendMessage(new StandardDestination(StandardDestination.DELETE, type), new Message<>(objectId),
-        new MessageTypeRef(type), callback);
+        new MessageTypeRef(type), callback, null);
   }
 
   @Override
   public void delete(Class product, String objectId, String action, String actionArg, Callback callback) {
     sendMessage(new StandardDestination(StandardDestination.DELETE, product, action), new Message<>(objectId, actionArg),
-        new MessageTypeRef(product), callback);
+        new MessageTypeRef(product), callback, null);
   }
 
   @Override
   public <T> T execute(String appId, String action, Object arg, Class<T> returnType, Callback<T> callback) {
-    return sendMessage(new AppDestination(appId, action), arg, new MessageTypeRef(returnType), callback);
+    return sendMessage(new AppDestination(appId, action), arg, new MessageTypeRef(returnType), callback, null);
   }
 
   @Override
   public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
                        Callback<T> callback) {
     return sendMessage(new StandardDestination(StandardDestination.EXEC, product, action),
-        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback);
+        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, null);
+  }
+
+  public <T> T execute(Class product, String objectId, String action, String actionArg, Object arg, Class<T> returnType,
+                       Callback<T> callback, Integer timeoutSec) {
+    return sendMessage(new StandardDestination(StandardDestination.EXEC, product, action),
+        new Message<>(objectId, actionArg, arg), new MessageTypeRef(returnType), callback, timeoutSec);
   }
 
   public void setAuthProvider(AuthProvider authProvider) {
@@ -172,28 +181,31 @@ public class StompChannel extends Channel {
     } catch (StompException e) {
       if (isConnectionError(e.getHeaders(), e.getBody())) {
         throw new AuthException("Invalid connect credentials provided - authorization failed." + e.getBody());
+      } else {
+        throw new RuntimeException("Unknown error open STOMP connection.", e);
       }
     }
     eventListener.onEvent(StompEvents.STOMP_CONNECTED);
   }
 
   private <T> T sendMessage(StandardDestination destinationSpec, Object arg, TypeReference returnType,
-                            final Callback<T> callback) {
-    return sendMessage(destinationSpec, arg, returnType, defaultStatusHandler, callback);
+                            final Callback<T> callback, Integer timeoutSec) {
+    return sendMessage(destinationSpec, arg, returnType, defaultStatusHandler, callback, timeoutSec);
   }
 
   private <T> T sendMessage(final StandardDestination destinationSpec, final Object arg,
-                            final TypeReference returnType, final StatusHandler statusHandler, Callback<T> callback) {
+                            final TypeReference returnType, final StatusHandler statusHandler, Callback<T> callback,
+                            final Integer timeoutSec) {
     return new Execution<T>() {
       @Override
       protected T execute() {
-        return sendMessage(destinationSpec, arg, returnType, statusHandler);
+        return sendMessage(destinationSpec, arg, returnType, statusHandler, timeoutSec);
       }
     }.start(callback);
   }
 
   private synchronized <T> T sendMessage(StandardDestination destinationSpec, Object arg,
-                                         TypeReference returnType, StatusHandler statusHandler) {
+                                         TypeReference returnType, StatusHandler statusHandler, Integer timeoutSec) {
     String token = getToken();
 
     // auto-connect or reconnect if token has changed since last connect
@@ -234,9 +246,9 @@ public class StompChannel extends Channel {
       throw new RuntimeException("Error marshalling data message data.", e);
     }
 
-    stomp.send(destinationSpec.toString(), body, header);
+    stomp.send(destinationSpec.toString(), body, header, timeoutSec);
 
-    String answer = awaitAnswer(corrId);
+    String answer = awaitAnswer(corrId, timeoutSec);
     Message<T> msg;
     try {
       msg = jsonMapper.map(answer, returnType);
@@ -261,10 +273,21 @@ public class StompChannel extends Channel {
    * @return Null if successfully started or an error if not.
    */
   public Throwable startSessionRefresh() {
+    // first stop if running and wait until finished.
+    stopRefresh = true;
+    if (refreshThread != null && refreshThread.isAlive()) {
+      LOG.debug("Refresh thread still running, wait for completion.");
+      try {
+        refreshThread.join();
+      } catch (InterruptedException e) {
+        // ignore
+      }
+    }
     final AtomicReference<Throwable> reference = new AtomicReference<>(null);
 
     final CountDownLatch latch = new CountDownLatch(1);
-    Thread t = new Thread() {
+    stopRefresh = false;
+    refreshThread = new Thread() {
       @Override
       public void run() {
         reference.set(runSessionRefresh(latch));
@@ -272,8 +295,8 @@ public class StompChannel extends Channel {
       }
     };
 
-    t.setDaemon(true);
-    t.start();
+    refreshThread.setDaemon(true);
+    refreshThread.start();
 
     // let current thread
     try {
@@ -290,6 +313,8 @@ public class StompChannel extends Channel {
    * Sends a confirmations within an fixed interval that this client is alive.
    * But is able to skip confirmation if other already confirmed this (setting isConfirmed to true).
    * Always keeps trying to refresh next time even if an attempt failed.
+   * Waits 5s (omitting normal config timeouts) for receipt and considers as failed after. This is to get a clue sooner if the
+   * network failed.
    *
    * @param countDownLatch A latch to release if successfully executed.
    */
@@ -298,7 +323,8 @@ public class StompChannel extends Channel {
     boolean initial = true;
     do {
       try {
-        execute(Session.class, "me", "refresh", null, null, Result.class, null);
+        LOG.debug("Try session refresh.");
+        execute(Session.class, "me", "refresh", null, null, Result.class, null, 5);
         isConfirmed = false;
         LOG.info("Session refresh sent.");
       } catch (Throwable t) {
@@ -307,6 +333,7 @@ public class StompChannel extends Channel {
           // first invocation after connect, let client know something is going wrong
           return t;
         }
+        // just try next time
       }
 
       // releases latch
@@ -317,7 +344,6 @@ public class StompChannel extends Channel {
 
 
       // sleep until next refresh, reset wait time if anybody confirmed session for us so we can sleep longer
-      // but cancel when not connected anymore
       new ThreadSleep() {
         @Override
         protected boolean reset() {
@@ -330,10 +356,10 @@ public class StompChannel extends Channel {
 
         @Override
         protected boolean cancel() {
-          return !stomp.isConnected();
+          return stopRefresh;
         }
       }.execute(configuration.heartbeatMs, 500, TimeUnit.MILLISECONDS);
-    } while (stomp.isConnected());
+    } while (!stopRefresh);
 
     LOG.info("Session refresh stopped.");
 
@@ -384,8 +410,11 @@ public class StompChannel extends Channel {
     return (id == null ? Integer.toString(hashCode()) : id) + "-" + System.currentTimeMillis();
   }
 
-  private String awaitAnswer(final String id) {
-    long maxWaitTime = System.currentTimeMillis() + configuration.messageTimeoutSec * 1000;
+  private String awaitAnswer(final String id, Integer timeoutSec) {
+    if (timeoutSec == null) {
+      timeoutSec = configuration.messageTimeoutSec;
+    }
+    long maxWaitTime = System.currentTimeMillis() + timeoutSec * 1000;
     String msg = null;
     while (System.currentTimeMillis() <= maxWaitTime) {
       synchronized (messages) {
@@ -402,7 +431,8 @@ public class StompChannel extends Channel {
     }
 
     if (msg == null) {
-      throw new MessageTimeoutException("No answer for " + id + " received within " + configuration.maxMessageAgeSec + "s.");
+      throw new MessageTimeoutException("No answer for " + id + " received within " + configuration.messageTimeoutSec
+          + "s.");
     }
 
     return msg;
@@ -447,7 +477,13 @@ public class StompChannel extends Channel {
 
     public void check(Message message) {
       if (hasError(message)) {
-        throw new ServerErrorException(message);
+        throw  new ServerErrorException(
+            message.getCode(),
+            message.getErrorDetails(),
+            message.getErrorUser(),
+            message.getError(),
+            message.getSupportId(),
+            null);
       }
     }
   }

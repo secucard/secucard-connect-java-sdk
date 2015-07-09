@@ -157,9 +157,10 @@ public abstract class RestChannelBase extends Channel {
 
   /**
    * Low level rest access for internal usage, posting to a url and get the response back as object.
+   * @throws com.secucard.connect.channel.rest.HttpErrorException if an HTTP error was happening.
    */
-  public abstract <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers, Class<T> responseType,
-                             Integer... ignoredState);
+  public abstract <T> T post(String url, Map<String, Object> parameters, Map<String, String> headers,
+                             Class<T> responseType);
 
   public abstract InputStream getStream(String url, Map<String, Object> parameters, Map<String, String> headers,
                                         Callback<InputStream> callback);

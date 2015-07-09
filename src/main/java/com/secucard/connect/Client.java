@@ -77,6 +77,11 @@ public class Client extends AbstractService {
 
   /**
    * Get notified when {@link Events.ConnectionStateChanged} happens.
+   * This event reflects the current overall connection state directly - if a connection goes on/off frequently in a
+   * unstable network so also this state. It's up to the user to  "dampen".
+   * <p/>
+   * Useful to give indication in unstable networks if operation scan be performed or not.
+   * Do NOT close the client based on this event.
    *
    * @see #onEvent(com.secucard.connect.event.EventListener)
    */
@@ -396,6 +401,8 @@ public class Client extends AbstractService {
    * exception the callback would receive. The {@link com.secucard.connect.Callback#failed(Throwable)} is NOT called in
    * the latter case.
    * By default no handler is set, that means all exceptions are thrown or returned by the callback.
+   * <p/>
+   * Note: With an
    *
    * @param exceptionHandler The handler to set.
    */
@@ -412,9 +419,9 @@ public class Client extends AbstractService {
     Class<?> eventClass = event.getClass();
     // just log STOMP connection for now
     if (StompEvents.STOMP_CONNECTED.equals(event)) {
-      LOG.info("Connected to STOMP server.");
+      getEventDispatcher().dispatch(new Events.ConnectionStateChanged(true), false);
     } else if (StompEvents.STOMP_DISCONNECTED.equals(event)) {
-      LOG.info("Disconnected from STOMP server.");
+      getEventDispatcher().dispatch(new Events.ConnectionStateChanged(false), false);
     } else {
       if (StompEvents.Error.class.equals(eventClass) || StompEvents.AuthorizationFailed.class.equals(eventClass)) {
         if (context.getConfig().getStompConfiguration().isDisconnectOnError()) {

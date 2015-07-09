@@ -5,11 +5,14 @@ import com.secucard.connect.channel.Channel;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
+import com.secucard.connect.model.QueryParams;
 import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.Transaction;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
+
+import java.util.List;
 
 /**
  * The Smart Product operations.
@@ -18,7 +21,11 @@ public class TransactionService extends AbstractService {
 
 
   public Transaction get(String id, Callback<Transaction> callback) {
-    return new ServiceTemplate(Channel.STOMP).get(Transaction.class, id, callback);
+    return new ServiceTemplate().get(Transaction.class, id, callback);
+  }
+
+  public List<Transaction> getList(QueryParams queryParams, Callback<List<Transaction>> callback) {
+    return new ServiceTemplate().getAsList(Transaction.class, queryParams, callback);
   }
 
   /**
@@ -28,7 +35,7 @@ public class TransactionService extends AbstractService {
    * @return The new transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction createTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return new ServiceTemplate(Channel.STOMP).create(transaction, callback);
+    return new ServiceTemplate().create(transaction, callback);
   }
 
   /**
@@ -38,7 +45,7 @@ public class TransactionService extends AbstractService {
    * @return The updated transaction. Use this instance for further processing rather the the provided..
    */
   public Transaction updateTransaction(final Transaction transaction, Callback<Transaction> callback) {
-    return new ServiceTemplate(Channel.STOMP).update(transaction, callback);
+    return new ServiceTemplate().update(transaction, callback);
   }
 
   /**
@@ -79,12 +86,12 @@ public class TransactionService extends AbstractService {
   /**
    * Cancel an existing transaction.
    *
-   * @param id       The debit object id.
+   * @param id       The transaction object id.
    * @param callback Callback for async processing.
    * @return True if ok false else.
    */
   public Boolean cancel(final String id, Callback<Boolean> callback) {
-    return new ServiceTemplate(Channel.STOMP).executeToBoolean(Transaction.class, id, "cancel", null, null,
+    return new ServiceTemplate().executeToBoolean(Transaction.class, id, "cancel", null, null,
         Result.class, callback);
   }
 

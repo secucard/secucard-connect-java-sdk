@@ -19,6 +19,14 @@ public abstract class Events {
     public ConnectionStateChanged(boolean connected) {
       this.connected = connected;
     }
+
+
+    @Override
+    public String toString() {
+      return "ConnectionStateChanged{" +
+          "connected=" + connected +
+          '}';
+    }
   }
 
 

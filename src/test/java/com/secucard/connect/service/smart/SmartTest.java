@@ -1,6 +1,8 @@
 package com.secucard.connect.service.smart;
 
 import com.secucard.connect.Callback;
+import com.secucard.connect.event.EventListener;
+import com.secucard.connect.event.Events;
 import com.secucard.connect.model.MediaResource;
 import com.secucard.connect.model.general.Notification;
 import com.secucard.connect.model.smart.*;
@@ -23,8 +25,8 @@ public class SmartTest extends AbstractServicesTest {
   @Override
   protected void executeTests() throws Exception {
 //    testIdents();
-//    testTransaction();
-    testCheckins();
+    testTransaction();
+//    testCheckins();
 
 //    Thread.sleep(3 * 60 * 1000);
 //    System.out.println("done");
@@ -89,6 +91,7 @@ public class SmartTest extends AbstractServicesTest {
   }
 
   private void testTransaction() throws IOException {
+
     TransactionService service = client.getService("smart.transactions");
     service.onCashierDisplayChanged(new Callback<Notification>() {
       @Override
@@ -110,34 +113,36 @@ public class SmartTest extends AbstractServicesTest {
       }
     }*/
 
-    if(true){
-      return;
-    }
 
     Basket basket = new Basket();
     basket.addProduct(new Product(1, null, "3378", "5060215249804", "desc1", "5.0", 1999, 19, null));
-    basket.addProduct(new Product(2, null, "34543", "5060215249805", "desc2", "1.5", 999, 2, null));
-    basket.addProduct(new Text("art2", "text1"));
-    basket.addProduct(new Text("art2", "text2"));
-    basket.addProduct(new Product(3, null, "08070", "60215249807", "desc3", "20", 219, 2, null));
+//    basket.addProduct(new Product(2, null, "34543", "5060215249805", "desc2", "1", 999, 2, null));
+//    basket.addProduct(new Text("art2", "text1"));
+//    basket.addProduct(new Text("art2", "text2"));
+//    basket.addProduct(new Product(3, null, "08070", "60215249807", "desc3", "20", 219, 2, null));
 
     BasketInfo basketInfo = new BasketInfo(13650, "EUR");
 
+    List<Ident> idents = Arrays.asList(new Ident("card", "9276004426002928"));//, new Ident("card", "9276004427634577"));
     Transaction newTrans;
-    newTrans = new Transaction();
-    //newTrans = new Transaction(basketInfo, basket, Arrays.asList(ident));
+    newTrans = new Transaction(basketInfo, basket, idents);
 //    newTrans = JsonMapper.get().map(getClass().getClassLoader().getResource("transaction.json"), Transaction.class);
 
-    newTrans.setIdents(Arrays.asList(new Ident("card", "9276004426002928"),new Ident("card", "9276004427634577")));
     Transaction transaction = service.createTransaction(newTrans, null);
     assertNotNull(transaction);
 
-    List<Ident> idents = transaction.getIdents();
+    idents = transaction.getIdents();
     assertNotNull(idents);
 
     transaction = service.updateTransaction(transaction, null);
 
-    Transaction result = service.startTransaction(transaction.getId(), "demo", null);
-    assertNotNull(result);
+    Boolean cancel = service.cancel(transaction.getId(), null);
+
+    transaction = service.get(transaction.getId(), null);
+
+    transaction = service.startTransaction(transaction.getId(), "demo", null);
+    System.out.println(transaction);
+
+    assertNotNull(transaction);
   }
 }

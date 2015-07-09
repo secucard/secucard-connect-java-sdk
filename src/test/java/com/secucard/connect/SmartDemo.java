@@ -146,16 +146,6 @@ public class SmartDemo {
 
     try {
 
-      if (true) {
-
-        while (true) {
-          QueryParams queryParams = new QueryParams();
-          queryParams.setCount(6);
-//          List<Transaction> list = transactionService.getList(queryParams, null);
-          Thread.sleep(60000);
-        }
-      }
-
       // select an ident
       List<Ident> availableIdents = identService.getIdents(null);
       if (availableIdents == null) {
@@ -203,7 +193,7 @@ public class SmartDemo {
         ServerErrorException err = (ServerErrorException) e;
         if (err.getUserMessage() != null) {
           // display to the user, so he may fix
-          System.err.println("### " + err.getUserMessage());
+          System.err.println("### " + err.getUserMessage() + ", " + err.getMessage());
         } else if (err.getSupportId() != null) {
           System.err.println("### Unexpected error happened, please contact ... for assistance and provide this id: "
               + err.getSupportId());

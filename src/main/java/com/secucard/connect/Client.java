@@ -228,10 +228,10 @@ public class Client extends AbstractService {
    * Any timeout set by {@link #autoDisconnect(int)}) is cleared when this method is called.
    *
    * @param credentials The credentials to use. Pass null to use credentials from config.
-   * @param forceAuth   If true new authentication is forced using the credentials. If false client may use cached
-   *                    authentication token from previous attempts for this credential if it is still valid,
-   *                    avoiding a new authentication.
-   *                    Falls back to true if no authentication token is available.
+   * @param forceAuth   If true new authentication is forced using the credentials. Note: Any cached tokens are removed
+   *                    in this case!
+   *                    If false client may use cached authentication token from previous attempts for this credential
+   *                    if it is still valid, avoiding a new authentication.
    * @param callback    Callback to get notified when the connection attempt succeeded or failed. See "Throws" section
    *                    to get details about the exceptions passed on failure.
    * @throws AuthException   If the authentication failed for some reason, check exception details. May be an instance of
@@ -273,7 +273,6 @@ public class Client extends AbstractService {
     } catch (Throwable t) {
       disconnect(true);
       if (t instanceof AuthException) {
-        clearAuthentication();
         throw t;
       }
       throw new ClientException("Error while authenticating the credentials.", t);
@@ -285,7 +284,6 @@ public class Client extends AbstractService {
       if (throwable != null) {
         disconnect(true);
         if (throwable instanceof AuthException) {
-          clearAuthentication();
           throw (AuthException) throwable;
         }
         throw new ClientException("Error executing session refresh.", throwable);
@@ -402,7 +400,7 @@ public class Client extends AbstractService {
    * the latter case.
    * By default no handler is set, that means all exceptions are thrown or returned by the callback.
    * <p/>
-   * Note: With an
+   * Note: With an exception handler in place service methods will not return any useful data in error case!
    *
    * @param exceptionHandler The handler to set.
    */

@@ -1,6 +1,7 @@
 package com.secucard.connect.event;
 
 import com.secucard.connect.model.general.Event;
+import com.secucard.connect.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.Map;
  * Registers event handlers or listeners and dispatches events to them.
  */
 public class EventDispatcher {
+  private static final Log LOG = new Log(EventDispatcher.class);
+
   // event type to listener map
   private final Map<Object, EventListener> listeners = new HashMap<>();
 
@@ -61,6 +64,7 @@ public class EventDispatcher {
    */
   @SuppressWarnings("unchecked")
   public synchronized boolean dispatch(Object event, boolean async) {
+    LOG.debug("Dispatch event: ", event);
     int count = 0;
     for (Map.Entry<Object, EventListener> entry : listeners.entrySet()) {
       boolean accept = false;

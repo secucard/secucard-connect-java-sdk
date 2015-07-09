@@ -118,7 +118,7 @@ public class StompClient {
     }
 
     if (config.requestDISCONNECTReceipt) {
-      awaitReceipt(id, false);  // no disconnect because we already sent it
+      awaitReceipt(id, false, null);  // no disconnect because we already sent it
     }
 
     dispatchFrame(new Frame(DISCONNECTED));
@@ -141,7 +141,7 @@ public class StompClient {
    *                            {@link Config#receiptTimeoutSec}. Will NEVER be
    *                            thrown when a callback is provided.
    */
-  public synchronized void send(String destination, String body, Map<String, String> headers) {
+  public synchronized void send(String destination, String body, Map<String, String> headers, Integer timeoutSec) {
     if (headers == null) {
       headers = new HashMap<>();
     }
@@ -158,7 +158,7 @@ public class StompClient {
       throw new StompException(t);
     }
 
-    awaitReceipt(id, config.disconnectOnSENDReceiptTimeout);
+    awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, timeoutSec);
   }
 
   public boolean isConnected() {
@@ -254,11 +254,13 @@ public class StompClient {
     }
   }
 
-  private void awaitReceipt(final String receiptId, final boolean disconnectOnError) {
+  private void awaitReceipt(final String receiptId, final boolean disconnectOnError, Integer timeoutSec) {
     // check if receipt was received
-
+    if (timeoutSec == null) {
+      timeoutSec = config.receiptTimeoutSec;
+    }
     boolean found = false;
-    long maxWaitTime = System.currentTimeMillis() + config.receiptTimeoutSec * 1000;
+    long maxWaitTime = System.currentTimeMillis() + timeoutSec * 1000;
     outer:
     while (System.currentTimeMillis() <= maxWaitTime && connected) {
       synchronized (receipts) {

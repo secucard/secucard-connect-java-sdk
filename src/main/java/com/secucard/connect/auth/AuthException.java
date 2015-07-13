@@ -5,6 +5,10 @@ package com.secucard.connect.auth;
  * Inspect {@link #getMessage()} {@link #getError()} and {@link #getCause()} to get more details.
  */
 public class AuthException extends RuntimeException {
+  public final static String ERROR_UNAUTHORIZED = "unauthorized_client";
+  public final static String ERROR_INVALID_GRANT = "invalid_grant";
+  public final static String ERROR_INVALID_CLIENT = "invalid_client";
+
   String error;
 
   public String getError() {

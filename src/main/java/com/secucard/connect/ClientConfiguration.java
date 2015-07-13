@@ -29,6 +29,12 @@ public class ClientConfiguration {
   private final ClientCredentials clientCredentials;
   private final String deviceId;
   private final String authType;
+  private final String logFormat;
+  private final String logLevel;
+  private final String logPath;
+  private final int logLimit;
+  private final int logCount;
+  private final boolean logIgnoreGlobal;
 
   private ClientConfiguration(Properties properties) {
     try {
@@ -47,6 +53,12 @@ public class ClientConfiguration {
       deviceId = properties.getProperty("device");
       authType = properties.getProperty("auth.type");
       androidMode = Boolean.valueOf(properties.getProperty("androidMode"));
+      logIgnoreGlobal = Boolean.valueOf(properties.getProperty("logging.local"));
+      logCount = Integer.valueOf(properties.getProperty("logging.count"));
+      logLimit = Integer.valueOf(properties.getProperty("logging.limit"));
+      logPath = properties.getProperty("logging.path");
+      logLevel = properties.getProperty("logging.level");
+      logFormat = properties.getProperty("logging.format");
 
       stompConfiguration = new StompChannel.Configuration(
           properties.getProperty("stomp.host"),
@@ -167,5 +179,29 @@ public class ClientConfiguration {
 
   public String getAuthType() {
     return authType;
+  }
+
+  public String getLogFormat() {
+    return logFormat;
+  }
+
+  public String getLogLevel() {
+    return logLevel;
+  }
+
+  public String getLogPath() {
+    return logPath;
+  }
+
+  public int getLogLimit() {
+    return logLimit;
+  }
+
+  public int getLogCount() {
+    return logCount;
+  }
+
+  public boolean isLogIgnoreGlobal() {
+    return logIgnoreGlobal;
   }
 }

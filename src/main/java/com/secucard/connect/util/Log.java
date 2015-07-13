@@ -1,14 +1,19 @@
 package com.secucard.connect.util;
 
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import com.secucard.connect.ClientConfiguration;
+import com.secucard.connect.ClientException;
+
+import java.util.logging.*;
 
 /**
  * Logging util which uses java.util.logging.
  */
 public class Log {
   private final Logger logger;
+
+  static {
+    init();
+  }
 
   public Log(Class type) {
     this.logger = Logger.getLogger(type.getName());
@@ -77,5 +82,27 @@ public class Log {
       }
     }
     return sb.toString();
+  }
+
+  private static void init() {
+    try {
+      ClientConfiguration cfg = ClientConfiguration.getDefault();
+      if (cfg.isLogIgnoreGlobal()) {
+        Logger logger = Logger.getLogger("com.secucard.connect");
+        LogFormatter formatter = new LogFormatter(cfg.getLogFormat());
+        if (cfg.getLogPath() != null) {
+          FileHandler fileHandler = new FileHandler(cfg.getLogPath(), cfg.getLogLimit(), cfg.getLogCount(), true);
+          fileHandler.setFormatter(formatter);
+          logger.addHandler(fileHandler);
+        }
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setFormatter(formatter);
+        consoleHandler.setLevel(Level.ALL);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(Level.parse(cfg.getLogLevel()));
+      }
+    } catch (Exception e) {
+      throw new ClientException("Error initializing logging.", e);
+    }
   }
 }

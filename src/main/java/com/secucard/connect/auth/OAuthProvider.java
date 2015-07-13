@@ -78,12 +78,6 @@ public class OAuthProvider implements AuthProvider {
 
     Token token = getCurrent();
 
-    // check if token matches the current credentials
-    if (token != null && !token.getId().equals(credentials.getId())) {
-      LOG.debug("Credentials changed, current token invalid, must obtain new.");
-      token = null;
-    }
-
     boolean authenticate = false;
 
     if (token == null) {

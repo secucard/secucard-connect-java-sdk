@@ -227,7 +227,6 @@ public class StompChannel extends Channel {
     Map<String, String> header = StompClient.createHeader(
         "reply-to", configuration.replyQueue,
         "correlation-id", corrId,
-        "persistent", "true",
         "content-type", "application/json",
         "user-id", token
     );

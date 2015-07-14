@@ -65,8 +65,8 @@ public class AppUserDemo {
     return new AppUserCredentials(
         "app.mobile.secucard",
         "576459f04ee8f67f7fcb1cf66416306e64517e01106090edfadbd381f81b58fc",
-        "thomas.krauss@posteo.de",
-        "Mwx9vMr2",
+        "user",
+        "pwd",
         "tk1");
   }
 }

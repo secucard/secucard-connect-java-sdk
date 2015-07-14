@@ -9,8 +9,6 @@ import java.util.Date;
 public class Contract extends SecuObject {
   public static final String OBJECT = "payment.contracts";
 
-  private Merchant merchant;
-
   private Date created;
 
   private Date updated;
@@ -19,14 +17,6 @@ public class Contract extends SecuObject {
 
   @JsonProperty("allow_cloning")
   private boolean allowCloning;
-
-  public Merchant getMerchant() {
-    return merchant;
-  }
-
-  public void setMerchant(Merchant merchant) {
-    this.merchant = merchant;
-  }
 
   public Date getCreated() {
     return created;
@@ -68,7 +58,6 @@ public class Contract extends SecuObject {
   @Override
   public String toString() {
     return "Contract{" +
-        "merchant=" + merchant +
         ", created=" + created +
         ", updated=" + updated +
         ", parent=" + parent +

@@ -70,7 +70,11 @@ public class StoreService extends AbstractService {
       MediaResource picture = object.getLogo();
       if (picture != null) {
         if (!picture.isCached()) {
-          picture.download();
+          try {
+            picture.download();
+          }catch (Exception e){
+            e.printStackTrace();
+          }
         }
       }
     }

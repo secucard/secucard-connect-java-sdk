@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class MemoryDataStorage extends DataStorage implements Serializable {
+  private static final long serialVersionUID = -7306421009494189403L;
+
   private Map<String, Item> store = new HashMap<>();
 
   @Override

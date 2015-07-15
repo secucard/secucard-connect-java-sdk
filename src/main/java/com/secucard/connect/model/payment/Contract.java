@@ -9,31 +9,14 @@ import java.util.Date;
 public class Contract extends SecuObject {
   public static final String OBJECT = "payment.contracts";
 
-  @JsonProperty("contract_id")
-  private String contractId;
-
-  private Merchant merchant;
-
-  @JsonProperty("internal_reference")
-  private String internalReference;
-
   private Date created;
 
-  public Merchant getMerchant() {
-    return merchant;
-  }
+  private Date updated;
 
-  public void setMerchant(Merchant merchant) {
-    this.merchant = merchant;
-  }
+  private Contract parent;
 
-  public String getInternalReference() {
-    return internalReference;
-  }
-
-  public void setInternalReference(String internalReference) {
-    this.internalReference = internalReference;
-  }
+  @JsonProperty("allow_cloning")
+  private boolean allowCloning;
 
   public Date getCreated() {
     return created;
@@ -43,12 +26,28 @@ public class Contract extends SecuObject {
     this.created = created;
   }
 
-  public String getContractId() {
-    return contractId;
+  public Date getUpdated() {
+    return updated;
   }
 
-  public void setContractId(String contractId) {
-    this.contractId = contractId;
+  public void setUpdated(Date updated) {
+    this.updated = updated;
+  }
+
+  public Contract getParent() {
+    return parent;
+  }
+
+  public void setParent(Contract parent) {
+    this.parent = parent;
+  }
+
+  public boolean isAllowCloning() {
+    return allowCloning;
+  }
+
+  public void setAllowCloning(boolean allowCloning) {
+    this.allowCloning = allowCloning;
   }
 
   @Override

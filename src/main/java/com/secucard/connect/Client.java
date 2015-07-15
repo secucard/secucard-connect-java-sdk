@@ -417,9 +417,9 @@ public class Client extends AbstractService {
     Class<?> eventClass = event.getClass();
     // just log STOMP connection for now
     if (StompEvents.STOMP_CONNECTED.equals(event)) {
-      getEventDispatcher().dispatch(new Events.ConnectionStateChanged(true), false);
+      getEventDispatcher().dispatch(new Events.ConnectionStateChanged(true), true);
     } else if (StompEvents.STOMP_DISCONNECTED.equals(event)) {
-      getEventDispatcher().dispatch(new Events.ConnectionStateChanged(false), false);
+      getEventDispatcher().dispatch(new Events.ConnectionStateChanged(false), true);
     } else {
       if (StompEvents.Error.class.equals(eventClass) || StompEvents.AuthorizationFailed.class.equals(eventClass)) {
         if (context.getConfig().getStompConfiguration().isDisconnectOnError()) {
@@ -428,7 +428,7 @@ public class Client extends AbstractService {
           disconnect();
         }
       } else {
-        getEventDispatcher().dispatch(event, false);
+        getEventDispatcher().dispatch(event, true);
       }
     }
   }

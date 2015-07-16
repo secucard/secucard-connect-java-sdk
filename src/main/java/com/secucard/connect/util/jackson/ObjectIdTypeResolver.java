@@ -56,6 +56,12 @@ public class ObjectIdTypeResolver extends TypeIdResolverBase {
 
   @Override
   public JavaType typeFromId(DatabindContext context, String id) {
+    JsonToken currentToken = ((DeserializationContext) context).getParser().getCurrentToken();
+
+    if (currentToken.equals(JsonToken.VALUE_NULL)) {
+      return null; // forces default type usage
+    }
+
     Class<?> type = getType(id);
 
     JavaType javatype = null;
@@ -65,8 +71,7 @@ public class ObjectIdTypeResolver extends TypeIdResolverBase {
       javatype = MapType.construct(HashMap.class, SimpleType.construct(String.class), SimpleType.construct(Object.class));
     }
 
-
-    if (JsonToken.END_ARRAY.equals(((DeserializationContext) context).getParser().getCurrentToken())) {
+    if (JsonToken.END_ARRAY.equals(currentToken)) {
       // it is expected to get called here when reading the last token.
       javatype = CollectionType.construct(ArrayList.class, javatype);
     }

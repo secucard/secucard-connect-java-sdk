@@ -1,7 +1,9 @@
 package com.secucard.connect.model.general;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import com.fasterxml.jackson.databind.deser.std.NullifyingDeserializer;
 import com.secucard.connect.model.SecuObject;
 import com.secucard.connect.util.jackson.ObjectIdTypeResolver;
 
@@ -19,7 +21,9 @@ public class Event<T> extends SecuObject {
 
   private Date created;
 
-  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = TARGET_PROPERTY)
+  @JsonDeserialize(using = NullifyingDeserializer.class)
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = TARGET_PROPERTY,
+      defaultImpl = Void.class)
   @JsonTypeIdResolver(ObjectIdTypeResolver.class)
   private T data = null;
 

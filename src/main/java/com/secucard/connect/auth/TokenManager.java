@@ -60,10 +60,6 @@ public class TokenManager {
     return cancelCallback != null && cancelCallback.cancel();
   }
 
-  private OAuthCredentials getCredentials() {
-    return credentialsProvider.getCredentials();
-  }
-
   private Map<String, String> getAdditionalInfo() {
     return configuration.deviceInfo;
   }
@@ -109,7 +105,7 @@ public class TokenManager {
         authenticate = true;
       } else {
         try {
-          token = refresh(token, getCredentials());
+          refresh(token, credentialsProvider.getClientCredentials());
           setCurrentToken(token);
         } catch (Throwable t) {
           LOG.debug("Token refresh failed, try obtain new.", t);
@@ -127,16 +123,18 @@ public class TokenManager {
     }
 
     if (authenticate) {
-      OAuthCredentials credentials = getCredentials();
+      OAuthCredentials credentials = credentialsProvider.getCredentials();
 
       if (credentials instanceof AnonymousCredentials) {
         return null;
       }
 
-      // credential auth is needed but only if allowed
-      if (!allowInteractive && credentials instanceof DeviceCredentials) {
-        throw new AuthFailedException("Invalid or no auth token, please authenticate again.");
+      // new authentication is needed but only if allowed
+      if ((credentials instanceof AppUserCredentials || credentials instanceof DeviceCredentials)
+          && !allowInteractive) {
+        throw new AuthFailedException("Invalid acess token, please authenticate again.");
       }
+
       token = authenticate(credentials);
       token.setExpireTime();
       token.setId(credentials.getId());
@@ -258,27 +256,20 @@ public class TokenManager {
    * Refresh token, but copy ony access token and time of the refreshed token.
    *
    * @param token The token to refresh.
-   * @return The refreshed token data.
    */
-  protected Token refresh(Token token, OAuthCredentials credentials) throws AuthFailedException, AuthCanceledException {
+  protected void refresh(Token token, ClientCredentials credentials) throws AuthFailedException, AuthCanceledException {
     if (credentials == null) {
       throw new AuthFailedException("Missing credentials");
     }
 
     LOG.debug("Refresh token: ", credentials);
-    if (!(credentials instanceof ClientCredentials)) {
-      throw new IllegalArgumentException("Invalid credentials type for refresh, need any ClientCredentials type");
-    }
-    ClientCredentials cc = (ClientCredentials) credentials;
-    RefreshCredentials rc = new RefreshCredentials(cc.getClientId(), cc.getClientSecret(), token.getRefreshToken());
-    Token refreshToken = authService.refresh(rc);
+    Token refreshToken = authService.refresh(new RefreshCredentials(credentials, token.getRefreshToken()));
     token.setAccessToken(refreshToken.getAccessToken());
     token.setExpiresIn(refreshToken.getExpiresIn());
     if (StringUtils.isNotBlank(refreshToken.getRefreshToken())) {
       token.setRefreshToken(refreshToken.getRefreshToken());
     }
     token.setExpireTime();
-    return token;
   }
 
   /**

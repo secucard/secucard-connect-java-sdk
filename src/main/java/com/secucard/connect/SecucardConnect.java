@@ -6,6 +6,7 @@ import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.exception.AuthFailedException;
 import com.secucard.connect.auth.exception.AuthTimeoutException;
 import com.secucard.connect.auth.model.AnonymousCredentials;
+import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
 import com.secucard.connect.auth.model.Token;
 import com.secucard.connect.client.*;
@@ -244,6 +245,11 @@ public class SecucardConnect {
         @Override
         public OAuthCredentials getCredentials() {
           return new AnonymousCredentials();
+        }
+
+        @Override
+        public ClientCredentials getClientCredentials() {
+          return null;
         }
       };
     }

@@ -18,6 +18,10 @@ public class AppUserCredentials extends ClientCredentials {
     this.deviceId = deviceId;
   }
 
+  public AppUserCredentials(ClientCredentials clientCredentials, String userName, String password, String deviceId) {
+    this(clientCredentials.getClientId(), clientCredentials.getClientSecret(), userName, password, deviceId);
+  }
+
   public String getUserName() {
     return userName;
   }

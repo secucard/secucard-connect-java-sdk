@@ -3,6 +3,7 @@ package com.secucard.connect;
 import com.secucard.connect.auth.CredentialsProvider;
 import com.secucard.connect.auth.DefaultTokenStore;
 import com.secucard.connect.auth.exception.AuthDeniedException;
+import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.DeviceAuthCode;
 import com.secucard.connect.auth.model.DeviceCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
@@ -33,10 +34,12 @@ public class SmartDemo {
     cfg.credentialsProvider = new CredentialsProvider() {
       @Override
       public OAuthCredentials getCredentials() {
-        return new DeviceCredentials(
-            "myid",
-            "mysecret",
-            "mydevice");
+        return new DeviceCredentials("id", "secret", "device");
+      }
+
+      @Override
+      public ClientCredentials getClientCredentials() {
+        return (ClientCredentials) getCredentials();
       }
     };
     cfg.tokenStore = new DefaultTokenStore("smartdemo-ts");

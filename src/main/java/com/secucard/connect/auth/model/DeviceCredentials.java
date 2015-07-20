@@ -8,7 +8,6 @@ public class DeviceCredentials extends ClientCredentials {
    */
   private String deviceCode;
 
-
   private String id;
 
   /**
@@ -20,6 +19,10 @@ public class DeviceCredentials extends ClientCredentials {
     super(clientId, clientSecret);
     this.deviceId = deviceId;
     this.id = getGrantType() + clientId + clientSecret + deviceId;
+  }
+
+  public DeviceCredentials(ClientCredentials clientCredentials, String deviceId) {
+    this(clientCredentials.getClientId(), clientCredentials.getClientSecret(), deviceId);
   }
 
   public String getDeviceId() {

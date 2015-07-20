@@ -10,6 +10,10 @@ public class RefreshCredentials extends ClientCredentials {
     this.refreshToken = refreshToken;
   }
 
+  public RefreshCredentials(ClientCredentials clientCredentials, String refreshToken) {
+    this(clientCredentials.getClientId(),clientCredentials.getClientSecret(), refreshToken);
+  }
+
   public String getRefreshToken() {
     return refreshToken;
   }

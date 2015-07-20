@@ -4,10 +4,10 @@ import com.secucard.connect.auth.CredentialsProvider;
 import com.secucard.connect.auth.DefaultTokenStore;
 import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.model.AppUserCredentials;
+import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
-import com.secucard.connect.product.general.General;
 import com.secucard.connect.product.loyalty.Loyalty;
 import com.secucard.connect.product.loyalty.MerchantCardsService;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
@@ -24,10 +24,18 @@ public class AppUserDemo {
     SecucardConnect.Configuration cfg = SecucardConnect.Configuration.get();
     cfg.id = "appusertest";
 
-    cfg.credentialsProvider  = new CredentialsProvider() {
+    cfg.credentialsProvider = new CredentialsProvider() {
       @Override
       public OAuthCredentials getCredentials() {
-        return login();
+        String[] loginData = login();
+        return new AppUserCredentials(getClientCredentials(), loginData[0], loginData[1], "device");
+      }
+
+      @Override
+      public ClientCredentials getClientCredentials() {
+        return new ClientCredentials(
+            "id",
+            "secret");
       }
     };
 
@@ -40,7 +48,7 @@ public class AppUserDemo {
         client.open();
         break;
       } catch (AuthDeniedException e) {
-        // invalid username or password, try again
+        // invalid username or password, let try again
         System.err.println(e.getMessage());
       } catch (Exception e) {
         // all other errors are caused by connection problems, bugs, wrong config etc.
@@ -63,19 +71,12 @@ public class AppUserDemo {
     } finally {
       client.close();
     }
-
   }
-
 
   /**
    * Method which simulates requesting login from user.
    */
-  private AppUserCredentials login() {
-    return new AppUserCredentials(
-        "myid",
-        "mysecret",
-        "myname",
-        "mypassword",
-        "mydevice");
+  private String[] login() {
+    return new String[]{"user", "pwd"};
   }
 }

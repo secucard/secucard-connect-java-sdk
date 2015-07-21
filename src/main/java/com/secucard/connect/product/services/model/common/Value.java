@@ -10,7 +10,7 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.product.services.model.idresult;
+package com.secucard.connect.product.services.model.common;
 
 public class Value {
   public static final String STATUS_NEW = "NEW";

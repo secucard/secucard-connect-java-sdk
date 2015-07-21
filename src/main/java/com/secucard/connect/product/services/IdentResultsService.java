@@ -22,8 +22,7 @@ import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.services.model.IdentRequest;
 import com.secucard.connect.product.services.model.IdentResult;
-import com.secucard.connect.product.services.model.idresult.Attachment;
-import com.secucard.connect.product.services.model.idresult.Person;
+import com.secucard.connect.product.services.model.common.Attachment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,13 +30,13 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * Implements the servcies/identresult operations.
  * Provides access to the secucard services resources and operations.
  * Support also caching of attachments when requested.
  * Note: Caching will speed up clients access, but has also impact on memory usage. Depending on the type of cache storage
  * it may be not a good idea to cache too much data. The {@link com.secucard.connect.client.DataStorage) implementation
  * provided to the client is used also for caching.
- * See {@link com.secucard.connect.SecucardConnect#create(String, com.secucard.connect.ClientConfiguration, Object, com.secucard.connect.storage.DataStorage)}
- * to get details which storage implementation is actually used.
+ * See {@link com.secucard.connect.SecucardConnect.Configuration to get details which storage implementation is actually used.
  */
 public class IdentResultsService extends ProductService<IdentResult> {
   private boolean cacheAttachmentsEnabled = true;
@@ -158,7 +157,7 @@ public class IdentResultsService extends ProductService<IdentResult> {
   private void processAttachments(List<IdentResult> results, boolean cache) {
     if (cacheAttachmentsEnabled && cache) {
       for (IdentResult result : results) {
-        for (Person person : result.getPersons()) {
+        for (IdentResult.Person person : result.getPersons()) {
           for (Attachment attachment : person.getAttachments()) {
             // todo: introduce download policy settings to be able to avoid some downloads
             attachment.download();

@@ -10,7 +10,7 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.product.services.model.idresult;
+package com.secucard.connect.product.services.model.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -15,6 +15,9 @@ package com.secucard.connect.product.services;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.services.model.IdentRequest;
 
+/**
+ * Implements the services/identrequest operations.
+ */
 public class IdentRequestsService extends ProductService<IdentRequest> {
 
   @Override

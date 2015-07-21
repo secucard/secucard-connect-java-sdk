@@ -20,6 +20,9 @@ import com.secucard.connect.product.smart.model.Ident;
 
 import java.util.List;
 
+/**
+ * Implements the smart/idents operations.
+ */
 public class IdentService extends ProductService<Ident> {
 
   @Override
@@ -43,6 +46,9 @@ public class IdentService extends ProductService<Ident> {
     return super.getSimpleList(null, null, callback);
   }
 
+  /**
+   * Read an ident with a given id from a connected device.
+   */
   public Ident readIdent(String id, Callback<Ident> callback) {
     return super.execute(id, "read", null, null, Ident.class, null, callback);
   }

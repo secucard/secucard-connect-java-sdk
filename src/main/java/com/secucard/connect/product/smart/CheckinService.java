@@ -25,6 +25,9 @@ import com.secucard.connect.product.smart.model.Checkin;
 
 import java.util.List;
 
+/**
+ * Implements the smart/checkins operations.
+ */
 public class CheckinService extends ProductService<Checkin> {
 
   @Override
@@ -37,6 +40,9 @@ public class CheckinService extends ProductService<Checkin> {
     return new Options(Options.CHANNEL_STOMP);
   }
 
+  /**
+   * Set a callback to get notified when a check in happened.
+   */
   public void onCheckinsChanged(final Callback<List<Checkin>> callback) {
     AbstractEventListener listener = null;
 
@@ -61,8 +67,8 @@ public class CheckinService extends ProductService<Checkin> {
    * Returning check in data.<br/>
    * Data may contain a downloadable image. When the method returns either by callback or directly it is
    * guarantied that all images are completely downloaded to an local cache. To get the image content simply call
-   * {@link com.secucard.connect.product.common.model.MediaResource#getInputStream()}  or
-   * {@link com.secucard.connect.product.common.model.MediaResource#getContents()}. The streaming approach should be favored,
+   * {@link MediaResource#getInputStream()}  or
+   * {@link MediaResource#getContents()}. The streaming approach should be favored,
    * since the other obviously loads the content completely in memory before returning, which may not be optimal in any
    * case.<br/>
    * Note: Depending on the network it may of course take a while to download all, so without using an callback the

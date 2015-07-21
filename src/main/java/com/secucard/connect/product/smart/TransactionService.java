@@ -23,7 +23,7 @@ import com.secucard.connect.product.general.model.Notification;
 import com.secucard.connect.product.smart.model.Transaction;
 
 /**
- * The Smart Product operations.
+ * Implements the smart/transaction operations.
  */
 public class TransactionService extends ProductService<Transaction> {
 
@@ -40,11 +40,14 @@ public class TransactionService extends ProductService<Transaction> {
    * @param type          The transaction type like "auto" or "cash".
    * @return The result data.
    */
-  public Transaction startTransaction(final String transactionId, final String type,
-                                      Callback<Transaction> callback) {
-    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  public Transaction start(String transactionId, String type, Callback<Transaction> callback) {
+    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP),
+        callback);
   }
 
+  /**
+   * Set a callback to get notified when a cashier notification arrives.
+   */
   public void onCashierDisplayChanged(Callback<Notification> callback) {
     AbstractEventListener listener = null;
 
@@ -66,10 +69,8 @@ public class TransactionService extends ProductService<Transaction> {
   }
 
   /**
-   * Cancel an existing transaction.
+   * Cancel the existing transaction with the given id.
    *
-   * @param id       The debit object id.
-   * @param callback Callback for async processing.
    * @return True if ok false else.
    */
   public Boolean cancel(String id, Callback<Boolean> callback) {

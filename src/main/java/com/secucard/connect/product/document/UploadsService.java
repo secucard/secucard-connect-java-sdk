@@ -15,16 +15,29 @@ package com.secucard.connect.product.document;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.document.model.Upload;
+import com.secucard.connect.util.CallbackAdapter;
+import com.secucard.connect.util.Converter;
+
+/**
+ * Implements the document/uploads operations.
+ */
 
 public class UploadsService extends ProductService<Upload> {
+
   /**
-   * Upload a Base64 encoded document
-   *
-   * @param base64EncodeDocument Base64 encoded document
-   * @return JSONObject with id
+   * Upload the given document and returns the new id for the upload.
+   * Note: the uploaded content should be base64 encoded.
    */
-  public Upload uploadDocument(Upload base64EncodeDocument, Callback<Upload> callback) {
-    return super.execute(null, null, null, base64EncodeDocument, Upload.class, null, callback);
+  public String upload(Upload content, Callback<String> callback) {
+    Converter<Upload, String> conv = new Converter<Upload, String>() {
+      @Override
+      public String convert(Upload value) {
+        return value.getId();
+      }
+    };
+    CallbackAdapter<Upload, String> cb = callback == null ? null : new CallbackAdapter<>(callback, conv);
+    Upload result = super.execute(null, null, null, content, Upload.class, null, cb);
+    return conv.convert(result);
   }
 
   @Override

@@ -15,6 +15,9 @@ package com.secucard.connect.product.loyalty;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
 
+/**
+ * Implements the loyalty/merchantcards operations.
+ */
 public class MerchantCardsService extends ProductService<MerchantCard> {
 
   @Override

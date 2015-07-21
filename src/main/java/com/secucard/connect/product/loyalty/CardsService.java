@@ -16,6 +16,9 @@ import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.loyalty.model.Card;
 
+/**
+ * Implements the loyalty/cards operations.
+ */
 public class CardsService extends ProductService<Card> {
 
   @Override
@@ -24,16 +27,18 @@ public class CardsService extends ProductService<Card> {
   }
 
   /**
-   * Assign a card
+   * Assign current user to a card with given card number and pin.
    *
-   * @param cardNumber Card number
-   * @return Assigned card
+   * @return True of ok false else.
    */
-  public Boolean assignUser(final String cardNumber, final Object pin, Callback<Boolean> callback) {
+  public Boolean assignUser(String cardNumber, String pin, Callback<Boolean> callback) {
     return super.executeToBool(cardNumber, "assignUser", "me", pin, null, callback);
   }
 
-  public void deleteUserFromCard(final String cardNumber, Callback<Void> callback) {
+  /**
+   * Remove the assigned current user from the card with the given number.
+   */
+  public void removeUser(final String cardNumber, Callback<Void> callback) {
     super.delete(cardNumber, "assignUser", "me", null, callback);
   }
 

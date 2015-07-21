@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Store;
 
+import java.io.Serializable;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
@@ -160,5 +161,41 @@ public class Sale extends SecuObject {
 
   public void setBonus(List<Bonus> bonus) {
     this.bonus = bonus;
+  }
+
+
+  public static class Bonus implements Serializable {
+    private int amount;
+
+    /**
+     * PTS or EUR
+     */
+    private String currency;
+
+    private int balance;
+
+    public int getAmount() {
+      return amount;
+    }
+
+    public void setAmount(int amount) {
+      this.amount = amount;
+    }
+
+    public String getCurrency() {
+      return currency;
+    }
+
+    public void setCurrency(String currency) {
+      this.currency = currency;
+    }
+
+    public int getBalance() {
+      return balance;
+    }
+
+    public void setBalance(int balance) {
+      this.balance = balance;
+    }
   }
 }

@@ -15,6 +15,9 @@ package com.secucard.connect.product.loyalty;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.loyalty.model.Customer;
 
+/**
+ * Implements the loyalty/customers operations.
+ */
 public class CustomersService extends ProductService<Customer> {
 
   @Override

@@ -198,6 +198,10 @@ public abstract class ProductService<T extends SecuObject> {
         new Channel.Params(getObject(), id, action, actionArg, object, returnType, options), options, callback);
   }
 
+  protected <R> R execute(String action, Object object, Class<R> returnType, Options options, Callback<R> callback) {
+    return execute(getAppId(), action, object, returnType, options, callback);
+  }
+
   protected <R> R execute(String appId, String action, Object object, Class<R> returnType, Options options,
                           Callback<R> callback) {
     return request(Channel.Method.EXECUTE, Channel.Params.forApp(appId, action, object, returnType, options), options,
@@ -211,6 +215,10 @@ public abstract class ProductService<T extends SecuObject> {
     Result result = request(Channel.Method.EXECUTE, new Channel.Params(getObject(), id, action, actionArg, object,
         Result.class, options), options, cb);
     return converter.convert(result);
+  }
+
+  protected Boolean executeToBool(String action, Object object, Options options, Callback<Boolean> callback) {
+    return executeToBool(getAppId(), action, object, options, callback);
   }
 
   protected Boolean executeToBool(String appId, String action, Object object, Options options, Callback<Boolean> callback) {
@@ -339,6 +347,10 @@ public abstract class ProductService<T extends SecuObject> {
     return getMetaData().getObjectArray();
   }
 
+  private String getAppId() {
+    return getMetaData().getAppId();
+  }
+
   private Class<T> getResourceType() {
     return getMetaData().resourceType;
   }
@@ -350,16 +362,29 @@ public abstract class ProductService<T extends SecuObject> {
   public static class ServiceMetaData<T extends SecuObject> {
     public final String product;
     public final String resource;
+    public final String appId;
     public final Class<T> resourceType;
 
     public ServiceMetaData(String product, String resource, Class<T> resourceType) {
       this.product = product;
       this.resource = resource;
       this.resourceType = resourceType;
+      this.appId = null;
+    }
+
+    public ServiceMetaData(String appId) {
+      this.appId = appId;
+      this.product = null;
+      this.resource = null;
+      this.resourceType = null;
     }
 
     public Class<T> getResourceType() {
       return resourceType;
+    }
+
+    public String getAppId() {
+      return appId;
     }
 
     /**

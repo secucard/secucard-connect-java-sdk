@@ -18,6 +18,10 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.product.general.model.AccountDevice;
 import com.secucard.connect.product.general.model.Event;
 
+/**
+ * Implements the general/account devices operations.
+ */
+
 public class AccountDevicesService extends ProductService<AccountDevice> {
 
   @Override
@@ -25,6 +29,9 @@ public class AccountDevicesService extends ProductService<AccountDevice> {
     return new ServiceMetaData<>("general", "accountdevices", AccountDevice.class);
   }
 
+  /**
+   * Set a callback to get notified when a device has changed.
+   */
   public void onAccountDevicesChanged(AccountDevicesListener listener) {
     if (listener != null) {
       listener.service = this;

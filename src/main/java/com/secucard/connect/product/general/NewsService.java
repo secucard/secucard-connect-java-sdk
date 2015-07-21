@@ -16,6 +16,10 @@ import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.general.model.News;
 
+/**
+ * Implements the general/news operations.
+ */
+
 public class NewsService extends ProductService<News> {
 
   @Override
@@ -24,13 +28,12 @@ public class NewsService extends ProductService<News> {
   }
 
   /**
-   * Mark news as read
+   * Mark news with given id as read.
    *
-   * @param pid News ID
    * @return True if successfully updated, false else.
    */
-  public Boolean markRead(final String pid, Callback<Boolean> callback) {
-    return executeToBool(pid, "markRead", null, null, callback);
+  public Boolean markRead(final String id, Callback<Boolean> callback) {
+    return executeToBool(id, "markRead", null, null, callback);
   }
 
 }

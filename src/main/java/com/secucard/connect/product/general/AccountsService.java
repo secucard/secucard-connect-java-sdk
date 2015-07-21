@@ -18,10 +18,15 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.general.model.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+/**
+ * Implements the general/accounts operations.
+ */
 
 public class AccountsService extends ProductService<Account> {
-
   public static final String EVENT_TYPE_BEACON_MONITOR = "BeaconMonitor";
 
   @Override
@@ -34,6 +39,9 @@ public class AccountsService extends ProductService<Account> {
     return new Options(Options.CHANNEL_STOMP);
   }
 
+  /**
+   * Set a listener to get notified when a beacon was monitored.
+   */
   public void onBeaconMonitor(AccountEventListener listener) {
     if (listener != null) {
       listener.service = this;
@@ -42,35 +50,38 @@ public class AccountsService extends ProductService<Account> {
   }
 
   /**
-   * Updates the location of a account.
+   * Updates the location of the current user account.
    *
-   * @param accountId The account to update.
-   * @param location  The new geo location to set.
    * @return True if successfully updated, false else.
    */
-  public boolean updateLocation(String accountId, Location location) {
-    return super.updateToBool(accountId, "location", null, location, null, null);
+  public boolean updateLocation(Location location) {
+    return super.updateToBool("me", "location", null, location, null, null);
   }
 
   /**
-   * Updates the beacons of the account
+   * Updates the current users account with the given beacons.
    *
-   * @param accountId  Account ID
-   * @param beaconList List of beacons near by
    * @return True if successfully updated, false else.
    */
-  public boolean updateBeacons(String accountId, List<BeaconEnvironment> beaconList) {
+  public boolean updateBeacons(List<BeaconEnvironment> beaconList) {
     return super.updateToBool("me", "beaconEnvironment", null, beaconList, null, null);
   }
 
-  public boolean updateGCM(String accountId, Object objectArg) {
-    return super.updateToBool(accountId, "gcm", null, objectArg, null, null);
+  /**
+   * Update the current users Google Cloud Messaging with the given registration id.
+   *
+   * @return True if successfully updated, false else.
+   */
+  public boolean updateGCM(String id) {
+    Map arg = new HashMap();
+    arg.put("registrationId", id);
+    return super.updateToBool("me", "gcm", null, arg, null, null);
   }
 
 
   /**
    * Set a listener when interested to get notified about merchants around a location.
-   * To set a location use {@link #updateLocation(String, com.secucard.connect.product.general.model.Location)}.
+   * To set a location use {@link #updateLocation(com.secucard.connect.product.general.model.Location)}.
    * Set to null to remove a listener.
    */
   public void onMerchantsChanged(EventListener<MerchantList> listener) {

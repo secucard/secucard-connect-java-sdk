@@ -23,6 +23,10 @@ import com.secucard.connect.product.general.model.Store;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Implements the general/stores operations.
+ */
+
 public class StoresService extends ProductService<Store> {
 
   @Override
@@ -31,23 +35,30 @@ public class StoresService extends ProductService<Store> {
   }
 
   /**
-   * Set checkIn state for the store
+   * Check in the store with the given id.
    *
-   * @param storeId StoreID
    * @return True if successfully updated, false else.
    */
-  public boolean checkIn(final String storeId, final String sid, Callback<Boolean> callback) {
-    return super.executeToBool(storeId, "checkin", sid, null, callback);
+  public boolean checkIn(String storeId, Callback<Boolean> callback) {
+    return super.executeToBool(storeId, "checkin", null, null, callback);
   }
 
   /**
-   * Set store as default
+   * Check out of the store with the given id.
    *
-   * @param storeId StoreID
    * @return True if successfully updated, false else.
    */
-  public boolean setDefault(final String storeId, Callback<Boolean> callback) {
-    return super.executeToBool(storeId, "setDefault", null, null, callback);
+  public boolean checkOut(String storeId, Callback<Boolean> callback) {
+    return super.executeToBool(storeId, "checkin", "false", null, callback);
+  }
+
+  /**
+   * Set store with given id as default.
+   *
+   * @return True if successfully updated, false else.
+   */
+  public boolean setDefault(final String id, Callback<Boolean> callback) {
+    return super.executeToBool(id, "setDefault", null, null, callback);
   }
 
   /**

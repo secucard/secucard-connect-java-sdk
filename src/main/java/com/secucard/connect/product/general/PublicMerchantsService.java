@@ -15,6 +15,10 @@ package com.secucard.connect.product.general;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.general.model.PublicMerchant;
 
+/**
+ * Implements the general/publicmerchants operations.
+ */
+
 public class PublicMerchantsService extends ProductService<PublicMerchant> {
 
   @Override

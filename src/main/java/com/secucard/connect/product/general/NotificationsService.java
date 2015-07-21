@@ -15,6 +15,9 @@ package com.secucard.connect.product.general;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.general.model.Notification;
 
+/**
+ * Implements the general/notifications operations.
+ */
 public class NotificationsService extends ProductService<Notification> {
 
   @Override

@@ -22,6 +22,9 @@ import com.secucard.connect.product.general.model.Transaction;
 
 import java.util.Map;
 
+/**
+ * Implements the general/transactions operations.
+ */
 public class TransactionsService extends ProductService<Transaction> {
 
   @Override
@@ -29,6 +32,9 @@ public class TransactionsService extends ProductService<Transaction> {
     return new ServiceMetaData<>("general", "transactions", Transaction.class);
   }
 
+  /**
+   * Set a callback to get notified when a transaction has changed.
+   */
   public void onTransactionsChanged(final Callback<Transaction> callback) {
     AbstractEventListener listener = null;
 

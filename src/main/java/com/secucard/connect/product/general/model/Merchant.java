@@ -83,4 +83,7 @@ public class Merchant extends SecuObject {
   public void setPhotoMain(String photoMain) {
     this.photoMain = photoMain;
   }
+
+  public static class MetaData extends SecuObject {
+  }
 }

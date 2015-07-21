@@ -15,7 +15,7 @@ package com.secucard.connect.product.payment.model;
 /**
  * Holds payment container details.
  */
-public class  Data {
+public class Data {
   private String owner;
 
   private String iban;

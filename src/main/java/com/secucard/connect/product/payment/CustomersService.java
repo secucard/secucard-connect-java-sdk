@@ -15,6 +15,9 @@ package com.secucard.connect.product.payment;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.payment.model.Customer;
 
+/**
+ * Implements the payment/customers operations.
+ */
 public class CustomersService extends ProductService<Customer> {
 
   @Override

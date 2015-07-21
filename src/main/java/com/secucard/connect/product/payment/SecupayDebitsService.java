@@ -24,7 +24,7 @@ import com.secucard.connect.product.payment.model.SecupayDebit;
 import java.util.List;
 
 /**
- * Provides Payment/Secupaydebit product operations.
+ * Implements the payment/secupaydebit operations.
  */
 public class SecupayDebitsService extends ProductService<SecupayDebit> {
 
@@ -44,6 +44,9 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
     return executeToBool(id, "cancel", null, null, callback);
   }
 
+  /**
+   * Set a callback to get notified when a debit has changed.
+   */
   public void onSecupayDebitChanged(Callback<SecupayDebit> callback) {
     AbstractEventListener listener = null;
 

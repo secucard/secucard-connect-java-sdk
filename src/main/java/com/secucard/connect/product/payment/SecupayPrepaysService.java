@@ -24,7 +24,7 @@ import com.secucard.connect.product.payment.model.SecupayPrepay;
 import java.util.List;
 
 /**
- * Provides Payment/Secupayprepay product operations.
+ * Implements the payment/secupayprepay operations.
  */
 public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
 
@@ -34,16 +34,17 @@ public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
   }
 
   /**
-   * Cancel an existing prepay transaction.
+   * Cancel an existing prepay transaction with the given id.
    *
-   * @param id       The prepay object id.
-   * @param callback Callback for async processing.
-   * @return
+   * @return True if ok false else.
    */
   public Boolean cancelTransaction(final String id, Callback<Boolean> callback) {
     return executeToBool(id, "cancel", null, null, callback);
   }
 
+  /**
+   * Set a callback to get notified when a prepay has changed.
+   */
   public void onSecuPrepayChanged(Callback<SecupayPrepay> callback) {
     AbstractEventListener listener = null;
 

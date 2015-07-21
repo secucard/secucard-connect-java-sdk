@@ -15,8 +15,10 @@ package com.secucard.connect.product.payment;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.payment.model.Container;
-import com.secucard.connect.product.payment.model.Customer;
 
+/**
+ * Implements the payment/containers operations.
+ */
 public class ContainersService extends ProductService<Container> {
 
   @Override
@@ -35,17 +37,23 @@ public class ContainersService extends ProductService<Container> {
    * @param callback  Callback to get notified when completed or failed.
    * @return The validated and completed data like Container.publicData.
    * @throws com.secucard.connect.client.SecucardConnectException if a error happens. userMessage field has the reason,
-   *                                                   like "invalid iban and bic combination".
+   *                                                              like "invalid iban and bic combination".
    */
   public Container create(final Container container, Callback<Container> callback) {
     return super.create(container, callback);
   }
 
-  public Container updateContainerAssignment(final String containerId, final String customerId, Callback<Container> callback) {
-    return super.execute(containerId, "assign", customerId, new Customer(), Container.class, null, callback);
+  /**
+   * Assigns a customer with given id to a container and return the updated container.
+   */
+  public Container assignCustomer(final String containerId, final String customerId, Callback<Container> callback) {
+    return super.execute(containerId, "assign", customerId, null, Container.class, null, callback);
   }
 
-  public void deleteContainerAssignment(final String containerId, Callback<Void> callback) {
+  /**
+   * Removes an assigned customer from a container with given id.
+   */
+  public void removeCustomer(final String containerId, Callback<Void> callback) {
     super.delete(containerId, "assign", null, null, callback);
   }
 }

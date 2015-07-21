@@ -16,6 +16,9 @@ import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.payment.model.Contract;
 
+/**
+ * Implements the payment/contracts operations.
+ */
 public class ContractService extends ProductService<Contract> {
 
   @Override
@@ -23,10 +26,16 @@ public class ContractService extends ProductService<Contract> {
     return new ServiceMetaData<>("payment", "contracts", Contract.class);
   }
 
-  public Contract cloneMyContract(String contractId, Contract.CloneParams params, Callback<Contract> callback) {
+  /**
+   * Clones the contract of the current user according to the given parameters and returns the contract.
+   */
+  public Contract cloneMyContract(Contract.CloneParams params, Callback<Contract> callback) {
     return clone("me", params, callback);
   }
 
+  /**
+   * Clones a contract with a given id according to the given parameters and returns the contract.
+   */
   public Contract clone(String contractId, Contract.CloneParams params, Callback<Contract> callback) {
     return execute(contractId, "clone", null, params, Contract.class, null, callback);
   }

@@ -14,7 +14,6 @@ package com.secucard.connect.product.services.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-import com.secucard.connect.product.services.model.common.*;
 
 import java.util.ArrayList;
 import java.util.Date;

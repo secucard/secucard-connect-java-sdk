@@ -22,7 +22,7 @@ import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.services.model.IdentRequest;
 import com.secucard.connect.product.services.model.IdentResult;
-import com.secucard.connect.product.services.model.common.Attachment;
+import com.secucard.connect.product.services.model.Attachment;
 
 import java.util.ArrayList;
 import java.util.Collections;

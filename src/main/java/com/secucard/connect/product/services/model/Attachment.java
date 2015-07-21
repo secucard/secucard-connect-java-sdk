@@ -10,34 +10,36 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.product.services.model.common;
+package com.secucard.connect.product.services.model;
 
-public class ContactData {
-  String mobile;
+import com.secucard.connect.product.common.model.MediaResource;
 
-  String email;
+import java.net.MalformedURLException;
 
-  public String getMobile() {
-    return mobile;
+public class Attachment extends MediaResource {
+  private String type;
+
+  public Attachment() {
   }
 
-  public void setMobile(String mobile) {
-    this.mobile = mobile;
+  public Attachment(String url, String type) throws MalformedURLException {
+    super(url);
+    this.type = type;
   }
 
-  public String getEmail() {
-    return email;
+  public String getType() {
+    return type;
   }
 
-  public void setEmail(String email) {
-    this.email = email;
+  public void setType(String type) {
+    this.type = type;
   }
 
   @Override
   public String toString() {
-    return "ContactData{" +
-        "mobilePhone='" + mobile + '\'' +
-        ", email='" + email + '\'' +
+    return "Attachment{" +
+        "type='" + type + '\'' +
+        ", url='" + getUrl() + '\'' +
         '}';
   }
 }

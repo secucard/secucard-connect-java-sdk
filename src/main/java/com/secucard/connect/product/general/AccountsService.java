@@ -34,9 +34,15 @@ public class AccountsService extends ProductService<Account> {
     return new ServiceMetaData<>("general", "accounts", Account.class);
   }
 
+  /**
+   *  Create new account. Needs no auth.
+   */
   @Override
-  public Options getDefaultOptions() {
-    return new Options(Options.CHANNEL_STOMP);
+  public Account create(Account object) {
+    // overrides super to pass special option
+    Options options = getDefaultOptions();
+    options.anonymous = true;
+    return super.create(object, options, null);
   }
 
   /**
@@ -55,7 +61,9 @@ public class AccountsService extends ProductService<Account> {
    * @return True if successfully updated, false else.
    */
   public boolean updateLocation(Location location) {
-    return super.updateToBool("me", "location", null, location, null, null);
+    Options options = getDefaultOptions();
+    options.channel = Options.CHANNEL_STOMP;
+    return super.updateToBool("me", "location", null, location, options, null);
   }
 
   /**
@@ -64,7 +72,9 @@ public class AccountsService extends ProductService<Account> {
    * @return True if successfully updated, false else.
    */
   public boolean updateBeacons(List<BeaconEnvironment> beaconList) {
-    return super.updateToBool("me", "beaconEnvironment", null, beaconList, null, null);
+    Options options = getDefaultOptions();
+    options.channel = Options.CHANNEL_STOMP;
+    return super.updateToBool("me", "beaconEnvironment", null, beaconList, options, null);
   }
 
   /**
@@ -73,9 +83,11 @@ public class AccountsService extends ProductService<Account> {
    * @return True if successfully updated, false else.
    */
   public boolean updateGCM(String id) {
+    Options options = getDefaultOptions();
+    options.channel = Options.CHANNEL_STOMP;
     Map arg = new HashMap();
     arg.put("registrationId", id);
-    return super.updateToBool("me", "gcm", null, arg, null, null);
+    return super.updateToBool("me", "gcm", null, arg, options, null);
   }
 
 

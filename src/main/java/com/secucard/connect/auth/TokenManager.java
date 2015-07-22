@@ -35,20 +35,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class TokenManager {
   private EventListener authEventListener;
-  protected TokenStore tokenStore;
+  protected ClientAuthDetails clientAuthDetails;
   protected CancelCallback cancelCallback;
-  protected CredentialsProvider credentialsProvider;
   private final Configuration configuration;
   private AuthService authService;
 
   protected static final Log LOG = new Log(TokenManager.class);
 
-  public TokenManager(Configuration configuration, TokenStore tokenStore,
-                      CredentialsProvider credentialsProvider,
+  public TokenManager(Configuration configuration, ClientAuthDetails clientAuthDetails,
                       CancelCallback cancelCallback, AuthService authService) {
     this.configuration = configuration;
-    this.tokenStore = tokenStore;
-    this.credentialsProvider = credentialsProvider;
+    this.clientAuthDetails = clientAuthDetails;
     this.cancelCallback = cancelCallback;
     this.authService = authService;
   }
@@ -117,7 +114,7 @@ public class TokenManager {
         authenticate = true;
       } else {
         try {
-          refresh(token, credentialsProvider.getClientCredentials());
+          refresh(token, clientAuthDetails.getClientCredentials());
           setCurrentToken(token);
         } catch (Throwable t) {
           LOG.debug("Token refresh failed, try obtain new.", t);
@@ -135,7 +132,7 @@ public class TokenManager {
     }
 
     if (authenticate) {
-      OAuthCredentials credentials = credentialsProvider.getCredentials();
+      OAuthCredentials credentials = clientAuthDetails.getCredentials();
 
       if (credentials instanceof AnonymousCredentials) {
         return null;
@@ -157,17 +154,16 @@ public class TokenManager {
     return token.getAccessToken();
   }
 
-  private void setCurrentToken(Token token) {
-    if (tokenStore != null) {
-      tokenStore.set(token);
+  private synchronized void setCurrentToken(Token token) {
+    if (clientAuthDetails != null) {
+      clientAuthDetails.set(token);
     }
   }
 
-  private Token getCurrent() {
-    if (tokenStore != null) {
-      return tokenStore.get();
+  private synchronized Token getCurrent() {
+    if (clientAuthDetails != null) {
+      return clientAuthDetails.get();
     }
-
     return null;
   }
 

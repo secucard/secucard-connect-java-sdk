@@ -12,8 +12,7 @@
 
 package com.secucard.connect;
 
-import com.secucard.connect.auth.CredentialsProvider;
-import com.secucard.connect.auth.DefaultTokenStore;
+import com.secucard.connect.auth.AbstractClientAuthDetails;
 import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.model.AppUserCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
@@ -36,7 +35,8 @@ public class AppUserDemo {
     SecucardConnect.Configuration cfg = SecucardConnect.Configuration.get();
     cfg.id = "appusertest";
 
-    cfg.credentialsProvider = new CredentialsProvider() {
+    cfg.clientAuthDetails = new AbstractClientAuthDetails("appuserdemo-ts") {
+
       @Override
       public OAuthCredentials getCredentials() {
         String[] loginData = login();
@@ -50,8 +50,6 @@ public class AppUserDemo {
             "secret");
       }
     };
-
-    cfg.tokenStore = new DefaultTokenStore("appuserdemo-ts");
 
     SecucardConnect client = SecucardConnect.create(cfg);
 

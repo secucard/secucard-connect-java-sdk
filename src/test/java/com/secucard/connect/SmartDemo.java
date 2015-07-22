@@ -12,8 +12,7 @@
 
 package com.secucard.connect;
 
-import com.secucard.connect.auth.CredentialsProvider;
-import com.secucard.connect.auth.DefaultTokenStore;
+import com.secucard.connect.auth.AbstractClientAuthDetails;
 import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.DeviceAuthCode;
@@ -43,7 +42,7 @@ public class SmartDemo {
 
     cfg.id = "smartdemo";
 
-    cfg.credentialsProvider = new CredentialsProvider() {
+    cfg.clientAuthDetails = new AbstractClientAuthDetails("smartdemo-ts") {
       @Override
       public OAuthCredentials getCredentials() {
         return new DeviceCredentials("id", "secret", "device");
@@ -51,10 +50,9 @@ public class SmartDemo {
 
       @Override
       public ClientCredentials getClientCredentials() {
-        return (ClientCredentials) getCredentials();
+        return (ClientCredentials) this.getCredentials();
       }
     };
-    cfg.tokenStore = new DefaultTokenStore("smartdemo-ts");
 
     final SecucardConnect client = SecucardConnect.create(cfg);
 
@@ -207,7 +205,7 @@ public class SmartDemo {
       // startTransaction, also different formatted receipt lines will be returned
       String type = "demo";
 
-      transaction = transactionService.startTransaction(transaction.getId(), type, null);
+      transaction = transactionService.start(transaction.getId(), type, null);
       assert (transaction.getStatus().equals(Transaction.STATUS_OK));
 
       System.out.println("### Transaction started: " + transaction);

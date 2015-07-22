@@ -12,23 +12,29 @@
 
 package com.secucard.connect.auth;
 
-import com.secucard.connect.auth.model.ClientCredentials;
-import com.secucard.connect.auth.model.OAuthCredentials;
+import com.secucard.connect.auth.model.Token;
+import com.secucard.connect.client.DiskCache;
 
 /**
- * Returns the credentials used to obtain OAuth access tokens.
- * To be implemented by the SDK user to have control how credentials are stored in the system.
+ * Abstract implementation which just delegates the token persistence to a file based cache.
  */
-public interface CredentialsProvider {
+public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
+  private DiskCache diskCache;
 
   /**
-   * Returns the credentials needed to obtain an new access token and refresh token.
-   * The returned type depends on the authorisation type used with the client.
+   * Create an instance.
+   *
+   * @param dir The cache directory to use. May be absolute (starting with "/" or "\") or relative.
    */
-  OAuthCredentials getCredentials();
+  public AbstractClientAuthDetails(String dir) {
+    this.diskCache = new DiskCache(dir);
+  }
 
-  /**
-   * Returns the client credentials needed to obtained an access token with an existing refresh token.
-   */
-  ClientCredentials getClientCredentials();
+  public Token get() {
+    return (Token) diskCache.get("token");
+  }
+
+  public void set(Token token) {
+    diskCache.save("token", token);
+  }
 }

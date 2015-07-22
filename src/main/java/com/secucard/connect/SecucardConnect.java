@@ -12,7 +12,10 @@
 
 package com.secucard.connect;
 
-import com.secucard.connect.auth.*;
+import com.secucard.connect.auth.ClientAuthDetails;
+import com.secucard.connect.auth.AuthService;
+import com.secucard.connect.auth.CancelCallback;
+import com.secucard.connect.auth.TokenManager;
 import com.secucard.connect.auth.exception.AuthCanceledException;
 import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.exception.AuthFailedException;
@@ -124,9 +127,9 @@ public class SecucardConnect {
 
   /**
    * Opens this client resources.
-   * Attempts also to validate the token provided by {@link SecucardConnect.Configuration#tokenStore}. If not valid
+   * Attempts also to validate the token provided by {@link SecucardConnect.Configuration#clientAuthDetails}. If not valid
    * or null the token is refreshed or obtained new. To do this credentials are requested by using the attached
-   * {@link SecucardConnect.Configuration#credentialsProvider}. Depending on the type of credentials an authentication
+   * {@link SecucardConnect.Configuration#clientAuthDetails}. Depending on the type of credentials an authentication
    * process may start also causing events which will be delivered by the EventListener set by
    * {@link #onAuthEvent(com.secucard.connect.event.EventListener)}.
    * <p/>
@@ -252,8 +255,8 @@ public class SecucardConnect {
 
     sc.disconnectTimer = new Timer(true); // daemon thread needed
 
-    if (config.credentialsProvider == null) {
-      config.credentialsProvider = new CredentialsProvider() {
+    if (config.clientAuthDetails == null) {
+      config.clientAuthDetails = new ClientAuthDetails() {
         @Override
         public OAuthCredentials getCredentials() {
           return new AnonymousCredentials();
@@ -263,14 +266,16 @@ public class SecucardConnect {
         public ClientCredentials getClientCredentials() {
           return null;
         }
-      };
-    }
 
-    TokenStore tokenStore = config.tokenStore;
-    if (tokenStore != null) {
-      if (!tokenStore.getClass().equals(DefaultTokenStore.class)) {
-        tokenStore = new TokenStoreProxy(tokenStore);
-      }
+        @Override
+        public Token get() {
+          return null;
+        }
+
+        @Override
+        public void set(Token token) {
+        }
+      };
     }
 
     // set up channels
@@ -307,7 +312,7 @@ public class SecucardConnect {
 
     sc.authService = authService;
 
-    ctx.tokenManager = new TokenManager(authCfg, tokenStore, config.credentialsProvider, config.autCancelCallback,
+    ctx.tokenManager = new TokenManager(authCfg, config.clientAuthDetails, config.autCancelCallback,
         authService);
 
     // set up event dispatcher
@@ -340,28 +345,6 @@ public class SecucardConnect {
     } else {
       context.eventDispatcher.dispatch(event, true);
     }
-  }
-
-  /**
-   * Proxy to make sure the provider is synchronized.
-   */
-  private static class TokenStoreProxy implements TokenStore {
-    private final TokenStore tokenStore;
-
-    private TokenStoreProxy(TokenStore tokenStore) {
-      this.tokenStore = tokenStore;
-    }
-
-    @Override
-    public synchronized Token get() {
-      return tokenStore.get();
-    }
-
-    @Override
-    public synchronized void set(Token token) {
-      tokenStore.set(token);
-    }
-
   }
 
   /**
@@ -410,6 +393,7 @@ public class SecucardConnect {
    * - stompEnabled (true), set to true to enable usage of STOMP communication, false else. <br/>
    * - defaultChannel (rest), the default server communication channel.
    * - loggingConfig (logging.properties), the logging configuration, set null to stop logging
+   * - appId (null), the app id if used in a custom app
    * <p/>
    * OAuth:<br/>
    * - see {@link com.secucard.connect.auth.TokenManager.Configuration}
@@ -424,8 +408,8 @@ public class SecucardConnect {
    * - {@link #id}<br/>
    * - {@link #dataStorage}<br/>
    * - {@link #runtimeContext}<br/>
-   * - {@link #tokenStore} <br/>
-   * - {@link #credentialsProvider} <br/>
+   * - {@link #clientAuthDetails} <br/>
+   * - {@link #clientAuthDetails} <br/>
    * - {@link #autCancelCallback} <br/>
    */
   public static final class Configuration {
@@ -434,6 +418,7 @@ public class SecucardConnect {
     private final String loggingConfig;
     private final boolean androidMode;
     private final boolean stompEnabled;
+    private final String appId;
     public final String logFormat;
     public final String logLevel;
     public final String logPattern;
@@ -464,16 +449,9 @@ public class SecucardConnect {
     public DataStorage dataStorage = new DiskCache("secucardconnectcache");
 
     /**
-     * The token store to use. Set null when no token is needed i.e. anonymous access mandatory else. Default null.
+     * The ClientAuthDetails implementation to use. Default returns AnonymousCredentials and no tokens.
      */
-    public TokenStore tokenStore;
-
-
-    /**
-     * Provides the credentials to obtain a token for. Set null to use anonymously else mandatory. Default null.
-     */
-    public CredentialsProvider credentialsProvider;
-
+    public ClientAuthDetails clientAuthDetails;
 
     /**
      * Callback instance who indicates if any pending authentication should be canceled.
@@ -511,6 +489,7 @@ public class SecucardConnect {
       logPattern = properties.getProperty("logging.pattern", "secucardconnect.log");
       logLevel = properties.getProperty("logging.level", "INFO");
       logFormat = properties.getProperty("logging.format", "%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n");
+      appId = properties.getProperty("appId");
     }
 
 
@@ -529,8 +508,7 @@ public class SecucardConnect {
           ", logIgnoreGlobal=" + logIgnoreGlobal +
           ", id='" + id + '\'' +
           ", dataStorage=" + dataStorage +
-          ", tokenStore=" + tokenStore +
-          ", credentialsProvider=" + credentialsProvider +
+          ", clientAuthDetails=" + clientAuthDetails +
           ", autCancelCallback=" + autCancelCallback +
           ", runtimeContext=" + runtimeContext +
           '}';

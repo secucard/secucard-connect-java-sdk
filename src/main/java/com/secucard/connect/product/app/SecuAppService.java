@@ -19,10 +19,13 @@ import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Store;
 
+/**
+ * Implements the operation for the secucard android app.
+ */
 public class SecuAppService extends ProductService<SecuObject> {
   @Override
   public ServiceMetaData<SecuObject> createMetaData() {
-    return new ServiceMetaData<>("APP-ID");
+    return new ServiceMetaData<>("APP-ID"); // todo:get from config?
   }
 
   /**

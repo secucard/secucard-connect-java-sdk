@@ -268,12 +268,12 @@ public class SecucardConnect {
         }
 
         @Override
-        public Token get() {
+        public Token getCurrent() {
           return null;
         }
 
         @Override
-        public void set(Token token) {
+        public void onTokenChanged(Token token) {
         }
       };
     }

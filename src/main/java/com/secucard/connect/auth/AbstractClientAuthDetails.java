@@ -30,11 +30,15 @@ public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
     this.diskCache = new DiskCache(dir);
   }
 
-  public Token get() {
+  public Token getCurrent() {
     return (Token) diskCache.get("token");
   }
 
-  public void set(Token token) {
+  /**
+   * Handles token changed event.
+   * Override and call super() to place further notification hooks.
+   */
+  public void onTokenChanged(Token token) {
     diskCache.save("token", token);
   }
 }

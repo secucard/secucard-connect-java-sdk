@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides low level API for OAuth token retrieval and refreshment.
+ * Provides low level API for secucard OAuth token retrieval.
  * See <a href=http://secucard.com/developer/doc/auth.html">http://secucard.com/developer/doc/auth.html</a>
  */
 public class AuthService {

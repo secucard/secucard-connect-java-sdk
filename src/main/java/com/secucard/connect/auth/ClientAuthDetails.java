@@ -34,12 +34,14 @@ public interface ClientAuthDetails {
   ClientCredentials getClientCredentials();
 
   /**
-   * Returns an (stored) existing Oauth access token or null if no token is available yet.
+   * Returns the current Oauth token data passed by {@link #onTokenChanged(com.secucard.connect.auth.model.Token)}
+   * or null if no token is available yet.
    */
-  Token get();
+  Token getCurrent();
 
   /**
-   * Persist the given token in a way that calls to {@link #get()} can return this token anytime.
+   * Called when a new token was obtained.
+   * The client must persist the given token in a way that calls to {@link #getCurrent()} can return this token anytime.
    */
-  void set(Token token);
+  void onTokenChanged(Token token);
 }

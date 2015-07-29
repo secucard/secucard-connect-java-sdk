@@ -156,13 +156,13 @@ public class TokenManager {
 
   private synchronized void setCurrentToken(Token token) {
     if (clientAuthDetails != null) {
-      clientAuthDetails.set(token);
+      clientAuthDetails.onTokenChanged(token);
     }
   }
 
   private synchronized Token getCurrent() {
     if (clientAuthDetails != null) {
-      return clientAuthDetails.get();
+      return clientAuthDetails.getCurrent();
     }
     return null;
   }

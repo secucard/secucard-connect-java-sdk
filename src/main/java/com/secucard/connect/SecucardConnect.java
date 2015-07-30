@@ -16,10 +16,6 @@ import com.secucard.connect.auth.AuthService;
 import com.secucard.connect.auth.CancelCallback;
 import com.secucard.connect.auth.ClientAuthDetails;
 import com.secucard.connect.auth.TokenManager;
-import com.secucard.connect.auth.exception.AuthCanceledException;
-import com.secucard.connect.auth.exception.AuthDeniedException;
-import com.secucard.connect.auth.exception.AuthFailedException;
-import com.secucard.connect.auth.exception.AuthTimeoutException;
 import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
@@ -137,11 +133,11 @@ public class SecucardConnect {
    * This method blocks execution of the current thread until finished. If the method fails all resources are
    * already released, no need to call {@link #close()}.
    *
-   * @throws AuthFailedException   If an access token could not be validated or obtained.
-   * @throws AuthCanceledException If the authentication was canceled by request.
-   * @throws AuthTimeoutException  If the authentication was canceled due timeout.
-   * @throws AuthDeniedException   If the authentication failed due wrong credentials. Method may be repeated with
-   *                               corrected data.
+   * @throws AuthError    If authentication problem exist, check the actual type like
+   *                      {@link com.secucard.connect.auth.exception.AuthDeniedException} to get
+   *                      further details about the problem and how to handle (like repeating)
+   * @throws NetworkError if the network failed.
+   * @throws ClientError  if any other non recoverable error happened.
    */
   public synchronized void open() throws AuthError, NetworkError, ClientError {
     if (isConnected) {
@@ -213,6 +209,8 @@ public class SecucardConnect {
    *             existing in every product package like {@link com.secucard.connect.product.payment.Payment}
    *             instead of giving type directly.
    * @return The service instance.
+   *
+   * @see com.secucard.connect.client.ProductService
    */
   @SuppressWarnings({"unchecked"})
   public <T> T service(Class<T> type) {

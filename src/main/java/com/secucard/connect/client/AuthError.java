@@ -16,6 +16,11 @@ package com.secucard.connect.client;
  * Indicates that an authentication problem happened during an operation.
  * Inspect the actual exception type to get details about the cause. Some type are recoverable just by correcting user
  * input.
+ *
+ * @see com.secucard.connect.auth.exception.AuthDeniedException
+ * @see com.secucard.connect.auth.exception.AuthCanceledException
+ * @see com.secucard.connect.auth.exception.AuthFailedException
+ * @see com.secucard.connect.auth.exception.AuthTimeoutException
  */
 public class AuthError extends RuntimeException {
   public AuthError() {

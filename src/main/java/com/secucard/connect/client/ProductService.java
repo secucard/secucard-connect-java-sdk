@@ -24,6 +24,20 @@ import com.secucard.connect.util.ExceptionMapper;
 
 import java.util.List;
 
+/**
+ * The base class of all product services.
+ * <p/>
+ * Please note each service method may throw just the following runtime exceptions:<br/>
+ * - {@link com.secucard.connect.client.APIError} <br/>
+ * - {@link com.secucard.connect.client.NetworkError} <br/>
+ * - {@link com.secucard.connect.auth.exception.AuthFailedException} <br/>
+ * - {@link com.secucard.connect.client.ClientError} <br/>
+ * <p/>
+ * These exceptions may be handled either separate on each call or by setting an global exception handler,
+ * see {@link com.secucard.connect.SecucardConnect#setServiceExceptionHandler(com.secucard.connect.client.ExceptionHandler)}
+ *
+ * @param <T> The actual product resource type
+ */
 public abstract class ProductService<T extends SecuObject> {
   private ServiceMetaData<T> metaData;
   protected ClientContext context;
@@ -92,7 +106,6 @@ public abstract class ProductService<T extends SecuObject> {
    * @param queryParams Contains the query params to apply.
    * @param callback    Callback for getting the results asynchronous.
    * @return The resource objects. Null if nothing found.
-   * @throws com.secucard.connect.client.ClientError if an error happens.
    */
   public List<T> getSimpleList(QueryParams queryParams, Callback<List<T>> callback) {
     return getSimpleList(queryParams, null, callback);
@@ -127,7 +140,6 @@ public abstract class ProductService<T extends SecuObject> {
    *
    * @param object   The resource to create.
    * @param callback Callback receiving the result asynchronous.
-   * @throws com.secucard.connect.client.ClientError if an error happens.
    */
   public T create(T object, Callback<T> callback) {
     return create(object, null, callback);

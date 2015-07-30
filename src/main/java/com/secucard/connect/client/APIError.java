@@ -72,9 +72,10 @@ public class APIError extends RuntimeException {
   public String toString() {
     return "APIError{" +
         "code='" + code + '\'' +
+        ", message='" + getMessage() + '\'' +
         ", userMessage='" + userMessage + '\'' +
         ", supportId='" + supportId + '\'' +
         ", serverError='" + serverError + '\'' +
-        "} " + super.toString();
+        "}";
   }
 }

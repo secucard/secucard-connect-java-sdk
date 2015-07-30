@@ -240,6 +240,8 @@ public class SecucardConnect {
     ClientContext ctx = new ClientContext();
     sc.context = ctx;
 
+    ctx.appId = config.appId;
+
     TokenManager.Configuration authCfg = new TokenManager.Configuration(config.properties, null);
     StompChannel.Configuration stompCfg = new StompChannel.Configuration(config.properties);
     RestChannel.Configuration restConfig = new RestChannel.Configuration(config.properties);

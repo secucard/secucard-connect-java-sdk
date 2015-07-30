@@ -388,7 +388,6 @@ public class SecucardConnect {
    * - loggingConfig (logging.properties), the logging configuration, set null to stop logging
    * - appId (null), the app id if used in a custom app
    * - cacheDir (".scc-cache"), the directory for the cache
-   * - id ("scc"), a unique string for this client, used to identify this instance in logs or in server communication.
    * <p/>
    * OAuth:<br/>
    * - see {@link com.secucard.connect.auth.TokenManager.Configuration}

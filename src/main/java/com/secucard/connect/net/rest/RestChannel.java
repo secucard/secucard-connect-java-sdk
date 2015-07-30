@@ -33,8 +33,8 @@ public abstract class RestChannel extends Channel {
   private final static Log LOG = new Log(RestChannel.class);
   protected final Configuration configuration;
 
-  public RestChannel(String id, Configuration configuration, ClientContext context) {
-    super(id, context);
+  public RestChannel(Configuration configuration, ClientContext context) {
+    super(context);
     this.configuration = configuration;
   }
 

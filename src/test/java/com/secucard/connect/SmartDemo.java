@@ -42,9 +42,7 @@ public class SmartDemo {
 
     final SecucardConnect.Configuration cfg = SecucardConnect.Configuration.get();
 
-    cfg.id = "smartdemo";
-
-    cfg.clientAuthDetails = new AbstractClientAuthDetails("smartdemo-ts") {
+    cfg.clientAuthDetails = new AbstractClientAuthDetails("smartdemostore") {
       @Override
       public OAuthCredentials getCredentials() {
         return new DeviceCredentials("id", "secret", "device");

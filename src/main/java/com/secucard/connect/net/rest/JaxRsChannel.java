@@ -48,8 +48,8 @@ public class JaxRsChannel extends RestChannel {
 
   protected Client restClient;
 
-  public JaxRsChannel(String id, Configuration configuration, ClientContext context) {
-    super(id, configuration, context);
+  public JaxRsChannel(Configuration configuration, ClientContext context) {
+    super(configuration, context);
   }
 
 

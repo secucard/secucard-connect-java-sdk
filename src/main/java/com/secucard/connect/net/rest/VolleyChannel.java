@@ -41,8 +41,8 @@ public class VolleyChannel extends RestChannel {
   protected RequestQueue requestQueue;
 
 
-  public VolleyChannel(String id, Configuration configuration, ClientContext context) {
-    super(id, configuration, context);
+  public VolleyChannel(Configuration configuration, ClientContext context) {
+    super(configuration, context);
   }
 
   @Override

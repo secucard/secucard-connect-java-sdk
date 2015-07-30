@@ -12,10 +12,13 @@
 
 package com.secucard.connect.util;
 
+import com.secucard.connect.auth.exception.AuthFailedException;
 import com.secucard.connect.client.APIError;
+import com.secucard.connect.client.AuthError;
 import com.secucard.connect.client.ClientError;
 import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.net.ServerErrorException;
+import com.secucard.connect.net.stomp.client.StompError;
 import com.secucard.connect.product.common.model.Status;
 
 public class ExceptionMapper {
@@ -23,8 +26,16 @@ public class ExceptionMapper {
    * Translate or wrap any throwable into secucard exceptions.
    */
   public static RuntimeException map(Throwable throwable, String message) {
-    if (throwable instanceof ClientError || throwable instanceof APIError || throwable instanceof NetworkError) {
+    if (throwable instanceof ClientError || throwable instanceof APIError || throwable instanceof NetworkError
+        || throwable instanceof AuthError) {
       return (RuntimeException) throwable;
+    }
+
+    if (throwable instanceof StompError) {
+      StompError se = (StompError) throwable;
+      if (se.getHeaders() != null && "Bad CONNECT".contains(se.getHeaders().get("message"))) {
+        return new AuthFailedException(se.getBody() + ", new authentication needed.");
+      }
     }
 
     if (throwable instanceof ServerErrorException) {

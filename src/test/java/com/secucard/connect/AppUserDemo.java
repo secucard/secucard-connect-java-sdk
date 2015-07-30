@@ -33,9 +33,8 @@ public class AppUserDemo {
   public void test() throws IOException {
 
     SecucardConnect.Configuration cfg = SecucardConnect.Configuration.get();
-    cfg.id = "appusertest";
 
-    cfg.clientAuthDetails = new AbstractClientAuthDetails("appuserdemo-ts") {
+    cfg.clientAuthDetails = new AbstractClientAuthDetails("appuserdemostore") {
 
       @Override
       public OAuthCredentials getCredentials() {

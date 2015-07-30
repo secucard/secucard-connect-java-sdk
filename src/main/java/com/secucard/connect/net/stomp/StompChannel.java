@@ -53,6 +53,7 @@ public class StompChannel extends Channel {
   private volatile boolean isConfirmed;
   private volatile boolean stopRefresh;
   private Thread refreshThread;
+  private final String id;
 
   private final StatusHandler defaultStatusHandler = new StatusHandler() {
     @Override
@@ -61,13 +62,14 @@ public class StompChannel extends Channel {
     }
   };
 
-  public StompChannel(String id, Configuration cfg, ClientContext context) {
-    super(id, context);
+  public StompChannel(Configuration cfg, ClientContext context) {
+    super(context);
     this.configuration = cfg;
     StompClient.Config stompCfg = new StompClient.Config(cfg.host, cfg.port, cfg.virtualHost,
         cfg.userId, cfg.password, cfg.heartbeatSec * 1000, cfg.useSsl, cfg.socketTimeoutSec,
         cfg.messageTimeoutSec, cfg.connectionTimeoutSec);
-    stomp = new StompClient(id, stompCfg, new DefaultEventListner());
+    this.id = Integer.toString(hashCode());
+    stomp = new StompClient(this.id, stompCfg, new DefaultEventListner());
   }
 
   /**
@@ -168,8 +170,8 @@ public class StompChannel extends Channel {
    * If the connection fails all resources are closed.
    *
    * @param token The token used as login/password. May be null.
-   * @throws IllegalStateException    If no connect credentials available.
-   * @throws ClientError If any  error happens.
+   * @throws IllegalStateException If no connect credentials available.
+   * @throws ClientError           If any  error happens.
    */
   private void connect(String token) {
     connectToken = token;
@@ -214,11 +216,8 @@ public class StompChannel extends Channel {
       connect(token);
     }
 
-    String corrId = createCorrelationId();
-
     Map<String, String> header = StompClient.createHeader(
         "reply-to", configuration.replyQueue,
-        "correlation-id", corrId,
         "content-type", "application/json",
         "user-id", token
     );
@@ -236,6 +235,9 @@ public class StompChannel extends Channel {
     } catch (IOException e) {
       throw new ClientError("Error marshalling data message data.", e);
     }
+
+    String corrId = createCorrelationId(body);
+    header.put("correlation-id", corrId);
 
     stomp.send(destinationSpec.toString(), body, header, timeoutSec);
 
@@ -364,7 +366,7 @@ public class StompChannel extends Channel {
       StompMessage msg = new StompMessage(id, body);
       StompMessage m = messages.put(msg.id, msg);
       if (m != null) {
-       throw new IllegalArgumentException("Invalid correlation id, message with this id already exists.");
+        throw new IllegalArgumentException("Invalid correlation id, message with this id already exists.");
       }
     }
   }
@@ -386,8 +388,8 @@ public class StompChannel extends Channel {
     return null;
   }
 
-  private String createCorrelationId() {
-    return (id == null ? Integer.toString(hashCode()) : id) + "-" + System.currentTimeMillis();
+  private String createCorrelationId(String str) {
+    return id + "-" + str.hashCode() + "-" + System.currentTimeMillis();
   }
 
   private String awaitAnswer(final String id, Integer timeoutSec) {

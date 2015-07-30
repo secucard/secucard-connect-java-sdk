@@ -123,7 +123,7 @@ public class StompClient {
     // if connect was performed successfully before must send disconnect
     // closing of all further resources will be done by the receiver thread which gets an error on disconnect
 
-    final String id = config.requestDISCONNECTReceipt ? createReceiptId() : null;
+    final String id = config.requestDISCONNECTReceipt ? createReceiptId("disconnect") : null;
     try {
       sendDisconnect(id);
     } catch (IOException e) {
@@ -162,7 +162,7 @@ public class StompClient {
     if (headers == null) {
       headers = new HashMap<>();
     }
-    String id = createReceiptId();
+    String id = createReceiptId(body);
     headers.put("destination", destination);
     if (config.requestSENDReceipt) {
       headers.put("receipt", id);
@@ -516,8 +516,8 @@ public class StompClient {
     }
   }
 
-  private String createReceiptId() {
-    return "rcpt-" + (id == null ? Integer.toString(hashCode()) : id) + "-" + System.currentTimeMillis();
+  private String createReceiptId(String str) {
+    return "rcpt-" + id + "-" + str.hashCode() + "-" + System.currentTimeMillis();
   }
 
   /**

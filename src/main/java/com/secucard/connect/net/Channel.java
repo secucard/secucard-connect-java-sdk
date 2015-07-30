@@ -18,18 +18,15 @@ import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
-import com.secucard.connect.util.Log;
 
 /**
  * The base class used to realize any type of server communication.
  */
 public abstract class Channel {
   protected EventListener<Object> eventListener;
-  protected final String id;
   protected ClientContext context;
 
-  protected Channel(String id, ClientContext context) {
-    this.id = id;
+  protected Channel(ClientContext context) {
     this.context = context;
   }
 

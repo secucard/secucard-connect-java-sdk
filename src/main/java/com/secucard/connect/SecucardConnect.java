@@ -43,7 +43,6 @@ import com.secucard.connect.product.smart.Smart;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Log;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -53,7 +52,6 @@ public class SecucardConnect {
   public static final String VERSION = "1.0.0";
 
   protected volatile boolean isConnected;
-  private String id;
   private Configuration configuration;
   private Timer disconnectTimer;
   private TimerTask disconnectTimerTask;
@@ -209,7 +207,6 @@ public class SecucardConnect {
    *             existing in every product package like {@link com.secucard.connect.product.payment.Payment}
    *             instead of giving type directly.
    * @return The service instance.
-   *
    * @see com.secucard.connect.client.ProductService
    */
   @SuppressWarnings({"unchecked"})
@@ -238,7 +235,6 @@ public class SecucardConnect {
     }
 
     final SecucardConnect sc = new SecucardConnect();
-    sc.id = config.id;
     sc.configuration = config;
 
     ClientContext ctx = new ClientContext();
@@ -283,14 +279,14 @@ public class SecucardConnect {
       if (config.runtimeContext == null) {
         throw new ClientError("Missing Android application context.");
       }
-      rc = new VolleyChannel(sc.id, restConfig, ctx);
+      rc = new VolleyChannel(restConfig, ctx);
     } else {
-      rc = new JaxRsChannel(sc.id, restConfig, ctx);
+      rc = new JaxRsChannel(restConfig, ctx);
     }
     Map<String, Channel> channels = new HashMap<>();
     channels.put(Options.CHANNEL_REST, rc);
     if (config.stompEnabled) {
-      StompChannel channel = new StompChannel(sc.id, stompCfg, ctx);
+      StompChannel channel = new StompChannel(stompCfg, ctx);
       channels.put(Options.CHANNEL_STOMP, channel);
     }
     for (Channel channel : channels.values()) {
@@ -391,6 +387,8 @@ public class SecucardConnect {
    * - defaultChannel (rest), the default server communication channel.
    * - loggingConfig (logging.properties), the logging configuration, set null to stop logging
    * - appId (null), the app id if used in a custom app
+   * - cacheDir (".scc-cache"), the directory for the cache
+   * - id ("scc"), a unique string for this client, used to identify this instance in logs or in server communication.
    * <p/>
    * OAuth:<br/>
    * - see {@link com.secucard.connect.auth.TokenManager.Configuration}
@@ -416,6 +414,7 @@ public class SecucardConnect {
     private final boolean androidMode;
     private final boolean stompEnabled;
     private final String appId;
+    private final String cacheDir;
     public final String logFormat;
     public final String logLevel;
     public final String logPattern;
@@ -424,26 +423,24 @@ public class SecucardConnect {
     public final boolean logIgnoreGlobal;
 
     /**
-     * A unique string for this client. Default is "SecucardConnect".
-     */
-    public String id = "SecucardConnect";
-
-    /**
-     * Set the property with given name.
+     * Set the property with given name. Can be used to change properties in programmatic way without config file.
      */
     public void property(String name, String value) {
       properties.setProperty(name, value);
     }
 
+    /**
+     * Get the property with the given name.
+     */
     public String property(String name) {
       return properties.getProperty(name);
     }
 
     /**
-     * Storage interface used as cache. Default is {@link com.secucard.connect.client.DiskCache} with relative path
-     * "secucardconnectcache".
+     * Storage interface used as cache. Default is {@link com.secucard.connect.client.DiskCache} with path set
+     * to {@link #cacheDir}.
      */
-    public DataStorage dataStorage = new DiskCache("secucardconnectcache");
+    public DataStorage dataStorage;
 
     /**
      * The ClientAuthDetails implementation to use. Default returns AnonymousCredentials and no tokens.
@@ -468,8 +465,10 @@ public class SecucardConnect {
       try {
         Properties p = new Properties();
         p.load(Configuration.class.getClassLoader().getResourceAsStream("config.properties"));
-        return new Configuration(p);
-      } catch (IOException e) {
+        Configuration configuration = new Configuration(p);
+        configuration.dataStorage = new DiskCache(configuration.cacheDir);
+        return configuration;
+      } catch (Exception e) {
         throw new ClientError("Error loading configuration properties.", e);
       }
     }
@@ -483,10 +482,11 @@ public class SecucardConnect {
       logIgnoreGlobal = Boolean.valueOf(properties.getProperty("logging.local", "false"));
       logCount = Integer.valueOf(properties.getProperty("logging.count", "10"));
       logLimit = Integer.valueOf(properties.getProperty("logging.limit", "1000000"));
-      logPattern = properties.getProperty("logging.pattern", "secucardconnect.log");
+      logPattern = properties.getProperty("logging.pattern", "scc.log");
       logLevel = properties.getProperty("logging.level", "INFO");
       logFormat = properties.getProperty("logging.format", "%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n");
       appId = properties.getProperty("appId");
+      cacheDir = properties.getProperty("cacheDir", ".scc-cache");
     }
 
 
@@ -503,7 +503,6 @@ public class SecucardConnect {
           ", logLimit=" + logLimit +
           ", logCount=" + logCount +
           ", logIgnoreGlobal=" + logIgnoreGlobal +
-          ", id='" + id + '\'' +
           ", dataStorage=" + dataStorage +
           ", clientAuthDetails=" + clientAuthDetails +
           ", autCancelCallback=" + autCancelCallback +

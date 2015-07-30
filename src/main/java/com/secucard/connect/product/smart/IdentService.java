@@ -30,11 +30,6 @@ public class IdentService extends ProductService<Ident> {
     return new ServiceMetaData<>("smart", "idents", Ident.class);
   }
 
-  @Override
-  public Options getDefaultOptions() {
-    return new Options(Options.CHANNEL_STOMP);
-  }
-
   /**
    * Returns all idents in the system or null if nothing found.
    */

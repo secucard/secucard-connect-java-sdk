@@ -12,9 +12,9 @@
 
 package com.secucard.connect;
 
-import com.secucard.connect.auth.ClientAuthDetails;
 import com.secucard.connect.auth.AuthService;
 import com.secucard.connect.auth.CancelCallback;
+import com.secucard.connect.auth.ClientAuthDetails;
 import com.secucard.connect.auth.TokenManager;
 import com.secucard.connect.auth.exception.AuthCanceledException;
 import com.secucard.connect.auth.exception.AuthDeniedException;
@@ -44,6 +44,7 @@ import com.secucard.connect.product.loyalty.Loyalty;
 import com.secucard.connect.product.payment.Payment;
 import com.secucard.connect.product.services.Services;
 import com.secucard.connect.product.smart.Smart;
+import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Log;
 
 import java.io.IOException;
@@ -112,14 +113,14 @@ public class SecucardConnect {
    *              immediately. Set to false to handle in the main thread which will cause this method to block.
    * @return True if the event could be handled, false if no appropriate handler could be found and the event is not
    * handled.
-   * @throws com.secucard.connect.client.SecucardConnectException if the given JSON contains no valid event data.
+   * @throws com.secucard.connect.client.ClientError if the given JSON contains no valid event data.
    */
   public synchronized boolean handleEvent(String json, boolean async) {
     Event event;
     try {
       event = context.jsonMapper.map(json, Event.class);
     } catch (Exception e) {
-      throw new SecucardConnectException("Error processing event, invalid event data.", e);
+      throw new ClientError("Error processing event, invalid event data.", e);
     }
 
     return context.eventDispatcher.dispatch(event, async);
@@ -142,8 +143,7 @@ public class SecucardConnect {
    * @throws AuthDeniedException   If the authentication failed due wrong credentials. Method may be repeated with
    *                               corrected data.
    */
-  public synchronized void open() throws AuthFailedException, AuthCanceledException, AuthTimeoutException,
-      AuthDeniedException {
+  public synchronized void open() throws AuthError, NetworkError, ClientError {
     if (isConnected) {
       return;
     }
@@ -154,7 +154,7 @@ public class SecucardConnect {
 
     try {
       context.tokenManager.getToken(true);
-    } catch (AuthDeniedException | AuthFailedException | AuthCanceledException e) {
+    } catch (AuthError e) {
       close();
       throw e;
     }
@@ -165,15 +165,13 @@ public class SecucardConnect {
       }
     } catch (Exception e) {
       close();
-      if (e instanceof SecucardConnectException) {
-        throw e;
-      }
-      throw new SecucardConnectException("Error open client.", e);
+      throw ExceptionMapper.map(e, "Error opening secucard connect client.");
     }
 
     isConnected = true;
 
     context.eventDispatcher.dispatch(new Events.ConnectionStateChanged(true), false);
+    LOG.debug("Secucard connect client opened.");
   }
 
   /**
@@ -191,6 +189,7 @@ public class SecucardConnect {
       LOG.error(e);
     }
     context.eventDispatcher.dispatch(new Events.ConnectionStateChanged(false), false);
+    LOG.debug("Secucard connect client closed.");
   }
 
   /**
@@ -228,16 +227,16 @@ public class SecucardConnect {
    *
    * @param config The settings to configure the new instance. Pass null to use the default settings.
    * @return The new instance.
-   * @throws SecucardConnectException if an error happens.
+   * @throws ClientError if an error happens.
    */
   public static SecucardConnect create(Configuration config)
-      throws SecucardConnectException {
+      throws ClientError {
     if (config == null) {
       config = Configuration.get();
     }
 
     if (config.dataStorage == null) {
-      throw new SecucardConnectException("Missing cache implementation found in config.");
+      throw new ClientError("Missing cache implementation found in config.");
     }
 
     final SecucardConnect sc = new SecucardConnect();
@@ -284,7 +283,7 @@ public class SecucardConnect {
     RestChannel rc;
     if (config.androidMode) {
       if (config.runtimeContext == null) {
-        throw new SecucardConnectException("Missing Android application context.");
+        throw new ClientError("Missing Android application context.");
       }
       rc = new VolleyChannel(sc.id, restConfig, ctx);
     } else {
@@ -473,7 +472,7 @@ public class SecucardConnect {
         p.load(Configuration.class.getClassLoader().getResourceAsStream("config.properties"));
         return new Configuration(p);
       } catch (IOException e) {
-        throw new SecucardConnectException("Error loading configuration properties.", e);
+        throw new ClientError("Error loading configuration properties.", e);
       }
     }
 

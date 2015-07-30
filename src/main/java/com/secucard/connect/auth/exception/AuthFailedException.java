@@ -12,6 +12,8 @@
 
 package com.secucard.connect.auth.exception;
 
+import com.secucard.connect.client.AuthError;
+
 /**
  * Indicates an authorization attempt failed due missing or invalid authentication data.
  * Typically this kind of error is caused by wrong API usage or alike, something that is wrong implemented.
@@ -19,7 +21,7 @@ package com.secucard.connect.auth.exception;
  * Inspect {@link #getError()} for the general error "type". <br/>
  * Inspect {@link #getMessage()} for a more detailed description oft the error.
  */
-public class AuthFailedException extends Exception {
+public class AuthFailedException extends AuthError {
   private String error;
 
   /**

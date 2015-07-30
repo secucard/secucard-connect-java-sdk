@@ -10,12 +10,21 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.auth.exception;
-
-import com.secucard.connect.client.AuthError;
+package com.secucard.connect.client;
 
 /**
- * Indicates an authentication was canceled by user request.
+ * Indicates that the server communication failed because of network problems. The client may repeat the operation
+ * later when the network connection is established again.
  */
-public class AuthCanceledException extends AuthError {
+public class NetworkError extends RuntimeException {
+  public NetworkError() {
+  }
+
+  public NetworkError(Throwable cause) {
+    super(cause);
+  }
+
+  public NetworkError(String message) {
+    super(message);
+  }
 }

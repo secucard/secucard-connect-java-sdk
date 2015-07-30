@@ -12,6 +12,8 @@
 
 package com.secucard.connect.net.stomp.client;
 
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.util.Log;
 
 import javax.net.SocketFactory;
@@ -69,12 +71,9 @@ public class StompClient {
    *
    * @param user     User name.
    * @param password User password.
-   * @throws StompException             If the connection could not established for some reason,
-   *                                    get the details by inspecting exception properties. If the
-   *                                    server responds with an ERROR frame, the frame details are set.
-   * @throws ConnectionTimeoutException If no connection could be made after
-   *                                    {@link StompClient.Config#connectionTimeoutSec}.
-   *                                    Will NEVER be thrown when a callback is provided.
+   * @throws StompError                               if the server responds with an ERROR frame, the frame details are set.
+   * @throws com.secucard.connect.client.NetworkError if the network failed.
+   * @throws com.secucard.connect.client.ClientError  if an general error happened.
    */
   public synchronized void connect(String user, String password) {
     if (connected) {
@@ -86,12 +85,14 @@ public class StompClient {
       sendConnect(user, password);
     } catch (Throwable e) {
       closeConnection(true);
-      throw new StompException(e);
+      if (e instanceof IOException) {
+        throw new NetworkError(e);
+      }
+      throw new ClientError(e);
     }
 
     awaitConnect();
   }
-
 
   /**
    * Disconnect connection to STOMP server.
@@ -99,7 +100,7 @@ public class StompClient {
    *
    * @throws NoReceiptException Only if {@link StompClient.Config#requestDISCONNECTReceipt} is true
    *                            (default: false) and no receipt could be received in time.
-   * @throws StompException     If an error happens during disconnect attempt. Get details by
+   * @throws StompError         If an error happens during disconnect attempt. Get details by
    *                            inspecting the properties.
    */
   public synchronized void disconnect() {
@@ -125,9 +126,11 @@ public class StompClient {
     final String id = config.requestDISCONNECTReceipt ? createReceiptId() : null;
     try {
       sendDisconnect(id);
-    } catch (Throwable e) {
-      throw new StompException(e);
+    } catch (IOException e) {
+      // ignore an just return
+      return;
     }
+
 
     if (config.requestDISCONNECTReceipt) {
       awaitReceipt(id, false, null);  // no disconnect because we already sent it
@@ -147,12 +150,13 @@ public class StompClient {
    * @param body        The message body or null.
    * @param headers     The message headers or null.
    * @param timeoutSec  Timeout for awaiting receipt. Pass null to use the config value.
-   * @throws StompException     If an error happens during sending.
-   *                            Get details by inspecting the properties.
-   *                            All resources are closed properly, no need to call disconnect().
-   * @throws NoReceiptException If no receipt is received after
-   *                            {@link Config#receiptTimeoutSec}. Will NEVER be
-   *                            thrown when a callback is provided.
+   * @throws StompError                               If an error happens during sending.
+   *                                                  Get details by inspecting the properties.
+   *                                                  All resources are closed properly, no need to call disconnect().
+   * @throws NoReceiptException                       If no receipt is received after
+   *                                                  {@link Config#receiptTimeoutSec}. Will NEVER be
+   *                                                  thrown when a callback is provided.
+   * @throws com.secucard.connect.client.NetworkError if the networks failed.
    */
   public synchronized void send(String destination, String body, Map<String, String> headers, Integer timeoutSec) {
     if (headers == null) {
@@ -168,7 +172,10 @@ public class StompClient {
       sendFrame(SEND, headers, body);
     } catch (Throwable t) {
       closeConnection(true);
-      throw new StompException(t);
+      if (t instanceof IOException) {
+        throw new NetworkError(t);
+      }
+      throw new ClientError(t);
     }
 
     awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, timeoutSec);
@@ -231,10 +238,10 @@ public class StompClient {
       String body = error.getBody();
       Map<String, String> headers = error.getHeaders();
       error = null;
-      throw new StompException(body, headers);
+      throw new StompError(body, headers);
     } else {
       closeConnection(true);
-      throw new ConnectionTimeoutException();
+      throw new NetworkError("Timout waiting for connection.");
     }
   }
 
@@ -259,7 +266,7 @@ public class StompClient {
         }
       }
 
-      LOG.trace("waiting for receipt: ", receiptId);
+//      LOG.trace("waiting for receipt: ", receiptId);
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
@@ -282,9 +289,9 @@ public class StompClient {
         String body = error.getBody();
         Map<String, String> headers = error.getHeaders();
         error = null;
-        throw new StompException(body, headers);
+        throw new StompError(body, headers);
       } else {
-        throw new NoReceiptException();
+        throw new NoReceiptException("No receipt frame received for sent message.");
       }
     }
     // consider receipt as successful disconnect
@@ -454,10 +461,8 @@ public class StompClient {
         String line = reader.readLine();
         LOG.trace("line={", line, "}");
         if (line == null) {
-          // this should not happen in normal case because reading stream until end of stream
-          // is reached is done in Frame class later on,
-          // this could happen when the connection is broken or closed by server when we sent a disconnect
-          // so we write test to see if it's the case - if write throws IOException we must close
+          // indicates connection is dropped
+          // write test to see if it's the case - if write throws IOException we must close
           write(null);
         } else {
           line = line.trim();
@@ -470,7 +475,8 @@ public class StompClient {
       } catch (SocketTimeoutException e) {
         // just regular configured socket timeout, ignore and go on
       } catch (Exception e) {
-        // in most cases this would be an IOException, coming from unstable connection
+        LOG.trace("Exception happened: ", e);
+        // in most cases this would be an IOException, coming from dropped connection
         // very unlikely that the receiver loop would work after, so quit and close all
         closeConnection(false);
         if (!shutdown) {

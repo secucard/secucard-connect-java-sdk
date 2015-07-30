@@ -16,7 +16,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.net.JsonMappingException;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.net.ServerErrorException;
@@ -26,6 +27,7 @@ import com.secucard.connect.product.common.model.Status;
 import com.secucard.connect.util.Log;
 import org.glassfish.jersey.client.ClientProperties;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -131,11 +133,12 @@ public class JaxRsChannel extends RestChannel {
     }
     Invocation invocation = builder.buildPost(Entity.form(map));
 
+
     Response response;
     try {
       response = invocation.submit().get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
-      throw new SecucardConnectException("Error executing request.", e);
+      throw translate(e);
     }
 
     if (!response.getStatusInfo().getFamily().equals(Response.Status.Family.SUCCESSFUL)) {
@@ -151,7 +154,7 @@ public class JaxRsChannel extends RestChannel {
     }
 
     if (responseType != null) {
-     return response.readEntity(responseType);
+      return response.readEntity(responseType);
     }
 
     return null;
@@ -326,6 +329,28 @@ public class JaxRsChannel extends RestChannel {
    * Unwrapping and translating throwable.
    */
   private RuntimeException translate(Throwable throwable) {
+    if (throwable instanceof ExecutionException) {
+      throwable = throwable.getCause();
+    }
+
+    if (throwable instanceof TimeoutException) {
+      // timeout is most likely caused by network problem
+      throw new NetworkError(throwable);
+    }
+
+    if (throwable instanceof ProcessingException && throwable.getCause() != null) {
+      if (throwable.getCause() instanceof IOException) {
+        throw new NetworkError(throwable.getCause());
+      }
+
+      if (throwable.getCause() instanceof IllegalStateException
+          && throwable.getCause().getMessage().contains("Already connected")) {
+        // weird error thrown when trying to send request without connection
+        // https://java.net/jira/browse/JERSEY-2728
+        throw new NetworkError(throwable.getCause());
+      }
+    }
+
     if (throwable instanceof WebApplicationException) {
       //this is a HTTP error, try to get status payload
       Response response = ((WebApplicationException) throwable).getResponse();
@@ -339,26 +364,23 @@ public class JaxRsChannel extends RestChannel {
       }
 
       if (status == null) {
-        return new RuntimeException("Request failed with HTTP error " + response.getStatus(), throwable);
+        return new ClientError("Request failed with HTTP error " + response.getStatus(), throwable);
       }
 
       return new ServerErrorException(status);
     }
 
     if (throwable instanceof JsonMappingException) {
-      return new RuntimeException("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
+      return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
     }
 
-    if (throwable instanceof ExecutionException) {
-      throwable = throwable.getCause();
-    }
 
-    if (throwable instanceof RuntimeException) {
+    if (throwable instanceof ClientError) {
       return (RuntimeException) throwable;
     }
 
     // just wrap in any runtime ex
-    return new RuntimeException("Error executing request.", throwable);
+    return new ClientError("Error executing request.", throwable);
   }
 
 }

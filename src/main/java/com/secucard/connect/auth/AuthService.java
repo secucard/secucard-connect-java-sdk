@@ -15,7 +15,7 @@ package com.secucard.connect.auth;
 import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.exception.AuthFailedException;
 import com.secucard.connect.auth.model.*;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.ClientError;
 import com.secucard.connect.net.rest.HttpErrorException;
 import com.secucard.connect.net.rest.RestChannel;
 
@@ -104,7 +104,7 @@ public class AuthService {
         }
       }
 
-      throw new SecucardConnectException("Unexpected error executing authentication request.", e);
+      throw new ClientError("Unexpected error executing authentication request.", e);
     }
   }
 

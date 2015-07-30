@@ -64,7 +64,6 @@ public class IdentResultsService extends ProductService<IdentResult> {
    *                            Note: Depending on the number of returned persons + attachments this may be a lot!
    *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
    * @return The ident results or null if a callback was provided.
-   * @throws com.secucard.connect.client.SecucardConnectException I fan error happens.
    */
   public List<IdentResult> getListByRequestIds(final List<String> identRequestIds,
                                                Callback<List<IdentResult>> callback,
@@ -96,7 +95,6 @@ public class IdentResultsService extends ProductService<IdentResult> {
    *                            Note: Depending on the number of returned results + persons + attachments this may be a lot!
    *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
    * @return The ident results or null if a callback was provided.
-   * @throws com.secucard.connect.client.SecucardConnectException If an error happens executing the service.
    */
   public List<IdentResult> getSimpleList(final QueryParams queryParams, Callback<List<IdentResult>> callback,
                                          final boolean downloadAttachments) {
@@ -122,7 +120,6 @@ public class IdentResultsService extends ProductService<IdentResult> {
    *                            Note: Depending on the number of returned persons + attachments this may be a lot!
    *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
    * @return The ident result or null if a callback was provided.
-   * @throws com.secucard.connect.client.SecucardConnectException If an error happens executing the service.
    */
   public IdentResult get(final String id, Callback<IdentResult> callback, final boolean downloadAttachments) {
     Options opts = getDefaultOptions();

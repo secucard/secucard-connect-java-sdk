@@ -12,9 +12,11 @@
 
 package com.secucard.connect.auth.exception;
 
+import com.secucard.connect.client.AuthError;
+
 /**
  * Indicates an authentication was aborted due a timeout.
  */
-public class AuthTimeoutException extends Exception {
+public class AuthTimeoutException extends AuthError {
 
 }

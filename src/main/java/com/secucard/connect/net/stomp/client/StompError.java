@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * Exception wrapping a STOMP error frame.
  */
-public class StompException extends RuntimeException {
+public class StompError extends RuntimeException {
   private String body;
   private Map<String, String> headers;
 
@@ -25,38 +25,13 @@ public class StompException extends RuntimeException {
     return body;
   }
 
-  public void setBody(String body) {
-    this.body = body;
-  }
-
   public Map<String, String> getHeaders() {
     return headers;
   }
 
-  public void setHeaders(Map<String, String> headers) {
-    this.headers = headers;
-  }
-
-  public StompException(String body, Map<String, String> headers) {
+  public StompError(String body, Map<String, String> headers) {
     this.body = body;
     this.headers = headers;
-  }
-
-  public StompException(String message, String body, Map<String, String> headers) {
-    super(message);
-    this.body = body;
-    this.headers = headers;
-  }
-
-  public StompException() {
-  }
-
-  public StompException(String message) {
-    super(message);
-  }
-
-  public StompException(Throwable cause) {
-    super(cause);
   }
 
   @Override

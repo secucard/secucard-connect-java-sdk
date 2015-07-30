@@ -22,7 +22,7 @@ import com.android.volley.toolbox.Volley;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.ClientError;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.ObjectList;
@@ -140,7 +140,7 @@ public class VolleyChannel extends RestChannel {
         }
       }
 
-      throw new SecucardConnectException("Unexpected error executing request.", throwable);
+      throw new ClientError("Unexpected error executing request.", throwable);
     }
   }
 

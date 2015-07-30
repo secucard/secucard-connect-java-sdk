@@ -18,8 +18,10 @@ import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.DeviceAuthCode;
 import com.secucard.connect.auth.model.DeviceCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
+import com.secucard.connect.client.APIError;
+import com.secucard.connect.client.AuthError;
 import com.secucard.connect.client.Callback;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.product.common.model.QueryParams;
@@ -108,6 +110,7 @@ public class SmartDemo {
       } catch (Exception e) {
         // all other errors are caused by connection problems, bugs, wrong config etc.
         // not solvable by the user
+        System.err.println("Error opening client: ");
         e.printStackTrace();
         return;
       }
@@ -217,21 +220,18 @@ public class SmartDemo {
       transaction = transactionService.get(transaction.getId(), null);
       assert (transaction.getStatus().equals(Transaction.STATUS_CANCELED));
 
-    } catch (Exception e) {
-      e.printStackTrace();
-
-      if (e instanceof SecucardConnectException) {
-        SecucardConnectException ex = (SecucardConnectException) e;
-        if (ex.getUserMessage() != null && !SecucardConnectException.INTERNAL.equals(ex.getCode())) {
-          System.err.println(ex.getUserMessage());
-        } else {
-          System.err.println("### Unexpected error happened, please contact ... for assistance and provide this id: "
-              + ex.getSupportId());
-        }
-      } else {
-        System.err.println("### Unexpected error happened, please contact ... for assistance.");
-      }
-
+    } catch (APIError err) {
+      System.err.println("API Error:");
+      err.printStackTrace();
+    } catch (AuthError err) {
+      System.err.println("Auth Error:");
+      err.printStackTrace();
+    } catch (NetworkError err) {
+      System.err.println("Networ Error!");
+      err.printStackTrace();
+    } catch (Exception err) {
+      System.err.println("Internal Error");
+      err.printStackTrace();
     } finally {
       client.close();
     }

@@ -10,12 +10,22 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.auth.exception;
-
-import com.secucard.connect.client.AuthError;
+package com.secucard.connect.client;
 
 /**
- * Indicates an authentication was canceled by user request.
+ * Indicates that an authentication problem happened during an operation.
+ * Inspect the actual exception type to get details about the cause. Some type are recoverable just by correcting user
+ * input.
  */
-public class AuthCanceledException extends AuthError {
+public class AuthError extends RuntimeException {
+  public AuthError() {
+  }
+
+  public AuthError(String message) {
+    super(message);
+  }
+
+  public AuthError(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

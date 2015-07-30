@@ -12,13 +12,8 @@
 
 package com.secucard.connect.net.rest;
 
-import com.secucard.connect.auth.exception.AuthCanceledException;
-import com.secucard.connect.auth.exception.AuthDeniedException;
-import com.secucard.connect.auth.exception.AuthFailedException;
-import com.secucard.connect.auth.exception.AuthTimeoutException;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.SecucardConnectException;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.net.Channel;
 import com.secucard.connect.product.common.model.QueryParams;
@@ -47,7 +42,7 @@ public abstract class RestChannel extends Channel {
    * Low level rest access for internal usage, posting to a url and get the response back as object.
    *
    * @throws com.secucard.connect.net.rest.HttpErrorException     if an http error happens.
-   * @throws com.secucard.connect.client.SecucardConnectException if an error happens.
+   * @throws com.secucard.connect.client.ClientError if an error happens.
    */
   public abstract <T, E> T post(String url, Map<String, Object> parameters, Map<String, String> headers,
                                 Class<T> responseType, Class<E> errorResponseType) throws HttpErrorException;
@@ -162,12 +157,7 @@ public abstract class RestChannel extends Channel {
    */
   @SuppressWarnings({"unchecked"})
   protected void setAuthorizationHeader(Map headers) {
-    String token = null;
-    try {
-      token = context.tokenManager.getToken(false);
-    } catch (AuthDeniedException| AuthFailedException | AuthCanceledException | AuthTimeoutException e) {
-      throw new SecucardConnectException("Error sending request.", e);
-    }
+    String token = context.tokenManager.getToken(false);
 
     if (token != null) {
       String key = "Authorization";

@@ -27,7 +27,7 @@ public class DiskCache extends DataStorage {
     try {
       init(cacheDir);
     } catch (Exception e) {
-      throw new SecucardConnectException("Error initializing data storage.", e);
+      throw new ClientError("Error initializing data storage.", e);
     }
   }
 

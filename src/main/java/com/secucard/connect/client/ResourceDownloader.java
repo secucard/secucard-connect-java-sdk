@@ -75,7 +75,7 @@ public class ResourceDownloader {
     } while (retry && stream == null && count++ < 2);
 
     if (ex != null) {
-      throw new SecucardConnectException("Unable to download resource from " + url, ex);
+      throw new ClientError("Unable to download resource from " + url, ex);
     }
 
     if (stream != null) {

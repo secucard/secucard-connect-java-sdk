@@ -12,31 +12,37 @@
 
 package com.secucard.connect.util;
 
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.APIError;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.product.common.model.Status;
 
 public class ExceptionMapper {
   /**
-   * Translate or wrap any throwable into our main exception.
+   * Translate or wrap any throwable into secucard exceptions.
    */
-  public static SecucardConnectException map(Throwable throwable) {
-    if (throwable instanceof SecucardConnectException) {
-      return (SecucardConnectException) throwable;
+  public static RuntimeException map(Throwable throwable, String message) {
+    if (throwable instanceof ClientError || throwable instanceof APIError || throwable instanceof NetworkError) {
+      return (RuntimeException) throwable;
     }
 
     if (throwable instanceof ServerErrorException) {
       Status status = ((ServerErrorException) throwable).getStatus();
 
-      if (status.getError().equalsIgnoreCase("ProductInternalException")) {
+      if ("ProductInternalException".equalsIgnoreCase(status.getError())) {
         // map to internal exception
-        return new SecucardConnectException(status.getErrorDetails(), throwable);
+        return new ClientError(status.getErrorDetails(), throwable);
       }
 
-      return new SecucardConnectException(status.getCode(), status.getErrorDetails(), status.getErrorUser(),
-          status.getError(), status.getSupportId(), throwable);
+      return new APIError(status.getError(), status.getCode(), status.getErrorDetails(), status.getErrorUser(),
+          status.getSupportId(), throwable);
     }
 
-    return new SecucardConnectException(throwable.getMessage(), throwable);
+    if (message == null) {
+      message = throwable.getMessage();
+    }
+
+    return new ClientError(message, throwable);
   }
 }

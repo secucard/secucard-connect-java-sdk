@@ -13,19 +13,14 @@
 package com.secucard.connect.net.stomp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.secucard.connect.auth.exception.AuthCanceledException;
-import com.secucard.connect.auth.exception.AuthDeniedException;
-import com.secucard.connect.auth.exception.AuthFailedException;
-import com.secucard.connect.auth.exception.AuthTimeoutException;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.ClientError;
 import com.secucard.connect.net.Channel;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.net.stomp.client.Frame;
 import com.secucard.connect.net.stomp.client.StompClient;
-import com.secucard.connect.net.stomp.client.StompException;
 import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.Message;
 import com.secucard.connect.product.common.model.ObjectList;
@@ -84,7 +79,7 @@ public class StompChannel extends Channel {
 
     Throwable throwable = startSessionRefresh();
     if (throwable != null) {
-      throw ExceptionMapper.map(throwable);
+      throw ExceptionMapper.map(throwable, null);
     }
   }
 
@@ -93,6 +88,7 @@ public class StompChannel extends Channel {
   public synchronized void close() {
     stopRefresh = true;
     stomp.disconnect();
+    LOG.debug("STOMP channel closed.");
   }
 
   @Override
@@ -157,11 +153,7 @@ public class StompChannel extends Channel {
    * Provides the token used as login and password for  STOMP connect.
    */
   protected String getToken() {
-    try {
-      return context.tokenManager.getToken(false);
-    } catch (AuthDeniedException | AuthFailedException | AuthCanceledException | AuthTimeoutException e) {
-      throw new SecucardConnectException("Error sending request.", e);
-    }
+    return context.tokenManager.getToken(false);
   }
 
   /**
@@ -177,7 +169,7 @@ public class StompChannel extends Channel {
    *
    * @param token The token used as login/password. May be null.
    * @throws IllegalStateException    If no connect credentials available.
-   * @throws SecucardConnectException If any  error happens.
+   * @throws ClientError If any  error happens.
    */
   private void connect(String token) {
     connectToken = token;
@@ -242,7 +234,7 @@ public class StompChannel extends Channel {
     } catch (UnsupportedEncodingException e) {
       // should not happen
     } catch (IOException e) {
-      throw new SecucardConnectException("Error marshalling data message data.", e);
+      throw new ClientError("Error marshalling data message data.", e);
     }
 
     stomp.send(destinationSpec.toString(), body, header, timeoutSec);
@@ -252,7 +244,7 @@ public class StompChannel extends Channel {
     try {
       msg = context.jsonMapper.map(answer, returnType);
     } catch (Exception e) {
-      throw new SecucardConnectException("Error unmarshalling message.", e);
+      throw new ClientError("Error unmarshalling message.", e);
     }
 
     if (msg == null) {
@@ -359,7 +351,8 @@ public class StompChannel extends Channel {
           return stopRefresh;
         }
       }.execute(configuration.heartbeatSec * 1000, 500, TimeUnit.MILLISECONDS);
-    } while (stopRefresh);
+
+    } while (!stopRefresh);
 
     LOG.info("Session refresh stopped.");
 

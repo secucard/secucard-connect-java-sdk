@@ -36,7 +36,7 @@ public class ContainersService extends ProductService<Container> {
    * @param container The payment container data.
    * @param callback  Callback to get notified when completed or failed.
    * @return The validated and completed data like Container.publicData.
-   * @throws com.secucard.connect.client.SecucardConnectException if a error happens. userMessage field has the reason,
+   * @throws com.secucard.connect.client.APIError if a error happens. userMessage field has the reason,
    *                                                              like "invalid iban and bic combination".
    */
   public Container create(final Container container, Callback<Container> callback) {

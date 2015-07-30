@@ -13,7 +13,8 @@
 package com.secucard.connect.util;
 
 import com.secucard.connect.SecucardConnect;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.ClientError;
 
 import java.util.logging.*;
 
@@ -115,7 +116,7 @@ public class Log {
         logger.setLevel(Level.parse(cfg.logLevel));
       }
     } catch (Exception e) {
-      throw new SecucardConnectException("Error initializing logging.", e);
+      throw new ClientError("Error initializing logging.", e);
     }
   }
 }

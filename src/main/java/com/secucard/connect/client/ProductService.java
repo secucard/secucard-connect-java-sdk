@@ -92,7 +92,7 @@ public abstract class ProductService<T extends SecuObject> {
    * @param queryParams Contains the query params to apply.
    * @param callback    Callback for getting the results asynchronous.
    * @return The resource objects. Null if nothing found.
-   * @throws com.secucard.connect.client.SecucardConnectException if an error happens.
+   * @throws com.secucard.connect.client.ClientError if an error happens.
    */
   public List<T> getSimpleList(QueryParams queryParams, Callback<List<T>> callback) {
     return getSimpleList(queryParams, null, callback);
@@ -122,12 +122,12 @@ public abstract class ProductService<T extends SecuObject> {
    * so additional field may be filled in the result, like id. Use this result for further processing instead of the
    * provided.
    * <p/>
-   * If the resource can't be created or another error happens SecucardConnectException will be thrown.
+   * If the resource can't be created or another error happens ClientError will be thrown.
    * Inspect the code and userMessage field to get info about the error cause.
    *
    * @param object   The resource to create.
    * @param callback Callback receiving the result asynchronous.
-   * @throws com.secucard.connect.client.SecucardConnectException if an error happens.
+   * @throws com.secucard.connect.client.ClientError if an error happens.
    */
   public T create(T object, Callback<T> callback) {
     return create(object, null, callback);
@@ -154,7 +154,7 @@ public abstract class ProductService<T extends SecuObject> {
    * so additional field may be filled in the result. Use this result for further processing instead of the
    * provided.
    * <p/>
-   * If the resource can't be updated or another error happens SecucardConnectException will be thrown.
+   * If the resource can't be updated or another error happens ClientError will be thrown.
    * Inspect the code and userMessage field to get info about the error cause.
    *
    * @param object   The resource to update.
@@ -272,7 +272,7 @@ public abstract class ProductService<T extends SecuObject> {
         }
 
         public void failed(Throwable cause) {
-          SecucardConnectException ex = ExceptionMapper.map(cause);
+          Exception ex = ExceptionMapper.map(cause, null);
           if (context.exceptionHandler == null) {
             callback.failed(ex);
           } else {
@@ -314,7 +314,7 @@ public abstract class ProductService<T extends SecuObject> {
         }
 
         public void failed(Throwable cause) {
-          SecucardConnectException ex = ExceptionMapper.map(cause);
+          Exception ex = ExceptionMapper.map(cause, null);
           if (context.exceptionHandler == null) {
             callback.failed(ex);
           } else {
@@ -331,7 +331,7 @@ public abstract class ProductService<T extends SecuObject> {
    * Translate and pass given throwable to the exception handler if any, else just throw.
    */
   private void handleException(Throwable throwable) {
-    SecucardConnectException ex = ExceptionMapper.map(throwable);
+    RuntimeException ex = ExceptionMapper.map(throwable, null);
     if (context.exceptionHandler == null) {
       throw ex;
     }

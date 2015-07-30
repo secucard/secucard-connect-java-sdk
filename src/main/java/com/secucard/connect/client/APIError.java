@@ -13,17 +13,13 @@
 package com.secucard.connect.client;
 
 /**
- * Top level exception of the Java client. Should wrap all other.
+ * Indicates business related errors happening when a API call could not performed properly.<br/>
+ * Happens for example when input data have wrong format or if not enough balance exist for a product.<br/>
  * Holds detailed information about the cause which should presented to the end user like a error code or a support id.
- * <p/>
- * If the code is {@link #INTERNAL} it means something unexpected happened, maybe caused by a bug, and you should display
- * a very generic message to the user or use the default given by {@link #getUserMessage()} and maybe notify yourself.
  */
-public class SecucardConnectException extends RuntimeException {
-  public static final String INTERNAL = "500";
-
-  private String code = INTERNAL; // default for any unknown internal error
-  private String userMessage = "Unknown error happened, please contact ... for assistance.";  //
+public class APIError extends RuntimeException {
+  private String code;
+  private String userMessage;
   private String supportId;
   private String serverError;
 
@@ -42,7 +38,7 @@ public class SecucardConnectException extends RuntimeException {
   }
 
   /**
-   * Returns an unique error id to provide to the support.
+   * Returns an unique error id to provide to the support facility.
    */
   public String getSupportId() {
     return supportId;
@@ -64,31 +60,21 @@ public class SecucardConnectException extends RuntimeException {
     return serverError;
   }
 
-  public SecucardConnectException(String message) {
-    super(message);
-  }
-
-  public SecucardConnectException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public SecucardConnectException(String code, String message, String userMessage, String serverError, String supportId,
-                                  Throwable cause) {
+  public APIError(String serverError, String code, String message, String userMessage, String supportId, Throwable cause) {
     super(message, cause);
     this.code = code;
     this.userMessage = userMessage;
-    this.serverError = serverError;
     this.supportId = supportId;
+    this.serverError = serverError;
   }
-
 
   @Override
   public String toString() {
-    return getClass().getName() + ": " + "code='" + code + '\'' +
-        ", message='" + getMessage() + '\'' +
+    return "APIError{" +
+        "code='" + code + '\'' +
         ", userMessage='" + userMessage + '\'' +
         ", supportId='" + supportId + '\'' +
         ", serverError='" + serverError + '\'' +
-        "} ";
+        "} " + super.toString();
   }
 }

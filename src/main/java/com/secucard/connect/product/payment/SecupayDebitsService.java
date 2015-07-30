@@ -14,7 +14,7 @@ package com.secucard.connect.product.payment;
 
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
-import com.secucard.connect.client.SecucardConnectException;
+import com.secucard.connect.client.ClientError;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
@@ -62,7 +62,7 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
         protected SecupayDebit process(Event<List<SecupayDebit>> event) {
           List<SecupayDebit> list = event.getData();
           if (list == null || list.size() == 0) {
-            throw new SecucardConnectException("Invalid event data, missing debit ids.");
+            throw new ClientError("Invalid event data, missing debit ids.");
           } else {
             return get(list.get(0).getId(), null);
           }

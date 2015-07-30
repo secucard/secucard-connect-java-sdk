@@ -400,10 +400,8 @@ public class SecucardConnect {
    * - see {@link StompChannel.Configuration}
    * <p/>
    * Additionally set custom instances for:<br/>
-   * - {@link #id}<br/>
    * - {@link #dataStorage}<br/>
    * - {@link #runtimeContext}<br/>
-   * - {@link #clientAuthDetails} <br/>
    * - {@link #clientAuthDetails} <br/>
    * - {@link #autCancelCallback} <br/>
    */

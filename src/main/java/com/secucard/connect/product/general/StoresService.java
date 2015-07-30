@@ -30,7 +30,7 @@ import java.util.List;
 public class StoresService extends ProductService<Store> {
 
   @Override
-  public ServiceMetaData<Store> createMetaData() {
+  protected ServiceMetaData<Store> createMetaData() {
     return new ServiceMetaData<>("general", "stores", Store.class);
   }
 

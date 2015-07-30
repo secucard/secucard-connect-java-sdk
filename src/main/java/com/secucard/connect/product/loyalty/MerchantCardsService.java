@@ -21,7 +21,7 @@ import com.secucard.connect.product.loyalty.model.MerchantCard;
 public class MerchantCardsService extends ProductService<MerchantCard> {
 
   @Override
-  public ServiceMetaData<MerchantCard> createMetaData() {
+  protected ServiceMetaData<MerchantCard> createMetaData() {
     return new ServiceMetaData<>("loyalty", "merchantcards", MerchantCard.class);
   }
 

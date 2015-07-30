@@ -30,7 +30,7 @@ public class AccountsService extends ProductService<Account> {
   public static final String EVENT_TYPE_BEACON_MONITOR = "BeaconMonitor";
 
   @Override
-  public ServiceMetaData<Account> createMetaData() {
+  protected ServiceMetaData<Account> createMetaData() {
     return new ServiceMetaData<>("general", "accounts", Account.class);
   }
 

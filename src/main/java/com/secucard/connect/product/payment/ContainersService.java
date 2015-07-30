@@ -22,7 +22,7 @@ import com.secucard.connect.product.payment.model.Container;
 public class ContainersService extends ProductService<Container> {
 
   @Override
-  public ServiceMetaData<Container> createMetaData() {
+  protected ServiceMetaData<Container> createMetaData() {
     return new ServiceMetaData<>("payment", "containers", Container.class);
   }
 

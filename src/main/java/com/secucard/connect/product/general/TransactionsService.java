@@ -28,7 +28,7 @@ import java.util.Map;
 public class TransactionsService extends ProductService<Transaction> {
 
   @Override
-  public ServiceMetaData<Transaction> createMetaData() {
+  protected ServiceMetaData<Transaction> createMetaData() {
     return new ServiceMetaData<>("general", "transactions", Transaction.class);
   }
 

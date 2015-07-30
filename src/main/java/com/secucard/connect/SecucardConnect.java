@@ -382,12 +382,17 @@ public class SecucardConnect {
    * Main configuration of the SDK client. Supports properties:
    * <p/>
    * Client:<br/>
-   * - androidMode (false), set to true if use in Android environment, false else. <br/>
-   * - stompEnabled (true), set to true to enable usage of STOMP communication, false else. <br/>
-   * - defaultChannel (rest), the default server communication channel.
-   * - loggingConfig (logging.properties), the logging configuration, set null to stop logging
-   * - appId (null), the app id if used in a custom app
-   * - cacheDir (".scc-cache"), the directory for the cache
+   * - androidMode (false), set to true if use in Android environment, false else <br/>
+   * - stompEnabled (true), set to true to enable usage of STOMP communication, false else <br/>
+   * - defaultChannel (rest), the default server communication channel <br/>
+   * - appId (null), the app id if used in a custom app <br/>
+   * - cacheDir (".scc-cache"), the directory for the cache <br/>
+   * - logging.local(false), set to true to enable local logging and ignoring global settings <br/>
+   * - logging.pattern(scc.log), the logging file path <br/>
+   * - logging.limit(1000000), the max log file size in b, 1mb <br/>
+   * - logging.count(10), the max number of files to keep <br/>
+   * - logging.level(INFO), the log level  <br/>
+   * - logging.format("%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n"), output format  <br/>
    * <p/>
    * OAuth:<br/>
    * - see {@link com.secucard.connect.auth.TokenManager.Configuration}

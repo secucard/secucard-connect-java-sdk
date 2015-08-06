@@ -396,6 +396,7 @@ public class SecucardConnect {
    * - cacheDir (".scc-cache"), the directory for the cache <br/>
    * - logging.local(false), set to true to enable local logging and ignoring global settings <br/>
    * - logging.pattern(scc.log), the logging file path <br/>
+   * - logging.logger(com.secucard.log), the logger to configure, empty for root logger <br/>
    * - logging.limit(1000000), the max log file size in b, 1mb <br/>
    * - logging.count(10), the max number of files to keep <br/>
    * - logging.level(INFO), the log level  <br/>
@@ -427,6 +428,7 @@ public class SecucardConnect {
     public final String logFormat;
     public final String logLevel;
     public final String logPattern;
+    public final String logger;
     public final int logLimit;
     public final int logCount;
     public final boolean logIgnoreGlobal;
@@ -526,6 +528,7 @@ public class SecucardConnect {
       logCount = Integer.valueOf(properties.getProperty("logging.count", "10"));
       logLimit = Integer.valueOf(properties.getProperty("logging.limit", "1000000"));
       logPattern = properties.getProperty("logging.pattern", "scc.log");
+      logger = properties.getProperty("logging.logger", "com.secucard.connect");
       logLevel = properties.getProperty("logging.level", "INFO");
       logFormat = properties.getProperty("logging.format", "%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n");
       appId = properties.getProperty("appId");

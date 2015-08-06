@@ -14,12 +14,12 @@ package com.secucard.connect.util;
 
 import com.secucard.connect.SecucardConnect;
 import com.secucard.connect.client.ClientError;
-import com.secucard.connect.client.ClientError;
 
 import java.util.logging.*;
 
 /**
  * Logging util which uses java.util.logging.
+ * Use system property "com.secucard.connect.config" to pass the client config file path.
  */
 public class Log {
   private final Logger logger;
@@ -98,10 +98,11 @@ public class Log {
   }
 
   private static void init() {
+    String path = System.getProperty("com.secucard.connect.config");
     try {
-      SecucardConnect.Configuration cfg = SecucardConnect.Configuration.get();
+      SecucardConnect.Configuration cfg = path == null ? SecucardConnect.Configuration.get(): SecucardConnect.Configuration.get(path);
       if (cfg.logIgnoreGlobal) {
-        Logger logger = Logger.getLogger("com.secucard.connect");
+        Logger logger = Logger.getLogger(cfg.logger);
         LogFormatter formatter = new LogFormatter(cfg.logFormat);
         if (cfg.logPattern != null) {
           FileHandler fileHandler = new FileHandler(cfg.logPattern, cfg.logLimit, cfg.logCount, true);

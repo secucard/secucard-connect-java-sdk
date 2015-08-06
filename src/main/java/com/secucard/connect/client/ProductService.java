@@ -75,8 +75,20 @@ public abstract class ProductService<T extends SecuObject> {
   }
 
   protected T get(String id, Options options, Callback<T> callback) {
+    return get(id, null, null, options, callback);
+  }
+
+  public T get(String id, String action, String actionArg) {
+    return get(id, action, actionArg, null, null);
+  }
+
+  public T get(String id, String action, String actionArg, Callback<T> callback) {
+    return get(id, action, actionArg, null, callback);
+  }
+
+  protected T get(String id, String action, String actionArg, Options options, Callback<T> callback) {
     return request(Channel.Method.GET,
-        new Channel.Params(getObject(), id, getResourceType(), options), options, callback);
+        new Channel.Params(getObject(), id, action, actionArg, null, getResourceType(), options), options, callback);
   }
 
   public ObjectList<T> getList(QueryParams queryParams) {

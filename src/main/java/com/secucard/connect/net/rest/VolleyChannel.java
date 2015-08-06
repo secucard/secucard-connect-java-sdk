@@ -23,6 +23,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.NetworkError;
+import com.secucard.connect.net.JsonMappingException;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.ObjectList;
@@ -32,7 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
@@ -140,7 +144,7 @@ public class VolleyChannel extends RestChannel {
         }
       }
 
-      throw new ClientError("Unexpected error executing request.", throwable);
+      throw translate(throwable);
     }
   }
 
@@ -273,7 +277,27 @@ public class VolleyChannel extends RestChannel {
   /**
    * Inspect the throwable and skip the ignores http status codes and/or extract error details.
    */
-  protected Throwable translate(Throwable throwable, Integer... ignoredStates) {
+  protected RuntimeException translate(Throwable throwable) {
+    if (throwable instanceof ExecutionException) {
+      throwable = throwable.getCause();
+    }
+
+    if (throwable instanceof ClientError) {
+      return (RuntimeException) throwable;
+    }
+
+    if (throwable instanceof JsonMappingException) {
+      return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
+    }
+
+    if (throwable instanceof IOException || throwable.getCause() instanceof IOException) {
+      throw new NetworkError(throwable);
+    }
+
+    if (throwable instanceof TimeoutException) {
+      // timeout is most likely caused by network problem
+      throw new NetworkError(throwable);
+    }
 
     VolleyError error = null;
     if (throwable instanceof VolleyError) {
@@ -283,26 +307,20 @@ public class VolleyChannel extends RestChannel {
     }
 
     if (error != null && error.networkResponse != null) {
-      if (ignoredStates != null) {
-        for (Integer state : ignoredStates) {
-          if (state != null && state == error.networkResponse.statusCode) {
-            return null;
-          }
-        }
-      }
       if (error.networkResponse.data != null) {
         // this could be an specific secucard server error
         try {
           Status status = context.jsonMapper.map(new String(error.networkResponse.data), Status.class);
           return new ServerErrorException(status);
         } catch (Exception e) {
+          // ignore
         }
 
-        return new RuntimeException("Request failed with HTTP error " + error.networkResponse.statusCode, throwable);
+        return new ClientError("Request failed with HTTP error " + error.networkResponse.statusCode, throwable);
       }
     }
 
-    // else any reason
-    return throwable;
+    // just wrap in any runtime ex
+    return new ClientError("Error executing request.", throwable);
   }
 }

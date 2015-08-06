@@ -333,6 +333,10 @@ public class JaxRsChannel extends RestChannel {
       throwable = throwable.getCause();
     }
 
+    if (throwable instanceof ClientError) {
+      return (RuntimeException) throwable;
+    }
+
     if (throwable instanceof TimeoutException) {
       // timeout is most likely caused by network problem
       throw new NetworkError(throwable);
@@ -372,11 +376,6 @@ public class JaxRsChannel extends RestChannel {
 
     if (throwable instanceof JsonMappingException) {
       return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
-    }
-
-
-    if (throwable instanceof ClientError) {
-      return (RuntimeException) throwable;
     }
 
     // just wrap in any runtime ex

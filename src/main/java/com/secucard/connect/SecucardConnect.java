@@ -43,6 +43,11 @@ import com.secucard.connect.product.smart.Smart;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -464,11 +469,45 @@ public class SecucardConnect {
 
     /**
      * Returns the default configuration.
+     *
+     * @throws ClientError If a error occurs.
      */
     public static Configuration get() {
+      return get("config.properties");
+    }
+
+    /**
+     * Get config from file.
+     *
+     * @param path The file path. If this path is relative (no leading path separator) it will be treated as classpath relative path.
+     * @throws ClientError If a error occurs.
+     */
+    public static Configuration get(String path) {
+      File file = new File(path);
+      InputStream inputStream;
+      if (file.isAbsolute()) {
+        try {
+          inputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+          throw new ClientError("Error loading configuration properties.", e);
+        }
+      } else {
+        // relative path, treat as classpath relative
+        inputStream = Configuration.class.getClassLoader().getResourceAsStream(path);
+      }
+
+      return get(inputStream);
+    }
+
+    /**
+     * Get config from stream
+     *
+     * @throws ClientError If a error occurs.
+     */
+    public static Configuration get(InputStream inputStream) {
       try {
         Properties p = new Properties();
-        p.load(Configuration.class.getClassLoader().getResourceAsStream("config.properties"));
+        p.load(inputStream);
         Configuration configuration = new Configuration(p);
         configuration.dataStorage = new DiskCache(configuration.cacheDir);
         return configuration;

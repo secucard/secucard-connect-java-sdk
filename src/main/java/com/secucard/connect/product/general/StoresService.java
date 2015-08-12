@@ -29,9 +29,11 @@ import java.util.List;
 
 public class StoresService extends ProductService<Store> {
 
+  public static final ServiceMetaData<Store> META_DATA = new ServiceMetaData<>("general", "stores", Store.class);
+
   @Override
-  protected ServiceMetaData<Store> createMetaData() {
-    return new ServiceMetaData<>("general", "stores", Store.class);
+  public ServiceMetaData<Store> getMetaData() {
+    return META_DATA;
   }
 
   /**

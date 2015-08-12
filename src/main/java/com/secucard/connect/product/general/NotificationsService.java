@@ -20,8 +20,11 @@ import com.secucard.connect.product.general.model.Notification;
  */
 public class NotificationsService extends ProductService<Notification> {
 
+  public static final ServiceMetaData<Notification> META_DATA = new ServiceMetaData<>("general", "notifications",
+      Notification.class);
+
   @Override
-  protected ServiceMetaData<Notification> createMetaData() {
-    return new ServiceMetaData<>("general", "notifications", Notification.class);
+  public ServiceMetaData<Notification> getMetaData() {
+    return META_DATA;
   }
 }

@@ -21,9 +21,11 @@ import com.secucard.connect.product.loyalty.model.Card;
  */
 public class CardsService extends ProductService<Card> {
 
+  public static final ServiceMetaData<Card> META_DATA = new ServiceMetaData<>("loyalty", "cards", Card.class);
+
   @Override
-  protected ServiceMetaData<Card> createMetaData() {
-    return new ServiceMetaData<>("loyalty", "cards", Card.class);
+  public ServiceMetaData<Card> getMetaData() {
+    return META_DATA;
   }
 
   /**

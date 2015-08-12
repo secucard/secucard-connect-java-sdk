@@ -13,6 +13,7 @@
 package com.secucard.connect.product.loyalty;
 
 import com.secucard.connect.client.ProductService;
+import com.secucard.connect.net.Options;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
 
 /**
@@ -20,9 +21,17 @@ import com.secucard.connect.product.loyalty.model.MerchantCard;
  */
 public class MerchantCardsService extends ProductService<MerchantCard> {
 
+  public static final ServiceMetaData<MerchantCard> META_DATA = new ServiceMetaData<>("loyalty", "merchantcards",
+      MerchantCard.class);
+
   @Override
-  protected ServiceMetaData<MerchantCard> createMetaData() {
-    return new ServiceMetaData<>("loyalty", "merchantcards", MerchantCard.class);
+  public ServiceMetaData<MerchantCard> getMetaData() {
+    return META_DATA;
+  }
+
+  @Override
+  public Options getDefaultOptions() {
+    return new Options(Options.CHANNEL_STOMP);
   }
 
 }

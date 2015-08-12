@@ -26,10 +26,14 @@ import com.secucard.connect.product.smart.model.Transaction;
  * Implements the smart/transaction operations.
  */
 public class TransactionService extends ProductService<Transaction> {
+  public static final ServiceMetaData<Transaction> META_DATA = new ServiceMetaData<>("smart", "transactions",
+      Transaction.class);
+
+  private static final String GENERAL_NOTIFICATIONS_OBJECT = "general.notifications";
 
   @Override
-  protected ServiceMetaData<Transaction> createMetaData() {
-    return new ServiceMetaData<>("smart", "transactions", Transaction.class);
+  public ServiceMetaData<Transaction> getMetaData() {
+    return META_DATA;
   }
 
   /**
@@ -55,7 +59,7 @@ public class TransactionService extends ProductService<Transaction> {
       listener = new DelegatingEventHandlerCallback<Notification, Notification>(callback) {
         @Override
         public boolean accept(Event event) {
-          return Events.TYPE_DISPLAY.equals(event.getType()) && "general.notifications".equals(event.getTarget());
+          return Events.TYPE_DISPLAY.equals(event.getType()) && GENERAL_NOTIFICATIONS_OBJECT.equals(event.getTarget());
         }
 
         @Override
@@ -65,7 +69,7 @@ public class TransactionService extends ProductService<Transaction> {
       };
     }
 
-    context.eventDispatcher.registerListener(Events.TYPE_DISPLAY + "general.notifications", listener);
+    context.eventDispatcher.registerListener(Events.TYPE_DISPLAY + GENERAL_NOTIFICATIONS_OBJECT, listener);
   }
 
   /**

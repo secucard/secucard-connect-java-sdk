@@ -28,9 +28,12 @@ import java.util.List;
  */
 public class SecupayDebitsService extends ProductService<SecupayDebit> {
 
+  public static final ServiceMetaData<SecupayDebit> META_DATA = new ServiceMetaData<>("payment", "secupaydebit",
+      SecupayDebit.class);
+
   @Override
-  protected ServiceMetaData<SecupayDebit> createMetaData() {
-    return new ServiceMetaData<>("payment", "secupaydebit", SecupayDebit.class);
+  public ServiceMetaData<SecupayDebit> getMetaData() {
+    return META_DATA;
   }
 
   /**

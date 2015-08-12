@@ -27,9 +27,12 @@ import java.util.Map;
  */
 public class TransactionsService extends ProductService<Transaction> {
 
+  public static final ServiceMetaData<Transaction> META_DATA = new ServiceMetaData<>("general", "transactions",
+      Transaction.class);
+
   @Override
-  protected ServiceMetaData<Transaction> createMetaData() {
-    return new ServiceMetaData<>("general", "transactions", Transaction.class);
+  public ServiceMetaData<Transaction> getMetaData() {
+    return META_DATA;
   }
 
   /**

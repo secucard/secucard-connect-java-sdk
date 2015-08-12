@@ -23,29 +23,26 @@ import com.secucard.connect.product.general.model.Event;
  */
 
 public class AccountDevicesService extends ProductService<AccountDevice> {
+  public static final ServiceMetaData<AccountDevice> META_DATA =
+      new ServiceMetaData<>("general", "accountdevices", AccountDevice.class);
 
   @Override
-  protected ServiceMetaData<AccountDevice> createMetaData() {
-    return new ServiceMetaData<>("general", "accountdevices", AccountDevice.class);
+  public ServiceMetaData<AccountDevice> getMetaData() {
+    return META_DATA;
   }
 
   /**
    * Set a callback to get notified when a device has changed.
    */
   public void onAccountDevicesChanged(AccountDevicesListener listener) {
-    if (listener != null) {
-      listener.service = this;
-    }
     context.eventDispatcher.registerListener(getMetaData().getObject() + Events.TYPE_CHANGED, listener);
   }
 
   public static abstract class AccountDevicesListener extends AbstractEventListener<AccountDevice> {
-    protected AccountDevicesService service;
 
     @Override
     public boolean accept(Event<AccountDevice> event) {
-      return Events.TYPE_CHANGED.equals(event.getType()) && service.getMetaData().getObject().equals(event.getTarget());
+      return Events.TYPE_CHANGED.equals(event.getType()) && META_DATA.getObject().equals(event.getTarget());
     }
-
   }
 }

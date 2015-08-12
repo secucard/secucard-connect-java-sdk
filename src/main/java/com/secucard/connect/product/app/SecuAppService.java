@@ -24,7 +24,7 @@ import com.secucard.connect.product.general.model.Store;
  */
 public class SecuAppService extends ProductService<SecuObject> {
   @Override
-  protected ServiceMetaData<SecuObject> createMetaData() {
+  public ServiceMetaData<SecuObject> getMetaData() {
     return new ServiceMetaData<>(context.appId); // get configured app id
   }
 

@@ -39,11 +39,13 @@ import java.util.List;
  * See {@link com.secucard.connect.SecucardConnect.Configuration to get details which storage implementation is actually used.
  */
 public class IdentResultsService extends ProductService<IdentResult> {
+  public static final ServiceMetaData<IdentResult> META_DATA = new ServiceMetaData<>("services", "identresults",
+      IdentResult.class);
   private boolean cacheAttachmentsEnabled = true;
 
   @Override
-  protected ServiceMetaData<IdentResult> createMetaData() {
-    return new ServiceMetaData<>("services", "identresults", IdentResult.class);
+  public ServiceMetaData<IdentResult> getMetaData() {
+    return META_DATA;
   }
 
   /**

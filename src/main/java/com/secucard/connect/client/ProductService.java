@@ -39,7 +39,6 @@ import java.util.List;
  * @param <T> The actual product resource type
  */
 public abstract class ProductService<T extends SecuObject> {
-  private ServiceMetaData<T> metaData;
   protected ClientContext context;
 
   public void setContext(ClientContext context) {
@@ -47,22 +46,19 @@ public abstract class ProductService<T extends SecuObject> {
   }
 
   /**
-   * Creates meta data associated with this product service.
-   * Don't use for retrieval, use {@link #getMetaData()} instead.
+   * Returns meta data associated with this product service.<br/>
+   * When implementing this method it's a goo idea to return just a constant static instance instead creating new ones.<br/>
+   * The convention is to have a field:<br/>
+   * public static final ServiceMetaData<...> META_DATA; <br/>
+   * This way the meta data is also accessibly statically.
    */
-  protected abstract ServiceMetaData<T> createMetaData();
+  public abstract ServiceMetaData<T> getMetaData();
 
 
   protected Options getDefaultOptions() {
     return Options.getDefault();
   }
 
-  public ServiceMetaData<T> getMetaData() {
-    if (metaData == null) {
-      metaData = createMetaData();
-    }
-    return metaData;
-  }
 
   // get, get list -----------------------------------------------------------------------------------------------------
 

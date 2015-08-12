@@ -20,8 +20,11 @@ import com.secucard.connect.product.services.model.IdentRequest;
  */
 public class IdentRequestsService extends ProductService<IdentRequest> {
 
+  public static final ServiceMetaData<IdentRequest> META_DATA = new ServiceMetaData<>("services", "identrequests",
+      IdentRequest.class);
+
   @Override
-  protected ServiceMetaData<IdentRequest> createMetaData() {
-    return new ServiceMetaData<>("services", "identrequests", IdentRequest.class);
+  public ServiceMetaData<IdentRequest> getMetaData() {
+    return META_DATA;
   }
 }

@@ -21,8 +21,10 @@ import com.secucard.connect.product.general.model.Merchant;
 
 public class MerchantsService extends ProductService<Merchant> {
 
+  public static final ServiceMetaData<Merchant> META_DATA = new ServiceMetaData<>("general", "merchants", Merchant.class);
+
   @Override
-  protected ServiceMetaData<Merchant> createMetaData() {
-    return new ServiceMetaData<>("general", "merchants", Merchant.class);
+  public ServiceMetaData<Merchant> getMetaData() {
+    return META_DATA;
   }
 }

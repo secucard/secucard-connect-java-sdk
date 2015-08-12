@@ -28,10 +28,11 @@ import java.util.Map;
 
 public class AccountsService extends ProductService<Account> {
   public static final String EVENT_TYPE_BEACON_MONITOR = "BeaconMonitor";
+  public static final ServiceMetaData<Account> META_DATA = new ServiceMetaData<>("general", "accounts", Account.class);
 
   @Override
-  protected ServiceMetaData<Account> createMetaData() {
-    return new ServiceMetaData<>("general", "accounts", Account.class);
+  public ServiceMetaData<Account> getMetaData() {
+    return META_DATA;
   }
 
   /**
@@ -49,9 +50,6 @@ public class AccountsService extends ProductService<Account> {
    * Set a listener to get notified when a beacon was monitored.
    */
   public void onBeaconMonitor(AccountEventListener listener) {
-    if (listener != null) {
-      listener.service = this;
-    }
     context.eventDispatcher.registerListener(getMetaData().getObject() + EVENT_TYPE_BEACON_MONITOR, listener);
   }
 
@@ -101,11 +99,10 @@ public class AccountsService extends ProductService<Account> {
   }
 
   public static abstract class AccountEventListener extends AbstractEventListener<Account> {
-    protected AccountsService service;
 
     @Override
     public boolean accept(Event<Account> event) {
-      return EVENT_TYPE_BEACON_MONITOR.equals(event.getType()) && service.getMetaData().getObject().equals(event.getTarget());
+      return EVENT_TYPE_BEACON_MONITOR.equals(event.getType()) && META_DATA.getObject().equals(event.getTarget());
     }
   }
 

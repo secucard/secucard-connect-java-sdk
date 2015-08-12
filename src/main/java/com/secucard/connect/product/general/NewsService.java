@@ -22,9 +22,11 @@ import com.secucard.connect.product.general.model.News;
 
 public class NewsService extends ProductService<News> {
 
+  public static final ServiceMetaData<News> META_DATA = new ServiceMetaData<>("general", "news", News.class);
+
   @Override
-  protected ServiceMetaData<News> createMetaData() {
-    return new ServiceMetaData<>("general", "news", News.class);
+  public ServiceMetaData<News> getMetaData() {
+    return META_DATA;
   }
 
   /**

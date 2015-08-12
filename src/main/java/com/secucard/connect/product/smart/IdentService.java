@@ -25,9 +25,11 @@ import java.util.List;
  */
 public class IdentService extends ProductService<Ident> {
 
+  public static final ServiceMetaData<Ident> META_DATA = new ServiceMetaData<>("smart", "idents", Ident.class);
+
   @Override
-  protected ServiceMetaData<Ident> createMetaData() {
-    return new ServiceMetaData<>("smart", "idents", Ident.class);
+  public ServiceMetaData<Ident> getMetaData() {
+    return META_DATA;
   }
 
   /**

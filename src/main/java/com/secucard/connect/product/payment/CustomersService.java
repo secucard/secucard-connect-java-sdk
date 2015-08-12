@@ -20,8 +20,10 @@ import com.secucard.connect.product.payment.model.Customer;
  */
 public class CustomersService extends ProductService<Customer> {
 
+  public static final ServiceMetaData<Customer> META_DATA = new ServiceMetaData<>("payment", "customers", Customer.class);
+
   @Override
-  protected ServiceMetaData<Customer> createMetaData() {
-    return new ServiceMetaData<>("payment", "customers", Customer.class);
+  public ServiceMetaData<Customer> getMetaData() {
+    return META_DATA;
   }
 }

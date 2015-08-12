@@ -21,9 +21,11 @@ import com.secucard.connect.product.payment.model.Contract;
  */
 public class ContractService extends ProductService<Contract> {
 
+  public static final ServiceMetaData<Contract> META_DATA = new ServiceMetaData<>("payment", "contracts", Contract.class);
+
   @Override
-  protected ServiceMetaData<Contract> createMetaData() {
-    return new ServiceMetaData<>("payment", "contracts", Contract.class);
+  public ServiceMetaData<Contract> getMetaData() {
+    return META_DATA;
   }
 
   /**

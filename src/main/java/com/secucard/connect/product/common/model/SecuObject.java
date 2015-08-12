@@ -14,9 +14,10 @@ package com.secucard.connect.product.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public abstract class SecuObject {
+public abstract class SecuObject implements Serializable {
   public static final String OBJECT_PROPERTY = "object";
   public static final String OBJECT_FIELD = "OBJECT";
   public static final String ID_PROPERTY = "id";

@@ -325,7 +325,7 @@ public abstract class ProductService<T extends SecuObject> {
         handleException(e);
       }
     } else {
-      channel.request(method, p, new Callback<ObjectList<R>>() {
+      channel.requestList(method, p, new Callback<ObjectList<R>>() {
         public void completed(ObjectList<R> result) {
           if (processor != null) {
             processor.notify(result);

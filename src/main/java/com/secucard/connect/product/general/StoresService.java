@@ -82,7 +82,7 @@ public class StoresService extends ProductService<Store> {
     return getList(queryParams, options, callback);
   }
 
-  public Store get(String pid, QueryParams queryParams, Callback<Store> callback) {
+  public Store get(String pid, Callback<Store> callback) {
     Options options = getDefaultOptions();
     options.resultProcessing = new Callback.Notify<Store>() {
       @Override

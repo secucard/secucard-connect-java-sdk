@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class CheckinService extends ProductService<Checkin> {
 
-  public static final ServiceMetaData<Checkin> META_DATA = new ServiceMetaData<>("smart", "checkin", Checkin.class);
+  public static final ServiceMetaData<Checkin> META_DATA = new ServiceMetaData<>("smart", "checkins", Checkin.class);
 
   @Override
   public ServiceMetaData<Checkin> getMetaData() {

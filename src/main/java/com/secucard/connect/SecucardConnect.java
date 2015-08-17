@@ -12,10 +12,8 @@
 
 package com.secucard.connect;
 
-import com.secucard.connect.auth.AuthService;
-import com.secucard.connect.auth.CancelCallback;
-import com.secucard.connect.auth.ClientAuthDetails;
-import com.secucard.connect.auth.TokenManager;
+import android.content.Context;
+import com.secucard.connect.auth.*;
 import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
@@ -41,13 +39,13 @@ import com.secucard.connect.product.payment.Payment;
 import com.secucard.connect.product.services.Services;
 import com.secucard.connect.product.smart.Smart;
 import com.secucard.connect.util.ExceptionMapper;
+import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -173,6 +171,17 @@ public class SecucardConnect {
     LOG.debug("Secucard connect client opened.");
   }
 
+  public void open(Callback<Void> callback) {
+     new Execution<Void>(){
+       @Override
+       protected Void execute() {
+         open();
+         return null;
+       }
+     }.start(callback);
+  }
+
+
   /**
    * Gracefully closes this instance and releases all resources.
    */
@@ -205,6 +214,10 @@ public class SecucardConnect {
     disconnectTimer.schedule(disconnectTimerTask, seconds * 1000);
   }
 
+  public boolean isConnected(){
+    return isConnected;
+  }
+
   /**
    * Obtain a service reference by type. Returns always the same instance for a given type.
    *
@@ -235,8 +248,17 @@ public class SecucardConnect {
       config = Configuration.get();
     }
 
+    if(config.androidMode && config.runtimeContext == null){
+      throw new ClientError("Missing Android application context.");
+    }
+
     if (config.dataStorage == null) {
-      throw new ClientError("Missing cache implementation found in config.");
+      String cacheDir = config.cacheDir;
+      if (config.androidMode && Configuration.DEFAULT_CACHE_DIR.equals(config.cacheDir)){
+        cacheDir = ((Context) config.runtimeContext).getCacheDir().getPath() + File.separator
+                + Configuration.DEFAULT_CACHE_DIR;
+      }
+      config.dataStorage = new DiskCache(cacheDir);
     }
 
     final SecucardConnect sc = new SecucardConnect();
@@ -283,9 +305,6 @@ public class SecucardConnect {
     ctx.defaultChannel = config.defaultChannel;
     RestChannel rc;
     if (config.androidMode) {
-      if (config.runtimeContext == null) {
-        throw new ClientError("Missing Android application context.");
-      }
       rc = new VolleyChannel(restConfig, ctx);
     } else {
       rc = new JaxRsChannel(restConfig, ctx);
@@ -326,6 +345,15 @@ public class SecucardConnect {
     // set up JSON mapper instance
     ctx.jsonMapper = new JsonMapper();
     ctx.jsonMapper.init(services.values());
+
+    // inject json mapper in user provided instance
+    if (config.clientAuthDetails instanceof AndroidClientAuthDetails) {
+      ((AndroidClientAuthDetails) config.clientAuthDetails).setJsonMapper(ctx.jsonMapper);
+    }
+
+    ResourceDownloader downloader = ResourceDownloader.get();
+    downloader.setCache(config.dataStorage);
+    downloader.setHttpClient(rc);
 
     sc.wireServiceInstances();
 
@@ -395,7 +423,7 @@ public class SecucardConnect {
    * - appId (null), the app id if used in a custom app <br/>
    * - cacheDir (".scc-cache"), the directory for the cache <br/>
    * - logging.local(false), set to true to enable local logging and ignoring global settings <br/>
-   * - logging.pattern(scc.log), the logging file path <br/>
+   * - logging.pattern(null), the logging file path <br/>
    * - logging.logger(com.secucard.log), the logger to configure, empty for root logger <br/>
    * - logging.limit(1000000), the max log file size in b, 1mb <br/>
    * - logging.count(10), the max number of files to keep <br/>
@@ -418,6 +446,8 @@ public class SecucardConnect {
    * - {@link #autCancelCallback} <br/>
    */
   public static final class Configuration {
+    public static final String DEFAULT_CACHE_DIR = ".scc-cache";
+
     private final Properties properties;
     private final String defaultChannel;
     private final String loggingConfig;
@@ -510,9 +540,7 @@ public class SecucardConnect {
       try {
         Properties p = new Properties();
         p.load(inputStream);
-        Configuration configuration = new Configuration(p);
-        configuration.dataStorage = new DiskCache(configuration.cacheDir);
-        return configuration;
+        return new Configuration(p);
       } catch (Exception e) {
         throw new ClientError("Error loading configuration properties.", e);
       }
@@ -527,12 +555,12 @@ public class SecucardConnect {
       logIgnoreGlobal = Boolean.valueOf(properties.getProperty("logging.local", "false"));
       logCount = Integer.valueOf(properties.getProperty("logging.count", "10"));
       logLimit = Integer.valueOf(properties.getProperty("logging.limit", "1000000"));
-      logPattern = properties.getProperty("logging.pattern", "scc.log");
+      logPattern = properties.getProperty("logging.pattern");
       logger = properties.getProperty("logging.logger", "com.secucard.connect");
       logLevel = properties.getProperty("logging.level", "INFO");
       logFormat = properties.getProperty("logging.format", "%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n");
       appId = properties.getProperty("appId");
-      cacheDir = properties.getProperty("cacheDir", ".scc-cache");
+      cacheDir = properties.getProperty("cacheDir", DEFAULT_CACHE_DIR);
     }
 
 

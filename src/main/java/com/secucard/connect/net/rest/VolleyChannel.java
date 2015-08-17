@@ -75,38 +75,52 @@ public class VolleyChannel extends RestChannel {
   public <T> T request(Method method, Params params, Callback<T> callback) {
     String url = buildRequestUrl(params);
 
-    DynamicTypeReference typeReference = new DynamicTypeReference(params.returnType);
-
-    String requestBody = null;
-    if (params.data != null) {
-      try {
-        requestBody = context.jsonMapper.map(params.data);
-      } catch (Exception e) {
-        callback.failed(e);
-        return null;
-      }
+    RequestFuture<T> future = null;
+    if (callback == null) {
+      future = RequestFuture.newFuture();
     }
-    putToQueue(buildRequest(method, url, requestBody, typeReference, callback));
-    return null;
+
+    Request<T> request = putToQueue(buildRequest(method, url, params.data,
+        new DynamicTypeReference(params.returnType), callback, future));
+
+    if (callback != null) {
+      // done, callback will receive results
+      return null;
+    }
+
+    future.setRequest(request);
+
+    try {
+      return future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
+    } catch (Throwable e) {
+      throw translate(e);
+    }
   }
 
   @Override
   public <T> ObjectList<T> requestList(Method method, Params params, Callback<ObjectList<T>> callback) {
     String url = buildRequestUrl(params);
 
-    DynamicTypeReference typeReference = new DynamicTypeReference(ObjectList.class, params.returnType);
-
-    String requestBody = null;
-    if (params.data != null) {
-      try {
-        requestBody = context.jsonMapper.map(params.data);
-      } catch (Exception e) {
-        callback.failed(e);
-        return null;
-      }
+    RequestFuture<ObjectList<T>> future = null;
+    if (callback == null) {
+      future = RequestFuture.newFuture();
     }
-    putToQueue(buildRequest(method, url, requestBody, typeReference, callback));
-    return null;
+
+    Request<ObjectList<T>> request = putToQueue(buildRequest(method, url, params.data,
+        new DynamicTypeReference(ObjectList.class, params.returnType), callback, future));
+
+    if (callback != null) {
+      // done, callback will receive results
+      return null;
+    }
+
+    future.setRequest(request);
+
+    try {
+      return future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
+    } catch (Throwable e) {
+      throw translate(e);
+    }
   }
 
 
@@ -125,6 +139,7 @@ public class VolleyChannel extends RestChannel {
     };
 
     future.setRequest(putToQueue(request));
+//    putToQueue(request);
 
     try {
       return future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
@@ -188,8 +203,19 @@ public class VolleyChannel extends RestChannel {
     return url;
   }
 
-  private <T> ObjectJsonRequest<T> buildRequest(Method method, String url, String requestBody,
-                                                TypeReference typeReference, Callback<T> callback) {
+  private <T> ObjectJsonRequest<T> buildRequest(Method method, String url, Object data,
+                                                TypeReference typeReference, final Callback<T> callback,
+                                                RequestFuture<T> future) {
+    String requestBody = null;
+
+    if (data != null) {
+      try {
+        requestBody = context.jsonMapper.map(data);
+      } catch (Exception e) {
+        throw new ClientError("Error mapping request data to JSON", e);
+      }
+    }
+
     int m;
     if (method == Method.GET) {
       m = Request.Method.GET;
@@ -204,8 +230,31 @@ public class VolleyChannel extends RestChannel {
     }
     Map<String, String> headers = new HashMap<>();
     setAuthorizationHeader(headers);
+
+    Response.Listener<T> listener;
+    Response.ErrorListener errorListener;
+    if (callback != null) {
+      errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+          callback.failed(translate(error));
+        }
+      };
+      listener = new Response.Listener<T>() {
+        @Override
+        public void onResponse(T response) {
+          callback.completed(response);
+        }
+      };
+    } else if (future != null) {
+      listener = future;
+      errorListener = future;
+    } else {
+      throw new IllegalStateException("Missing callback or future for request");
+    }
+
     ObjectJsonRequest<T> request = new ObjectJsonRequest<>(m, url, requestBody, headers.size() == 0 ? null : headers,
-        typeReference, callback);
+        typeReference, listener, errorListener);
 
     return request;
   }
@@ -214,7 +263,7 @@ public class VolleyChannel extends RestChannel {
     open();
 
     // looks like volley is using this timeout for connection and read timeout, at least the default HTTP stack (Hurl) does.
-    request.setRetryPolicy(new DefaultRetryPolicy(configuration.connectTimeoutSec, 1, 1f));
+    request.setRetryPolicy(new DefaultRetryPolicy(configuration.connectTimeoutSec * 1000, 1, 1f));
 
     return requestQueue.add(request);
   }
@@ -240,21 +289,6 @@ public class VolleyChannel extends RestChannel {
     @Override
     public RetryPolicy getRetryPolicy() {
       return super.getRetryPolicy();
-    }
-
-    private ObjectJsonRequest(int method, String url, String requestBody, Map<String, String> headers,
-                              TypeReference typeReference, final Callback<T> callback) {
-      this(method, url, requestBody, headers, typeReference, new Response.Listener<T>() {
-        @Override
-        public void onResponse(T response) {
-          callback.completed(response);
-        }
-      }, new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-          callback.failed(translate(error));
-        }
-      });
     }
 
     @Override

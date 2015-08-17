@@ -41,4 +41,8 @@ public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
   public void onTokenChanged(Token token) {
     diskCache.save("token", token);
   }
+
+  public void clear(){
+    diskCache.clear("token", null);
+  }
 }

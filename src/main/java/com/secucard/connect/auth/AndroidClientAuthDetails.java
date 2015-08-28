@@ -31,7 +31,7 @@ public abstract class AndroidClientAuthDetails implements ClientAuthDetails {
   public static final String TOKEN_KEY = "scctoken";
 
   private JsonMapper jsonMapper;
-  private final SharedPreferences sharedPreferences;
+  protected final SharedPreferences sharedPreferences;
   private Token currentToken; // caching instance for reads
 
   public void setJsonMapper(JsonMapper jsonMapper) {
@@ -76,6 +76,7 @@ public abstract class AndroidClientAuthDetails implements ClientAuthDetails {
   }
 
   public void clear() {
+    currentToken = null;
     sharedPreferences.edit().remove(TOKEN_KEY).apply();
   }
 }

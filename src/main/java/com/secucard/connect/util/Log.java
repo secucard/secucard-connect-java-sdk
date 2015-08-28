@@ -19,14 +19,13 @@ import java.util.logging.*;
 
 /**
  * Logging util which uses java.util.logging.
- * Use system property "com.secucard.connect.config" to pass the client config file path.
+ * Needs access to the client configuration, so make sure the config exist either in the default location or path is
+ * specified by system property  "com.secucard.connect.config".
+ *
+ * @see SecucardConnect.Configuration#get()
  */
 public class Log {
   private final Logger logger;
-
-  static {
-    init();
-  }
 
   public Log(Class type) {
     this.logger = Logger.getLogger(type.getName());
@@ -97,10 +96,8 @@ public class Log {
     return sb.toString();
   }
 
-  private static void init() {
-    String path = System.getProperty("com.secucard.connect.config");
+  public static void init(SecucardConnect.Configuration cfg) {
     try {
-      SecucardConnect.Configuration cfg = path == null ? SecucardConnect.Configuration.get(): SecucardConnect.Configuration.get(path);
       if (cfg.logIgnoreGlobal) {
         Logger logger = Logger.getLogger(cfg.logger);
         LogFormatter formatter = new LogFormatter(cfg.logFormat);

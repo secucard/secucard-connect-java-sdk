@@ -141,7 +141,10 @@ public abstract class RestChannel extends Channel {
       for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
         encodedParams.append(URLEncoder.encode(entry.getKey(), paramsEncoding));
         encodedParams.append('=');
-        encodedParams.append(URLEncoder.encode((String) entry.getValue(), paramsEncoding));
+        String value = (String) entry.getValue();
+        if (value != null) {
+          encodedParams.append(URLEncoder.encode(value, paramsEncoding));
+        }
         encodedParams.append('&');
       }
       return encodedParams.toString();

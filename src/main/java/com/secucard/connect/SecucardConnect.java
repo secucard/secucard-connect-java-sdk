@@ -172,13 +172,13 @@ public class SecucardConnect {
   }
 
   public void open(Callback<Void> callback) {
-     new Execution<Void>(){
-       @Override
-       protected Void execute() {
-         open();
-         return null;
-       }
-     }.start(callback);
+    new Execution<Void>() {
+      @Override
+      protected Void execute() {
+        open();
+        return null;
+      }
+    }.start(callback);
   }
 
 
@@ -248,15 +248,15 @@ public class SecucardConnect {
       config = Configuration.get();
     }
 
-    if(config.androidMode && config.runtimeContext == null){
+    if (config.androidMode && config.runtimeContext == null) {
       throw new ClientError("Missing Android application context.");
     }
 
     if (config.dataStorage == null) {
       String cacheDir = config.cacheDir;
-      if (config.androidMode && Configuration.DEFAULT_CACHE_DIR.equals(config.cacheDir)){
+      if (config.androidMode && Configuration.DEFAULT_CACHE_DIR.equals(config.cacheDir)) {
         cacheDir = ((Context) config.runtimeContext).getCacheDir().getPath() + File.separator
-                + Configuration.DEFAULT_CACHE_DIR;
+            + Configuration.DEFAULT_CACHE_DIR;
       }
       config.dataStorage = new DiskCache(cacheDir);
     }
@@ -447,6 +447,8 @@ public class SecucardConnect {
    */
   public static final class Configuration {
     public static final String DEFAULT_CACHE_DIR = ".scc-cache";
+    public static final String LOCATION_PROPERTY = "com.secucard.connect.config";
+    public static final String DEFAULT_FILENAME = "config.properties";
 
     private final Properties properties;
     private final String defaultChannel;
@@ -500,23 +502,29 @@ public class SecucardConnect {
     public Object runtimeContext;
 
     /**
-     * Returns the default configuration.
+     * Get config from default location {@link #DEFAULT_FILENAME} or from a path specified by the
+     * system property {@link #LOCATION_PROPERTY}.
      *
      * @throws ClientError If a error occurs.
      */
     public static Configuration get() {
-      return get("config.properties");
+      String path = System.getProperty(LOCATION_PROPERTY);
+      if (path == null) {
+        path = DEFAULT_FILENAME;
+      }
+      return get(path);
     }
 
     /**
      * Get config from file.
      *
-     * @param path The file path. If this path is relative (no leading path separator) it will be treated as classpath relative path.
+     * @param path The file path. If this path is relative (no leading path separator) it will be treated as classpath
+     *             relative path.
      * @throws ClientError If a error occurs.
      */
     public static Configuration get(String path) {
       File file = new File(path);
-      InputStream inputStream;
+      InputStream inputStream = null;
       if (file.isAbsolute()) {
         try {
           inputStream = new FileInputStream(file);
@@ -532,7 +540,7 @@ public class SecucardConnect {
     }
 
     /**
-     * Get config from stream
+     * Get config from stream.
      *
      * @throws ClientError If a error occurs.
      */
@@ -561,6 +569,7 @@ public class SecucardConnect {
       logFormat = properties.getProperty("logging.format", "%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n");
       appId = properties.getProperty("appId");
       cacheDir = properties.getProperty("cacheDir", DEFAULT_CACHE_DIR);
+      Log.init(this);
     }
 
 

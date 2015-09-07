@@ -22,9 +22,9 @@
     <url>http://secucard.com</url>
 
     <scm>
-        <connection>scm:git:git@github.com:secucard/secucard-connect-java-client-lib.git</connection>
-        <developerConnection>scm:git:git@github.com:secucard/secucard-connect-java-client-lib.git</developerConnection>
-        <url>git@github.com:secucard/secucard-connect-java-client-lib.git</url>
+        <connection>scm:git:https://github.com/secucard/secucard-connect-java-sdk.git</connection>
+        <developerConnection>scm:git:https://github.com/secucard/secucard-connect-java-sdk.git</developerConnection>
+        <url>https://github.com/secucard/secucard-connect-java-sdk/tree/master</url>
     </scm>
 
     <build>

@@ -43,8 +43,8 @@ public class SecuAppService extends ProductService<SecuObject> {
   public ObjectList<Store> getMerchantDetails(String storeId, String merchantId, Geometry geometry,
                                               Callback<ObjectList<Store>> callback) {
     Map<String, Object> arg = new HashMap<>();
-    arg.put("store", "STO_WTXP3QN2BZT77D2GMMP90273P6C4PN");
-    arg.put("merchant", "MRC_35SZ3R5GGQQP4T0U2T5GFAN9P6C4PG");
+    arg.put("store", storeId);
+    arg.put("merchant", merchantId);
     arg.put("geo", geometry);
     return executeToList("getMerchantDetails", arg, Store.class, null, callback);
   }

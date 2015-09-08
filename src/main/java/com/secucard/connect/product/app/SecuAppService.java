@@ -19,6 +19,8 @@ import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Store;
 
+import java.io.Serializable;
+
 /**
  * Implements the operation for the secucard android app.
  */

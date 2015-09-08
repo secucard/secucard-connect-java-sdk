@@ -17,7 +17,11 @@ import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.common.model.SecuObject;
+import com.secucard.connect.product.general.model.Geometry;
 import com.secucard.connect.product.general.model.Store;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implements the operation for the secucard android app.
@@ -31,35 +35,42 @@ public class SecuAppService extends ProductService<SecuObject> {
   /**
    * Get the merchant with the given ID
    *
-   * @param argObject Object with Store ID and Merchant ID
+   * @param storeId    Store ID and Merchant ID
+   * @param merchantId Merchant ID
+   * @param geometry   The geo location.
    * @return The merchant with the given ID or null if not found
    */
-  public StoreList getMerchant(Object argObject, Callback<StoreList> callback) {
-    return execute("getMerchantDetails", argObject, StoreList.class, null, callback);
+  public ObjectList<Store> getMerchantDetails(String storeId, String merchantId, Geometry geometry,
+                                              Callback<ObjectList<Store>> callback) {
+    Map<String, Object> arg = new HashMap<>();
+    arg.put("store", "STO_WTXP3QN2BZT77D2GMMP90273P6C4PN");
+    arg.put("merchant", "MRC_35SZ3R5GGQQP4T0U2T5GFAN9P6C4PG");
+    arg.put("geo", geometry);
+    return executeToList("getMerchantDetails", arg, Store.class, null, callback);
   }
 
   /**
    * Get a list of merchants
    *
-   * @param arg   Arguments to filter list
+   * @param arg Arguments to filter list
    * @return List of merchants
    */
-  public StoreList getMerchants(QueryParams arg, final Callback<StoreList> callback) {
-    return execute("getMyMerchants", arg, StoreList.class, null, callback);
+  public ObjectList<Store> getMyMerchants(QueryParams arg, final Callback<ObjectList<Store>> callback) {
+    return executeToList("getMyMerchants", arg, Store.class, null, callback);
   }
 
   /**
    * Add card to account
    *
-   * @param argObject Arguments with card number and pin
+   * @param cardNumber Cards number.
+   * @param pin        Cards PIN.
    * @return True if card added successfully, else false
    */
-  public Boolean addCard(final Object argObject, Callback<Boolean> callback) {
-    return executeToBool("addCard", argObject, null, callback);
-  }
-
-  public static class StoreList extends ObjectList<Store> {
-
+  public Boolean addCard(final String cardNumber, String pin, Callback<Boolean> callback) {
+    Map<String, String> arg = new HashMap<>();
+    arg.put("cardnumber", cardNumber);
+    arg.put("pin", pin);
+    return executeToBool("addCard", arg, null, callback);
   }
 }
 

@@ -19,8 +19,9 @@ public class AccountDevice extends SecuObject {
 
   // todo: add properties
 
-  @JsonIgnore
   private Boolean checkin;
+
+  private Store store;
 
   public Boolean getCheckin() {
     return checkin;
@@ -30,4 +31,11 @@ public class AccountDevice extends SecuObject {
     this.checkin = checkin;
   }
 
+  public Store getStore() {
+    return store;
+  }
+
+  public void setStore(Store store) {
+    this.store = store;
+  }
 }

@@ -18,6 +18,7 @@ import com.secucard.connect.net.Options;
 import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
+import com.secucard.connect.product.common.model.Result;
 import com.secucard.connect.product.general.model.Store;
 import com.secucard.connect.product.general.model.StoreSetDefault;
 
@@ -43,7 +44,10 @@ public class StoresService extends ProductService<Store> {
    * @return True if successfully updated, false else.
    */
   public boolean checkIn(String storeId, Callback<Boolean> callback) {
-    return super.executeToBool(storeId, "checkin", null, null, callback);
+//    return super.executeToBool(null, "checkin", storeId, null, callback);
+    Options options = getDefaultOptions();
+    options.channel = Options.CHANNEL_STOMP;
+    return executeToBool(storeId, "checkin", null, null, null, callback);
   }
 
   /**
@@ -52,7 +56,10 @@ public class StoresService extends ProductService<Store> {
    * @return True if successfully updated, false else.
    */
   public boolean checkOut(String storeId, Callback<Boolean> callback) {
-    return super.executeToBool(storeId, "checkin", "false", null, callback);
+//    return super.executeToBool(null, "checkin", storeId, null, callback);
+    Options options = getDefaultOptions();
+    options.channel = Options.CHANNEL_STOMP;
+    return executeToBool(storeId, "checkin", "false", null, null, callback);
   }
 
   /**
@@ -99,7 +106,11 @@ public class StoresService extends ProductService<Store> {
       MediaResource picture = object.getLogo();
       if (picture != null) {
         if (!picture.isCached()) {
-          picture.download();
+          try {
+            picture.download();
+          }catch (Exception e){
+            e.printStackTrace();
+          }
         }
       }
     }

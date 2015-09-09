@@ -33,26 +33,30 @@ public class SecuAppService extends ProductService<SecuObject> {
   }
 
   /**
-   * Get the merchant with the given ID
+   * Get details for a merchant.
    *
-   * @param storeId    Store ID and Merchant ID
-   * @param merchantId Merchant ID
-   * @param geometry   The geo location.
-   * @return The merchant with the given ID or null if not found
+   * @param storeId    Store ID
+   * @param merchantId Merchant ID or null.
+   * @param geometry   The geo location or null.
+   * @return List with stores.
    */
   public ObjectList<Store> getMerchantDetails(String storeId, String merchantId, Geometry geometry,
                                               Callback<ObjectList<Store>> callback) {
     Map<String, Object> arg = new HashMap<>();
     arg.put("store", storeId);
-    arg.put("merchant", merchantId);
-    arg.put("geo", geometry);
+    if (merchantId != null) {
+      arg.put("merchant", merchantId);
+    }
+    if (geometry != null) {
+      arg.put("geo", geometry);
+    }
     return executeToList("getMerchantDetails", arg, Store.class, null, callback);
   }
 
   /**
-   * Get a list of merchants
+   * Get a list of stores according to the added card.
    *
-   * @param arg Arguments to filter list
+   * @param arg Params to apply for query or null. Note: Currently only {@link QueryParams.GeoQuery} is supported.
    * @return List of merchants
    */
   public ObjectList<Store> getMyMerchants(QueryParams arg, final Callback<ObjectList<Store>> callback) {

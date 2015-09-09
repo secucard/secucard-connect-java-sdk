@@ -80,7 +80,7 @@ public class VolleyChannel extends RestChannel {
       future = RequestFuture.newFuture();
     }
 
-    Request<T> request = putToQueue(buildRequest(method, url, params.data,
+    Request<T> request = putToQueue(buildRequest(method, url, params,
         new DynamicTypeReference(params.returnType), callback, future));
 
     if (callback != null) {
@@ -106,7 +106,7 @@ public class VolleyChannel extends RestChannel {
       future = RequestFuture.newFuture();
     }
 
-    Request<ObjectList<T>> request = putToQueue(buildRequest(method, url, params.data,
+    Request<ObjectList<T>> request = putToQueue(buildRequest(method, url, params,
         new DynamicTypeReference(ObjectList.class, params.returnType), callback, future));
 
     if (callback != null) {
@@ -203,14 +203,14 @@ public class VolleyChannel extends RestChannel {
     return url;
   }
 
-  private <T> ObjectJsonRequest<T> buildRequest(Method method, String url, Object data,
+  private <T> ObjectJsonRequest<T> buildRequest(Method method, String url, Params params,
                                                 TypeReference typeReference, final Callback<T> callback,
                                                 RequestFuture<T> future) {
     String requestBody = null;
 
-    if (data != null) {
+    if (params.data != null) {
       try {
-        requestBody = context.jsonMapper.map(data);
+        requestBody = context.jsonMapper.map(params.data);
       } catch (Exception e) {
         throw new ClientError("Error mapping request data to JSON", e);
       }
@@ -228,8 +228,11 @@ public class VolleyChannel extends RestChannel {
     } else {
       throw new IllegalArgumentException("Invalid method arg");
     }
+
     Map<String, String> headers = new HashMap<>();
-    setAuthorizationHeader(headers);
+    if (!params.options.anonymous) {
+      setAuthorizationHeader(headers);
+    }
 
     Response.Listener<T> listener;
     Response.ErrorListener errorListener;

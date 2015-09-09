@@ -234,10 +234,21 @@ public abstract class ProductService<T extends SecuObject> {
     return execute(getAppId(), action, object, returnType, options, callback);
   }
 
+  protected <R> ObjectList<R> executeToList(String action, Object object, Class<R> returnType, Options options,
+                                            Callback<ObjectList<R>> callback) {
+    return executeToList(getAppId(), action, object, returnType, options, callback);
+  }
+
   protected <R> R execute(String appId, String action, Object object, Class<R> returnType, Options options,
                           Callback<R> callback) {
     return request(Channel.Method.EXECUTE, Channel.Params.forApp(appId, action, object, returnType, options), options,
         callback);
+  }
+
+  protected <R> ObjectList<R> executeToList(String appId, String action, Object object, Class<R> returnType, Options options,
+                          Callback<ObjectList<R>> callback) {
+    return requestList(Channel.Method.EXECUTE, Channel.Params.forApp(appId, action, object, returnType, options),
+        options, callback);
   }
 
   protected Boolean executeToBool(String id, String action, String actionArg, Object object, Options options,

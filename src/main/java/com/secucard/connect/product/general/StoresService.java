@@ -19,6 +19,7 @@ import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.general.model.Store;
+import com.secucard.connect.product.general.model.StoreSetDefault;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,8 +60,8 @@ public class StoresService extends ProductService<Store> {
    *
    * @return True if successfully updated, false else.
    */
-  public boolean setDefault(final String id, Callback<Boolean> callback) {
-    return super.executeToBool(id, "setDefault", null, null, callback);
+  public boolean setDefault(final String id, StoreSetDefault reason, Callback<Boolean> callback) {
+    return super.executeToBool(id, "setDefault", reason, null, callback);
   }
 
   /**

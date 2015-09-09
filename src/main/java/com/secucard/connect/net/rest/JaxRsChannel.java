@@ -375,7 +375,8 @@ public class JaxRsChannel extends RestChannel {
     }
 
     if (throwable instanceof JsonMappingException) {
-      return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
+      return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson(),
+          throwable);
     }
 
     // just wrap in any runtime ex

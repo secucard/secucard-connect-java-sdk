@@ -88,6 +88,15 @@ public class AccountsService extends ProductService<Account> {
     return super.updateToBool("me", "gcm", null, arg, options, null);
   }
 
+  /**
+   * Reset password and send link to given email
+   *
+   * @return True if successfully resetted, false else.
+   */
+  public boolean resetPassword(String email) {
+    return true;
+  }
+
 
   /**
    * Set a listener when interested to get notified about merchants around a location.

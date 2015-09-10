@@ -18,7 +18,6 @@ import com.secucard.connect.net.Options;
 import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
-import com.secucard.connect.product.common.model.Result;
 import com.secucard.connect.product.general.model.Store;
 import com.secucard.connect.product.general.model.StoreSetDefault;
 
@@ -106,11 +105,7 @@ public class StoresService extends ProductService<Store> {
       MediaResource picture = object.getLogo();
       if (picture != null) {
         if (!picture.isCached()) {
-          try {
-            picture.download();
-          }catch (Exception e){
-            e.printStackTrace();
-          }
+          picture.download();
         }
       }
     }

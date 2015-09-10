@@ -28,12 +28,20 @@ public class ResourceDownloader {
   boolean retry = false;
   private RestChannel httpClient;
   private DataStorage cache;
+  private boolean enabled = true;
 
   private ResourceDownloader() {
   }
 
   public static ResourceDownloader get() {
+    if (!instance.enabled) {
+      return null;
+    }
     return instance;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
   }
 
   private static String createId(String url) {

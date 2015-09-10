@@ -214,7 +214,7 @@ public class SecucardConnect {
     disconnectTimer.schedule(disconnectTimerTask, seconds * 1000);
   }
 
-  public boolean isConnected(){
+  public boolean isConnected() {
     return isConnected;
   }
 
@@ -352,8 +352,13 @@ public class SecucardConnect {
     }
 
     ResourceDownloader downloader = ResourceDownloader.get();
-    downloader.setCache(config.dataStorage);
-    downloader.setHttpClient(rc);
+    if (config.androidMode) {
+      // Volley based channel is used in Android, can't handle streams, so disable
+      downloader.setEnabled(false);
+    } else {
+      downloader.setCache(config.dataStorage);
+      downloader.setHttpClient(rc);
+    }
 
     sc.wireServiceInstances();
 

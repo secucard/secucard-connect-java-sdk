@@ -59,8 +59,7 @@ public class MediaResource implements Serializable{
     return url;
   }
 
-  protected ResourceDownloader getDownloader() {
-//    return ClientContext.get().getResourceDownloader();
+  protected static ResourceDownloader getDownloader() {
     return ResourceDownloader.get();
   }
 
@@ -96,8 +95,9 @@ public class MediaResource implements Serializable{
    * Call {@link #isCached} before to determine if this is the case.
    */
   public void download() {
-    if (cachingEnabled && getDownloader() != null) {
-      getDownloader().download(url);
+    ResourceDownloader downloader = getDownloader();
+    if (cachingEnabled && downloader != null) {
+      downloader.download(url);
       isCached = true;
     }
   }
@@ -141,10 +141,10 @@ public class MediaResource implements Serializable{
       download();
     }
 
-    if (getDownloader() == null) {
+    ResourceDownloader downloader = getDownloader();
+    if (downloader == null) {
       return null;
     }
-
-    return getDownloader().getInputStream(url, cachingEnabled);
+    return downloader.getInputStream(url, cachingEnabled);
   }
 }

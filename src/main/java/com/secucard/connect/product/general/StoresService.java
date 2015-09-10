@@ -43,7 +43,6 @@ public class StoresService extends ProductService<Store> {
    * @return True if successfully updated, false else.
    */
   public boolean checkIn(String storeId, Callback<Boolean> callback) {
-//    return super.executeToBool(null, "checkin", storeId, null, callback);
     Options options = getDefaultOptions();
     options.channel = Options.CHANNEL_STOMP;
     return executeToBool(storeId, "checkin", null, null, null, callback);
@@ -55,7 +54,6 @@ public class StoresService extends ProductService<Store> {
    * @return True if successfully updated, false else.
    */
   public boolean checkOut(String storeId, Callback<Boolean> callback) {
-//    return super.executeToBool(null, "checkin", storeId, null, callback);
     Options options = getDefaultOptions();
     options.channel = Options.CHANNEL_STOMP;
     return executeToBool(storeId, "checkin", "false", null, null, callback);

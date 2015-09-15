@@ -557,26 +557,26 @@ public class StompChannel extends Channel {
   /**
    * STOMP configuration. Supported properties are:
    * <p/>
-   * - stomp.host (connect.secucard.com), STOMP host.<br/>
-   * - stomp.virtualHost (null), STOMP virtual host.<br/>
-   * - stomp.port (61614), STOMP port.<br/>
-   * - stomp.destination (/exchange/connect.api), Base path of the secucard STOMP API.<br/>
-   * - stomp.ssl (true), SSL used for STOMP or not<br/>
-   * - stomp.user (null), Login, just for tests.<br/>
-   * - stomp.pwd (null), Password, just for tests.<br/>
-   * - stomp.replyQueue (/temp-queue/main), The default queue for all STOMP messages.<br/>
-   * - stomp.messageTimeoutSec (120), Timeout for awaiting message receipts and also message responses.
+   * - stomp.host, STOMP host.<br/>
+   * - stomp.virtualHost, STOMP virtual host.<br/>
+   * - stomp.port, STOMP port.<br/>
+   * - stomp.destination, Base path of the secucard STOMP API.<br/>
+   * - stomp.ssl, SSL used for STOMP or not<br/>
+   * - stomp.user, Login, just for tests.<br/>
+   * - stomp.pwd, Password, just for tests.<br/>
+   * - stomp.replyQueue, The default queue for all STOMP messages.<br/>
+   * - stomp.messageTimeoutSec, Timeout for awaiting message receipts and also message responses.
    * An error is raised after. 0 means no waiting.<br/>
-   * - stomp.connectTimeoutSec (20), Timeout for trying to connect to STOMP server. 0 means no waiting.<br/>
-   * - stomp.socketTimeoutSec (10), Max time the receiving socket is allowed to block when waiting for any input.
+   * - stomp.connectTimeoutSec, Timeout for trying to connect to STOMP server. 0 means no waiting.<br/>
+   * - stomp.socketTimeoutSec, Max time the receiving socket is allowed to block when waiting for any input.
    * This timeout mainly determines the time needed to detect broken socket connections, so short timeouts are desirable
    * but obviously also increases number of unnecessary performed timeout handling circles.<br/>
-   * - stomp.heartbeatSec (30), The interval in sec a heart beat signal is sent to the Stomp server to verify the
+   * - stomp.heartbeatSec, The interval in sec a heart beat signal is sent to the Stomp server to verify the
    * client is still alive. Helps to cleanup connections to dead clients.<br/>
-   * - stomp.maxMessageAgeSec (360), Max age of received STOMP messages in the systems message box before they get
+   * - stomp.maxMessageAgeSec, Max age of received STOMP messages in the systems message box before they get
    * deleted. Keeps the message queue clean, usually messages should not get very old in the box, if a message
    * reaches this max age its very likely that nobody is interested or a problem exist and therefore we can remove.<br/>
-   * - stomp.disconnectOnError (true), STOMP channel will be disconnected or not when a ERROR frame was received
+   * - stomp.disconnectOnError, STOMP channel will be disconnected or not when a ERROR frame was received
    * In our environment receiving an error means a non recoverable error condition caused by bugs or configuration problems,
    * so it's better to close this automatically to prevent resource leaking.
    */
@@ -596,20 +596,20 @@ public class StompChannel extends Channel {
     private final String basicDestination;
 
     public Configuration(Properties properties) {
-      this.host = properties.getProperty("stomp.host", "connect.secucard.com");
-      this.port = Integer.parseInt(properties.getProperty("stomp.port", "61614"));
+      this.host = properties.getProperty("stomp.host");
+      this.port = Integer.parseInt(properties.getProperty("stomp.port"));
       this.password = properties.getProperty("stomp.pwd");
       this.virtualHost = properties.getProperty("stomp.virtualHost");
-      this.heartbeatSec = Integer.parseInt(properties.getProperty("stomp.heartbeatSec", "30"));
-      this.useSsl = Boolean.parseBoolean(properties.getProperty("stomp.ssl", "true"));
+      this.heartbeatSec = Integer.parseInt(properties.getProperty("stomp.heartbeatSec"));
+      this.useSsl = Boolean.parseBoolean(properties.getProperty("stomp.ssl"));
       this.userId = properties.getProperty("stomp.user");
-      this.replyQueue = properties.getProperty("stomp.replyQueue", "/temp-queue/main");
-      this.connectionTimeoutSec = Integer.parseInt(properties.getProperty("stomp.connectTimeoutSec", "20"));
-      this.messageTimeoutSec = Integer.parseInt(properties.getProperty("stomp.messageTimeoutSec", "120"));
-      this.maxMessageAgeSec = Integer.parseInt(properties.getProperty("stomp.maxMessageAgeSec", "360"));
-      this.socketTimeoutSec = Integer.parseInt(properties.getProperty("stomp.socketTimeoutSec", "10"));
+      this.replyQueue = properties.getProperty("stomp.replyQueue");
+      this.connectionTimeoutSec = Integer.parseInt(properties.getProperty("stomp.connectTimeoutSec"));
+      this.messageTimeoutSec = Integer.parseInt(properties.getProperty("stomp.messageTimeoutSec"));
+      this.maxMessageAgeSec = Integer.parseInt(properties.getProperty("stomp.maxMessageAgeSec"));
+      this.socketTimeoutSec = Integer.parseInt(properties.getProperty("stomp.socketTimeoutSec"));
 
-      String property = properties.getProperty("stomp.destination", "/exchange/connect.api");
+      String property = properties.getProperty("stomp.destination");
       if (!property.endsWith("/")) {
         property += "/";
       }

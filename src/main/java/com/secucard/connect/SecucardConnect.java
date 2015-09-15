@@ -422,18 +422,19 @@ public class SecucardConnect {
    * Main configuration of the SDK client. Supports properties:
    * <p/>
    * Client:<br/>
-   * - androidMode (false), set to true if use in Android environment, false else <br/>
-   * - stompEnabled (true), set to true to enable usage of STOMP communication, false else <br/>
-   * - defaultChannel (rest), the default server communication channel <br/>
-   * - appId (null), the app id if used in a custom app <br/>
-   * - cacheDir (".scc-cache"), the directory for the cache <br/>
-   * - logging.local(false), set to true to enable local logging and ignoring global settings <br/>
-   * - logging.pattern(null), the logging file path <br/>
-   * - logging.logger(com.secucard.log), the logger to configure, empty for root logger <br/>
-   * - logging.limit(1000000), the max log file size in b, 1mb <br/>
-   * - logging.count(10), the max number of files to keep <br/>
-   * - logging.level(INFO), the log level  <br/>
-   * - logging.format("%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n"), output format  <br/>
+   * - androidMode, set to true if use in Android environment, false else <br/>
+   * - stompEnabled, set to true to enable usage of STOMP communication, false else <br/>
+   * - defaultChannel, the default server communication channel <br/>
+   * - appId, the app id if used in a custom app <br/>
+   * - cacheDir, the directory for the cache <br/>
+   * - host, name of the secucard API server<br/>
+   * - logging.local, set to true to enable local logging and ignoring global settings <br/>
+   * - logging.pattern, the logging file path <br/>
+   * - logging.logger, the logger to configure, empty for root logger <br/>
+   * - logging.limit, the max log file size in b, 1mb <br/>
+   * - logging.count, the max number of files to keep <br/>
+   * - logging.level, the log level  <br/>
+   * - logging.format, output format  <br/>
    * <p/>
    * OAuth:<br/>
    * - see {@link com.secucard.connect.auth.TokenManager.Configuration}
@@ -449,6 +450,8 @@ public class SecucardConnect {
    * - {@link #runtimeContext}<br/>
    * - {@link #clientAuthDetails} <br/>
    * - {@link #autCancelCallback} <br/>
+   * <br/>
+   * Support also resolving placeholders like $${property}, NOTE the "$$".
    */
   public static final class Configuration {
     public static final String DEFAULT_CACHE_DIR = ".scc-cache";
@@ -457,11 +460,11 @@ public class SecucardConnect {
 
     private final Properties properties;
     private final String defaultChannel;
-    private final String loggingConfig;
     private final boolean androidMode;
     private final boolean stompEnabled;
     private final String appId;
     private final String cacheDir;
+    private final String host;
     public final String logFormat;
     public final String logLevel;
     public final String logPattern;
@@ -553,27 +556,45 @@ public class SecucardConnect {
       try {
         Properties p = new Properties();
         p.load(inputStream);
+        resolvePlaceholder(p);
         return new Configuration(p);
       } catch (Exception e) {
         throw new ClientError("Error loading configuration properties.", e);
       }
     }
 
+    private static void resolvePlaceholder(Properties p) {
+      for (Map.Entry<Object, Object> entry : p.entrySet()) {
+        String value = (String) entry.getValue();
+        int start = value.indexOf("$${");
+        if (start >= 0) {
+          int end = value.indexOf("}", start);
+          if (end > 0) {
+            String prop = value.substring(start + 3, end);
+            String rep = p.getProperty(prop);
+            if (rep != null) {
+              entry.setValue(value.substring(0, start) + rep + value.substring(end + 1));
+            }
+          }
+        }
+      }
+    }
+
     Configuration(Properties properties) {
       this.properties = properties;
-      defaultChannel = properties.getProperty("defaultChannel", Options.CHANNEL_REST).trim().toLowerCase();
-      loggingConfig = properties.getProperty("loggingConfig");
-      androidMode = Boolean.parseBoolean(properties.getProperty("androidMode", "false"));
-      stompEnabled = Boolean.parseBoolean(properties.getProperty("stompEnabled", "true"));
-      logIgnoreGlobal = Boolean.valueOf(properties.getProperty("logging.local", "false"));
-      logCount = Integer.valueOf(properties.getProperty("logging.count", "10"));
-      logLimit = Integer.valueOf(properties.getProperty("logging.limit", "1000000"));
+      defaultChannel = properties.getProperty("defaultChannel").trim().toLowerCase();
+      androidMode = Boolean.parseBoolean(properties.getProperty("androidMode"));
+      stompEnabled = Boolean.parseBoolean(properties.getProperty("stompEnabled"));
+      logIgnoreGlobal = Boolean.valueOf(properties.getProperty("logging.local"));
+      logCount = Integer.valueOf(properties.getProperty("logging.count", "0"));
+      logLimit = Integer.valueOf(properties.getProperty("logging.limit", "0"));
       logPattern = properties.getProperty("logging.pattern");
-      logger = properties.getProperty("logging.logger", "com.secucard.connect");
-      logLevel = properties.getProperty("logging.level", "INFO");
-      logFormat = properties.getProperty("logging.format", "%1$tD %1$tH:%1$tM:%1$tS:%1$tL %4$s %2$s - %5$s %6$s%n");
+      logger = properties.getProperty("logging.logger");
+      logLevel = properties.getProperty("logging.level");
+      logFormat = properties.getProperty("logging.format");
       appId = properties.getProperty("appId");
-      cacheDir = properties.getProperty("cacheDir", DEFAULT_CACHE_DIR);
+      cacheDir = properties.getProperty("cacheDir");
+      host = properties.getProperty("host");
       Log.init(this);
     }
 
@@ -582,7 +603,6 @@ public class SecucardConnect {
     public String toString() {
       return "Configuration{" +
           "defaultChannel='" + defaultChannel + '\'' +
-          ", loggingConfig='" + loggingConfig + '\'' +
           ", androidMode=" + androidMode +
           ", stompEnabled=" + stompEnabled +
           ", logFormat='" + logFormat + '\'' +
@@ -595,6 +615,7 @@ public class SecucardConnect {
           ", clientAuthDetails=" + clientAuthDetails +
           ", autCancelCallback=" + autCancelCallback +
           ", runtimeContext=" + runtimeContext +
+          ", host=" + host +
           '}';
     }
   }

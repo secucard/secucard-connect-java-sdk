@@ -283,9 +283,8 @@ public class TokenManager {
   /**
    * OAuth configuration. Supported properties are:
    * <p/>
-   * - auth.url (https://connect.secucard.com/oauth/token), URL of the OAuth service to use.<br/>
-   * - auth.waitTimeoutSec (300), Timeout in seconds to use when waiting for auth tokens when performing
-   * "device" auth type.
+   * - auth.url, URL of the OAuth service to use.<br/>
+   * - auth.waitTimeoutSec, Timeout in seconds to use when waiting for auth tokens when performing "device" auth type.
    * <p/>
    * Additionally a map with any device related data to submit during auth may provided.
    */
@@ -296,10 +295,10 @@ public class TokenManager {
     public final Map<String, String> deviceInfo;
 
     public Configuration(Properties properties, Map<String, String> deviceInfo) {
-      this.authWaitTimeoutSec = Integer.parseInt(properties.getProperty("auth.waitTimeoutSec", "300"));
-      this.oauthUrl = properties.getProperty("auth.url", "https://connect.secucard.com/oauth/token");
+      this.authWaitTimeoutSec = Integer.parseInt(properties.getProperty("auth.waitTimeoutSec"));
+      this.oauthUrl = properties.getProperty("auth.url");
       this.deviceInfo = deviceInfo;
-      this.extendExpire = Boolean.parseBoolean(properties.getProperty("auth.extendExpire", "false"));
+      this.extendExpire = Boolean.parseBoolean(properties.getProperty("auth.extendExpire"));
     }
 
 

@@ -180,9 +180,9 @@ public abstract class RestChannel extends Channel {
   /**
    * REST configuration. Supported properties are:
    * <p/>
-   * - rest.url (https://connect.secucard.com/api/v2), URL of the secucard REST API.<br/>
-   * - rest.responseTimeoutSec (30), Timeout for getting any response. O for no timeout.<br/>
-   * - rest.connectTimeoutSec (30), Timeout for connecting. O for no timeout.<br/>
+   * - rest.url, URL of the secucard REST API.<br/>
+   * - rest.responseTimeoutSec, Timeout for getting any response. O for no timeout.<br/>
+   * - rest.connectTimeoutSec, Timeout for connecting. O for no timeout.<br/>
    */
   public static class Configuration {
     protected final String baseUrl;
@@ -190,9 +190,9 @@ public abstract class RestChannel extends Channel {
     protected final int connectTimeoutSec;
 
     public Configuration(Properties properties) {
-      this.baseUrl = properties.getProperty("rest.url", "https://connect.secucard.com/api/v2");
-      this.responseTimeoutSec = Integer.parseInt(properties.getProperty("rest.responseTimeoutSec", "30"));
-      this.connectTimeoutSec = Integer.parseInt(properties.getProperty("rest.connectTimeoutSec", "30"));
+      this.baseUrl = properties.getProperty("rest.url");
+      this.responseTimeoutSec = Integer.parseInt(properties.getProperty("rest.responseTimeoutSec"));
+      this.connectTimeoutSec = Integer.parseInt(properties.getProperty("rest.connectTimeoutSec"));
     }
 
 

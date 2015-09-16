@@ -78,6 +78,6 @@ public class TransactionService extends ProductService<Transaction> {
    * @return True if ok false else.
    */
   public Boolean cancel(String id, Callback<Boolean> callback) {
-    return executeToBool(id, "cancel", null, null, callback);
+    return executeToBool(id, "cancel", null, null, null, callback);
   }
 }

@@ -14,7 +14,8 @@ package com.secucard.connect.client;
 
 /**
  * Indicates business related errors happening when a API call could not performed properly.<br/>
- * Happens for example when input data have wrong format or if not enough balance exist for a product.<br/>
+ * Happens for example when input data are invalid or if not enough balance exist for a product or the API was
+ * not used properly.<br/>
  * Holds detailed information about the cause which should presented to the end user like a error code or a support id.
  */
 public class APIError extends RuntimeException {

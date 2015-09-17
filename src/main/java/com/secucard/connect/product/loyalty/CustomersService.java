@@ -12,7 +12,9 @@
 
 package com.secucard.connect.product.loyalty;
 
+import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
+import com.secucard.connect.net.Options;
 import com.secucard.connect.product.loyalty.model.Customer;
 
 /**
@@ -25,6 +27,23 @@ public class CustomersService extends ProductService<Customer> {
   @Override
   public ServiceMetaData<Customer> getMetaData() {
     return META_DATA;
+  }
+
+  @Override
+  public Customer get(String id) {
+    return get(id, null);
+  }
+
+  @Override
+  public Customer get(String id, Callback<Customer> callback) {
+    Options options = Options.getDefault();
+    options.resultProcessing = new Callback.Notify<Customer>() {
+      @Override
+      public void notify(Customer customer) {
+        downloadMedia(customer.getPictureObject());
+      }
+    };
+    return super.get(id, options, callback);
   }
 
 }

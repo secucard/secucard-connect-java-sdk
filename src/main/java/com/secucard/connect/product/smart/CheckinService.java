@@ -97,8 +97,14 @@ public class CheckinService extends ProductService<Checkin> {
    */
   private void processCheckins(ObjectList<Checkin> checkins) {
     if (checkins != null && checkins.getList() != null) {
-      for (Checkin object : checkins.getList()) {
-        downloadMedia(object.getPictureObject());
+      for (Checkin checkin : checkins.getList()) {
+        try {
+          downloadMedia(checkin.getPictureObject());
+        } catch (Exception e) {
+          // download went wrong, so skip picture and continue
+          checkin.setPicture(null);
+          checkin.setError(e);
+        }
       }
     }
   }

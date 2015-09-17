@@ -20,6 +20,10 @@ import com.secucard.connect.product.loyalty.model.Customer;
 
 import java.util.Date;
 
+/**
+ * The Check-In data.
+ * The error field may be not null if an error happened during retrieval of the picture object.
+ */
 public class Checkin extends SecuObject {
 
   private String customerName;
@@ -34,6 +38,17 @@ public class Checkin extends SecuObject {
   private Account account;
 
   private Customer customer;
+
+  @JsonIgnore
+  private Exception error;
+
+  public Exception getError() {
+    return error;
+  }
+
+  public void setError(Exception error) {
+    this.error = error;
+  }
 
   public Customer getCustomer() {
     return customer;
@@ -76,6 +91,10 @@ public class Checkin extends SecuObject {
     this.created = created;
   }
 
+  /**
+   * Returns the customer picture. Picture is not available if null - if the error field is not null this was caused
+   * by an error.
+   */
   public MediaResource getPictureObject() {
     return pictureObject;
   }

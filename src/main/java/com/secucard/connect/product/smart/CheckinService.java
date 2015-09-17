@@ -98,12 +98,7 @@ public class CheckinService extends ProductService<Checkin> {
   private void processCheckins(ObjectList<Checkin> checkins) {
     if (checkins != null && checkins.getList() != null) {
       for (Checkin object : checkins.getList()) {
-        MediaResource picture = object.getPictureObject();
-        if (picture != null) {
-          if (!picture.isCached()) {
-            picture.download();
-          }
-        }
+        downloadMedia(object.getPictureObject());
       }
     }
   }

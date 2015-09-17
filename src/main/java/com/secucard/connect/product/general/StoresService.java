@@ -100,12 +100,7 @@ public class StoresService extends ProductService<Store> {
 
   private void processStore(List<Store> stores) {
     for (Store object : stores) {
-      MediaResource picture = object.getLogo();
-      if (picture != null) {
-        if (!picture.isCached()) {
-          picture.download();
-        }
-      }
+      downloadMedia(object.getLogo());
     }
   }
 }

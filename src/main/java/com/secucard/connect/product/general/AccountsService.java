@@ -93,8 +93,12 @@ public class AccountsService extends ProductService<Account> {
    *
    * @return True if successfully resetted, false else.
    */
-  public boolean resetPassword(String email) {
-    return true;
+  public Object resetPassword(String email, String appName) {
+    Options options = getDefaultOptions();
+    options.anonymous = true;
+    Map<String, String> arg = new HashMap<>();
+    arg.put("origin", appName);
+    return execute("null", "passwordreset", email, arg, Object.class, options, null);
   }
 
 

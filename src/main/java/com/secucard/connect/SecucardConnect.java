@@ -242,8 +242,7 @@ public class SecucardConnect {
    * @return The new instance.
    * @throws ClientError if an error happens.
    */
-  public static SecucardConnect create(Configuration config)
-      throws ClientError {
+  public static SecucardConnect create(Configuration config) throws ClientError {
     if (config == null) {
       config = Configuration.get();
     }
@@ -451,7 +450,8 @@ public class SecucardConnect {
    * - {@link #clientAuthDetails} <br/>
    * - {@link #autCancelCallback} <br/>
    * <br/>
-   * Support also resolving placeholders like $${property}, NOTE the "$$".
+   * Support also resolving placeholders like $${property}, NOTE the "$$". <br/>
+   * You may also add your own custom properties, retrieve them by using {@link #property(String)}.
    */
   public static final class Configuration {
     public static final String DEFAULT_CACHE_DIR = ".scc-cache";

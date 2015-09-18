@@ -121,18 +121,30 @@ public class Product {
     this.quantity = quantity;
   }
 
+  /**
+   * Return the price in lowest unit (e.g. cent).
+   */
   public int getPriceOne() {
     return priceOne;
   }
 
+  /**
+   * Set the price in lowest unit (e.g. cent).
+   */
   public void setPriceOne(int priceOne) {
     this.priceOne = priceOne;
   }
 
+  /**
+   * Return the tax in % * 10
+   */
   public int getTax() {
     return tax;
   }
 
+  /**
+   * Set the tax in % * 10.
+   */
   public void setTax(int tax) {
     this.tax = tax;
   }

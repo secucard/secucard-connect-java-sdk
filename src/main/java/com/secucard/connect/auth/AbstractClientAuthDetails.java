@@ -17,6 +17,7 @@ import com.secucard.connect.client.DiskCache;
 
 /**
  * Abstract implementation which just delegates the token persistence to a file based cache.
+ * Accepts already existing tokens.
  */
 public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
   private DiskCache diskCache;
@@ -25,6 +26,7 @@ public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
    * Create an instance.
    *
    * @param dir The cache directory to use. May be absolute (starting with "/" or "\") or relative.
+   *            Creates the directory if necessary.
    */
   public AbstractClientAuthDetails(String dir) {
     this.diskCache = new DiskCache(dir);
@@ -42,7 +44,7 @@ public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
     diskCache.save("token", token);
   }
 
-  public void clear(){
+  public void clear() {
     diskCache.clear("token", null);
   }
 }

@@ -14,10 +14,7 @@ package com.secucard.connect.client;
 
 import com.secucard.connect.net.Channel;
 import com.secucard.connect.net.Options;
-import com.secucard.connect.product.common.model.ObjectList;
-import com.secucard.connect.product.common.model.QueryParams;
-import com.secucard.connect.product.common.model.Result;
-import com.secucard.connect.product.common.model.SecuObject;
+import com.secucard.connect.product.common.model.*;
 import com.secucard.connect.util.CallbackAdapter;
 import com.secucard.connect.util.Converter;
 import com.secucard.connect.util.ExceptionMapper;
@@ -398,6 +395,16 @@ public abstract class ProductService<T extends SecuObject> {
     return getMetaData().resourceType;
   }
 
+  /**
+   * Downloads given media resource if necessary.
+   */
+  protected static void downloadMedia(MediaResource picture) {
+    if (picture != null) {
+      if (!picture.isCached()) {
+        picture.download();
+      }
+    }
+  }
 
   /**
    * Meta data describing the service.

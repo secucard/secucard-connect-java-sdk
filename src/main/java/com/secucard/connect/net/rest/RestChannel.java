@@ -14,13 +14,18 @@ package com.secucard.connect.net.rest;
 
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.net.Channel;
+import com.secucard.connect.net.JsonMappingException;
 import com.secucard.connect.product.common.model.QueryParams;
+import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Log;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -28,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeoutException;
 
 public abstract class RestChannel extends Channel {
   private final static Log LOG = new Log(RestChannel.class);
@@ -41,8 +47,8 @@ public abstract class RestChannel extends Channel {
   /**
    * Low level rest access for internal usage, posting to a url and get the response back as object.
    *
-   * @throws com.secucard.connect.net.rest.HttpErrorException     if an http error happens.
-   * @throws com.secucard.connect.client.ClientError if an error happens.
+   * @throws com.secucard.connect.net.rest.HttpErrorException if an http error happens.
+   * @throws com.secucard.connect.client.ClientError          if an error happens.
    */
   public abstract <T, E> T post(String url, Map<String, Object> parameters, Map<String, String> headers,
                                 Class<T> responseType, Class<E> errorResponseType) throws HttpErrorException;
@@ -175,6 +181,35 @@ public abstract class RestChannel extends Channel {
 
   public void setEventListener(EventListener listener) {
     LOG.info("REST channel doesn't support events.");
+  }
+
+  /**
+   * Inspect the throwable and skip the ignores http status codes and/or extract error details.
+   */
+  protected RuntimeException translate(Throwable throwable) {
+    ClientError ce = ExceptionMapper.unwrap(throwable, ClientError.class);
+    if (ce != null) {
+      return ce;
+    }
+
+    // IO error caused by parsing, must test before normal IO
+    JsonMappingException je = ExceptionMapper.unwrap(throwable, JsonMappingException.class);
+    if (je != null) {
+      return new ClientError("Failed to read secucard server response: " + je.getJson());
+    }
+
+    IOException ie = ExceptionMapper.unwrap(throwable, IOException.class);
+    if (ie != null) {
+      return new NetworkError(throwable);
+    }
+
+    TimeoutException te = ExceptionMapper.unwrap(throwable, TimeoutException.class);
+    if (te != null) {
+      // timeout is most likely caused by network problem
+      return new NetworkError(throwable);
+    }
+
+    return null;
   }
 
   /**

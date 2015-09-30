@@ -23,20 +23,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.client.ClientError;
-import com.secucard.connect.client.NetworkError;
-import com.secucard.connect.net.JsonMappingException;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.Status;
+import com.secucard.connect.util.ExceptionMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Rest channel impl. for Android usage. Utilizes com.android.volley.
@@ -301,7 +298,7 @@ public class VolleyChannel extends RestChannel {
         T result = context.jsonMapper.map(jsonString, typeReference);
         return Response.success(result, HttpHeaderParser.parseCacheHeaders(response));
       } catch (Exception e) {
-        return Response.error(new VolleyError("Error reading response data.", e));
+        return Response.error(new VolleyError(e));
       }
     }
 
@@ -311,38 +308,14 @@ public class VolleyChannel extends RestChannel {
     }
   }
 
-  /**
-   * Inspect the throwable and skip the ignores http status codes and/or extract error details.
-   */
+  @Override
   protected RuntimeException translate(Throwable throwable) {
-    if (throwable instanceof ExecutionException) {
-      throwable = throwable.getCause();
+    RuntimeException exception = super.translate(throwable);
+    if (exception != null) {
+      return exception;
     }
 
-    if (throwable instanceof ClientError) {
-      return (RuntimeException) throwable;
-    }
-
-    if (throwable instanceof JsonMappingException) {
-      return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson());
-    }
-
-    if (throwable instanceof IOException || throwable.getCause() instanceof IOException) {
-      throw new NetworkError(throwable);
-    }
-
-    if (throwable instanceof TimeoutException) {
-      // timeout is most likely caused by network problem
-      throw new NetworkError(throwable);
-    }
-
-    VolleyError error = null;
-    if (throwable instanceof VolleyError) {
-      error = (VolleyError) throwable;
-    } else if (throwable.getCause() instanceof VolleyError) {
-      error = (VolleyError) throwable.getCause();
-    }
-
+    VolleyError error = ExceptionMapper.unwrap(throwable, VolleyError.class);
     if (error != null && error.networkResponse != null) {
       if (error.networkResponse.data != null) {
         // this could be an specific secucard server error

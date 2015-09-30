@@ -63,11 +63,17 @@ public class ExceptionMapper {
       return (T) throwable;
     }
 
+    if (throwable.getCause() == null) {
+      return null;
+    }
     throwable = throwable.getCause();
     if (ex.isInstance(throwable)) {
       return (T) throwable;
     }
 
+    if (throwable.getCause() == null) {
+      return null;
+    }
     throwable = throwable.getCause();
     if (ex.isInstance(throwable)) {
       return (T) throwable;

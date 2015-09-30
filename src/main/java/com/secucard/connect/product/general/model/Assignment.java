@@ -31,7 +31,7 @@ public class Assignment implements Serializable {
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY,
           property = SecuObject.OBJECT_PROPERTY)
   @JsonSubTypes({
-          @JsonSubTypes.Type(value = Merchant.class, name = "general.merchant"),
+          @JsonSubTypes.Type(value = Merchant.class, name = "general.merchants"),
           @JsonSubTypes.Type(value = AccountDevice.class, name = "general.accountdevices"),
           @JsonSubTypes.Type(value = Card.class, name = "loyalty.cards")})
   private SecuObject assign;

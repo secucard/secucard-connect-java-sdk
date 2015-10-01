@@ -36,7 +36,9 @@ public class AccountsService extends ProductService<Account> {
   }
 
   /**
-   *  Create new account. Needs no auth.
+   * Create and return new account with the given data. Needs no authentication.
+   *
+   * @throws Exception If an error happens, see {@link ProductService} which ones.
    */
   @Override
   public Account create(Account object) {
@@ -89,16 +91,21 @@ public class AccountsService extends ProductService<Account> {
   }
 
   /**
-   * Reset password and send link to given email
+   * Send password reset link. Needs no authentication.
    *
-   * @return True if successfully resetted, false else.
+   * @param email  The email account to send the link to.
+   * @param origin The origin of the request, i.e. the app name.
+   * @return The time in seconds the reset link is valid. 0 if not supported.
+   * @throws Exception If an error happens, see {@link ProductService} which ones.
    */
-  public Object resetPassword(String email, String appName) {
+  public int passwordReset(String email, String origin) {
     Options options = getDefaultOptions();
     options.anonymous = true;
     Map<String, String> arg = new HashMap<>();
-    arg.put("origin", appName);
-    return execute("null", "passwordreset", email, arg, Object.class, options, null);
+    arg.put("origin", origin);
+    Map result = super.execute("null", "passwordreset", email, arg, Map.class, options, null);
+    Object livetime = result.get("livetime");
+    return livetime instanceof Integer ? (Integer) livetime : 0;
   }
 
 

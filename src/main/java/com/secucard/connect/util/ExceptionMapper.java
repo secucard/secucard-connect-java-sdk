@@ -56,4 +56,29 @@ public class ExceptionMapper {
 
     return new ClientError(message, throwable);
   }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Exception> T unwrap(Throwable throwable, Class<T> ex) {
+    if (ex.isInstance(throwable)) {
+      return (T) throwable;
+    }
+
+    if (throwable.getCause() == null) {
+      return null;
+    }
+    throwable = throwable.getCause();
+    if (ex.isInstance(throwable)) {
+      return (T) throwable;
+    }
+
+    if (throwable.getCause() == null) {
+      return null;
+    }
+    throwable = throwable.getCause();
+    if (ex.isInstance(throwable)) {
+      return (T) throwable;
+    }
+
+    return null;
+  }
 }

@@ -18,16 +18,15 @@ import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.client.ClientError;
 import com.secucard.connect.client.NetworkError;
-import com.secucard.connect.net.JsonMappingException;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.Status;
+import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Log;
 import org.glassfish.jersey.client.ClientProperties;
 
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -328,36 +327,23 @@ public class JaxRsChannel extends RestChannel {
   /**
    * Unwrapping and translating throwable.
    */
-  private RuntimeException translate(Throwable throwable) {
-    if (throwable instanceof ExecutionException) {
-      throwable = throwable.getCause();
+  protected RuntimeException translate(Throwable throwable) {
+    RuntimeException exception = super.translate(throwable);
+    if (exception != null) {
+      return exception;
     }
 
-    if (throwable instanceof ClientError) {
-      return (RuntimeException) throwable;
+    IllegalStateException ie = ExceptionMapper.unwrap(throwable, IllegalStateException.class);
+    if (ie != null && ie.getMessage().contains("Already connected")) {
+      // weird error thrown when trying to send request without connection
+      // https://java.net/jira/browse/JERSEY-2728
+      return new NetworkError(throwable);
     }
 
-    if (throwable instanceof TimeoutException) {
-      // timeout is most likely caused by network problem
-      throw new NetworkError(throwable);
-    }
-
-    if (throwable instanceof ProcessingException && throwable.getCause() != null) {
-      if (throwable.getCause() instanceof IOException) {
-        throw new NetworkError(throwable.getCause());
-      }
-
-      if (throwable.getCause() instanceof IllegalStateException
-          && throwable.getCause().getMessage().contains("Already connected")) {
-        // weird error thrown when trying to send request without connection
-        // https://java.net/jira/browse/JERSEY-2728
-        throw new NetworkError(throwable.getCause());
-      }
-    }
-
-    if (throwable instanceof WebApplicationException) {
+    WebApplicationException we = ExceptionMapper.unwrap(throwable, WebApplicationException.class);
+    if (we != null) {
       //this is a HTTP error, try to get status payload
-      Response response = ((WebApplicationException) throwable).getResponse();
+      Response response = we.getResponse();
 
       Status status = null;
       try {
@@ -374,10 +360,6 @@ public class JaxRsChannel extends RestChannel {
       return new ServerErrorException(status);
     }
 
-    if (throwable instanceof JsonMappingException) {
-      return new ClientError("Unexpected secucard server response: " + ((JsonMappingException) throwable).getJson(),
-          throwable);
-    }
 
     // just wrap in any runtime ex
     return new ClientError("Error executing request.", throwable);

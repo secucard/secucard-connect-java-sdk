@@ -18,7 +18,7 @@ package com.secucard.connect.product.payment;
 public class Payment {
 
   public Payment(ContainersService containers, CustomersService customers, SecupayDebitsService secupaydebits,
-                 SecupayPrepaysService secupayprepays, ContractService contracts) {
+                 SecupayPrepaysService secupayprepays, ContractsService contracts) {
     this.containers = containers;
     this.customers = customers;
     this.secupaydebits = secupaydebits;
@@ -29,8 +29,8 @@ public class Payment {
   public static Class<ContainersService> Containers = ContainersService.class;
   public ContainersService containers;
 
-  public static Class<ContractService> Contracts = ContractService.class;
-  public ContractService contracts;
+  public static Class<ContractsService> Contracts = ContractsService.class;
+  public ContractsService contracts;
 
   public static Class<CustomersService> Customers = CustomersService.class;
   public CustomersService customers;

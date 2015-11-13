@@ -28,7 +28,7 @@ com.secucard.connect.product.loyalty.CustomersService
 com.secucard.connect.product.loyalty.MerchantCardsService
 
 com.secucard.connect.product.payment.ContainersService
-com.secucard.connect.product.payment.ContractService
+com.secucard.connect.product.payment.ContractsService
 com.secucard.connect.product.payment.CustomersService
 com.secucard.connect.product.payment.SecupayDebitsService
 com.secucard.connect.product.payment.SecupayPrepaysService

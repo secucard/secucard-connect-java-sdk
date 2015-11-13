@@ -19,7 +19,7 @@ import com.secucard.connect.product.payment.model.Contract;
 /**
  * Implements the payment/contracts operations.
  */
-public class ContractService extends ProductService<Contract> {
+public class ContractsService extends ProductService<Contract> {
 
   public static final ServiceMetaData<Contract> META_DATA = new ServiceMetaData<>("payment", "contracts", Contract.class);
 

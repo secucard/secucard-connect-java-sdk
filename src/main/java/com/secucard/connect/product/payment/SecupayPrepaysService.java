@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
 
-  public static final ServiceMetaData<SecupayPrepay> META_DATA = new ServiceMetaData<>("payment", "secupayprepay",
+  public static final ServiceMetaData<SecupayPrepay> META_DATA = new ServiceMetaData<>("payment", "secupayprepays",
       SecupayPrepay.class);
 
   @Override
@@ -43,6 +43,10 @@ public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
    */
   public Boolean cancelTransaction(final String id, Callback<Boolean> callback) {
     return executeToBool(id, "cancel", null, null, callback);
+  }
+
+  public Boolean cancelTransaction(final String id) {
+    return cancelTransaction(id,  null);
   }
 
   /**

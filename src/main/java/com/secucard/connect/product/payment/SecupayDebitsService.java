@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class SecupayDebitsService extends ProductService<SecupayDebit> {
 
-  public static final ServiceMetaData<SecupayDebit> META_DATA = new ServiceMetaData<>("payment", "secupaydebit",
+  public static final ServiceMetaData<SecupayDebit> META_DATA = new ServiceMetaData<>("payment", "secupaydebits",
       SecupayDebit.class);
 
   @Override
@@ -41,11 +41,16 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
    *
    * @param id       The debit object id.
    * @param callback Callback for async processing.
-   * @return
+   * @return  True if successful, false else.
    */
   public Boolean cancelTransaction(final String id, Callback<Boolean> callback) {
     return executeToBool(id, "cancel", null, null, callback);
   }
+
+  public Boolean cancelTransaction(final String id) {
+    return cancelTransaction(id,  null);
+  }
+
 
   /**
    * Set a callback to get notified when a debit has changed.

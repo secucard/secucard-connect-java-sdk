@@ -13,15 +13,17 @@
 package com.secucard.connect.product.payment;
 
 import com.secucard.connect.client.Callback;
-import com.secucard.connect.client.ProductService;
 import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.ProductService;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.payment.model.SecupayDebit;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the payment/secupaydebit operations.
@@ -39,16 +41,20 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
   /**
    * Cancel an existing transaction.
    *
-   * @param id       The debit object id.
-   * @param callback Callback for async processing.
-   * @return  True if successful, false else.
+   * @param id         The debit transaction id.
+   * @param contractId The id of the contract that was used to create this transaction. May be null if the
+   *                   contract is an parent contract (not cloned).
+   * @param callback   Callback for async processing.
+   * @return True if successful, false else.
    */
-  public Boolean cancelTransaction(final String id, Callback<Boolean> callback) {
-    return executeToBool(id, "cancel", null, null, callback);
+  public Boolean cancel(final String id, final String contractId, Callback<Boolean> callback) {
+    Map<String, String> map = new HashMap<>();
+    map.put("contract", contractId == null ? "" : contractId);
+    return executeToBool(id, "cancel", null, map, null, callback);
   }
 
-  public Boolean cancelTransaction(final String id) {
-    return cancelTransaction(id,  null);
+  public Boolean cancel(final String id, final String contractId) {
+    return cancel(id, contractId, null);
   }
 
 

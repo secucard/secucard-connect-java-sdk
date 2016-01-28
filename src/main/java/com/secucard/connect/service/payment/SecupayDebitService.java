@@ -9,7 +9,9 @@ import com.secucard.connect.model.payment.SecupayDebit;
 import com.secucard.connect.model.transport.Result;
 import com.secucard.connect.service.AbstractService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides Payment/Secupaydebit product operations.
@@ -34,15 +36,19 @@ public class SecupayDebitService extends AbstractService {
   /**
    * Cancel an existing transaction.
    *
-   * @param id       The debit object id.
-   * @param callback Callback for async processing.
-   * @return
+   * @param id         The debit transaction id.
+   * @param contractId The id of the contract that was used to create this transaction. May be null if the
+   *                   contract is an parent contract (not cloned).
+   * @param callback   Callback for async processing.
+   * @return True if successful false else.
    */
-  public Boolean cancelTransaction(final String id, Callback<Boolean> callback) {
+  public Boolean cancelTransaction(final String id, final String contractId, Callback<Boolean> callback) {
     return new Result2BooleanInvoker() {
       @Override
       protected Result handle(Callback<Result> callback) throws Exception {
-        return execute(SecupayDebit.class, id, "cancel", null, null, Result.class, callback, null);
+        Map<String, String> map = new HashMap<>();
+        map.put("contract", contractId == null ? "" : contractId);
+        return execute(SecupayDebit.class, id, "cancel", null, map, Result.class, callback, null);
       }
     }.invokeAndConvert(callback);
   }

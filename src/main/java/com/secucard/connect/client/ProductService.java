@@ -243,7 +243,7 @@ public abstract class ProductService<T extends SecuObject> {
   }
 
   protected <R> ObjectList<R> executeToList(String appId, String action, Object object, Class<R> returnType, Options options,
-                          Callback<ObjectList<R>> callback) {
+                                            Callback<ObjectList<R>> callback) {
     return requestList(Channel.Method.EXECUTE, Channel.Params.forApp(appId, action, object, returnType, options),
         options, callback);
   }
@@ -377,8 +377,7 @@ public abstract class ProductService<T extends SecuObject> {
     Channel ch = context.channels.get(options.channel);
 
     if (ch == null) {
-      throw new IllegalArgumentException("Can't use " + ProductService.this.getClass().getSimpleName() + " with "
-          + options.channel);
+      throw new IllegalArgumentException("Channel " + options.channel + " not available. (Maybe disabled?)");
     }
     return ch;
   }

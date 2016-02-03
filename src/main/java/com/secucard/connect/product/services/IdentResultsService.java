@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Implements the servcies/identresult operations.
+ * Implements the services/identresult operations.
  * Provides access to the secucard services resources and operations.
  * Support also caching of attachments when requested.
  * Note: Caching will speed up clients access, but has also impact on memory usage. Depending on the type of cache storage

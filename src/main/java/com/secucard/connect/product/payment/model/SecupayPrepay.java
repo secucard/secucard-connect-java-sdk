@@ -15,6 +15,8 @@ package com.secucard.connect.product.payment.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SecupayPrepay extends Transaction {
+  public static final String STATUS_AUTHORIZED = "authorized";
+
   @JsonProperty("transfer_purpose")
   private String transferPurpose;
 

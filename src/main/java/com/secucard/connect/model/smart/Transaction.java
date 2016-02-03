@@ -44,6 +44,14 @@ public class Transaction extends SecuObject {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<ReceiptLine> receiptLines;
 
+  @JsonProperty("receipt_merchant")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private List<ReceiptLine> receiptLinesMerchant;
+
+  @JsonProperty("receipt_merchant_print")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Boolean receiptMerchantPrint;
+
   @JsonProperty("payment_requested")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String paymentRequested;
@@ -54,6 +62,22 @@ public class Transaction extends SecuObject {
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String error;
+
+  public List<ReceiptLine> getReceiptLinesMerchant() {
+    return receiptLinesMerchant;
+  }
+
+  public void setReceiptLinesMerchant(List<ReceiptLine> receiptLinesMerchant) {
+    this.receiptLinesMerchant = receiptLinesMerchant;
+  }
+
+  public Boolean getReceiptMerchantPrint() {
+    return receiptMerchantPrint;
+  }
+
+  public void setReceiptMerchantPrint(Boolean receiptMerchantPrint) {
+    this.receiptMerchantPrint = receiptMerchantPrint;
+  }
 
   public List<ReceiptLine> getReceiptLines() {
     return receiptLines;

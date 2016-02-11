@@ -146,7 +146,6 @@ public class TokenManager {
 
       token = authenticate(credentials);
       token.setExpireTime();
-      token.setId(credentials.getId());
       setCurrentToken(token);
       LOG.debug("Return new token: ", token);
     }

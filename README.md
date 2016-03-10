@@ -1,5 +1,4 @@
-secucard-connect-java-client-lib
-================================
+# secucard connect Java SDK
 
 
 Basic usage:

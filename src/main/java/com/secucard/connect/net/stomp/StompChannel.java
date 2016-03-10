@@ -58,7 +58,7 @@ public class StompChannel extends Channel {
   private final StatusHandler defaultStatusHandler = new StatusHandler() {
     @Override
     public boolean hasError(Message message) {
-      return !message.getStatus().equalsIgnoreCase(STATUS_OK);
+      return !STATUS_OK.equalsIgnoreCase(message.getStatus());
     }
   };
 

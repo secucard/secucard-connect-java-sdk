@@ -36,14 +36,22 @@ public class IdentsDemo {
 
     try {
 
-      // creating a request,
-      // if successfully the new ident request is returned otherwise a exception is thrown
+      // Creating a new request,
+
+      String transactionId = "TX" + System.currentTimeMillis(); // create your transaction reference
 
       IdentRequest request = new IdentRequest();
-      String transactionId = "TX" + System.currentTimeMillis();
+
+      request.setProvider(IdentRequest.PROVIDER_POSTIDENT);
+//      request.setProvider(IdentRequest.PROVIDER_IDNOW);
+
+      request.setOwnerTransactionId(transactionId);
+
+      request.setType(IdentRequest.TYPE_PERSON);
 
       Person p = new Person();
       p.setOwnerTransactionId(transactionId);
+
       Contact c = new Contact();
       c.setForename("Hans");
       c.setSurname("Dampf");
@@ -56,28 +64,37 @@ public class IdentsDemo {
       a.setCountry(Locale.GERMANY);
       a.setStreet("Platz der Republik");
       a.setStreetNumber("1");
+      c.setAddress(a);
 
-      request.setOwnerTransactionId(transactionId);
-      request.setType(IdentRequest.TYPE_PERSON);
+      p.setContact(c);
+
       request.addPerson(p);
 
+      // If successfully the new ident request is returned otherwise a exception is thrown
+      // The returned request contains additional data like the contract, status
+      // The ident process is now running
       IdentRequest newRequest = service.createIdentRequest(request, null);
+
       String id = newRequest.getId();
 
 
-      // retrieving a single request
+      // You can retrieving a single request
       request = service.getIdentRequest(id, null);
 
+      // or all existing
+      List <IdentRequest> requests = service.getIdentRequests(null, null);
 
-      // 1. retrieving the results of an ident request by manual polling:
+      // Update a request is not supported.
+
+      // To get the result of a request you can:
+
+      // 1. retrieving the results by manual polling:
       // returns null if nothing available yet, throws an exception if a error occurs, result else
       List<IdentResult> results = service.getIdentResultsByRequestIds(Arrays.asList(id), null, false);
 
 
-      // or 2. by responding on web hook event: 
-      // provide a special handler for the event
-      // when event happens call Client.handle() and pass event JSON data, result will be the ident result list
-
+      // 2. by responding on web hook event which is posted to you when an request changed on server side.
+      // To enable provide a callback which handles the ident result:
       service.onIdentRequestChanged(new IdentService.IdentEventHandler() {
 
         /**
@@ -107,7 +124,13 @@ public class IdentsDemo {
         }
       });
 
-      String jsonEventData = "..."; /* get from web server, example:
+      // A POST request is sent to your URL, you must receive and pass the body JSON
+      // to Client.handle() which will load the ident result list and trigger your callback when finished.
+      // Below is just a illustration how the the event would look like and how it is passed:
+      // (JSON comes from your web server in reality of course)
+
+      /*
+      String jsonEventData = "
        {  "object": "event.pushes",
           "id": "XXX_XXXXXXXXXXX",
           "created": "2015-02-02T11:40:50+01:00",
@@ -117,9 +140,12 @@ public class IdentsDemo {
             "object": "services.identrequests",
             "id": "XXX_XXXXXXXXXXXXXXXXXXXXXXXX"
           }
-        ]} */
+        ]}"
 
       boolean ok = client.handleEvent(jsonEventData);
+
+      */
+
       // done
 
     } finally {

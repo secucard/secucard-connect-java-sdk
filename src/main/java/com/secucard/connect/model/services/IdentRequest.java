@@ -17,8 +17,12 @@ public class IdentRequest extends SecuObject {
   public static final String STATUS_REQUESTED = "requested";
   public static final String STATUS_OK = "ok";
   public static final String STATUS_FAILED = "failed";
+  public static final String PROVIDER_IDNOW = "idnow";
+  public static final String PROVIDER_POSTIDENT = "post_ident";
 
   private String type;
+
+  private String provider;
 
   private String status;
 
@@ -37,6 +41,14 @@ public class IdentRequest extends SecuObject {
   @Override
   public String getObject() {
     return OBJECT;
+  }
+
+  public String getProvider() {
+    return provider;
+  }
+
+  public void setProvider(String provider) {
+    this.provider = provider;
   }
 
   public Contract getContract() {
@@ -110,6 +122,7 @@ public class IdentRequest extends SecuObject {
   public String toString() {
     return "IdentRequest{" +
         "type='" + type + '\'' +
+        ", provider='" + provider + '\'' +
         ", status='" + status + '\'' +
         ", owner='" + owner + '\'' +
         ", contract=" + contract +

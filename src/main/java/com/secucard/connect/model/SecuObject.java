@@ -11,6 +11,8 @@ public abstract class SecuObject implements Serializable {
 
   private String object;
 
+  // public String demo = "1"; // todo: remove in release, just for testing purposes!
+
   /**
    * Returns the unique resource/object/product identifier, all lowercase.<br/>
    * Override in subclasses to return a constant value using:<br/>

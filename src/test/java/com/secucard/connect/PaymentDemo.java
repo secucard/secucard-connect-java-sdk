@@ -35,7 +35,6 @@ public class PaymentDemo {
     try {
 
 
-
       Customer customer = new Customer();
       Contact contact = new Contact();
       contact.setForename("forename");
@@ -85,7 +84,7 @@ public class PaymentDemo {
       assert (debit.getStatus().equalsIgnoreCase(SecupayDebit.STATUS_ACCEPTED));
 
       // cancel this debit transaction
-      Boolean result = debitService.cancelTransaction(debit.getId(), null);
+      Boolean result = debitService.cancelTransaction(debit.getId(), debit.getContract().getId(), null);
 
       assert (Boolean.TRUE.equals(result));
 
@@ -101,7 +100,7 @@ public class PaymentDemo {
       assert (prepay.getStatus().equalsIgnoreCase(SecupayPrepay.STATUS_ACCEPTED));
 
       // cancel this prepay transaction
-      result = prepayService.cancelTransaction(prepay.getId(), null);
+      result = prepayService.cancelTransaction(prepay.getId(), prepay.getContract().getId(), null);
 
       assert (Boolean.TRUE.equals(result));
     } catch (Exception e) {

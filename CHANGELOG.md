@@ -7,6 +7,7 @@ used by IdentRequest and IdentResult to Entity and changed all
 access methods accordingly. IdentRequests can be created for persons
 or companies, so a generic entity field serving both types is more
 appropriate than just a single person field.
+- Improve IdentsDemo.
 
 ### Added
 - Adding changelog.

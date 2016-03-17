@@ -5,7 +5,7 @@ import com.secucard.connect.model.general.Address;
 import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
-import com.secucard.connect.model.services.idrequest.Person;
+import com.secucard.connect.model.services.idrequest.Entity;
 import com.secucard.connect.service.services.IdentService;
 
 import java.text.SimpleDateFormat;
@@ -43,48 +43,48 @@ public class IdentsDemo {
       IdentRequest request = new IdentRequest();
 
       request.setProvider(IdentRequest.PROVIDER_POSTIDENT);
-//      request.setProvider(IdentRequest.PROVIDER_IDNOW);
+      // request.setProvider(IdentRequest.PROVIDER_IDNOW);
 
       request.setOwnerTransactionId(transactionId);
 
+      // Choose type of entity to identify, a person here, could also be a company
       request.setType(IdentRequest.TYPE_PERSON);
 
-      Person p = new Person();
-      p.setOwnerTransactionId(transactionId);
+      // Create person entity
+      Entity p = new Entity();
 
       Contact c = new Contact();
-      c.setForename("Hans");
-      c.setSurname("Dampf");
+      c.setForename("Erika");
+      c.setSurname("Mustermann");
       c.setGender(Contact.GENDER_MALE);
       c.setNationality(Locale.GERMANY);
-      c.setDateOfBirth(new SimpleDateFormat("dd.MM.yyyy").parse("01.01.1951"));
+      c.setDateOfBirth(new SimpleDateFormat("dd.MM.yyyy").parse("12.08.1964"));
       Address a = new Address();
-      a.setCity("Berlin");
-      a.setPostalCode("11011");
+      a.setCity("Köln");
+      a.setPostalCode("51147");
       a.setCountry(Locale.GERMANY);
-      a.setStreet("Platz der Republik");
-      a.setStreetNumber("1");
+      a.setStreet("Heidestraße");
+      a.setStreetNumber("17");
       c.setAddress(a);
 
       p.setContact(c);
 
-      request.addPerson(p);
+      request.addEntity(p);
 
       // If successfully the new ident request is returned otherwise a exception is thrown
       // The returned request contains additional data like the contract, status
       // The ident process is now running
       IdentRequest newRequest = service.createIdentRequest(request, null);
 
+      // Obtain id and url and visit url to take next steps
       String id = newRequest.getId();
+      String url = newRequest.getEntities().get(0).getRedirectUrl();
 
-
-      // You can retrieving a single request
-      request = service.getIdentRequest(id, null);
-
-      // or all existing
-      List <IdentRequest> requests = service.getIdentRequests(null, null);
-
+      // You can retrieving a single request, or all existing
       // Update a request is not supported.
+      request = service.getIdentRequest(id, null);
+      List<IdentRequest> requests = service.getIdentRequests(null, null);
+
 
       // To get the result of a request you can:
 
@@ -100,7 +100,7 @@ public class IdentsDemo {
         /**
          *  If returning true all ident result attachments (pdf, etc) will be downloaded BEFORE completed() method is
          *  called, later access to an attachment (pdf, etc.) will be served from cache.
-         *  (Access to attachment is like: result.getPersons().get(0).getAttachments().get(0).getInputStream())
+         *  (Access to attachment is like: result.getEntities().get(0).getAttachments().get(0).getInputStream())
          *
          *  Returning false prevents such eager attachment download at all, attachments are downloaded and cached on
          *  the fly when accessed (lazy).

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Person {
+public class Entity {
   @JsonProperty("identificationprocess")
   private IdentificationProcess identificationProcess;
 

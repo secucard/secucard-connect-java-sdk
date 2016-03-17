@@ -3,7 +3,7 @@ package com.secucard.connect.model.services.idrequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.model.general.Contact;
 
-public class Person {
+public class Entity {
   @JsonProperty("transaction_id")
   private String transactionId;
 
@@ -11,9 +11,6 @@ public class Person {
   private String redirectUrl;
 
   private String status;
-
-  @JsonProperty("owner_transaction_id")
-  private String ownerTransactionId;
 
   private Contact contact = new Contact();
 
@@ -53,14 +50,6 @@ public class Person {
 
   public void setStatus(String status) {
     this.status = status;
-  }
-
-  public String getOwnerTransactionId() {
-    return ownerTransactionId;
-  }
-
-  public void setOwnerTransactionId(String ownerTransactionId) {
-    this.ownerTransactionId = ownerTransactionId;
   }
 
   public String getCustom1() {
@@ -105,11 +94,10 @@ public class Person {
 
   @Override
   public String toString() {
-    return "Person{" +
+    return "Entity{" +
         "transactionId='" + transactionId + '\'' +
         ", redirectUrl='" + redirectUrl + '\'' +
         ", status='" + status + '\'' +
-        ", ownerTransactionId='" + ownerTransactionId + '\'' +
         ", contact=" + contact +
         ", custom1='" + custom1 + '\'' +
         ", custom2='" + custom2 + '\'' +

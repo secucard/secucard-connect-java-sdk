@@ -5,7 +5,7 @@ import com.secucard.connect.model.general.Address;
 import com.secucard.connect.model.general.Contact;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
-import com.secucard.connect.model.services.idrequest.Person;
+import com.secucard.connect.model.services.idrequest.Entity;
 import com.secucard.connect.service.AbstractServicesTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -123,8 +123,7 @@ public class ServicesTest extends AbstractServicesTest {
       newIr.setType(IdentRequest.TYPE_PERSON);
       String transactionId = "TX" + System.currentTimeMillis();
       newIr.setOwnerTransactionId(transactionId);
-      Person p = new Person();
-      p.setOwnerTransactionId(transactionId);
+      Entity p = new Entity();
       Contact contact = new Contact();
       Address address = new Address();
       address.setCity("city");
@@ -148,9 +147,9 @@ public class ServicesTest extends AbstractServicesTest {
       contact.setTitle("title");
       contact.setUrlWebsite("url");
       p.setContact(contact);
-      newIr.addPerson(p);
+      newIr.addEntity(p);
       newIr = service.createIdentRequest(newIr, null);
-      assertEquals("forename", newIr.getPersons().get(0).getContact().getForename());
+      assertEquals("forename", newIr.getEntities().get(0).getContact().getForename());
 
     } finally {
       client.disconnect();

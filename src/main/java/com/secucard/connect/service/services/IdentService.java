@@ -9,7 +9,7 @@ import com.secucard.connect.model.general.Event;
 import com.secucard.connect.model.services.IdentRequest;
 import com.secucard.connect.model.services.IdentResult;
 import com.secucard.connect.model.services.idresult.Attachment;
-import com.secucard.connect.model.services.idresult.Person;
+import com.secucard.connect.model.services.idresult.Entity;
 import com.secucard.connect.service.AbstractService;
 
 import java.util.*;
@@ -252,8 +252,8 @@ public class IdentService extends AbstractService {
 
     if (cacheAttachmentsEnabled && cache) {
       for (IdentResult result : results) {
-        for (Person person : result.getPersons()) {
-          for (Attachment attachment : person.getAttachments()) {
+        for (Entity entity : result.getEntities()) {
+          for (Attachment attachment : entity.getAttachments()) {
             // todo: introduce download policy settings to be able to avoid some downloads
             attachment.download();
           }

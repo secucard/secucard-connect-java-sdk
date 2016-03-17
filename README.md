@@ -45,7 +45,6 @@ try {
   client.close()
 }
 ```
-    
 Available service classe are in package com/secucard/connect/product
    
 For your own configuration file see: src/main/resources/config.properties

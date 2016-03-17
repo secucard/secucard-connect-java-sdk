@@ -1,6 +1,7 @@
 # secucard connect Java SDK
 
-Basic usage:
+## Basic usage:
+
 ```java
 SecucardConnect.Configuration cfg = SecucardConnect.Configuration.get();  //use default config
 
@@ -45,6 +46,7 @@ try {
   client.close()
 }
 ```
+
 Available service classe are in package com/secucard/connect/product
    
 For your own configuration file see: src/main/resources/config.properties

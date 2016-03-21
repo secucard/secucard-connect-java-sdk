@@ -30,7 +30,7 @@ public class IdentResult extends SecuObject {
   private String status;
 
   @JsonProperty("person")
-  List<Person> persons = new ArrayList<>();
+  List<Entity> entities = new ArrayList<>();
 
   private Date created;
 
@@ -61,12 +61,12 @@ public class IdentResult extends SecuObject {
     this.status = status;
   }
 
-  public List<Person> getPersons() {
-    return persons;
+  public List<Entity> getEntities() {
+    return entities;
   }
 
-  public void setPersons(List<Person> persons) {
-    this.persons = persons;
+  public void setEntities(List<Entity> entities) {
+    this.entities = entities;
   }
 
   public Date getCreated() {
@@ -82,12 +82,12 @@ public class IdentResult extends SecuObject {
     return "IdentResult{" +
         "request=" + request +
         ", status='" + status + '\'' +
-        ", persons=" + persons +
+        ", entities=" + entities +
         ", created=" + created +
         "} " + super.toString();
   }
 
-  public static class Person {
+  public static class Entity {
     @JsonProperty("identificationprocess")
     private IdentificationProcess identificationProcess;
 

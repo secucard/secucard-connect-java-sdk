@@ -156,8 +156,8 @@ public class IdentResultsService extends ProductService<IdentResult> {
   private void processAttachments(List<IdentResult> results, boolean cache) {
     if (cacheAttachmentsEnabled && cache) {
       for (IdentResult result : results) {
-        for (IdentResult.Person person : result.getPersons()) {
-          for (Attachment attachment : person.getAttachments()) {
+        for (IdentResult.Entity entity : result.getEntities()) {
+          for (Attachment attachment : entity.getAttachments()) {
             // todo: introduce download policy settings to be able to avoid some downloads
             attachment.download();
           }

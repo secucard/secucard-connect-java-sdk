@@ -44,7 +44,7 @@ public class IdentRequest extends SecuObject {
   private String ownerTransactionId;
 
   @JsonProperty("person")
-  private List<Person> persons = new ArrayList<>();
+  private List<Entity> entities = new ArrayList<>();
 
   private Date created;
 
@@ -96,12 +96,12 @@ public class IdentRequest extends SecuObject {
     this.ownerTransactionId = ownerTransactionId;
   }
 
-  public List<Person> getPersons() {
-    return persons;
+  public List<Entity> getEntities() {
+    return entities;
   }
 
-  public void setPersons(List<Person> persons) {
-    this.persons = persons;
+  public void setEntities(List<Entity> entities) {
+    this.entities = entities;
   }
 
   public String getProvider() {
@@ -113,14 +113,14 @@ public class IdentRequest extends SecuObject {
   }
 
   /**
-   * Adding a person.
+   * Adding a entity.
    *
-   * @param person The person to add.
+   * @param entity The entity to add.
    * @return True if added, false else.
    */
   @JsonIgnore
-  public boolean addPerson(Person person) {
-    return persons.add(person);
+  public boolean addPerson(Entity entity) {
+    return entities.add(entity);
   }
 
   @Override
@@ -132,13 +132,13 @@ public class IdentRequest extends SecuObject {
         ", contract=" + contract +
         ", provider=" + provider +
         ", ownerTransactionId='" + ownerTransactionId + '\'' +
-        ", persons=" + persons +
+        ", entities=" + entities +
         ", created=" + created +
         "} " + super.toString();
   }
 
 
-  public static class Person {
+  public static class Entity {
     @JsonProperty("transaction_id")
     private String transactionId;
 
@@ -240,7 +240,7 @@ public class IdentRequest extends SecuObject {
 
     @Override
     public String toString() {
-      return "Person{" +
+      return "Entity{" +
           "transactionId='" + transactionId + '\'' +
           ", redirectUrl='" + redirectUrl + '\'' +
           ", status='" + status + '\'' +

@@ -27,8 +27,12 @@ public class IdentRequest extends SecuObject {
   public static final String STATUS_REQUESTED = "requested";
   public static final String STATUS_OK = "ok";
   public static final String STATUS_FAILED = "failed";
+  public static final String PROVIDER_IDNOW = "idnow";
+  public static final String PROVIDER_POSTIDENT = "post_ident";
 
   private String type;
+
+  private String provider;
 
   private String status;
 
@@ -100,6 +104,14 @@ public class IdentRequest extends SecuObject {
     this.persons = persons;
   }
 
+  public String getProvider() {
+    return provider;
+  }
+
+  public void setProvider(String provider) {
+    this.provider = provider;
+  }
+
   /**
    * Adding a person.
    *
@@ -118,11 +130,13 @@ public class IdentRequest extends SecuObject {
         ", status='" + status + '\'' +
         ", owner='" + owner + '\'' +
         ", contract=" + contract +
+        ", provider=" + provider +
         ", ownerTransactionId='" + ownerTransactionId + '\'' +
         ", persons=" + persons +
         ", created=" + created +
         "} " + super.toString();
   }
+
 
   public static class Person {
     @JsonProperty("transaction_id")

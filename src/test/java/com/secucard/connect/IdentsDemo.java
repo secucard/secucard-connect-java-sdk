@@ -92,21 +92,20 @@ public class IdentsDemo {
       // returns null if nothing available yet, throws an exception if a error occurs, result else
       List<IdentResult> results = service.getIdentResultsByRequestIds(Arrays.asList(id), null, false);
 
-
       // 2. by responding on web hook event which is posted to you when an request changed on server side.
       // To enable provide a callback which handles the ident result:
       service.onIdentRequestChanged(new IdentService.IdentEventHandler() {
 
         /**
-         *  If returning true all ident result attachments (pdf, etc) will be downloaded BEFORE completed() method is
-         *  called, later access to an attachment (pdf, etc.) will be served from cache.
-         *  (Access to attachment is like: result.getEntities().get(0).getAttachments().get(0).getInputStream())
-         *
-         *  Returning false prevents such eager attachment download at all, attachments are downloaded and cached on
-         *  the fly when accessed (lazy).
-         *
-         *  Depending on the amount of data to download eager loading may be a good idea or not (considering also if
-         *  all of the downloaded data will be actually accessed).
+         * If returning true all ident result attachments (pdf, etc) will be downloaded BEFORE completed() method is
+         * called, later access to an attachment (pdf, etc.) will be served from cache.
+         * (Access to attachment is like: result.getEntities().get(0).getAttachments().get(0).getInputStream())
+         * <p/>
+         * Returning false prevents such eager attachment download at all, attachments are downloaded and cached on
+         * the fly when accessed (lazy).
+         * <p/>
+         * Depending on the amount of data to download eager loading may be a good idea or not (considering also if
+         * all of the downloaded data will be actually accessed).
          */
         @Override
         public boolean downloadAttachments(List<IdentRequest> requests) {
@@ -122,29 +121,37 @@ public class IdentsDemo {
         public void failed(Throwable cause) {
           // handle fail ...
         }
+
+        @Override
+        protected boolean isAsync() {
+          // override here for easier testing only, see also event handling code below
+          return false;
+          // return super.isAsync();
+        }
       });
+
 
       // A POST request is sent to your URL, you must receive and pass the body JSON
       // to Client.handle() which will load the ident result list and trigger your callback when finished.
       // Below is just a illustration how the the event would look like and how it is passed:
       // (JSON comes from your web server in reality of course)
 
-      /*
-      String jsonEventData = "
-       {  "object": "event.pushes",
-          "id": "XXX_XXXXXXXXXXX",
-          "created": "2015-02-02T11:40:50+01:00",
-          "target": "services.identrequests",
-          "type": "changed", "data": [
-          {
-            "object": "services.identrequests",
-            "id": "XXX_XXXXXXXXXXXXXXXXXXXXXXXX"
-          }
-        ]}"
+      // you may set another known request id here for testing
+      // id = "";
 
+      String jsonEventData =
+          "{\"object\": \"event.pushes\"," +
+              "\"id\": \"evt_7642844576100646913\"," +
+              "\"created\": \"2016-03-21T16:31:36+01:00\"," +
+              "\"target\": \"services.identrequests\"," +
+              "\"type\": \"changed\"," +
+              "\"data\": [{\"object\": \"services.identrequests\",\"id\": \"" + id + "\"}]}";
+
+      // Trigger the ident result callback for testing purposes
+      // By overriding IdentService.IdentEventHandler#isAsync
+      // you can cause to block this call, otherwise you would need to insert Thread.sleep() after to get results.
       boolean ok = client.handleEvent(jsonEventData);
 
-      */
 
       // done
 

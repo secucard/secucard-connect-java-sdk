@@ -27,6 +27,10 @@ public class DeviceCredentials extends ClientCredentials {
    */
   protected String deviceId;
 
+  public DeviceCredentials(String clientId, String clientSecret, String vendor, Map<String, String> vendorIds) {
+    this(clientId, clientSecret, buildDeviceId(vendor, vendorIds));
+  }
+
   public DeviceCredentials(String clientId, String clientSecret, String deviceId) {
     super(clientId, clientSecret);
     this.deviceId = deviceId;
@@ -69,5 +73,15 @@ public class DeviceCredentials extends ClientCredentials {
       map.put("code", deviceCode);
     }
     return map;
+  }
+
+  private static String buildDeviceId(String vendor, Map<String, String> vendorIds) {
+    String id = "/vendor/" + vendor;
+
+    for (Map.Entry<String, String> entry : vendorIds.entrySet()) {
+      id += '/' + entry.getKey() + '/' + entry.getValue();
+    }
+
+    return id;
   }
 }

@@ -65,17 +65,9 @@ public class Transaction extends SecuObject {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<ReceiptLine> receiptLinesMerchant;
 
-  @JsonProperty("payment_requested")
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private String paymentRequested;
-
   @JsonProperty("receipt_merchant_print")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private Boolean receiptMerchantPrint;
-
-  @JsonProperty("payment_executed")
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private String paymentExecuted;
 
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String error;
@@ -86,22 +78,6 @@ public class Transaction extends SecuObject {
 
   public void setReceiptLines(List<ReceiptLine> receiptLines) {
     this.receiptLines = receiptLines;
-  }
-
-  public String getPaymentRequested() {
-    return paymentRequested;
-  }
-
-  public void setPaymentRequested(String paymentRequested) {
-    this.paymentRequested = paymentRequested;
-  }
-
-  public String getPaymentExecuted() {
-    return paymentExecuted;
-  }
-
-  public void setPaymentExecuted(String paymentExecuted) {
-    this.paymentExecuted = paymentExecuted;
   }
 
   public List<ReceiptLine> getReceiptLinesMerchant() {
@@ -244,8 +220,6 @@ public class Transaction extends SecuObject {
         ", transactionRef='" + transactionRef + '\'' +
         ", paymentMethod='" + paymentMethod + '\'' +
         ", receiptLines=" + receiptLines +
-        ", paymentRequested='" + paymentRequested + '\'' +
-        ", paymentExecuted='" + paymentExecuted + '\'' +
         ", error='" + error + '\'' +
         "} " + super.toString();
   }

@@ -44,7 +44,17 @@ public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
     diskCache.save("token", token);
   }
 
+  /**
+   * Clear cache.
+   */
   public void clear() {
     diskCache.clear("token", null);
+  }
+
+  /**
+   * Remove cache dir.
+   */
+  public void remove(){
+    diskCache.destroy();
   }
 }

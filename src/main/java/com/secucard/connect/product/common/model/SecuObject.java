@@ -17,6 +17,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Map;
 
+/**
+ * Base class for all product resource models.
+ */
 public abstract class SecuObject implements Serializable {
   public static final String OBJECT_PROPERTY = "object";
   public static final String OBJECT_FIELD = "OBJECT";

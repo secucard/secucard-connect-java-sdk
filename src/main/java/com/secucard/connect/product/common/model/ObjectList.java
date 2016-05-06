@@ -17,52 +17,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * Generic list type for any type of objects. <br/>
- * Pass "new {@literal javax.ws.rs.core.GenericType<ObjectList<Transaction>>() {}}"
- * to {@link javax.ws.rs.core.Response#readEntity(javax.ws.rs.core.GenericType)} when using JAX-RS implementations. <br/>
- * Or pass "new {@literal com.fasterxml.jackson.core.type.TypeReference<ObjectList<Transaction>>()}"
- * to according methods of {@link com.fasterxml.jackson.databind.ObjectMapper}.
+ * Generic list for any type T of objects.
+ * Provides some additional methods for getting the actual objects or the list count.
  */
 public class ObjectList<T> {
-
   @JsonProperty("scroll_id")
-  private String scrollId;
+  protected String scrollId;
 
   @JsonProperty("count")
-  private int totalCount;
+  protected int totalCount;
 
   @JsonProperty("data")
-  private List<T> list;
+  protected List<T> list;
 
-  public ObjectList() {
-  }
-
+  /**
+   * Returns a id associated with this result.
+   */
   public String getScrollId() {
     return scrollId;
   }
 
-  public void setScrollId(String scrollId) {
-    this.scrollId = scrollId;
-  }
-
+  /**
+   * Return the number of contained object in this list.
+   */
   public int getCount() {
     return list == null ? 0 : list.size();
   }
 
+  /**
+   * Return the number of actually available objects (maybe more then getCount()) for the query which produces this result.
+   */
   public int getTotalCount() {
     return totalCount;
   }
 
+  /**
+   * Returns the actual object instances.
+   */
   public List<T> getList() {
     return list;
   }
 
-  public void setList(List<T> list) {
-    this.list = list;
-  }
-
   @Override
   public String toString() {
-    return "ObjectList{" + "scrollId='" + scrollId + '\'' + ", count=" + totalCount + ", list=" + list + '}';
+    return "ObjectList{" + "scrollId='" + scrollId + '\'' + ", totalCount=" + totalCount + ", list=" + list + '}';
   }
 }

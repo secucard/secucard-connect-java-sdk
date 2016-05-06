@@ -98,6 +98,60 @@ public abstract class ProductService<T extends SecuObject> {
   }
 
   /**
+   * Much like getList() but additionally supports fast (forward only) retrieval of large result data amounts by
+   * returning the results in batches or pages, like forward scrolling through the whole result.<br/>
+   * With a first call to this method you may specify all needed search params like count or sort. The returned
+   * collection is the first batch of results and contains also an unique id usable to get the next batches by calling
+   * getNextBatch() with this id.<br/>
+   * Actually this API call will create a result set snapshot or search context (server side) from which the results
+   * are returned. The mandatory parameter expireTime specifies how long this snapshot should exist on the server.
+   * Since this allocates server resources please choose carefully appropriate times according to your needs,
+   * otherwise the server resource monitoring may limit your requests.
+   * <br/>
+   * Note those methods exists just for convenience purposes. Since all this behaviour is fully controlled by
+   * the {@link QueryParams} args of a call a normal getList call can do the same.
+   *
+   * @param queryParams The query params to apply.
+   * @param expireTime  String specifying the expire time expression of the search context on the server. Valid
+   *                    expression are "{number}{s|m|h}" like "5m" for 5 minutes.
+   * @return A collection of result items.
+   */
+  public ObjectList<T> getScrollableList(QueryParams queryParams, String expireTime) {
+    return getScrollableList(queryParams, expireTime, null);
+  }
+
+  /**
+   * Like {@link #getScrollableList(QueryParams, String)} but with an additional callback.
+   */
+  public ObjectList<T> getScrollableList(QueryParams queryParams, String expireTime, Callback<ObjectList<T>> callback) {
+    queryParams.setScrollExpire(expireTime);
+    return getList(queryParams, callback);
+  }
+
+  /**
+   * Returns the next batch of results initially requested by getScrollableList() call.
+   *
+   * @param id The id of the result set snapshot to access. Get this id from the collection returned by
+   *           getScrollableList().
+   * @return The collection of result items. The number of returned items may be less as requested
+   * by the initial count parameter at the end of the result set. Has count of 0 if no data is available anymore.
+   * The total count of items in result is not set here.
+   * todo: what happens on expiring
+   */
+  public ObjectList<T> getNextBatch(String id) {
+    return getNextBatch(id, null);
+  }
+
+  /**
+   * Like {@link #getNextBatch(String)} but with an additional callback.
+   */
+  public ObjectList<T> getNextBatch(String id, Callback<ObjectList<T>> callback) {
+    QueryParams qp = new QueryParams();
+    qp.setScrollId(id);
+    return getList(qp, callback);
+  }
+
+  /**
    * Like {@link #getSimpleList(com.secucard.connect.product.common.model.QueryParams, com.secucard.connect.client.Callback)}
    * but without callback.
    */

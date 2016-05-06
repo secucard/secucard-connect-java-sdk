@@ -28,7 +28,8 @@ public class ObjectList<T> {
   @JsonProperty("scroll_id")
   private String scrollId;
 
-  private int count;
+  @JsonProperty("count")
+  private int totalCount;
 
   @JsonProperty("data")
   private List<T> list;
@@ -45,11 +46,11 @@ public class ObjectList<T> {
   }
 
   public int getCount() {
-    return count;
+    return list == null ? 0 : list.size();
   }
 
-  public void setCount(int count) {
-    this.count = count;
+  public int getTotalCount() {
+    return totalCount;
   }
 
   public List<T> getList() {
@@ -62,6 +63,6 @@ public class ObjectList<T> {
 
   @Override
   public String toString() {
-    return "ObjectList{" + "scrollId='" + scrollId + '\'' + ", count=" + count + ", list=" + list + '}';
+    return "ObjectList{" + "scrollId='" + scrollId + '\'' + ", count=" + totalCount + ", list=" + list + '}';
   }
 }

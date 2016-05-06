@@ -13,27 +13,29 @@
 package com.secucard.connect.auth;
 
 import com.secucard.connect.auth.model.Token;
+import com.secucard.connect.client.DataStorage;
 import com.secucard.connect.client.DiskCache;
 
 /**
- * Abstract implementation which just delegates the token persistence to a file based cache.
- * Accepts already existing tokens.
+ * Abstract implementation which delegates the token persistence to a instance of {@link DataStorage}.
+ * Default instance is of {@link DiskCache}.
  */
 public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
-  private DiskCache diskCache;
+  private final String id;
+  private DataStorage cache;
 
   /**
    * Create an instance.
    *
-   * @param dir The cache directory to use. May be absolute (starting with "/" or "\") or relative.
-   *            Creates the directory if necessary.
+   * @param arg Any argument to pass to {@link #createCache(Object)}
    */
-  public AbstractClientAuthDetails(String dir) {
-    this.diskCache = new DiskCache(dir);
+  public AbstractClientAuthDetails(Object arg) {
+    cache = createCache(arg);
+    id = tokenId();
   }
 
   public Token getCurrent() {
-    return (Token) diskCache.get("token");
+    return (Token) cache.get(id);
   }
 
   /**
@@ -41,20 +43,42 @@ public abstract class AbstractClientAuthDetails implements ClientAuthDetails {
    * Override and call super() to place further notification hooks.
    */
   public void onTokenChanged(Token token) {
-    diskCache.save("token", token);
+    cache.save(id, token);
   }
 
   /**
-   * Clear cache.
+   * Clear the token from cache. The cache itself may stay.
    */
   public void clear() {
-    diskCache.clear("token", null);
+    cache.clear(id, null);
   }
 
   /**
-   * Remove cache dir.
+   * Remove the whole cache by calling {@link DataStorage#destroy()}.
    */
-  public void remove(){
-    diskCache.destroy();
+  public void remove() {
+    cache.destroy();
+  }
+
+  /**
+   * Returns the id to use as reference to token in cache. Called one time by constructor.
+   * Default is "token". Customize by overriding.
+   */
+  protected String tokenId() {
+    return "token";
+  }
+
+  /**
+   * Returns the cache instance to use to persist the token data. Called one time by constructor.
+   * Default is {@link DiskCache}. Customize by overriding.
+   *
+   * @param arg A string denoting the cache directory to use. May be absolute (starting with "/" or "\") or relative.
+   *            Creates the directory if necessary. If null is passed ".sccauth" is used.
+   */
+  protected DataStorage createCache(Object arg) {
+    if (arg == null) {
+      arg = ".sccauth";
+    }
+    return new DiskCache((String) arg);
   }
 }

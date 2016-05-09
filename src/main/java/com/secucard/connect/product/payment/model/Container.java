@@ -31,8 +31,7 @@ public class Container extends SecuObject {
   @JsonProperty("public")
   private Data publicData;
 
-  @JsonProperty("assign")
-  private Customer assigned;
+  private Customer customer;
 
   private String type;
 
@@ -98,12 +97,12 @@ public class Container extends SecuObject {
     this.updated = updated;
   }
 
-  public Customer getAssigned() {
-    return assigned;
+  public Customer getCustomer() {
+    return customer;
   }
 
-  public void setAssigned(Customer assigned) {
-    this.assigned = assigned;
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
   }
 
   @Override

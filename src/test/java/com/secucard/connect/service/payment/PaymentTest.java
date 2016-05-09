@@ -58,38 +58,26 @@ public class PaymentTest extends AbstractServicesTest {
     customer = customerService.updateCustomer(customer, null);
     Assert.assertTrue(customer.getContact().getForename().equals(name));
 
-
     Container container = new Container();
     container.setType(Container.TYPE_BANK_ACCOUNT);
     container.setPrivateData(new Data("iban"));
-
+    container.setCustomer(customer);
 
     container = containerService.createContainer(container, null);
     queryParams = new QueryParams();
     queryParams.setQuery("id:" + container.getId());
     List<Container> containers = containerService.getContainers(queryParams, null);
     Assert.assertTrue(containers.size() == 1);
-
+    Assert.assertTrue(container.getCustomer().getId().equals(customer.getId()));
 
     String owner = "owner2";
     container.setPrivateData(new Data("iban2"));
     container = containerService.updateContainer(container, null);
     Assert.assertTrue(container.getPublicData().getOwner().equals(owner));
 
-
-    container = containerService.updateContainerAssignment(container.getId(), customer.getId(), null);
-    Assert.assertTrue(container.getAssigned().getId().equals(customer.getId()));
-
-
-    containerService.deleteContainerAssignment(container.getId(), null);
-    containers = containerService.getContainers(queryParams, null);
-    Assert.assertTrue(containers.get(0).getAssigned() == null);
-
-
     containerService.deleteContainer(container.getId(), null);
     containers = containerService.getContainers(queryParams, null);
     Assert.assertTrue(containers == null);
-
 
     customerService.deleteCustomer(customer.getId(), null);
     customers = customerService.getCustomers(queryParams, null);

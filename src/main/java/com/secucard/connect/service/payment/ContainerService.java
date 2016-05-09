@@ -37,14 +37,6 @@ public class ContainerService extends AbstractService {
     return update(container, callback, null);
   }
 
-  public Container updateContainerAssignment(final String containerId, final String customerId, Callback<Container> callback) {
-    return execute(Container.class, containerId, "assign", customerId, new Customer(), Container.class, callback, null);
-  }
-
-  public void deleteContainerAssignment(final String containerId, Callback<Void> callback) {
-    delete(Container.class, containerId, "assign", null, callback, null);
-  }
-
   public void deleteContainer(final String id, Callback<Void> callback) {
     delete(Container.class, id, callback, null);
   }

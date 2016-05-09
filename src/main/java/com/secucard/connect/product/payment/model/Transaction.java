@@ -18,9 +18,14 @@ import com.secucard.connect.product.common.model.SecuObject;
 import java.util.Currency;
 
 public abstract class Transaction extends SecuObject {
-  public static final String STATUS_ACCEPTED = "accepted";
-  public static final String STATUS_CANCELED = "canceled";
-  public static final String STATUS_PROCEED = "proceed";
+  public static final String STATUS_ACCEPTED = "accepted"; // status for accepted debit transactions and finished prepay transactions
+  public static final String STATUS_AUTHORIZED = "authorized"; // prepay transaction after creation , before payment arrives
+  public static final String STATUS_DENIED = "denied"; // when scoring for debit transaction denies the payer
+  public static final String STATUS_ISSUE = "issue"; // then ruecklastschrift happens, or some other issue type
+  public static final String STATUS_VOID = "void"; // when transaction is cancelled by creator (it is not possible to cancel transactions any time, so the debit transaction is possible to cancel until it is cleared out)
+  public static final String STATUS_ISSUE_RESOLVED = "issue_resolved"; // when issue for transaction is resolved
+  public static final String STATUS_REFUND = "refund"; // special status, saying that transaction was paid back (for some reason)
+  public static final String STATUS_INTERNAL_SERVER_STATUS = "internal_server_status"; // should not happen, but only when status would be empty, this status is used
 
   protected Customer customer;
 

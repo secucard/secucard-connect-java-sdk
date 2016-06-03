@@ -25,6 +25,7 @@ import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.Message;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.Result;
+import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
@@ -224,6 +225,14 @@ public class StompChannel extends Channel {
 
     if (destinationSpec instanceof AppDestination) {
       header.put("app-id", ((AppDestination) destinationSpec).appId);
+    }
+
+    if (arg instanceof SecuObject) {
+      SecuObject so = (SecuObject) arg;
+      if (so.getActionId() != null) {
+        header.put("x-action", so.getActionId());
+        so.setActionId(null);
+      }
     }
 
     String body = null;

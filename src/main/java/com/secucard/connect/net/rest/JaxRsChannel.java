@@ -252,6 +252,9 @@ public class JaxRsChannel extends RestChannel {
     if (!params.options.anonymous) {
       setAuthorizationHeader(headers);
     }
+
+    setIdempotencyIdHeader(params, headers);
+
     if (headers.size() > 0) {
       builder.headers(headers);
     }

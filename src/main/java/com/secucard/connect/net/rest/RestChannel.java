@@ -20,6 +20,7 @@ import com.secucard.connect.event.EventListener;
 import com.secucard.connect.net.Channel;
 import com.secucard.connect.net.JsonMappingException;
 import com.secucard.connect.product.common.model.QueryParams;
+import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Log;
 import org.apache.commons.lang3.StringUtils;
@@ -175,6 +176,24 @@ public abstract class RestChannel extends Channel {
         ((MultivaluedMap) headers).putSingle(key, value);
       } else {
         headers.put(key, value);
+      }
+    }
+  }
+
+  /**
+   * Add id to header for preventing double requests.
+   */
+  @SuppressWarnings({"unchecked"})
+  protected void setIdempotencyIdHeader(Params params, Map headers) {
+    if (params.data instanceof SecuObject) {
+      SecuObject so = (SecuObject) params.data;
+      if (so.getActionId() != null) {
+        if (headers instanceof MultivaluedMap) {
+          ((MultivaluedMap) headers).putSingle("X-Action", so.getActionId());
+        } else {
+          headers.put("X-Action", so.getActionId());
+        }
+        so.setActionId(null);
       }
     }
   }

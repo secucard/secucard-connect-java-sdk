@@ -25,6 +25,7 @@ public class Options {
   public boolean eventListening = false;
   public String channel;
   public String clientId = null;
+  public String actionId = null;
   public Integer timeOutSec = null;
 
   /**

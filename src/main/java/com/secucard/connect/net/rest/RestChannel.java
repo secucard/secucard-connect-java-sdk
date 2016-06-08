@@ -185,15 +185,11 @@ public abstract class RestChannel extends Channel {
    */
   @SuppressWarnings({"unchecked"})
   protected void setIdempotencyIdHeader(Params params, Map headers) {
-    if (params.data instanceof SecuObject) {
-      SecuObject so = (SecuObject) params.data;
-      if (so.getActionId() != null) {
-        if (headers instanceof MultivaluedMap) {
-          ((MultivaluedMap) headers).putSingle("X-Action", so.getActionId());
-        } else {
-          headers.put("X-Action", so.getActionId());
-        }
-        so.setActionId(null);
+    if (params.options.actionId != null) {
+      if (headers instanceof MultivaluedMap) {
+        ((MultivaluedMap) headers).putSingle("X-Action", params.options.actionId);
+      } else {
+        headers.put("X-Action", params.options.actionId);
       }
     }
   }

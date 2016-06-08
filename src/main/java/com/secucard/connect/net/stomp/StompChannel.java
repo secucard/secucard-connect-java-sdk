@@ -100,7 +100,7 @@ public class StompChannel extends Channel {
     Message message = new Message<>(params.objectId, params.actionArg, params.queryParams, params.data);
 
     return sendMessage(dest, message, new MessageTypeRef(params.returnType), defaultStatusHandler, callback,
-        params.options.timeOutSec);
+        params.options.timeOutSec, params.options.actionId);
   }
 
   @Override
@@ -118,7 +118,7 @@ public class StompChannel extends Channel {
     };
 
     return sendMessage(dest, message, new MessageListTypeRef(params.returnType), statusHandler, callback,
-        params.options.timeOutSec);
+        params.options.timeOutSec, null);
   }
 
 
@@ -190,17 +190,18 @@ public class StompChannel extends Channel {
   }
 
   private <T> T sendMessage(final Destination destinationSpec, final Object arg, final TypeReference returnType,
-                            final StatusHandler statusHandler, Callback<T> callback, final Integer timeout) {
+                            final StatusHandler statusHandler, Callback<T> callback, final Integer timeout,
+                            final String actionId) {
     return new Execution<T>() {
       @Override
       protected T execute() {
-        return doSendMessage(destinationSpec, arg, returnType, statusHandler, timeout);
+        return doSendMessage(destinationSpec, arg, returnType, statusHandler, timeout, actionId);
       }
     }.start(callback);
   }
 
   private synchronized <T> T doSendMessage(Destination destinationSpec, Object arg, TypeReference returnType,
-                                           StatusHandler statusHandler, Integer timeoutSec) {
+                                           StatusHandler statusHandler, Integer timeoutSec, String actionId) {
     String token = getToken();
 
     // auto-connect or reconnect if token has changed since last connect
@@ -227,12 +228,8 @@ public class StompChannel extends Channel {
       header.put("app-id", ((AppDestination) destinationSpec).appId);
     }
 
-    if (arg instanceof SecuObject) {
-      SecuObject so = (SecuObject) arg;
-      if (so.getActionId() != null) {
-        header.put("x-action", so.getActionId());
-        so.setActionId(null);
-      }
+    if (actionId != null) {
+      header.put("x-action", actionId);
     }
 
     String body = null;

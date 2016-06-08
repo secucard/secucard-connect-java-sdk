@@ -33,9 +33,6 @@ public abstract class SecuObject implements Serializable {
   @JsonIgnore
   private Map metaData;
 
-  @JsonIgnore
-  private String actionId;
-
   public String getObject() {
     return object;
   }
@@ -60,11 +57,4 @@ public abstract class SecuObject implements Serializable {
     this.metaData = metaData;
   }
 
-  public String getActionId() {
-    return actionId;
-  }
-
-  public void setActionId(String actionId) {
-    this.actionId = actionId;
-  }
 }

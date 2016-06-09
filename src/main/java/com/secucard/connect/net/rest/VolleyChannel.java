@@ -231,6 +231,8 @@ public class VolleyChannel extends RestChannel {
       setAuthorizationHeader(headers);
     }
 
+    setIdempotencyIdHeader(params, headers);
+
     Response.Listener<T> listener;
     Response.ErrorListener errorListener;
     if (callback != null) {

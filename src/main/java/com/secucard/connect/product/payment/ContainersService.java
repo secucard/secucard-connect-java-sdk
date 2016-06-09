@@ -40,23 +40,9 @@ public class ContainersService extends ProductService<Container> {
    * @param callback  Callback to get notified when completed or failed.
    * @return The validated and completed data like Container.publicData.
    * @throws com.secucard.connect.client.APIError if a error happens. userMessage field has the reason,
-   *                                                              like "invalid iban and bic combination".
+   *                                                              like "invalid IBAN and BIC combination".
    */
   public Container create(final Container container, Callback<Container> callback) {
     return super.create(container, callback);
-  }
-
-  /**
-   * Assigns a customer with given id to a container and return the updated container.
-   */
-  public Container assignCustomer(final String containerId, final String customerId, Callback<Container> callback) {
-    return super.execute(containerId, "assign", customerId, null, Container.class, null, callback);
-  }
-
-  /**
-   * Removes an assigned customer from a container with given id.
-   */
-  public void removeCustomer(final String containerId, Callback<Void> callback) {
-    super.delete(containerId, "assign", null, null, callback);
   }
 }

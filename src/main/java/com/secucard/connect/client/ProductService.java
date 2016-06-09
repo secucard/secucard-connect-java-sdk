@@ -38,6 +38,13 @@ import java.util.List;
 public abstract class ProductService<T extends SecuObject> {
   protected ClientContext context;
 
+  private static final ThreadLocal<String> actionId = new ThreadLocal<String>(){
+    @Override
+    protected String initialValue() {
+      return null;
+    }
+  };
+
   public void setContext(ClientContext context) {
     this.context = context;
   }
@@ -51,6 +58,22 @@ public abstract class ProductService<T extends SecuObject> {
    */
   public abstract ServiceMetaData<T> getMetaData();
 
+  /**
+   * Set an ID to submit with the NEXT service call.
+   * If provided the server will prevent multiple executions of a service call with the same action ID.
+   * This ensures idempotent requests. Multiple service calls will not fail, the server just ignores and returns
+   * the same result as returned the first time.
+   * But NOTE, this behaviour has a timeout, an assigned ID is only kept for 3 minutes on server, after that treated as
+   * new!
+   * <p>
+   * The provided ID is thread local and is immediately cleared (null) after applied for a service call,
+   * even after a failure.
+   *
+   * @param id Any unique id.
+   */
+  public void setActionId(String id) {
+    actionId.set(id);
+  }
 
   protected Options getDefaultOptions() {
     return Options.getDefault();
@@ -332,6 +355,13 @@ public abstract class ProductService<T extends SecuObject> {
     if (p.options == null) {
       p.options = options;
     }
+
+    // pass the action id only here, requestList() will not need it
+    if (actionId.get() != null) {
+      p.options.actionId = actionId.get();
+      actionId.remove();
+    }
+
     final Callback.Notify pre = options.resultProcessing;
     Channel channel = channel(options);
     if (callback == null) {

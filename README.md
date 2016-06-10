@@ -34,7 +34,7 @@ To use this projects artifacts with Maven add the following dependency and repos
     <dependency>
       <groupId>com.secucard.connect</groupId>
       <artifactId>secucard-connect-java-sdk</artifactId>
-      <version>version-you-want-to-use</version>
+      <version>1.0.0-pios4</version>
     </dependency>
     .
     .

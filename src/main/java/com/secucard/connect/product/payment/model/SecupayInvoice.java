@@ -1,6 +1,6 @@
 package com.secucard.connect.product.payment.model;
 
-public class SecupayDebit extends Transaction {
+public class SecupayInvoice extends Transaction {
 
   private Container container;
 
@@ -14,6 +14,6 @@ public class SecupayDebit extends Transaction {
 
   @Override
   public String toString() {
-    return "SecupayDebit{" + "container=" + container + "} " + super.toString();
+    return "SecupayInvoice{" + "container=" + container + "} " + super.toString();
   }
 }

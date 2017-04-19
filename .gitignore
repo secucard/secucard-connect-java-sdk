@@ -32,3 +32,4 @@ proguard/
 # Gradle
 .gradle/
 .DS_Store
+/target/

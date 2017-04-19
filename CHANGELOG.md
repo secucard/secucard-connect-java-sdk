@@ -33,6 +33,9 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 - Transaction - RedirectUrl
 - Transaction - Subscription
 
+### Changed
+- The contract id is now optional in the cancel payment transaction methods
+
 ## [2.1.1] - 2016-06-10
 
 ### Addded

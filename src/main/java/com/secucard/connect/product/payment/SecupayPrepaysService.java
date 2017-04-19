@@ -40,8 +40,26 @@ public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
     return executeToBool(id, "cancel", null, map, null, callback);
   }
 
+  /**
+   * Cancel an existing transaction.
+   *
+   * @param id The prepay transaction id.
+   * @param contractId The id of the contract that was used to create this transaction. May be null
+   * if the contract is an parent contract (not cloned).
+   * @return True if successful, false else.
+   */
   public Boolean cancel(final String id, final String contractId) {
     return cancel(id, contractId, null);
+  }
+
+  /**
+   * Cancel an existing transaction.
+   *
+   * @param id The prepay transaction id.
+   * @return True if successful, false else.
+   */
+  public Boolean cancel(final String id) {
+    return cancel(id, null, null);
   }
 
   /**

@@ -58,8 +58,8 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 - product/smart/model/Transaction - paymentRequested
 - product/smart/model/Transaction - paymentExecuted
 
-
 ## [2.0.0] - 2016-03-21
+Reworked SDK
 (the list of changes are not complete)
 
 ### Added
@@ -71,28 +71,28 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 - Handling of exceptions
 
 ## [1.0.0] - 2015-05-15
-(the list of changes are not complete)
-
-### Added
-- Device Credentials
-- Stomp
+Reworked SDK
 
 ### Changed
 - Authentication / Credentials
+- Stomp
 
 ### Fixed
 - TLS 1.2 support
 
-
 ## [0.3.2] - 2016-06-10
-297b211976b9a2e5a3400ea6975e2b693ca73378
+Update README
 
 ## [0.3.1] - 2016-06-09
-9df781c4788f8d1b383a11ef14bfe1919d1c722d
+
+### Changed
+- Improve IdentsDemo
+- Correct payment transaction status constants.
+- Renamed customer reference in containers for payment.
+- Removed dedicated methods.
+- Fix POM, remove gradle build file.
 
 ## [0.3.0] - 2016-03-17
-db1716b565b0859740d31c2bc474b051c727dc6a
-(the list of changes are not complete)
 
 ### Changed
 - Rename Person classes in com.secucard.connect.model.services
@@ -103,47 +103,123 @@ appropriate than just a single person field.
 - Improve IdentsDemo.
 
 ## [0.2.0] - 2016-03-10
-6bd4089fbb0de82f3537854426415b2032f46298
+
+### Added
+- Additional properties for smart transactions.
+- Additional state for payment prepays.
+- Support postident
+
+### Changed
+- Adding new contract param when cancel prepay/debits transactions. Needed on trans. created by subcontracts.
 
 ## [0.1.23] - 2015-07-14
-789c75aa84dd61a8a00b61f14d14df189803f284
+
+### Changed
+- merchant relation removed from payment.contract
 
 ## [0.1.22] - 2015-07-08
-447af00af0de5e66eccc4496844bf36861b1af66
+
+### Added
+- Add build.gradle and AndroidManifest to use library as Android library.
+
+### Changed
+- payment contract cloning enhancements
 
 ## [0.1.21] - 2015-06-17
-5bb82b079ac2b9095c31f85fda1c15a049a26b7d
+
+### Added
+- payment.contracts clone added
 
 ## [0.1.20] - 2015-05-13
-b82e1cdefc8d5ff7e4259eb26479d248e09a89e2
+
+### Added
+- new bankname field for payment container
 
 ## [0.1.19] - 2015-04-23
-f57797b01de674e5153ba213fcf1cb6a6c915521
+
+### Added
+- state constants for ident request/response auth. cache clear method for client provided.
 
 ## [0.1.18] - 2015-04-15
-97742f773dd6425a6b0e981003fc4f12aa745583
+
+### Changed
+- async/sync event handling in payment services
 
 ## [0.1.17] - 2015-04-13
-6b6bd98a8fc29dd0caa9b99e1a951b7e37238cce
+
+### Changed
+- payment identification document model
+- event handling for payment
+- basic event handling corrections
 
 ## [0.1.16] - 2015-04-02
-100cac4f0a26e39370d10ab805ca0c0ef6b8a54e
+
+### Changed
+- async/sync event processing, payment model corrections
 
 ## [0.1.15] - 2015-04-01
-fa26aa2c74d57bacb094e8c4c0e1158c186bf5ea
+
+### Added
+- token expire time
+- Add account_read to News.
+
+### Changed
+- Change icon in getStream on VolleyChannel
+- ResourceDownloader
+- stomp message handling correction
+- Modify StoreService
+- contact model changes, moved from payment.customer and services.person
+- MerchantCards service completed
+- payment product models and services changed (prepay, debits, ...)
+- payment demo corrections
+- identresult event handling and model fixed
 
 ## [0.1.11] - 2015-03-11
-6ba4ce01ce970f28c730a3a27a3d8d3eea061fa9
+
+### Changed
+- timeout for volley future
+- loyalty.customer corrected, picture handling improved
+- downloader fix
 
 ## [0.1.10] - 2015-03-11
-fcd8d467f970532ed70a779e0c4a45d2d90a1220
+
+### Changed
+- auth canceling added, old smart service removed, additional auth device info passing prepared
+- client demo updated
+- setter for config
+- auth deactivated für general.account access
+- Modify model classes and create new service for SecuApp and MerchantCards
+- Reformat code with new code format.
+- Modify services for store checkin and Account.
+- Compile Volley dependency from maven not from project anymore.
+- media download changed
+- heart beat changed, model corrections
+- exception handling improved
+- picture property changed
+- stomp event handling
+- notifications for transactions
+- Modify BigDecimals to int.
+- implement onChangeEventListener for Account, AccountDevices and Transaction.
+- Create addCard method in SecuAppService.
+- volley stream request
+- Modify date format pattern for dob. Add Log to AccountDevicesService.
+- token expiring
+
+### Fixed
+- auth refresh fix, device field fix
+- picture url handling corrected
+- geo query params fixed
+- client demo fixed
+- stomp close fix
+- store and account device corrections
+- smart.transaction models corrections
+- smart.transaction start fixed
 
 ## [0.1.1] - 2015-03-02
-fe6a21b594ef4c9295606cba64720f38452b0ce1
+First public release
 
 ## [0.1.0] - not released
-e2ea08986d4e1656016d079bbe6f19b713ceac62
-
+Internal developer release
 
 
 
@@ -163,9 +239,7 @@ e2ea08986d4e1656016d079bbe6f19b713ceac62
 [0.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.2.0...v0.3.0
 [0.3.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.0...v0.3.1
 [0.3.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.1...v0.3.2
-
-[1.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.2...v1.0.0
-
+[1.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.18...v1.0.0
 [2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
 [2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
 [2.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.1.1

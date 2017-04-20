@@ -1,24 +1,26 @@
-/*
- * Copyright (c) 2015. hp.weber GmbH & Co secucard KG (www.secucard.com)
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.secucard.connect;
 
 import android.content.Context;
-import com.secucard.connect.auth.*;
+import com.secucard.connect.auth.AndroidClientAuthDetails;
+import com.secucard.connect.auth.AuthService;
+import com.secucard.connect.auth.CancelCallback;
+import com.secucard.connect.auth.ClientAuthDetails;
+import com.secucard.connect.auth.TokenManager;
 import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
 import com.secucard.connect.auth.model.Token;
-import com.secucard.connect.client.*;
+import com.secucard.connect.client.AuthError;
+import com.secucard.connect.client.Callback;
+import com.secucard.connect.client.ClientContext;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.DataStorage;
+import com.secucard.connect.client.DiskCache;
+import com.secucard.connect.client.ExceptionHandler;
+import com.secucard.connect.client.NetworkError;
+import com.secucard.connect.client.ProductService;
+import com.secucard.connect.client.ResourceDownloader;
+import com.secucard.connect.client.ServiceFactory;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
@@ -41,18 +43,21 @@ import com.secucard.connect.product.smart.Smart;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "1.0.0";
+  public static final String VERSION = "2.2.0";
 
   protected volatile boolean isConnected;
   private Configuration configuration;
@@ -401,16 +406,18 @@ public class SecucardConnect {
 
 
   private void wireServiceInstances() {
-
     document = new Document(service(Document.Uploads));
 
-    general = new General(service(General.Accountdevices), service(General.Accounts), service(General.Merchants),
-        service(General.News), service(General.Publicmerchants), service(General.Stores), service(General.Transactions));
+    general = new General(service(General.Accountdevices), service(General.Accounts),
+        service(General.Merchants), service(General.News), service(General.Publicmerchants),
+        service(General.Stores), service(General.Transactions));
 
-    payment = new Payment(service(Payment.Containers), service(Payment.Customers), service(Payment.Secupaydebits),
-        service(Payment.Secupayprepays), service(Payment.Contracts));
+    payment = new Payment(service(Payment.Containers), service(Payment.Customers),
+        service(Payment.Secupaydebits), service(Payment.Secupayprepays), service(Payment.Contracts),
+        service(Payment.Secupayinvoices), service(Payment.Secupaycreditcards));
 
-    loyalty = new Loyalty(service(Loyalty.Cards), service(Loyalty.Customers), service(Loyalty.Merchantcards));
+    loyalty = new Loyalty(service(Loyalty.Cards), service(Loyalty.Customers),
+        service(Loyalty.Merchantcards));
 
     services = new Services(service(Services.Identrequests), service(Services.Identresults));
 

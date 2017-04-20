@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
-## [2.2.0] - 2017-04-19
+## [2.2.0] - 2017-04-20
 
 ### Added
 Added missing payment stuff (it's now identical with the .net-sdk and the php-sdk).
@@ -34,6 +34,7 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 - Transaction - Subscription
 
 ### Changed
+- The versions of the dependencies are now up to date in the pom.xml
 - The contract id is now optional in the cancel payment transaction methods
 
 ## [2.1.1] - 2016-06-10

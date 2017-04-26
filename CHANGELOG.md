@@ -18,6 +18,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
+## [2.3.0] - YYYY-MM-DD
+
+### Security
+
+### Deprecated
+
+### Added
+
+### Changed
+
+### Fixed
+- Invalid list of supported SSL protocols (Only TLSv1.2 is supported currently).
+
+### Removed
+- Config param "stomp.ssl" was removed because only secure connections are supported by the SecuConnect-API.
+
 ## [2.2.0] - 2017-04-20
 
 ### Added

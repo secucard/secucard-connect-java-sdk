@@ -35,7 +35,7 @@ public class Transaction extends SecuObject {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private Device deviceSource;
 
-  @JsonProperty("target_device")
+  @JsonProperty("device_destination")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private Device targetDevice;
 

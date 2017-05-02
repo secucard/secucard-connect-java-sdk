@@ -20,6 +20,7 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.general.model.Notification;
+import com.secucard.connect.product.smart.model.ReceiptNumber;
 import com.secucard.connect.product.smart.model.Transaction;
 
 /**
@@ -74,10 +75,38 @@ public class TransactionService extends ProductService<Transaction> {
 
   /**
    * Cancel the existing transaction with the given id.
-   *
+   * @param id Id of the transaction
    * @return True if ok false else.
    */
   public Boolean cancel(String id, Callback<Boolean> callback) {
     return executeToBool(id, "cancel", null, null, null, callback);
+  }
+
+  /**
+   * Starts extended Diagnose
+   * @return Transaction
+   */
+  public Transaction diagnosis(Callback<Transaction> callback)
+  {
+    return execute(null,"Diagnosis",null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  }
+
+  /**
+   * Starts End of Day Report (Kassenschnitt)
+   * @return Transaction
+   */
+  public Transaction endOfDay(Callback<Transaction> callback)
+  {
+    return execute(null,"EndofDay", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  }
+
+  /**
+   * Cancel payment transaction different from Loyalty
+   * @param receiptNumber Receipt number to cancel
+   * @return Transaction
+   */
+  public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
+  {
+    return execute(null,"cancelTrx", null, new ReceiptNumber(receiptNumber), Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 }

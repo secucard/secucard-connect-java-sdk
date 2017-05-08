@@ -18,6 +18,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
+## [2.3.0] - 2017-05-08
+
+### Deprecated
+- Config param "stomp.ssl"
+
+### Added
+New Methods:
+- Smart.Transaction: Fetch an End of Day Report (Kassenschnitt)
+- Smart.Transaction: Start extended diagnostic analysis
+- Smart.Transaction: Cancel payment transaction (different from Loyalty)
+
+### Fixed
+- Invalid list of supported SSL protocols (Only TLSv1.2 is supported currently).
+
+### Removed
+- Config param "stomp.ssl" was removed because only secure connections are supported by the SecuConnect-API.
+
 ## [2.2.0] - 2017-04-20
 
 ### Added
@@ -245,3 +262,4 @@ Internal developer release
 [2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
 [2.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.1.1
 [2.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.2.0
+[2.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.2.0...v2.3.0

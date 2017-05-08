@@ -67,7 +67,7 @@ public class StompChannel extends Channel {
     super(context);
     this.configuration = cfg;
     StompClient.Config stompCfg = new StompClient.Config(cfg.host, cfg.port, cfg.virtualHost,
-        cfg.userId, cfg.password, cfg.heartbeatSec * 1000, cfg.useSsl, cfg.socketTimeoutSec,
+        cfg.userId, cfg.password, cfg.heartbeatSec * 1000, cfg.socketTimeoutSec,
         cfg.messageTimeoutSec, cfg.connectionTimeoutSec);
     this.id = Integer.toString(hashCode());
     stomp = new StompClient(this.id, stompCfg, new DefaultEventListner());
@@ -567,7 +567,6 @@ public class StompChannel extends Channel {
    * - stomp.virtualHost, STOMP virtual host.<br/>
    * - stomp.port, STOMP port.<br/>
    * - stomp.destination, Base path of the secucard STOMP API.<br/>
-   * - stomp.ssl, SSL used for STOMP or not<br/>
    * - stomp.user, Login, just for tests.<br/>
    * - stomp.pwd, Password, just for tests.<br/>
    * - stomp.replyQueue, The default queue for all STOMP messages.<br/>
@@ -592,7 +591,6 @@ public class StompChannel extends Channel {
     private final String password;
     private final String virtualHost;
     private final int heartbeatSec;
-    private final boolean useSsl;
     private final String userId;
     private final String replyQueue;
     private final int connectionTimeoutSec;
@@ -607,7 +605,6 @@ public class StompChannel extends Channel {
       this.password = properties.getProperty("stomp.pwd");
       this.virtualHost = properties.getProperty("stomp.virtualHost");
       this.heartbeatSec = Integer.parseInt(properties.getProperty("stomp.heartbeatSec"));
-      this.useSsl = Boolean.parseBoolean(properties.getProperty("stomp.ssl"));
       this.userId = properties.getProperty("stomp.user");
       this.replyQueue = properties.getProperty("stomp.replyQueue");
       this.connectionTimeoutSec = Integer.parseInt(properties.getProperty("stomp.connectTimeoutSec"));
@@ -631,7 +628,6 @@ public class StompChannel extends Channel {
           ", password='" + password + '\'' +
           ", virtualHost='" + virtualHost + '\'' +
           ", heartbeatSec=" + heartbeatSec +
-          ", useSsl=" + useSsl +
           ", userId='" + userId + '\'' +
           ", replyQueue='" + replyQueue + '\'' +
           ", connectionTimeoutSec=" + connectionTimeoutSec +

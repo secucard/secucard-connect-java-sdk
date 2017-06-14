@@ -20,7 +20,6 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.general.model.Notification;
-import com.secucard.connect.product.smart.model.ReceiptNumber;
 import com.secucard.connect.product.smart.model.Transaction;
 
 /**

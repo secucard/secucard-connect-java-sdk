@@ -32,6 +32,12 @@ public class TransactionService extends ProductService<Transaction> {
 
   private static final String GENERAL_NOTIFICATIONS_OBJECT = "general.notifications";
 
+  public static final String TYPE_DEMO = "demo";
+  public static final String TYPE_CASH = "cash";
+  public static final String TYPE_AUTO = "auto";
+  public static final String TYPE_ZVT = "cashless";
+  public static final String TYPE_LOYALTY = "loyalty";
+
   @Override
   public ServiceMetaData<Transaction> getMetaData() {
     return META_DATA;
@@ -107,6 +113,6 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
   {
-    return execute(null,"cancelTrx", null, new ReceiptNumber(receiptNumber), Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+    return execute(receiptNumber,"cancelTrx", null, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 }

@@ -57,7 +57,7 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.3.0";
+  public static final String VERSION = "2.4.0";
 
   protected volatile boolean isConnected;
   private Configuration configuration;

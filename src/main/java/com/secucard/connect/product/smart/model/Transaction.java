@@ -61,6 +61,10 @@ public class Transaction extends SecuObject {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<ReceiptLine> receiptLines;
 
+  @JsonProperty("receipt_number")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private String receiptNumber;
+
   @JsonProperty("receipt_merchant")
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private List<ReceiptLine> receiptLinesMerchant;
@@ -113,6 +117,13 @@ public class Transaction extends SecuObject {
     this.paymentMethod = paymentMethod;
   }
 
+  public String getReceiptNumber() {
+    return receiptNumber;
+  }
+
+  public void setReceiptNumber(String receiptNumber) {
+    this.receiptNumber = receiptNumber;
+  }
 
   public Transaction() {
   }
@@ -220,6 +231,7 @@ public class Transaction extends SecuObject {
         ", transactionRef='" + transactionRef + '\'' +
         ", paymentMethod='" + paymentMethod + '\'' +
         ", receiptLines=" + receiptLines +
+        ", receiptNumber='" + receiptNumber + '\'' +
         ", error='" + error + '\'' +
         "} " + super.toString();
   }

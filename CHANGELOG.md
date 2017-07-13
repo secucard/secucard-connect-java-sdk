@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
+## [2.4.0] - 2017-07-13
+
+### Fixed
+- Smart.Transaction: Cancel payment transaction call
+
 ## [2.3.0] - 2017-05-08
 
 ### Deprecated

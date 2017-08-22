@@ -29,6 +29,10 @@ public class CheckinService extends ProductService<Checkin> {
   public Options getDefaultOptions() {
     return new Options(Options.CHANNEL_STOMP);
   }
+  
+  public String getCheckinOverviewUrl() {
+    // TODO return
+  }
 
   /**
    * Set a callback to get notified when a check in happened.

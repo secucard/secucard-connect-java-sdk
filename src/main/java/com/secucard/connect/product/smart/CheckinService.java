@@ -30,6 +30,10 @@ public class CheckinService extends ProductService<Checkin> {
     return new Options(Options.CHANNEL_STOMP);
   }
   
+  public String getSecuofficeUrl() {
+    // TODO return
+  }
+  
   public String getCheckinOverviewUrl() {
     // TODO return
   }

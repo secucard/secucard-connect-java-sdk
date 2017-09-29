@@ -20,6 +20,7 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.general.model.Notification;
+import com.secucard.connect.product.loyalty.model.LoyaltyBonus;
 import com.secucard.connect.product.smart.model.Transaction;
 
 /**
@@ -113,5 +114,15 @@ public class TransactionService extends ProductService<Transaction> {
   public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
   {
     return execute(receiptNumber,"cancelTrx", null, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  }
+
+  /**
+   * Request loyalty bonus products and add them to the basket
+   * @param id Id of the smart transaction
+   * @return LoyaltyBonus
+   */
+  public LoyaltyBonus appendLoyaltyBonusProducts(String id, Callback<LoyaltyBonus> callback)
+  {
+    return execute(id, "preTransaction", null,null, LoyaltyBonus.class, null, callback);
   }
 }

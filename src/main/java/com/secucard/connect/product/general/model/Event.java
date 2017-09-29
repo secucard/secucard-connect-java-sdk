@@ -14,6 +14,7 @@ package com.secucard.connect.product.general.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import com.secucard.connect.net.util.JsonMapper;
 import com.secucard.connect.net.util.jackson.ObjectIdTypeResolver;
 import com.secucard.connect.product.common.model.SecuObject;
 
@@ -34,6 +35,10 @@ public class Event<T> extends SecuObject {
   @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = TARGET_PROPERTY)
   @JsonTypeIdResolver(ObjectIdTypeResolver.class)
   private T data = null;
+
+  private String dataRaw = null;
+
+  private JsonMapper jsonMapper = null;
 
   public String getTarget() {
     return target;
@@ -65,6 +70,22 @@ public class Event<T> extends SecuObject {
 
   public void setData(T data) {
     this.data = data;
+  }
+
+  public String getDataRaw() {
+    return dataRaw;
+  }
+
+  public void setDataRaw(String dataRaw) {
+    this.dataRaw = dataRaw;
+  }
+
+  public JsonMapper getJsonMapper() {
+    return jsonMapper;
+  }
+
+  public void setJsonMapper(JsonMapper jsonMapper) {
+    this.jsonMapper = jsonMapper;
   }
 
   @Override

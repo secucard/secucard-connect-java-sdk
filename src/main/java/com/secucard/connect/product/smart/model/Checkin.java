@@ -99,9 +99,6 @@ public class Checkin extends SecuObject {
     return pictureObject;
   }
 
-
-
-
   @Override
   public String toString() {
     return "Checkin{" +

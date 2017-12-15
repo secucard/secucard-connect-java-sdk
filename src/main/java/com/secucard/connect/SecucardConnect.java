@@ -417,7 +417,7 @@ public class SecucardConnect {
         service(Payment.Secupayinvoices), service(Payment.Secupaycreditcards));
 
     loyalty = new Loyalty(service(Loyalty.Cards), service(Loyalty.Customers),
-        service(Loyalty.Merchantcards));
+        service(Loyalty.Merchantcards), service(Loyalty.CardGroups));
 
     services = new Services(service(Services.Identrequests), service(Services.Identresults));
 

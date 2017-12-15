@@ -33,6 +33,15 @@ public abstract class Transaction extends SecuObject {
   @JsonProperty("redirect_url")
   protected RedirectUrl redirectUrl;
 
+  @JsonProperty("url_success")
+  protected String urlSuccess;
+
+  @JsonProperty("url_failure")
+  protected String urlFailure;
+
+  @JsonProperty("iframe_url")
+  protected String iframeUrl;
+
   @JsonProperty("opt_data")
   protected OptData optData;
 
@@ -192,6 +201,27 @@ public abstract class Transaction extends SecuObject {
 
   public void setPaymentAction(String paymentAction) {
     this.paymentAction = paymentAction;
+  }
+
+  public String getUrlSuccess() {
+    return urlSuccess;
+  }
+  public void setUrlSuccess(String urlSuccess) {
+    this.urlSuccess = urlSuccess;
+  }
+
+  public String getUrlFailure() {
+    return urlFailure;
+  }
+  public void setUrlFailure(String urlFailure) {
+    this.urlFailure = urlFailure;
+  }
+
+  public String getIframeUrl() {
+    return iframeUrl;
+  }
+  public void setIframeUrl(String iframeUrl) {
+    this.iframeUrl = iframeUrl;
   }
 
 }

@@ -14,6 +14,7 @@ com.secucard.connect.product.document.UploadsService
 com.secucard.connect.product.loyalty.CardsService
 com.secucard.connect.product.loyalty.CustomersService
 com.secucard.connect.product.loyalty.MerchantCardsService
+com.secucard.connect.product.loyalty.CardGroupsService
 
 com.secucard.connect.product.payment.ContainersService
 com.secucard.connect.product.payment.ContractsService

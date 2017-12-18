@@ -20,6 +20,10 @@ import com.secucard.connect.product.loyalty.model.MerchantCard;
 import java.util.List;
 
 public class Ident extends SecuObject {
+
+  public static final String TYPE_CARD = "card";
+  public static final String TYPE_CHECKIN = "checkin";
+
   private String type;
 
   private String name;
@@ -54,8 +58,6 @@ public class Ident extends SecuObject {
     this.type = type;
     this.value = value;
   }
-
-
 
   /**
    * Selects a indent of a given id from a list of idents.
@@ -138,7 +140,6 @@ public class Ident extends SecuObject {
   public void setMerchantCard(MerchantCard merchantCard) {
     this.merchantCard = merchantCard;
   }
-
 
   @Override
   public String toString() {

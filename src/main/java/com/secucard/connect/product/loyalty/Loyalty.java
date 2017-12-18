@@ -12,15 +12,14 @@
 
 package com.secucard.connect.product.loyalty;
 
-import com.secucard.connect.product.general.MerchantsService;
-
 /**
  * Holds service references and service type constants for "loyalty" product.
  */
 public class Loyalty {
 
-  public Loyalty(CardsService cards, CustomersService customers, MerchantCardsService merchantcards) {
+  public Loyalty(CardsService cards, CustomersService customers, MerchantCardsService merchantcards, CardGroupsService cardgroups) {
     this.cards = cards;
+    this.cardgroups = cardgroups;
     this.customers = customers;
     this.merchantcards = merchantcards;
   }
@@ -28,12 +27,13 @@ public class Loyalty {
   public static Class<CardsService> Cards = CardsService.class;
   public CardsService cards;
 
+  public static Class<CardGroupsService> CardGroups = CardGroupsService.class;
+  public CardGroupsService cardgroups;
+
   public static Class<CustomersService> Customers = CustomersService.class;
   public CustomersService customers;
 
-
   public static Class<MerchantCardsService> Merchantcards = MerchantCardsService.class;
   public MerchantCardsService merchantcards;
-
 
 }

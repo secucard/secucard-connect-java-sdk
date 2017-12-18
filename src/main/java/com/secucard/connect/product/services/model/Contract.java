@@ -12,9 +12,60 @@
 
 package com.secucard.connect.product.services.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
+import com.secucard.connect.product.general.model.Merchant;
+
+import java.util.Date;
 
 public class Contract extends SecuObject {
 
+    @JsonProperty("redirect_url_success")
+    private String redirectUrlSuccess;
 
+    @JsonProperty("redirect_url_failed")
+    private String redirectUrlFailed;
+
+    @JsonProperty("push_url")
+    private String pushUrl;
+
+    private Date created;
+
+    private Merchant merchant;
+
+    public String getRedirectUrlSuccess() {
+        return redirectUrlSuccess;
+    }
+    public void setRedirectUrlSuccess(String redirectUrlSuccess) { this.redirectUrlSuccess = redirectUrlSuccess;  }
+
+    public String getRedirectUrlFailed() {
+        return redirectUrlFailed;
+    }
+    public void setRedirectUrlFailed(String redirectUrlFailed) { this.redirectUrlFailed = redirectUrlFailed;  }
+
+    public String getPushUrl() {
+        return pushUrl;
+    }
+    public void setPushUrl(String pushUrl) { this.pushUrl = pushUrl;  }
+
+    public Date getCreated() {
+        return created;
+    }
+    public void setCreated(Date created) { this.created = created;  }
+
+    public Merchant getMerchant() {
+        return merchant;
+    }
+    public void setMerchant(Merchant merchant) { this.merchant = merchant;  }
+
+    @Override
+    public String toString() {
+        return "Contract{" +
+                "redirectUrlSuccess=" + redirectUrlSuccess +
+                ", redirectUrlFailed=" + redirectUrlFailed +
+                ", pushUrl=" + pushUrl +
+                ", created=" + created +
+                ", merchant=" + merchant +
+                '}';
+    }
 }

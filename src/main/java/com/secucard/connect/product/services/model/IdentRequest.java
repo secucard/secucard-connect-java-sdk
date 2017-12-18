@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Contact;
+import com.secucard.connect.product.general.model.Merchant;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,11 +25,20 @@ import java.util.List;
 public class IdentRequest extends SecuObject {
   public static final String TYPE_PERSON = "person";
   public static final String TYPE_COMPANY = "company";
+
   public static final String STATUS_REQUESTED = "requested";
   public static final String STATUS_OK = "ok";
   public static final String STATUS_FAILED = "failed";
   public static final String PROVIDER_IDNOW = "idnow";
+
+  /**
+   * @deprecated use {PROVIDER_POST_IDENT} instead
+   */
+  @Deprecated
   public static final String PROVIDER_POSTIDENT = "post_ident";
+
+  public static final String PROVIDER_POST_IDENT = "post_ident";
+  public static final String PROVIDER_BANK_IDENT = "bank_ident";
 
   private String type;
 
@@ -47,6 +57,25 @@ public class IdentRequest extends SecuObject {
   private List<Entity> entities = new ArrayList<>();
 
   private Date created;
+
+  @JsonProperty("use_internal_contract")
+  private String useInternalContract;
+
+  private Merchant[] assignment;
+
+  public String getUseInternalContract() {
+    return useInternalContract;
+  }
+  public void setUseInternalContract(String useInternalContract) {
+    this.useInternalContract = useInternalContract;
+  }
+
+  public Merchant[] getAssignment() {
+    return assignment;
+  }
+  public void setAssignment(Merchant[] assignment) {
+    this.assignment = assignment;
+  }
 
   public Contract getContract() {
     return contract;
@@ -134,9 +163,10 @@ public class IdentRequest extends SecuObject {
         ", ownerTransactionId='" + ownerTransactionId + '\'' +
         ", entities=" + entities +
         ", created=" + created +
+        ", useInternalContract=" + useInternalContract +
+        ", assignment=" + assignment +
         "} " + super.toString();
   }
-
 
   public static class Entity {
     @JsonProperty("transaction_id")

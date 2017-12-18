@@ -1,5 +1,6 @@
 package com.secucard.connect.product.payment.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Contact;
 import com.secucard.connect.product.general.model.Merchant;
@@ -17,6 +18,8 @@ public class Customer extends SecuObject {
 
   private Contract contract;
 
+  @JsonProperty("merchant_customer_id")
+  private int merchantCustomerId;
 
   public Contract getContract() {
     return contract;
@@ -58,9 +61,22 @@ public class Customer extends SecuObject {
     this.updated = updated;
   }
 
+  public int getMerchantCustomerId() {
+    return merchantCustomerId;
+  }
+  public void setMerchantCustomerId(int merchantCustomerId) {
+    this.merchantCustomerId = merchantCustomerId;
+  }
+
   @Override
   public String toString() {
-    return "Customer{" + "merchant=" + merchant + ", contact=" + contact + ", created=" + created
-        + ", updated=" + updated + ", contract=" + contract + "} " + super.toString();
+    return "Customer{"
+            + "merchant=" + merchant +
+            ", contact=" + contact +
+            ", created=" + created +
+            ", updated=" + updated +
+            ", contract=" + contract +
+            ", merchantCustomerId=" +merchantCustomerId +
+            "} " + super.toString();
   }
 }

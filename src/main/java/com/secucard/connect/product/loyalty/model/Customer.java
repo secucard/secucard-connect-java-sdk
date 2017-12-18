@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.SecuObject;
+import com.secucard.connect.product.general.model.Contact;
 import com.secucard.connect.product.general.model.Merchant;
 
 import java.util.Date;
@@ -23,6 +24,9 @@ import java.util.List;
 
 public class  Customer extends SecuObject {
   private Merchant merchant;
+
+  @JsonProperty("contact")
+  private Contact contact;
 
   @JsonProperty("forename")
   private String foreName;
@@ -93,6 +97,14 @@ public class  Customer extends SecuObject {
 
   public void setMerchant(Merchant merchant) {
     this.merchant = merchant;
+  }
+
+  public Contact getContact() {
+    return contact;
+  }
+
+  public void setContact(Contact contact) {
+    this.contact = contact;
   }
 
   public String getForeName() {

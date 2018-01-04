@@ -26,6 +26,8 @@ public class Product {
 
   private String articleNumber;
 
+  private String serialNumber;
+
   private String ean;
 
   protected String desc;
@@ -97,6 +99,14 @@ public class Product {
     this.articleNumber = articleNumber;
   }
 
+  public String getSerialNumber() {
+    return serialNumber;
+  }
+
+  public void setSerialNumber(String serialNumber) {
+    this.serialNumber = serialNumber;
+  }
+
   public String getEan() {
     return ean;
   }
@@ -161,6 +171,7 @@ public class Product {
         ", priceOne=" + priceOne +
         ", tax=" + tax +
         ", productGroups=" + groups +
+        ", serialNumber=" + serialNumber +
         '}';
   }
 }

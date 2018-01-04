@@ -19,6 +19,14 @@ import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Merchant;
 
 public class CardGroup extends SecuObject {
+
+  public static final String TRANSACTION_TYPE_CHARGE = "charge";
+  public static final String TRANSACTION_TYPE_DISCHARGE = "discharge";
+  public static final String TRANSACTION_TYPE_SALE_REVENUE = "sale_revenue";
+  public static final String TRANSACTION_TYPE_CHARGE_POINTS = "charge_points";
+  public static final String TRANSACTION_TYPE_DISCHARGE_POINTS = "discharge_points";
+  public static final String TRANSACTION_TYPE_CASHREPORT = "cashreport";
+
   @JsonProperty("display_name")
   private String displayName;
 

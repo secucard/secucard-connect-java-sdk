@@ -18,6 +18,36 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
+## [2.5.0] - 2017-12-18
+
+### Deprecated
+- Service.IdentRequest: PROVIDER_POSTIDENT use PROVIDER_POST_IDENT instead
+
+### Added
+New Methods:
+- Loyalty.CardGroupService: checkPasscodeEnabled for loyalty card and transaction type
+- Loyalty.MerchantCardService: validateCSC for loyalty card
+- Loyalty.MerchantCardService: validatePasscode for loyalty card
+
+Constants:
+- Loyalty.CardGroup
+- Smart.Ident
+
+Model classes:
+- General.Device
+- Loyalty.Customer
+- Loyalty.MerchantCard
+- Payment.Customer
+- Payment.Transaction
+- Services.Address
+- Services.AddressComponents
+- Services.Contract
+- Services.IdentRequest
+- Smart.Checkin
+- Smart.Device
+
+Dependency for Java 9
+
 ## [2.4.0] - 2017-07-13
 
 ### Fixed
@@ -104,6 +134,8 @@ Reworked SDK
 - TLS 1.2 support
 
 ## [0.3.2] - 2016-06-10
+
+### Changed
 Update README
 
 ## [0.3.1] - 2016-06-09
@@ -263,8 +295,10 @@ Internal developer release
 [0.3.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.0...v0.3.1
 [0.3.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.1...v0.3.2
 [1.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.18...v1.0.0
-[2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
+[2.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v1.0.0...v2.0.0
 [2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
 [2.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.1.1
-[2.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.2.0
+[2.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.1...v2.2.0
 [2.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.2.0...v2.3.0
+[2.4.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.3.0...v2.4.0
+[2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0

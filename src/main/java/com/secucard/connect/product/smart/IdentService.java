@@ -14,7 +14,6 @@ package com.secucard.connect.product.smart;
 
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
-import com.secucard.connect.net.Options;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.smart.model.Ident;
 

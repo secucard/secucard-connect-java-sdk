@@ -21,6 +21,10 @@ import java.util.Date;
 
 public class MerchantCard extends SecuObject {
 
+  public static final int PASSCODE_STATUS_NOT_ENABLED = 1;
+  public static final int PASSCODE_STATUS_NOT_SET = 2;
+  public static final int PASSCODE_STATUS_SET = 3;
+
   private Merchant merchant;
 
   @JsonProperty("created_for_merchant")
@@ -40,6 +44,9 @@ public class MerchantCard extends SecuObject {
 
   private int balance;
 
+  @JsonProperty("cash_balance")
+  private int cashBalance;
+
   private int points;
 
   @JsonProperty("last_usage")
@@ -53,6 +60,12 @@ public class MerchantCard extends SecuObject {
 
   @JsonProperty("lock_status")
   private String lockStatus;
+
+  @JsonProperty("bonus_balance")
+  private int bonusBalance;
+
+  @JsonProperty("passcode")
+  private int passcode;
 
   public Customer getCustomer() {
     return customer;
@@ -118,6 +131,22 @@ public class MerchantCard extends SecuObject {
     this.balance = balance;
   }
 
+  public int getCashBalance() {
+    return cashBalance;
+  }
+
+  public void setCashBalance(int cashBalance) {
+    this.cashBalance = cashBalance;
+  }
+
+  public int getBonusBalance() {
+    return bonusBalance;
+  }
+
+  public void setBonusBalance(int bonusBalance) {
+    this.bonusBalance = bonusBalance;
+  }
+
   public int getPoints() {
     return points;
   }
@@ -156,5 +185,13 @@ public class MerchantCard extends SecuObject {
 
   public void setLockStatus(String lockStatus) {
     this.lockStatus = lockStatus;
+  }
+
+  public int getPasscode() {
+    return passcode;
+  }
+
+  public void setPasscode(int passcode) {
+    this.passcode = passcode;
   }
 }

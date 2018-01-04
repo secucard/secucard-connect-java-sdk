@@ -17,6 +17,7 @@ import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Account;
 import com.secucard.connect.product.loyalty.model.Customer;
+import com.secucard.connect.product.loyalty.model.MerchantCard;
 
 import java.util.Date;
 
@@ -38,6 +39,8 @@ public class Checkin extends SecuObject {
   private Account account;
 
   private Customer customer;
+
+  private MerchantCard merchantcard;
 
   @JsonIgnore
   private Exception error;

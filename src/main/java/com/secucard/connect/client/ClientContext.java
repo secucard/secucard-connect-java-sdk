@@ -29,6 +29,5 @@ public class ClientContext {
   public Map<String, Channel> channels;
   public String defaultChannel;
   public JsonMapper jsonMapper;
-  public Object runtimeContext;
   public String appId;
 }

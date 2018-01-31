@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
+## [2.6.0] - 2018-01-30
+
+### Security
+- fasterxml dependency update
+
+### Removed
+- Android support
+- Unmaintained tests
+- Volley library
+
 ## [2.5.0] - 2017-12-18
 
 ### Deprecated
@@ -302,3 +312,4 @@ Internal developer release
 [2.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.2.0...v2.3.0
 [2.4.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.3.0...v2.4.0
 [2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0
+[2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0

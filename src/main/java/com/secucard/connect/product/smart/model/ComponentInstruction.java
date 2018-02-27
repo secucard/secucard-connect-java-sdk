@@ -12,6 +12,8 @@
 
 package com.secucard.connect.product.smart.model;
 
+import com.secucard.connect.product.loyalty.model.MerchantCard;
+
 public class ComponentInstruction {
 
     public static final String COMPONENT_ACTION_OPEN = "open";
@@ -32,6 +34,8 @@ public class ComponentInstruction {
 
     public ComponentPosition position;
 
+    public MerchantCard merchantcard;
+
     @Override
     public String toString() {
         return "ComponentInstruction{" +
@@ -40,6 +44,7 @@ public class ComponentInstruction {
                 ", action='" + action + '\'' +
                 ", size='" + size + '\'' +
                 ", position='" + position + '\'' +
+                ", merchantcard='" + merchantcard + '\'' +
                 "} " + super.toString();
     }
 

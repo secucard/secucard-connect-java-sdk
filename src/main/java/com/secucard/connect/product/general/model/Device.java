@@ -10,13 +10,10 @@
  * limitations under the License.
  */
 
-dependencies {
-    compile 'com.fasterxml.jackson.core:jackson-core:2.8.11'
-    compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.8.11'
-    compile('org.glassfish.jersey.core:jersey-client:2.25.1') {
-        exclude module: 'javax.inject'
-    }
-    compile 'org.apache.commons:commons-lang3:3.5'
-    compile 'org.reflections:reflections:0.9.11'
-    compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+package com.secucard.connect.product.general.model;
+
+import com.secucard.connect.product.common.model.SecuObject;
+
+public class Device extends SecuObject {
+
 }

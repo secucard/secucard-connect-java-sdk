@@ -52,8 +52,7 @@ public class TransactionService extends ProductService<Transaction> {
    * @return The result data.
    */
   public Transaction start(String transactionId, String type, Callback<Transaction> callback) {
-    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP),
-        callback);
+    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
@@ -85,7 +84,7 @@ public class TransactionService extends ProductService<Transaction> {
    * @return True if ok false else.
    */
   public Boolean cancel(String id, Callback<Boolean> callback) {
-    return executeToBool(id, "cancel", null, null, null, callback);
+    return executeToBool(id, "cancel", null, "smart.transactions", null, callback);
   }
 
   /**
@@ -94,7 +93,7 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public Transaction diagnosis(Callback<Transaction> callback)
   {
-    return execute(null,"Diagnosis",null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+    return execute(null, "Diagnosis", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
@@ -103,7 +102,7 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public Transaction endOfDay(Callback<Transaction> callback)
   {
-    return execute(null,"EndofDay", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+    return execute(null, "EndofDay", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
@@ -113,7 +112,7 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
   {
-    return execute(receiptNumber,"cancelTrx", null, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+    return execute(receiptNumber, "cancelTrx", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
@@ -123,6 +122,6 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public LoyaltyBonus appendLoyaltyBonusProducts(String id, Callback<LoyaltyBonus> callback)
   {
-    return execute(id, "preTransaction", null,null, LoyaltyBonus.class, null, callback);
+    return execute(id, "preTransaction", null, "smart.transactions", LoyaltyBonus.class, null, callback);
   }
 }

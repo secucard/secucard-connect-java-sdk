@@ -44,7 +44,16 @@ public class MerchantCardsService extends ProductService<MerchantCard> {
    * @param csc CSC number
    * @return bool
    */
-  public Boolean validateCSC(String cardNumber, String csc, Callback<Boolean> callback) {
+  public Boolean validateCSC(String cardNumber, String csc, Callback<Boolean> callback)
+  {
+    if (cardNumber == null || cardNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
+    }
+
+    if (csc == null || csc.equals("")) {
+      throw new IllegalArgumentException("Parameter [csc] can not be empty!");
+    }
+
     Map<String, String> obj = new HashMap<>();
     obj.put("cardnumber", cardNumber);
     obj.put("csc", csc);
@@ -58,7 +67,16 @@ public class MerchantCardsService extends ProductService<MerchantCard> {
    * @param pin PIN number
    * @return bool
    */
-  public Boolean validatePasscode(String cardNumber, String pin, Callback<Boolean> callback) {
+  public Boolean validatePasscode(String cardNumber, String pin, Callback<Boolean> callback)
+  {
+    if (cardNumber == null || cardNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
+    }
+
+    if (pin == null || pin.equals("")) {
+      throw new IllegalArgumentException("Parameter [pin] can not be empty!");
+    }
+
     Map<String, String> obj = new HashMap<>();
     obj.put("cardnumber", cardNumber);
     obj.put("pin", pin);

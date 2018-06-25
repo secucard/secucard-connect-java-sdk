@@ -24,5 +24,5 @@ public interface EventListener<T> {
    *
    * @param event The event data.
    */
-  public abstract void onEvent(T event);
+  void onEvent(T event);
 }

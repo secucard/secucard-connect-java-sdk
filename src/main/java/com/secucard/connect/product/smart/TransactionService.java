@@ -51,7 +51,16 @@ public class TransactionService extends ProductService<Transaction> {
    * @param type          The transaction type like "auto" or "cash".
    * @return The result data.
    */
-  public Transaction start(String transactionId, String type, Callback<Transaction> callback) {
+  public Transaction start(String transactionId, String type, Callback<Transaction> callback)
+  {
+    if (transactionId == null || transactionId.equals("")) {
+      throw new IllegalArgumentException("Parameter [transactionId] can not be empty!");
+    }
+
+    if (type == null || type.equals("")) {
+      throw new IllegalArgumentException("Parameter [type] can not be empty!");
+    }
+
     return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
@@ -83,7 +92,12 @@ public class TransactionService extends ProductService<Transaction> {
    * @param id Id of the transaction
    * @return True if ok false else.
    */
-  public Boolean cancel(String id, Callback<Boolean> callback) {
+  public Boolean cancel(String id, Callback<Boolean> callback)
+  {
+    if (id == null || id.equals("")) {
+      throw new IllegalArgumentException("Parameter [id] can not be empty!");
+    }
+
     return executeToBool(id, "cancel", null, "smart.transactions", null, callback);
   }
 
@@ -112,6 +126,10 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
   {
+    if (receiptNumber == null || receiptNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [receiptNumber] can not be empty!");
+    }
+
     return execute(receiptNumber, "cancelTrx", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
@@ -122,6 +140,10 @@ public class TransactionService extends ProductService<Transaction> {
    */
   public LoyaltyBonus appendLoyaltyBonusProducts(String id, Callback<LoyaltyBonus> callback)
   {
+    if (id == null || id.equals("")) {
+      throw new IllegalArgumentException("Parameter [id] can not be empty!");
+    }
+
     return execute(id, "preTransaction", null, "smart.transactions", LoyaltyBonus.class, null, callback);
   }
 }

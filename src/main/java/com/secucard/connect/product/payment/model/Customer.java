@@ -1,24 +1,13 @@
-/*
- * Copyright (c) 2015. hp.weber GmbH & Co secucard KG (www.secucard.com)
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.secucard.connect.product.payment.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Contact;
 import com.secucard.connect.product.general.model.Merchant;
-
 import java.util.Date;
 
 public class Customer extends SecuObject {
+
   private Merchant merchant;
 
   private Contact contact;
@@ -29,6 +18,8 @@ public class Customer extends SecuObject {
 
   private Contract contract;
 
+  @JsonProperty("merchant_customer_id")
+  private int merchantCustomerId;
 
   public Contract getContract() {
     return contract;
@@ -70,14 +61,22 @@ public class Customer extends SecuObject {
     this.updated = updated;
   }
 
+  public int getMerchantCustomerId() {
+    return merchantCustomerId;
+  }
+  public void setMerchantCustomerId(int merchantCustomerId) {
+    this.merchantCustomerId = merchantCustomerId;
+  }
+
   @Override
   public String toString() {
-    return "Customer{" +
-        "merchant=" + merchant +
-        ", contact=" + contact +
-        ", created=" + created +
-        ", updated=" + updated +
-        ", contract=" + contract +
-        "} " + super.toString();
+    return "Customer{"
+            + "merchant=" + merchant +
+            ", contact=" + contact +
+            ", created=" + created +
+            ", updated=" + updated +
+            ", contract=" + contract +
+            ", merchantCustomerId=" +merchantCustomerId +
+            "} " + super.toString();
   }
 }

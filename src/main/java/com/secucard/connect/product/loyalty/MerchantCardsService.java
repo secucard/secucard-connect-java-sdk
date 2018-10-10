@@ -12,9 +12,13 @@
 
 package com.secucard.connect.product.loyalty;
 
+import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implements the loyalty/merchantcards operations.
@@ -34,4 +38,49 @@ public class MerchantCardsService extends ProductService<MerchantCard> {
     return new Options(Options.CHANNEL_STOMP);
   }
 
+  /**
+   * Check the given CSC
+   * @param cardNumber Number of the card
+   * @param csc CSC number
+   * @return bool
+   */
+  public Boolean validateCSC(String cardNumber, String csc, Callback<Boolean> callback)
+  {
+    if (cardNumber == null || cardNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
+    }
+
+    if (csc == null || csc.equals("")) {
+      throw new IllegalArgumentException("Parameter [csc] can not be empty!");
+    }
+
+    Map<String, String> obj = new HashMap<>();
+    obj.put("cardnumber", cardNumber);
+    obj.put("csc", csc);
+
+    return super.executeToBool("me", "CheckCsc", null, obj, null, callback);
+  }
+
+  /**
+   * Check the given passcode
+   * @param cardNumber Number of the card
+   * @param pin PIN number
+   * @return bool
+   */
+  public Boolean validatePasscode(String cardNumber, String pin, Callback<Boolean> callback)
+  {
+    if (cardNumber == null || cardNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
+    }
+
+    if (pin == null || pin.equals("")) {
+      throw new IllegalArgumentException("Parameter [pin] can not be empty!");
+    }
+
+    Map<String, String> obj = new HashMap<>();
+    obj.put("cardnumber", cardNumber);
+    obj.put("pin", pin);
+
+    return super.executeToBool("me", "CheckPasscode", null, obj, null, callback);
+  }
 }

@@ -14,10 +14,16 @@ package com.secucard.connect.product.smart;
 
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
-import com.secucard.connect.net.Options;
+import com.secucard.connect.event.AbstractEventListener;
+import com.secucard.connect.event.DelegatingEventHandlerCallback;
+import com.secucard.connect.event.Events;
 import com.secucard.connect.product.common.model.ObjectList;
+import com.secucard.connect.product.general.model.Event;
+import com.secucard.connect.product.smart.model.ComponentInstruction;
 import com.secucard.connect.product.smart.model.Ident;
+import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,5 +54,42 @@ public class IdentService extends ProductService<Ident> {
    */
   public Ident readIdent(String id, Callback<Ident> callback) {
     return super.execute(id, "read", null, null, Ident.class, null, callback);
+  }
+
+  /**
+   * Set a callback to get notified when a component gets changed
+   */
+  public void onChanged(final Callback<List<ComponentInstruction>> callback) {
+    AbstractEventListener listener = null;
+
+    if (callback != null) {
+      listener = new DelegatingEventHandlerCallback<Event, List<ComponentInstruction>>(callback) {
+        @Override
+        public boolean accept(Event event) {
+          return Events.TYPE_CHANGED.equals(event.getType()) && getMetaData().getObject().equals(event.getTarget());
+        }
+
+        @Override
+        protected List<ComponentInstruction> process(Event event) {
+          return processAllEvents(event);
+        }
+      };
+    }
+
+    context.eventDispatcher.registerListener(getMetaData().getObject() + Events.TYPE_CHANGED, listener);
+  }
+
+  private List<ComponentInstruction> processAllEvents(Event event) {
+    List<ComponentInstruction> resultList = new ArrayList<>();
+    try {
+      JSONArray array = new JSONArray(event.getDataRaw());
+
+      for (int i = 0; i < array.length(); i++) {
+        resultList.add(event.getJsonMapper().map(array.get(i).toString(), ComponentInstruction.class));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return resultList;
   }
 }

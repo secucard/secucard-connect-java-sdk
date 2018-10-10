@@ -10,19 +10,24 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.event;
+package com.secucard.connect.product.smart.model;
 
-/**
- * A listener which gets notified when any kind of event happens.
- *
- * @param <T> The actual event type.
- */
-public interface EventListener<T> {
+public class ComponentPosition {
 
-  /**
-   * Gets called when an event happens.
-   *
-   * @param event The event data.
-   */
-  void onEvent(T event);
+    public String position;
+
+    public String top;
+
+    public String left;
+
+    public String right;
+
+    public String bottom;
+
+  @Override
+  public String toString() {
+    return "ComponentPosition{" +
+
+        '}';
+  }
 }

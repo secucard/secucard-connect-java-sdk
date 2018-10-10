@@ -15,15 +15,23 @@ package com.secucard.connect.net.stomp.client;
 import com.secucard.connect.client.ClientError;
 import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.util.Log;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Minimal stomp messaging support.
@@ -417,14 +425,10 @@ public class StompClient {
 
     closeConnection(true);
 
-    if (config.useSsl) {
-      SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(config.host, config.port);
-      // fix TLSv1.2 not in enabled but in supported protocol list, needed to support it
-      sslSocket.setEnabledProtocols(sslSocket.getSupportedProtocols());
-      socket = sslSocket;
-    } else {
-      socket = SocketFactory.getDefault().createSocket(config.host, config.port);
-    }
+    SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(config.host, config.port);
+    String[] supportedProtocols = {"TLSv1.2"};
+    sslSocket.setEnabledProtocols(supportedProtocols);
+    socket = sslSocket;
 
     int timeout = config.socketTimeoutSec;
     if (timeout <= 0) {
@@ -564,10 +568,11 @@ public class StompClient {
     Server side heart beat not supported.
     0 for no heart beat.
     */
-    private final boolean useSsl;
-
     private final int heartbeatMs;
 
+    /**
+     * @deprecated The config attribute "useSsl" is not used any more
+     */
     public Config(String host, int port, String virtualHost, String login, String password, int heartbeatMs,
                   boolean useSsl, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
       this.host = host;
@@ -576,7 +581,19 @@ public class StompClient {
       this.login = login;
       this.password = password;
       this.heartbeatMs = heartbeatMs;
-      this.useSsl = useSsl;
+      this.socketTimeoutSec = socketTimeoutSec;
+      this.receiptTimeoutSec = receiptTimeoutSec;
+      this.connectionTimeoutSec = connectionTimeoutSec;
+    }
+
+    public Config(String host, int port, String virtualHost, String login, String password,
+        int heartbeatMs, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
+      this.host = host;
+      this.port = port;
+      this.virtualHost = virtualHost;
+      this.login = login;
+      this.password = password;
+      this.heartbeatMs = heartbeatMs;
       this.socketTimeoutSec = socketTimeoutSec;
       this.receiptTimeoutSec = receiptTimeoutSec;
       this.connectionTimeoutSec = connectionTimeoutSec;
@@ -596,7 +613,6 @@ public class StompClient {
           ", socketTimeoutSec=" + socketTimeoutSec +
           ", receiptTimeoutSec=" + receiptTimeoutSec +
           ", connectionTimeoutSec=" + connectionTimeoutSec +
-          ", useSsl=" + useSsl +
           ", heartbeatMs=" + heartbeatMs +
           '}';
     }

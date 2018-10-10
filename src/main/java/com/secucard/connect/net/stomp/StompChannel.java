@@ -25,12 +25,12 @@ import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.Message;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.Result;
-import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
 import com.secucard.connect.util.ThreadSleep;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -67,7 +67,7 @@ public class StompChannel extends Channel {
     super(context);
     this.configuration = cfg;
     StompClient.Config stompCfg = new StompClient.Config(cfg.host, cfg.port, cfg.virtualHost,
-        cfg.userId, cfg.password, cfg.heartbeatSec * 1000, cfg.useSsl, cfg.socketTimeoutSec,
+        cfg.userId, cfg.password, cfg.heartbeatSec * 1000, cfg.socketTimeoutSec,
         cfg.messageTimeoutSec, cfg.connectionTimeoutSec);
     this.id = Integer.toString(hashCode());
     stomp = new StompClient(this.id, stompCfg, new DefaultEventListner());
@@ -492,7 +492,7 @@ public class StompChannel extends Channel {
 
         // todo: event type testing
 
-        Object event = null;
+        Event event = null;
         try {
           // we expect Event type at first
           event = context.jsonMapper.map(body, Event.class);
@@ -501,12 +501,21 @@ public class StompChannel extends Channel {
         }
 
         if (event != null) {
+          // set raw data
+          try {
+            JSONObject object = new JSONObject(body);
+            event.setDataRaw(object.getJSONArray("data").toString());
+            event.setJsonMapper(context.jsonMapper);
+          } catch (Exception e) {
+            LOG.error("STOMP message received but unable to convert: ", body, "; ", e.getMessage());
+          }
+
           eventListener.onEvent(event);
         } else {
           // try to map into any known object
           try {
-            event = context.jsonMapper.map(body);
-            eventListener.onEvent(event);
+            Object event2 = context.jsonMapper.map(body);
+            eventListener.onEvent(event2);
           } catch (Exception e) {
             LOG.error("STOMP message received but unable to convert: ", body, "; ", e.getMessage());
           }
@@ -567,7 +576,6 @@ public class StompChannel extends Channel {
    * - stomp.virtualHost, STOMP virtual host.<br/>
    * - stomp.port, STOMP port.<br/>
    * - stomp.destination, Base path of the secucard STOMP API.<br/>
-   * - stomp.ssl, SSL used for STOMP or not<br/>
    * - stomp.user, Login, just for tests.<br/>
    * - stomp.pwd, Password, just for tests.<br/>
    * - stomp.replyQueue, The default queue for all STOMP messages.<br/>
@@ -592,7 +600,6 @@ public class StompChannel extends Channel {
     private final String password;
     private final String virtualHost;
     private final int heartbeatSec;
-    private final boolean useSsl;
     private final String userId;
     private final String replyQueue;
     private final int connectionTimeoutSec;
@@ -607,7 +614,6 @@ public class StompChannel extends Channel {
       this.password = properties.getProperty("stomp.pwd");
       this.virtualHost = properties.getProperty("stomp.virtualHost");
       this.heartbeatSec = Integer.parseInt(properties.getProperty("stomp.heartbeatSec"));
-      this.useSsl = Boolean.parseBoolean(properties.getProperty("stomp.ssl"));
       this.userId = properties.getProperty("stomp.user");
       this.replyQueue = properties.getProperty("stomp.replyQueue");
       this.connectionTimeoutSec = Integer.parseInt(properties.getProperty("stomp.connectTimeoutSec"));
@@ -631,7 +637,6 @@ public class StompChannel extends Channel {
           ", password='" + password + '\'' +
           ", virtualHost='" + virtualHost + '\'' +
           ", heartbeatSec=" + heartbeatSec +
-          ", useSsl=" + useSsl +
           ", userId='" + userId + '\'' +
           ", replyQueue='" + replyQueue + '\'' +
           ", connectionTimeoutSec=" + connectionTimeoutSec +

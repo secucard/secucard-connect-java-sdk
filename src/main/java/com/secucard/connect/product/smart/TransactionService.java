@@ -20,6 +20,7 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.general.model.Notification;
+import com.secucard.connect.product.loyalty.model.LoyaltyBonus;
 import com.secucard.connect.product.smart.model.Transaction;
 
 /**
@@ -30,6 +31,12 @@ public class TransactionService extends ProductService<Transaction> {
       Transaction.class);
 
   private static final String GENERAL_NOTIFICATIONS_OBJECT = "general.notifications";
+
+  public static final String TYPE_DEMO = "demo";
+  public static final String TYPE_CASH = "cash";
+  public static final String TYPE_AUTO = "auto";
+  public static final String TYPE_ZVT = "cashless";
+  public static final String TYPE_LOYALTY = "loyalty";
 
   @Override
   public ServiceMetaData<Transaction> getMetaData() {
@@ -44,9 +51,17 @@ public class TransactionService extends ProductService<Transaction> {
    * @param type          The transaction type like "auto" or "cash".
    * @return The result data.
    */
-  public Transaction start(String transactionId, String type, Callback<Transaction> callback) {
-    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP),
-        callback);
+  public Transaction start(String transactionId, String type, Callback<Transaction> callback)
+  {
+    if (transactionId == null || transactionId.equals("")) {
+      throw new IllegalArgumentException("Parameter [transactionId] can not be empty!");
+    }
+
+    if (type == null || type.equals("")) {
+      throw new IllegalArgumentException("Parameter [type] can not be empty!");
+    }
+
+    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
@@ -74,10 +89,61 @@ public class TransactionService extends ProductService<Transaction> {
 
   /**
    * Cancel the existing transaction with the given id.
-   *
+   * @param id Id of the transaction
    * @return True if ok false else.
    */
-  public Boolean cancel(String id, Callback<Boolean> callback) {
-    return executeToBool(id, "cancel", null, null, null, callback);
+  public Boolean cancel(String id, Callback<Boolean> callback)
+  {
+    if (id == null || id.equals("")) {
+      throw new IllegalArgumentException("Parameter [id] can not be empty!");
+    }
+
+    return executeToBool(id, "cancel", null, "smart.transactions", null, callback);
+  }
+
+  /**
+   * Starts extended Diagnose
+   * @return Transaction
+   */
+  public Transaction diagnosis(Callback<Transaction> callback)
+  {
+    return execute(null, "Diagnosis", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  }
+
+  /**
+   * Starts End of Day Report (Kassenschnitt)
+   * @return Transaction
+   */
+  public Transaction endOfDay(Callback<Transaction> callback)
+  {
+    return execute(null, "EndofDay", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  }
+
+  /**
+   * Cancel payment transaction different from Loyalty
+   * @param receiptNumber Receipt number to cancel
+   * @return Transaction
+   */
+  public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
+  {
+    if (receiptNumber == null || receiptNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [receiptNumber] can not be empty!");
+    }
+
+    return execute(receiptNumber, "cancelTrx", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+  }
+
+  /**
+   * Request loyalty bonus products and add them to the basket
+   * @param id Id of the smart transaction
+   * @return LoyaltyBonus
+   */
+  public LoyaltyBonus appendLoyaltyBonusProducts(String id, Callback<LoyaltyBonus> callback)
+  {
+    if (id == null || id.equals("")) {
+      throw new IllegalArgumentException("Parameter [id] can not be empty!");
+    }
+
+    return execute(id, "preTransaction", null, "smart.transactions", LoyaltyBonus.class, null, callback);
   }
 }

@@ -1,23 +1,11 @@
-/*
- * Copyright (c) 2015. hp.weber GmbH & Co secucard KG (www.secucard.com)
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.secucard.connect.product.payment.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.Currency;
 
 public abstract class Transaction extends SecuObject {
+
   public static final String STATUS_ACCEPTED = "accepted"; // status for accepted debit transactions and finished prepay transactions
   public static final String STATUS_AUTHORIZED = "authorized"; // prepay transaction after creation , before payment arrives
   public static final String STATUS_DENIED = "denied"; // when scoring for debit transaction denies the payer
@@ -27,7 +15,38 @@ public abstract class Transaction extends SecuObject {
   public static final String STATUS_REFUND = "refund"; // special status, saying that transaction was paid back (for some reason)
   public static final String STATUS_INTERNAL_SERVER_STATUS = "internal_server_status"; // should not happen, but only when status would be empty, this status is used
 
+  public static final String PAYMENT_ACTION_AUTHORIZATION = "authorization"; // Use the Authorization option to place a hold on the payer funds
+  public static final String PAYMENT_ACTION_SALE = "sale"; // Direct payment (immediate debit of the funds from the buyer's funding source)
+
   protected Customer customer;
+
+  protected Customer recipient;
+
+  protected Basket[] basket;
+
+  protected Experience experience;
+
+  protected boolean accrual;
+
+  protected Subscription subscription;
+
+  @JsonProperty("redirect_url")
+  protected RedirectUrl redirectUrl;
+
+  @JsonProperty("url_success")
+  protected String urlSuccess;
+
+  @JsonProperty("url_failure")
+  protected String urlFailure;
+
+  @JsonProperty("iframe_url")
+  protected String iframeUrl;
+
+  @JsonProperty("opt_data")
+  protected OptData optData;
+
+  @JsonProperty("payment_action")
+  protected String paymentAction = PAYMENT_ACTION_SALE;
 
   protected Contract contract;
 
@@ -118,6 +137,91 @@ public abstract class Transaction extends SecuObject {
 
   public void setTransactionStatus(String transactionStatus) {
     this.transactionStatus = transactionStatus;
+  }
+
+  public Customer getRecipient() {
+    return recipient;
+  }
+
+  public void setRecipient(Customer recipient) {
+    this.recipient = recipient;
+  }
+
+  public Basket[] getBasket() {
+    return basket;
+  }
+
+  public void setBasket(Basket[] basket) {
+    this.basket = basket;
+  }
+
+  public Experience getExperience() {
+    return experience;
+  }
+
+  public void setExperience(Experience experience) {
+    this.experience = experience;
+  }
+
+  public boolean getAccrual() {
+    return accrual;
+  }
+
+  public void setAccrual(boolean accrual) {
+    this.accrual = accrual;
+  }
+
+  public Subscription getSubscription() {
+    return subscription;
+  }
+
+  public void setSubscription(Subscription subscription) {
+    this.subscription = subscription;
+  }
+
+  public RedirectUrl getRedirectUrl() {
+    return redirectUrl;
+  }
+
+  public void setRedirectUrl(RedirectUrl redirectUrl) {
+    this.redirectUrl = redirectUrl;
+  }
+
+  public OptData getOptData() {
+    return optData;
+  }
+
+  public void setOptData(OptData optData) {
+    this.optData = optData;
+  }
+
+  public String getPaymentAction() {
+    return paymentAction;
+  }
+
+  public void setPaymentAction(String paymentAction) {
+    this.paymentAction = paymentAction;
+  }
+
+  public String getUrlSuccess() {
+    return urlSuccess;
+  }
+  public void setUrlSuccess(String urlSuccess) {
+    this.urlSuccess = urlSuccess;
+  }
+
+  public String getUrlFailure() {
+    return urlFailure;
+  }
+  public void setUrlFailure(String urlFailure) {
+    this.urlFailure = urlFailure;
+  }
+
+  public String getIframeUrl() {
+    return iframeUrl;
+  }
+  public void setIframeUrl(String iframeUrl) {
+    this.iframeUrl = iframeUrl;
   }
 
 }

@@ -1,24 +1,24 @@
-/*
- * Copyright (c) 2015. hp.weber GmbH & Co secucard KG (www.secucard.com)
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.secucard.connect;
 
-import android.content.Context;
-import com.secucard.connect.auth.*;
+import com.secucard.connect.auth.AuthService;
+import com.secucard.connect.auth.CancelCallback;
+import com.secucard.connect.auth.ClientAuthDetails;
+import com.secucard.connect.auth.TokenManager;
 import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
 import com.secucard.connect.auth.model.Token;
-import com.secucard.connect.client.*;
+import com.secucard.connect.client.AuthError;
+import com.secucard.connect.client.Callback;
+import com.secucard.connect.client.ClientContext;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.DataStorage;
+import com.secucard.connect.client.DiskCache;
+import com.secucard.connect.client.ExceptionHandler;
+import com.secucard.connect.client.NetworkError;
+import com.secucard.connect.client.ProductService;
+import com.secucard.connect.client.ResourceDownloader;
+import com.secucard.connect.client.ServiceFactory;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
@@ -26,7 +26,6 @@ import com.secucard.connect.net.Channel;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.net.rest.JaxRsChannel;
 import com.secucard.connect.net.rest.RestChannel;
-import com.secucard.connect.net.rest.VolleyChannel;
 import com.secucard.connect.net.stomp.StompChannel;
 import com.secucard.connect.net.stomp.StompEvents;
 import com.secucard.connect.net.util.JsonMapper;
@@ -41,18 +40,21 @@ import com.secucard.connect.product.smart.Smart;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "1.0.0";
+  public static final String VERSION = "2.6.0";
 
   protected volatile boolean isConnected;
   private Configuration configuration;
@@ -247,16 +249,8 @@ public class SecucardConnect {
       config = Configuration.get();
     }
 
-    if (config.androidMode && config.runtimeContext == null) {
-      throw new ClientError("Missing Android application context.");
-    }
-
     if (config.dataStorage == null) {
       String cacheDir = config.cacheDir;
-      if (config.androidMode && Configuration.DEFAULT_CACHE_DIR.equals(config.cacheDir)) {
-        cacheDir = ((Context) config.runtimeContext).getCacheDir().getPath() + File.separator
-            + Configuration.DEFAULT_CACHE_DIR;
-      }
       config.dataStorage = new DiskCache(cacheDir);
     }
 
@@ -300,14 +294,9 @@ public class SecucardConnect {
     }
 
     // set up channels
-    ctx.runtimeContext = config.runtimeContext;
     ctx.defaultChannel = config.defaultChannel;
-    RestChannel rc;
-    if (config.androidMode) {
-      rc = new VolleyChannel(restConfig, ctx);
-    } else {
-      rc = new JaxRsChannel(restConfig, ctx);
-    }
+    RestChannel rc = new JaxRsChannel(restConfig, ctx);
+
     Map<String, Channel> channels = new HashMap<>();
     channels.put(Options.CHANNEL_REST, rc);
     if (config.stompEnabled) {
@@ -345,19 +334,9 @@ public class SecucardConnect {
     ctx.jsonMapper = new JsonMapper();
     ctx.jsonMapper.init(services.values());
 
-    // inject json mapper in user provided instance
-    if (config.clientAuthDetails instanceof AndroidClientAuthDetails) {
-      ((AndroidClientAuthDetails) config.clientAuthDetails).setJsonMapper(ctx.jsonMapper);
-    }
-
     ResourceDownloader downloader = ResourceDownloader.get();
-    if (config.androidMode) {
-      // Volley based channel is used in Android, can't handle streams, so disable
-      downloader.setEnabled(false);
-    } else {
-      downloader.setCache(config.dataStorage);
-      downloader.setHttpClient(rc);
-    }
+    downloader.setCache(config.dataStorage);
+    downloader.setHttpClient(rc);
 
     sc.wireServiceInstances();
 
@@ -401,16 +380,18 @@ public class SecucardConnect {
 
 
   private void wireServiceInstances() {
-
     document = new Document(service(Document.Uploads));
 
-    general = new General(service(General.Accountdevices), service(General.Accounts), service(General.Merchants),
-        service(General.News), service(General.Publicmerchants), service(General.Stores), service(General.Transactions));
+    general = new General(service(General.Accountdevices), service(General.Accounts),
+        service(General.Merchants), service(General.News), service(General.Publicmerchants),
+        service(General.Stores), service(General.Transactions));
 
-    payment = new Payment(service(Payment.Containers), service(Payment.Customers), service(Payment.Secupaydebits),
-        service(Payment.Secupayprepays), service(Payment.Contracts));
+    payment = new Payment(service(Payment.Containers), service(Payment.Customers),
+        service(Payment.Secupaydebits), service(Payment.Secupayprepays), service(Payment.Contracts),
+        service(Payment.Secupayinvoices), service(Payment.Secupaycreditcards));
 
-    loyalty = new Loyalty(service(Loyalty.Cards), service(Loyalty.Customers), service(Loyalty.Merchantcards));
+    loyalty = new Loyalty(service(Loyalty.Cards), service(Loyalty.Customers),
+        service(Loyalty.Merchantcards), service(Loyalty.CardGroups));
 
     services = new Services(service(Services.Identrequests), service(Services.Identresults));
 
@@ -421,7 +402,6 @@ public class SecucardConnect {
    * Main configuration of the SDK client. Supports properties:
    * <p/>
    * Client:<br/>
-   * - androidMode, set to true if use in Android environment, false else <br/>
    * - stompEnabled, set to true to enable usage of STOMP communication, false else <br/>
    * - defaultChannel, the default server communication channel <br/>
    * - appId, the app id if used in a custom app <br/>
@@ -446,7 +426,6 @@ public class SecucardConnect {
    * <p/>
    * Additionally set custom instances for:<br/>
    * - {@link #dataStorage}<br/>
-   * - {@link #runtimeContext}<br/>
    * - {@link #clientAuthDetails} <br/>
    * - {@link #autCancelCallback} <br/>
    * <br/>
@@ -460,7 +439,6 @@ public class SecucardConnect {
 
     private final Properties properties;
     private final String defaultChannel;
-    private final boolean androidMode;
     private final boolean stompEnabled;
     private final String appId;
     private final String cacheDir;
@@ -503,11 +481,6 @@ public class SecucardConnect {
      * Set null if no such a callback is needed. Default null.
      */
     public CancelCallback autCancelCallback;
-
-    /**
-     * Android application context object. Mandatory when property androidMode = true.  Default null.
-     */
-    public Object runtimeContext;
 
     /**
      * Get config from default location {@link #DEFAULT_FILENAME} or from a path specified by the
@@ -583,7 +556,6 @@ public class SecucardConnect {
     Configuration(Properties properties) {
       this.properties = properties;
       defaultChannel = properties.getProperty("defaultChannel").trim().toLowerCase();
-      androidMode = Boolean.parseBoolean(properties.getProperty("androidMode"));
       stompEnabled = Boolean.parseBoolean(properties.getProperty("stompEnabled"));
       logIgnoreGlobal = Boolean.valueOf(properties.getProperty("logging.local"));
       logCount = Integer.valueOf(properties.getProperty("logging.count", "0"));
@@ -603,7 +575,6 @@ public class SecucardConnect {
     public String toString() {
       return "Configuration{" +
           "defaultChannel='" + defaultChannel + '\'' +
-          ", androidMode=" + androidMode +
           ", stompEnabled=" + stompEnabled +
           ", logFormat='" + logFormat + '\'' +
           ", logLevel='" + logLevel + '\'' +
@@ -614,9 +585,16 @@ public class SecucardConnect {
           ", dataStorage=" + dataStorage +
           ", clientAuthDetails=" + clientAuthDetails +
           ", autCancelCallback=" + autCancelCallback +
-          ", runtimeContext=" + runtimeContext +
           ", host=" + host +
           '}';
     }
+  }
+
+  /**
+   * Returns the current access token
+   * @return String
+   */
+  public String getToken() {
+    return context.tokenManager.getToken(false);
   }
 }

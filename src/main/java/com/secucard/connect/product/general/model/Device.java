@@ -10,19 +10,10 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.event;
+package com.secucard.connect.product.general.model;
 
-/**
- * A listener which gets notified when any kind of event happens.
- *
- * @param <T> The actual event type.
- */
-public interface EventListener<T> {
+import com.secucard.connect.product.common.model.SecuObject;
 
-  /**
-   * Gets called when an event happens.
-   *
-   * @param event The event data.
-   */
-  void onEvent(T event);
+public class Device extends SecuObject {
+
 }

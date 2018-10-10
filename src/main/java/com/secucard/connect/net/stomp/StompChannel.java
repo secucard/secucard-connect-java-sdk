@@ -25,12 +25,12 @@ import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.Message;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.Result;
-import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
 import com.secucard.connect.util.ThreadSleep;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -492,7 +492,7 @@ public class StompChannel extends Channel {
 
         // todo: event type testing
 
-        Object event = null;
+        Event event = null;
         try {
           // we expect Event type at first
           event = context.jsonMapper.map(body, Event.class);
@@ -501,12 +501,21 @@ public class StompChannel extends Channel {
         }
 
         if (event != null) {
+          // set raw data
+          try {
+            JSONObject object = new JSONObject(body);
+            event.setDataRaw(object.getJSONArray("data").toString());
+            event.setJsonMapper(context.jsonMapper);
+          } catch (Exception e) {
+            LOG.error("STOMP message received but unable to convert: ", body, "; ", e.getMessage());
+          }
+
           eventListener.onEvent(event);
         } else {
           // try to map into any known object
           try {
-            event = context.jsonMapper.map(body);
-            eventListener.onEvent(event);
+            Object event2 = context.jsonMapper.map(body);
+            eventListener.onEvent(event2);
           } catch (Exception e) {
             LOG.error("STOMP message received but unable to convert: ", body, "; ", e.getMessage());
           }

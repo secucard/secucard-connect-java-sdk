@@ -589,4 +589,12 @@ public class SecucardConnect {
           '}';
     }
   }
+
+  /**
+   * Returns the current access token
+   * @return String
+   */
+  public String getToken() {
+    return context.tokenManager.getToken(false);
+  }
 }

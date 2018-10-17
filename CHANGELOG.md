@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Smart.IdentService onChanged event behavior
+- Additional error information for exception "Failed to read secucard server response"
+
+### Fixed
+- Definition error in the ObjectList model
 
 ### Removed
 - Support for Java 1.7

@@ -18,6 +18,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 
+
+## [2.7.0] - 2018-10-18
+
+### Security
+- dependency update
+
+### Added
+- Loyalty bonus products
+- MerchantCard frames (ident-link, user-selection, checkin-button)
+- Possibility to get the access token.
+
+### Changed
+- Smart.IdentService onChanged event behavior
+
+### Removed
+- Support for Java 1.7
+
+
 ## [2.6.0] - 2018-01-30
 
 ### Security
@@ -27,6 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Android support
 - Unmaintained tests
 - Volley library
+
 
 ## [2.5.0] - 2017-12-18
 
@@ -58,10 +77,12 @@ Model classes:
 
 Dependency for Java 9
 
+
 ## [2.4.0] - 2017-07-13
 
 ### Fixed
 - Smart.Transaction: Cancel payment transaction call
+
 
 ## [2.3.0] - 2017-05-08
 
@@ -79,6 +100,7 @@ New Methods:
 
 ### Removed
 - Config param "stomp.ssl" was removed because only secure connections are supported by the SecuConnect-API.
+
 
 ## [2.2.0] - 2017-04-20
 
@@ -99,6 +121,7 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 - The versions of the dependencies are now up to date in the pom.xml
 - The contract id is now optional in the cancel payment transaction methods
 
+
 ## [2.1.1] - 2016-06-10
 
 ### Addded
@@ -107,6 +130,7 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 ### Changed
 - Renamed product/payment/model/Container - getAssigned() to getCustomer()
 - Renamed product/payment/model/Container - setAssigned() to setCustomer()
+
 
 ## [2.1.0] - 2016-05-06
 
@@ -121,6 +145,7 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 - product/smart/model/Transaction - paymentRequested
 - product/smart/model/Transaction - paymentExecuted
 
+
 ## [2.0.0] - 2016-03-21
 Reworked SDK
 (the list of changes are not complete)
@@ -133,6 +158,7 @@ Reworked SDK
 - Handling of the credentials
 - Handling of exceptions
 
+
 ## [1.0.0] - 2015-05-15
 Reworked SDK
 
@@ -143,10 +169,12 @@ Reworked SDK
 ### Fixed
 - TLS 1.2 support
 
+
 ## [0.3.2] - 2016-06-10
 
 ### Changed
 Update README
+
 
 ## [0.3.1] - 2016-06-09
 
@@ -156,6 +184,7 @@ Update README
 - Renamed customer reference in containers for payment.
 - Removed dedicated methods.
 - Fix POM, remove gradle build file.
+
 
 ## [0.3.0] - 2016-03-17
 
@@ -167,6 +196,7 @@ or companies, so a generic entity field serving both types is more
 appropriate than just a single person field.
 - Improve IdentsDemo.
 
+
 ## [0.2.0] - 2016-03-10
 
 ### Added
@@ -177,10 +207,12 @@ appropriate than just a single person field.
 ### Changed
 - Adding new contract param when cancel prepay/debits transactions. Needed on trans. created by subcontracts.
 
+
 ## [0.1.23] - 2015-07-14
 
 ### Changed
 - merchant relation removed from payment.contract
+
 
 ## [0.1.22] - 2015-07-08
 
@@ -190,25 +222,30 @@ appropriate than just a single person field.
 ### Changed
 - payment contract cloning enhancements
 
+
 ## [0.1.21] - 2015-06-17
 
 ### Added
 - payment.contracts clone added
+
 
 ## [0.1.20] - 2015-05-13
 
 ### Added
 - new bankname field for payment container
 
+
 ## [0.1.19] - 2015-04-23
 
 ### Added
 - state constants for ident request/response auth. cache clear method for client provided.
 
+
 ## [0.1.18] - 2015-04-15
 
 ### Changed
 - async/sync event handling in payment services
+
 
 ## [0.1.17] - 2015-04-13
 
@@ -217,10 +254,12 @@ appropriate than just a single person field.
 - event handling for payment
 - basic event handling corrections
 
+
 ## [0.1.16] - 2015-04-02
 
 ### Changed
 - async/sync event processing, payment model corrections
+
 
 ## [0.1.15] - 2015-04-01
 
@@ -239,12 +278,14 @@ appropriate than just a single person field.
 - payment demo corrections
 - identresult event handling and model fixed
 
+
 ## [0.1.11] - 2015-03-11
 
 ### Changed
 - timeout for volley future
 - loyalty.customer corrected, picture handling improved
 - downloader fix
+
 
 ## [0.1.10] - 2015-03-11
 
@@ -280,8 +321,10 @@ appropriate than just a single person field.
 - smart.transaction models corrections
 - smart.transaction start fixed
 
+
 ## [0.1.1] - 2015-03-02
 First public release
+
 
 ## [0.1.0] - not released
 Internal developer release
@@ -313,3 +356,4 @@ Internal developer release
 [2.4.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.3.0...v2.4.0
 [2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0
 [2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0
+[2.7.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.6.0...v2.7.0

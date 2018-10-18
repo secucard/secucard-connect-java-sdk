@@ -39,7 +39,20 @@ public class CardGroupsService extends ProductService<CardGroup> {
      * @param cardNumber Number of the card
      * @return bool
      */
-    public Boolean checkPasscodeEnabled(String cardGroupId, String transactionType, String cardNumber, Callback<Boolean> callback) {
+    public Boolean checkPasscodeEnabled(String cardGroupId, String transactionType, String cardNumber, Callback<Boolean> callback)
+    {
+        if (cardGroupId == null || cardGroupId.equals("")) {
+            throw new IllegalArgumentException("Parameter [cardGroupId] can not be empty!");
+        }
+
+        if (transactionType == null || transactionType.equals("")) {
+            throw new IllegalArgumentException("Parameter [transactionType] can not be empty!");
+        }
+
+        if (cardNumber == null || cardNumber.equals("")) {
+            throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
+        }
+
         Map<String, String> obj = new HashMap<>();
         obj.put("action", transactionType);
         obj.put("cardnumber", cardNumber);

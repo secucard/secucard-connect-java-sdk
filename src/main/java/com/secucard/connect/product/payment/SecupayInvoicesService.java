@@ -7,6 +7,7 @@ import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.product.general.model.Event;
+import com.secucard.connect.product.payment.model.CancelResponse;
 import com.secucard.connect.product.payment.model.SecupayInvoice;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +35,11 @@ public class SecupayInvoicesService extends ProductService<SecupayInvoice> {
    * @param callback Callback for async processing.
    * @return True if successful, false else.
    */
-  public Boolean cancel(final String id, final String contractId, Callback<Boolean> callback) {
+  public Boolean cancel(final String id, final String contractId, Callback<CancelResponse> callback) {
     Map<String, String> map = new HashMap<>();
     map.put("contract", contractId == null ? "" : contractId);
-    return executeToBool(id, "cancel", null, map, null, callback);
+    CancelResponse result = execute(id, "cancel", null, map, CancelResponse.class,null, callback);
+    return true;
   }
 
   /**

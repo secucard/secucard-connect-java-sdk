@@ -10,19 +10,18 @@
  * limitations under the License.
  */
 
-package com.secucard.connect.event;
+package com.secucard.connect.product.smart.model;
 
-/**
- * A listener which gets notified when any kind of event happens.
- *
- * @param <T> The actual event type.
- */
-public interface EventListener<T> {
+public class ComponentSize {
 
-  /**
-   * Gets called when an event happens.
-   *
-   * @param event The event data.
-   */
-  void onEvent(T event);
+  public String width;
+
+  public String height;
+
+  @Override
+  public String toString() {
+    return "ComponentSize{" +
+
+        '}';
+  }
 }

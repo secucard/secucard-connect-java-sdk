@@ -74,7 +74,7 @@ public class JaxRsChannel extends RestChannel {
       entity = Entity.json(params.data);
     }
 
-    Invocation invocation = null;
+    Invocation invocation;
     if (method == Method.GET) {
       invocation = builder.buildGet();
     } else if (method == Method.CREATE || method == Method.EXECUTE) {

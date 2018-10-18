@@ -210,7 +210,7 @@ public abstract class RestChannel extends Channel {
     // IO error caused by parsing, must test before normal IO
     JsonMappingException je = ExceptionMapper.unwrap(throwable, JsonMappingException.class);
     if (je != null) {
-      return new ClientError("Failed to read secucard server response: " + je.getJson());
+      return new ClientError("Failed to read secucard server response: " + je.getJson() + " hint: " + je.getMessage());
     }
 
     IOException ie = ExceptionMapper.unwrap(throwable, IOException.class);

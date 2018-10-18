@@ -12,6 +12,7 @@
 
 package com.secucard.connect.product.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class ObjectList<T> {
   /**
    * Return the number of contained object in this list.
    */
+  @JsonIgnore
   public int getCount() {
     return list == null ? 0 : list.size();
   }

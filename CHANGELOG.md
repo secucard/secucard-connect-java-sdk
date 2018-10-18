@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Definition error in the ObjectList model
+- Payment: cancel method in SecupayCreditcardsService, SecupayDebitsService, SecupayInvoicesService and SecupayPrepaysService
 
 ### Removed
 - Support for Java 1.7

@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.7.1] - 2019-10-22
+
+### Security
+- fasterxml.jackson dependency update
+
+
 ## [2.7.0] - 2018-10-18
 
 ### Security
@@ -44,7 +50,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [2.6.0] - 2018-01-30
 
 ### Security
-- fasterxml dependency update
+- fasterxml.jackson dependency update
 
 ### Removed
 - Android support
@@ -362,3 +368,4 @@ Internal developer release
 [2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0
 [2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0
 [2.7.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.6.0...v2.7.0
+[2.7.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.0...v2.7.1

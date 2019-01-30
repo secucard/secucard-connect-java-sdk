@@ -92,13 +92,27 @@ public class TransactionService extends ProductService<Transaction> {
    * @param id Id of the transaction
    * @return True if ok false else.
    */
-  public Boolean cancel(String id, Callback<Boolean> callback)
+  public Boolean cancel(String id)
   {
     if (id == null || id.equals("")) {
       throw new IllegalArgumentException("Parameter [id] can not be empty!");
     }
 
-    return executeToBool(id, "cancel", null, "smart.transactions", null, callback);
+    return executeToBool(id, "cancel", null, "smart.transactions", null, null);
+  }
+
+  /**
+   * Cancel the existing transaction with the given id.
+   * @param id Id of the transaction
+   * @return The result data.
+   */
+  public Transaction cancel(String id, Callback<Transaction> callback)
+  {
+    if (id == null || id.equals("")) {
+      throw new IllegalArgumentException("Parameter [id] can not be empty!");
+    }
+
+    return execute(id, "cancel", null, "smart.transactions", Transaction.class, null, callback);
   }
 
   /**

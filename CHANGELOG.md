@@ -19,7 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
-## [2.7.1] - 2019-10-22
+## [2.8.0] - 2019-01-30
+
+### Changed
+- The Callback type of smart.TransactionService.cancel(id, callback) is now smart.model.Transaction
+
+
+## [2.7.1] - 2019-01-22
 
 ### Security
 - fasterxml.jackson dependency update
@@ -369,3 +375,4 @@ Internal developer release
 [2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0
 [2.7.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.6.0...v2.7.0
 [2.7.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.0...v2.7.1
+[2.8.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.1...v2.8.0

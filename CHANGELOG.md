@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [2.9.0] - 2019-02-21
 
+### Security
+- dependency update "com.google.guava"
+
 ### Added
 - Payment: SecupayPayoutService
 - Payment.Model.Transaction: redirectUrl.urlPush

@@ -16,7 +16,6 @@ import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,8 +24,7 @@ import java.util.Map;
  */
 public class MerchantCardsService extends ProductService<MerchantCard> {
 
-  public static final ServiceMetaData<MerchantCard> META_DATA = new ServiceMetaData<>("loyalty", "merchantcards",
-      MerchantCard.class);
+  public static final ServiceMetaData<MerchantCard> META_DATA = new ServiceMetaData<>("loyalty", "merchantcards", MerchantCard.class);
 
   @Override
   public ServiceMetaData<MerchantCard> getMetaData() {
@@ -40,12 +38,12 @@ public class MerchantCardsService extends ProductService<MerchantCard> {
 
   /**
    * Check the given CSC
+   *
    * @param cardNumber Number of the card
    * @param csc CSC number
    * @return bool
    */
-  public Boolean validateCSC(String cardNumber, String csc, Callback<Boolean> callback)
-  {
+  public Boolean validateCSC(String cardNumber, String csc, Callback<Boolean> callback) {
     if (cardNumber == null || cardNumber.equals("")) {
       throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
     }
@@ -63,12 +61,12 @@ public class MerchantCardsService extends ProductService<MerchantCard> {
 
   /**
    * Check the given passcode
+   *
    * @param cardNumber Number of the card
    * @param pin PIN number
    * @return bool
    */
-  public Boolean validatePasscode(String cardNumber, String pin, Callback<Boolean> callback)
-  {
+  public Boolean validatePasscode(String cardNumber, String pin, Callback<Boolean> callback) {
     if (cardNumber == null || cardNumber.equals("")) {
       throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
     }

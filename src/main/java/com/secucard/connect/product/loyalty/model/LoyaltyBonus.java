@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.smart.model.Product;
-
 import java.util.List;
 
 public class LoyaltyBonus extends SecuObject {
@@ -47,9 +46,6 @@ public class LoyaltyBonus extends SecuObject {
 
   @Override
   public String toString() {
-    return "LoyaltyBonus{" +
-            "missing_sum=" + missing_sum +
-            ", bonus_products=" + bonus_products +
-              "} " + super.toString();
+    return "LoyaltyBonus{" + "missing_sum=" + missing_sum + ", bonus_products=" + bonus_products + ", " + super.toString() + '}';
   }
 }

@@ -20,27 +20,23 @@ import com.secucard.connect.net.Options;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.general.model.Event;
+import com.secucard.connect.product.services.model.Attachment;
 import com.secucard.connect.product.services.model.IdentRequest;
 import com.secucard.connect.product.services.model.IdentResult;
-import com.secucard.connect.product.services.model.Attachment;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Implements the services/identresult operations.
- * Provides access to the secucard services resources and operations.
- * Support also caching of attachments when requested.
- * Note: Caching will speed up clients access, but has also impact on memory usage. Depending on the type of cache storage
- * it may be not a good idea to cache too much data. The {@link com.secucard.connect.client.DataStorage) implementation
- * provided to the client is used also for caching.
- * See {@link com.secucard.connect.SecucardConnect.Configuration to get details which storage implementation is actually used.
+ * Implements the services/identresult operations. Provides access to the secucard services resources and operations. Support also caching of
+ * attachments when requested. Note: Caching will speed up clients access, but has also impact on memory usage. Depending on the type of cache storage
+ * it may be not a good idea to cache too much data. The {@link com.secucard.connect.client.DataStorage) implementation provided to the client is used
+ * also for caching. See {@link com.secucard.connect.SecucardConnect.Configuration to get details which storage implementation is actually used.
  */
 public class IdentResultsService extends ProductService<IdentResult> {
-  public static final ServiceMetaData<IdentResult> META_DATA = new ServiceMetaData<>("services", "identresults",
-      IdentResult.class);
+
+  public static final ServiceMetaData<IdentResult> META_DATA = new ServiceMetaData<>("services", "identresults", IdentResult.class);
   private boolean cacheAttachmentsEnabled = true;
 
   @Override
@@ -49,27 +45,24 @@ public class IdentResultsService extends ProductService<IdentResult> {
   }
 
   /**
-   * Set to true/false to globally enable/disable attachment caching when requested by methods of this service.
-   * Caching is enabled by default but is only performed when requested in methods.
+   * Set to true/false to globally enable/disable attachment caching when requested by methods of this service. Caching is enabled by default but is
+   * only performed when requested in methods.
    */
   public void cacheAttachments(boolean cacheAttachments) {
     this.cacheAttachmentsEnabled = cacheAttachments;
   }
 
   /**
-   * Returns a ident result for a given  ident request ids.
-   * No exception is thrown when a callback was provided.
+   * Returns a ident result for a given  ident request ids. No exception is thrown when a callback was provided.
    *
-   * @param identRequestIds     The request ids to get the results for.
-   * @param callback            Callback for asynchronous handling.
-   * @param downloadAttachments Set to true if attachments should be completely downloaded before returning.
-   *                            Note: Depending on the number of returned persons + attachments this may be a lot!
-   *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
+   * @param identRequestIds The request ids to get the results for.
+   * @param callback Callback for asynchronous handling.
+   * @param downloadAttachments Set to true if attachments should be completely downloaded before returning. Note: Depending on the number of returned
+   * persons + attachments this may be a lot! Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
    * @return The ident results or null if a callback was provided.
    */
-  public List<IdentResult> getListByRequestIds(final List<String> identRequestIds,
-                                               Callback<List<IdentResult>> callback,
-                                               final boolean downloadAttachments) {
+  public List<IdentResult> getListByRequestIds(final List<String> identRequestIds, Callback<List<IdentResult>> callback,
+      final boolean downloadAttachments) {
     // todo: better avoid query and access by id?
 
     StringBuilder query = new StringBuilder();
@@ -86,20 +79,17 @@ public class IdentResultsService extends ProductService<IdentResult> {
   }
 
   /**
-   * Returns a list of ident result objects according to the given query parameters.
-   * Supports also the optional download and caching of all attachments before returning.
-   * This will speed up clients access to them but involves increasing memory usage.
-   * No exception is thrown when a callback was provided.
+   * Returns a list of ident result objects according to the given query parameters. Supports also the optional download and caching of all
+   * attachments before returning. This will speed up clients access to them but involves increasing memory usage. No exception is thrown when a
+   * callback was provided.
    *
-   * @param queryParams         A set of parameters a ident result must match.
-   * @param callback            Callback for asynchronous handling.
-   * @param downloadAttachments Set to true if attachments should be completely downloaded before returning.
-   *                            Note: Depending on the number of returned results + persons + attachments this may be a lot!
-   *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
+   * @param queryParams A set of parameters a ident result must match.
+   * @param callback Callback for asynchronous handling.
+   * @param downloadAttachments Set to true if attachments should be completely downloaded before returning. Note: Depending on the number of returned
+   * results + persons + attachments this may be a lot! Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
    * @return The ident results or null if a callback was provided.
    */
-  public List<IdentResult> getSimpleList(final QueryParams queryParams, Callback<List<IdentResult>> callback,
-                                         final boolean downloadAttachments) {
+  public List<IdentResult> getSimpleList(final QueryParams queryParams, Callback<List<IdentResult>> callback, final boolean downloadAttachments) {
     Options opts = getDefaultOptions();
     opts.resultProcessing = new Callback.Notify<ObjectList<IdentResult>>() {
       @Override
@@ -113,14 +103,12 @@ public class IdentResultsService extends ProductService<IdentResult> {
   }
 
   /**
-   * Returns a single ident result object.
-   * No exception is thrown when a callback was provided.
+   * Returns a single ident result object. No exception is thrown when a callback was provided.
    *
-   * @param id                  The
-   * @param callback            Callback for asynchronous handling.
-   * @param downloadAttachments Set to true if attachments should be completely downloaded before returning.
-   *                            Note: Depending on the number of returned persons + attachments this may be a lot!
-   *                            Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
+   * @param id The
+   * @param callback Callback for asynchronous handling.
+   * @param downloadAttachments Set to true if attachments should be completely downloaded before returning. Note: Depending on the number of returned
+   * persons + attachments this may be a lot! Works only if {@link #cacheAttachments(boolean)} is set to true, which is the default.
    * @return The ident result or null if a callback was provided.
    */
   public IdentResult get(final String id, Callback<IdentResult> callback, final boolean downloadAttachments) {
@@ -137,10 +125,8 @@ public class IdentResultsService extends ProductService<IdentResult> {
   }
 
   /**
-   * Attach an event handler to get notified when IdentRequest changed (approved, canceled etc)
-   * This handler will be called then when the event is passed to
-   * {@link com.secucard.connect.SecucardConnect#handleEvent(String, boolean)}
-   * The event is discarded if no handler is registered.<br/>
+   * Attach an event handler to get notified when IdentRequest changed (approved, canceled etc) This handler will be called then when the event is
+   * passed to {@link com.secucard.connect.SecucardConnect#handleEvent(String, boolean)} The event is discarded if no handler is registered.<br/>
    * Note: Registering a handler multiple times just replaces the previous instance.
    *
    * @param handler The handler instance or null to remove the handler.
@@ -167,11 +153,11 @@ public class IdentResultsService extends ProductService<IdentResult> {
   }
 
   /**
-   * This handler retrieves and returns a list of belonging IdentResults for an IdentRequest and downloads the
-   * containing attachments when required if such an event is passed to
-   * {@link com.secucard.connect.SecucardConnect#handleEvent(String, boolean)}.
+   * This handler retrieves and returns a list of belonging IdentResults for an IdentRequest and downloads the containing attachments when required if
+   * such an event is passed to {@link com.secucard.connect.SecucardConnect#handleEvent(String, boolean)}.
    */
   public static abstract class IdentEventHandler extends EventHandlerCallback<List<IdentRequest>, List<IdentResult>> {
+
     protected IdentResultsService service;
 
 

@@ -13,10 +13,10 @@
 package com.secucard.connect.product.general.model;
 
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.List;
 
 public class Account extends SecuObject {
+
   private String username;
 
   private String password;

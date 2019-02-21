@@ -116,11 +116,9 @@ public class Basket {
 
   @Override
   public String toString() {
-    return "Basket{" + "ean='" + ean + '\'' + ", tax='" + tax + '\'' + ", priceOne='" + priceOne
-        + '\'' + ", articleNumber='" + articleNumber + '\'' + ", name='" + name + '\'' + ", total='"
-        + total + '\'' + ", quantity='" + quantity + '\'' + ", itemType='" + itemType + '\''
-        + ", contractId='" + contractId + '\'' + ", model='" + model + ", apikey='" + apikey + '\''
-        + '}';
+    return "Basket{" + "ean='" + ean + '\'' + ", tax='" + tax + '\'' + ", priceOne='" + priceOne + '\'' + ", articleNumber='" + articleNumber + '\''
+        + ", name='" + name + '\'' + ", total='" + total + '\'' + ", quantity='" + quantity + '\'' + ", itemType='" + itemType + '\''
+        + ", contractId='" + contractId + '\'' + ", model='" + model + ", apikey='" + apikey + '\'' + '}';
   }
 
 }

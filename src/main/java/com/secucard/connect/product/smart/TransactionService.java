@@ -27,8 +27,8 @@ import com.secucard.connect.product.smart.model.Transaction;
  * Implements the smart/transaction operations.
  */
 public class TransactionService extends ProductService<Transaction> {
-  public static final ServiceMetaData<Transaction> META_DATA = new ServiceMetaData<>("smart", "transactions",
-      Transaction.class);
+
+  public static final ServiceMetaData<Transaction> META_DATA = new ServiceMetaData<>("smart", "transactions", Transaction.class);
 
   private static final String GENERAL_NOTIFICATIONS_OBJECT = "general.notifications";
 
@@ -44,15 +44,14 @@ public class TransactionService extends ProductService<Transaction> {
   }
 
   /**
-   * Starting/Executing a transaction.
-   * An event of type {@link com.secucard.connect.product.smart.model.CashierDisplay} may happen during the execution.
+   * Starting/Executing a transaction. An event of type {@link com.secucard.connect.product.smart.model.CashierDisplay} may happen during the
+   * execution.
    *
    * @param transactionId The transaction id.
-   * @param type          The transaction type like "auto" or "cash".
+   * @param type The transaction type like "auto" or "cash".
    * @return The result data.
    */
-  public Transaction start(String transactionId, String type, Callback<Transaction> callback)
-  {
+  public Transaction start(String transactionId, String type, Callback<Transaction> callback) {
     if (transactionId == null || transactionId.equals("")) {
       throw new IllegalArgumentException("Parameter [transactionId] can not be empty!");
     }
@@ -89,11 +88,11 @@ public class TransactionService extends ProductService<Transaction> {
 
   /**
    * Cancel the existing transaction with the given id.
+   *
    * @param id Id of the transaction
    * @return True if ok false else.
    */
-  public Boolean cancel(String id)
-  {
+  public Boolean cancel(String id) {
     if (id == null || id.equals("")) {
       throw new IllegalArgumentException("Parameter [id] can not be empty!");
     }
@@ -103,11 +102,11 @@ public class TransactionService extends ProductService<Transaction> {
 
   /**
    * Cancel the existing transaction with the given id.
+   *
    * @param id Id of the transaction
    * @return The result data.
    */
-  public Transaction cancel(String id, Callback<Transaction> callback)
-  {
+  public Transaction cancel(String id, Callback<Transaction> callback) {
     if (id == null || id.equals("")) {
       throw new IllegalArgumentException("Parameter [id] can not be empty!");
     }
@@ -117,29 +116,29 @@ public class TransactionService extends ProductService<Transaction> {
 
   /**
    * Starts extended Diagnose
+   *
    * @return Transaction
    */
-  public Transaction diagnosis(Callback<Transaction> callback)
-  {
+  public Transaction diagnosis(Callback<Transaction> callback) {
     return execute(null, "Diagnosis", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
    * Starts End of Day Report (Kassenschnitt)
+   *
    * @return Transaction
    */
-  public Transaction endOfDay(Callback<Transaction> callback)
-  {
+  public Transaction endOfDay(Callback<Transaction> callback) {
     return execute(null, "EndofDay", null, "smart.transactions", Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
   }
 
   /**
    * Cancel payment transaction different from Loyalty
+   *
    * @param receiptNumber Receipt number to cancel
    * @return Transaction
    */
-  public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback)
-  {
+  public Transaction cancelPayment(String receiptNumber, Callback<Transaction> callback) {
     if (receiptNumber == null || receiptNumber.equals("")) {
       throw new IllegalArgumentException("Parameter [receiptNumber] can not be empty!");
     }
@@ -149,11 +148,11 @@ public class TransactionService extends ProductService<Transaction> {
 
   /**
    * Request loyalty bonus products and add them to the basket
+   *
    * @param id Id of the smart transaction
    * @return LoyaltyBonus
    */
-  public LoyaltyBonus appendLoyaltyBonusProducts(String id, Callback<LoyaltyBonus> callback)
-  {
+  public LoyaltyBonus appendLoyaltyBonusProducts(String id, Callback<LoyaltyBonus> callback) {
     if (id == null || id.equals("")) {
       throw new IllegalArgumentException("Parameter [id] can not be empty!");
     }

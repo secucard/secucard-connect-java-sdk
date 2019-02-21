@@ -17,37 +17,37 @@ import java.io.Serializable;
 import java.util.List;
 
 public class AddressComponents implements Serializable {
-    @JsonProperty("long_name")
-    private String longName;
 
-    @JsonProperty("short_name")
-    private String shortName;
+  @JsonProperty("long_name")
+  private String longName;
 
-    @JsonProperty
-    private List<String> types;
+  @JsonProperty("short_name")
+  private String shortName;
 
-    public String getLongName() {
-        return longName;
-    }
-    public void setLongName(String longName) { this.longName = longName;  }
+  @JsonProperty
+  private List<String> types;
 
-    public String getShortName() {
-        return shortName;
-    }
-    public void setShortName(String shortName) { this.shortName = shortName;  }
+  public String getLongName() {
+    return longName;
+  }
 
-    public List<String> getTypes() {
-        return types;
-    }
-    public void setTypes(List<String> types) { this.types = types;  }
+  public void setLongName(String longName) { this.longName = longName; }
 
-    @Override
-    public String toString() {
-        return "AddressComponents{" +
-                "longName=" + longName +
-                ", shortName=" + shortName +
-                ", types=" + types +
-                '}';
-    }
+  public String getShortName() {
+    return shortName;
+  }
+
+  public void setShortName(String shortName) { this.shortName = shortName; }
+
+  public List<String> getTypes() {
+    return types;
+  }
+
+  public void setTypes(List<String> types) { this.types = types; }
+
+  @Override
+  public String toString() {
+    return "AddressComponents{" + "longName=" + longName + ", shortName=" + shortName + ", types=" + types + '}';
+  }
 
 }

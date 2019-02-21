@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.loyalty.model.Card;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -28,12 +27,11 @@ public class Assignment implements Serializable {
 
   private boolean owner;
 
-  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY,
-          property = SecuObject.OBJECT_PROPERTY)
+  @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = SecuObject.OBJECT_PROPERTY)
   @JsonSubTypes({
-          @JsonSubTypes.Type(value = Merchant.class, name = "general.merchants"),
-          @JsonSubTypes.Type(value = AccountDevice.class, name = "general.accountdevices"),
-          @JsonSubTypes.Type(value = Card.class, name = "loyalty.cards")})
+      @JsonSubTypes.Type(value = Merchant.class, name = "general.merchants"),
+      @JsonSubTypes.Type(value = AccountDevice.class, name = "general.accountdevices"), @JsonSubTypes.Type(value = Card.class, name = "loyalty.cards")
+  })
   private SecuObject assign;
 
   public SecuObject getAssign() {

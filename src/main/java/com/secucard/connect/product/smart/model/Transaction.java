@@ -15,11 +15,11 @@ package com.secucard.connect.product.smart.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.Date;
 import java.util.List;
 
 public class Transaction extends SecuObject {
+
   public static final String STATUS_CREATED = "created";
   public static final String STATUS_CANCELED = "canceled";
   public static final String STATUS_FINISHED = "finished";
@@ -218,21 +218,9 @@ public class Transaction extends SecuObject {
 
   @Override
   public String toString() {
-    return "Transaction{" +
-        "basketInfo=" + basketInfo +
-        ", deviceSource=" + deviceSource +
-        ", targetDevice=" + targetDevice +
-        ", status='" + status + '\'' +
-        ", created=" + created +
-        ", updated=" + updated +
-        ", idents=" + idents +
-        ", basket=" + basket +
-        ", merchantRef='" + merchantRef + '\'' +
-        ", transactionRef='" + transactionRef + '\'' +
-        ", paymentMethod='" + paymentMethod + '\'' +
-        ", receiptLines=" + receiptLines +
-        ", receiptNumber='" + receiptNumber + '\'' +
-        ", error='" + error + '\'' +
-        "} " + super.toString();
+    return "Transaction{" + "basketInfo=" + basketInfo + ", deviceSource=" + deviceSource + ", targetDevice=" + targetDevice + ", status='" + status
+        + '\'' + ", created=" + created + ", updated=" + updated + ", idents=" + idents + ", basket=" + basket + ", merchantRef='" + merchantRef
+        + '\'' + ", transactionRef='" + transactionRef + '\'' + ", paymentMethod='" + paymentMethod + '\'' + ", receiptLines=" + receiptLines
+        + ", receiptNumber='" + receiptNumber + '\'' + ", error='" + error + '\'' + ", " + super.toString() + '}';
   }
 }

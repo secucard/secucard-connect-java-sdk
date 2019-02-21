@@ -15,7 +15,6 @@ package com.secucard.connect.product.general.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.util.LocaleUtil;
-
 import java.io.Serializable;
 import java.util.Locale;
 
@@ -79,8 +78,7 @@ public class Address implements Serializable {
   }
 
   /**
-   * Setting the country in ISO 3166 2 letter code.
-   * Case doesn't matter, will be corrected automatically.
+   * Setting the country in ISO 3166 2 letter code. Case doesn't matter, will be corrected automatically.
    *
    * @param country The country code string.
    */
@@ -107,13 +105,7 @@ public class Address implements Serializable {
 
   @Override
   public String toString() {
-    return "Address{" +
-        "street='" + street + '\'' +
-        ", streetNumber='" + streetNumber + '\'' +
-        ", postalCode='" + postalCode + '\'' +
-        ", city='" + city + '\'' +
-        ", country='" + country + '\'' +
-        ", countryLocale=" + countryLocale +
-        '}';
+    return "Address{" + "street='" + street + '\'' + ", streetNumber='" + streetNumber + '\'' + ", postalCode='" + postalCode + '\'' + ", city='"
+        + city + '\'' + ", country='" + country + '\'' + ", countryLocale=" + countryLocale + '}';
   }
 }

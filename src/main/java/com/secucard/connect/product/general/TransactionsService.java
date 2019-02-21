@@ -19,7 +19,6 @@ import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.general.model.Transaction;
-
 import java.util.Map;
 
 /**
@@ -27,8 +26,7 @@ import java.util.Map;
  */
 public class TransactionsService extends ProductService<Transaction> {
 
-  public static final ServiceMetaData<Transaction> META_DATA = new ServiceMetaData<>("general", "transactions",
-      Transaction.class);
+  public static final ServiceMetaData<Transaction> META_DATA = new ServiceMetaData<>("general", "transactions", Transaction.class);
 
   @Override
   public ServiceMetaData<Transaction> getMetaData() {

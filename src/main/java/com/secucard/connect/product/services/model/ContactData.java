@@ -13,6 +13,7 @@
 package com.secucard.connect.product.services.model;
 
 public class ContactData {
+
   String mobile;
 
   String email;
@@ -35,9 +36,6 @@ public class ContactData {
 
   @Override
   public String toString() {
-    return "ContactData{" +
-        "mobilePhone='" + mobile + '\'' +
-        ", email='" + email + '\'' +
-        '}';
+    return "ContactData{" + "mobilePhone='" + mobile + '\'' + ", email='" + email + '\'' + '}';
   }
 }

@@ -15,7 +15,6 @@ package com.secucard.connect.product.general.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.loyalty.model.Sale;
-
 import java.util.Currency;
 import java.util.Date;
 

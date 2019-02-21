@@ -36,9 +36,6 @@ public class Text {
 
   @Override
   public String toString() {
-    return "Text{" +
-        "parentId='" + parentId + '\'' +
-        ", desc='" + desc + '\'' +
-        '}';
+    return "Text{" + "parentId='" + parentId + '\'' + ", desc='" + desc + '\'' + '}';
   }
 }

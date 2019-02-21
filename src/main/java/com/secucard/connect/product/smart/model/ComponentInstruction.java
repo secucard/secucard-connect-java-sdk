@@ -16,36 +16,30 @@ import com.secucard.connect.product.loyalty.model.MerchantCard;
 
 public class ComponentInstruction {
 
-    public static final String COMPONENT_ACTION_OPEN = "open";
-    public static final String COMPONENT_ACTION_UPDATE = "update";
-    public static final String COMPONENT_ACTION_CLOSE = "close";
+  public static final String COMPONENT_ACTION_OPEN = "open";
+  public static final String COMPONENT_ACTION_UPDATE = "update";
+  public static final String COMPONENT_ACTION_CLOSE = "close";
 
-    public static final String COMPONENT_TARGET_IDENT_LINK = "ident-link";
-    public static final String COMPONENT_TARGET_USER_SELECTION = "user-selection";
-    public static final String COMPONENT_TARGET_CHECKIN_BUTTON = "checkin-button";
+  public static final String COMPONENT_TARGET_IDENT_LINK = "ident-link";
+  public static final String COMPONENT_TARGET_USER_SELECTION = "user-selection";
+  public static final String COMPONENT_TARGET_CHECKIN_BUTTON = "checkin-button";
 
-    public String url;
+  public String url;
 
-    public String target;
+  public String target;
 
-    public String action;
+  public String action;
 
-    public ComponentSize size;
+  public ComponentSize size;
 
-    public ComponentPosition position;
+  public ComponentPosition position;
 
-    public MerchantCard merchantcard;
+  public MerchantCard merchantcard;
 
-    @Override
-    public String toString() {
-        return "ComponentInstruction{" +
-                ", url='" + url + '\'' +
-                ", target='" + target + '\'' +
-                ", action='" + action + '\'' +
-                ", size='" + size + '\'' +
-                ", position='" + position + '\'' +
-                ", merchantcard='" + merchantcard + '\'' +
-                "} " + super.toString();
-    }
+  @Override
+  public String toString() {
+    return "ComponentInstruction{" + ", url='" + url + '\'' + ", target='" + target + '\'' + ", action='" + action + '\'' + ", size='" + size + '\''
+        + ", position='" + position + '\'' + ", merchantcard='" + merchantcard + '\'' + ", " + super.toString() + '}';
+  }
 
 }

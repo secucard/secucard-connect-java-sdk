@@ -23,12 +23,11 @@ import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.smart.model.Checkin;
 import com.secucard.connect.product.smart.model.ComponentInstruction;
-import org.json.JSONArray;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
 
 /**
  * Implements the smart/checkins operations.
@@ -49,6 +48,7 @@ public class CheckinService extends ProductService<Checkin> {
 
   /**
    * Set a callback to get notified when a check in happened.
+   *
    * @deprecated Use onChanged instead
    */
   public void onCheckinsChanged(final Callback<List<Checkin>> callback) {
@@ -72,19 +72,15 @@ public class CheckinService extends ProductService<Checkin> {
   }
 
   /**
-   * Returning check in data.<br/>
-   * Data may contain a downloadable image. When the method returns either by callback or directly it is
-   * guarantied that all images are completely downloaded to an local cache. To get the image content simply call
-   * {@link MediaResource#getInputStream()}  or
-   * {@link MediaResource#getContents()}. The streaming approach should be favored,
-   * since the other obviously loads the content completely in memory before returning, which may not be optimal in any
-   * case.<br/>
-   * Note: Depending on the network it may of course take a while to download all, so without using an callback the
-   * method may block until ready. Id that's not acceptable use the callback.
+   * Returning check in data.<br/> Data may contain a downloadable image. When the method returns either by callback or directly it is guarantied that
+   * all images are completely downloaded to an local cache. To get the image content simply call {@link MediaResource#getInputStream()}  or {@link
+   * MediaResource#getContents()}. The streaming approach should be favored, since the other obviously loads the content completely in memory before
+   * returning, which may not be optimal in any case.<br/> Note: Depending on the network it may of course take a while to download all, so without
+   * using an callback the method may block until ready. Id that's not acceptable use the callback.
    *
    * @param callback Callback for async result processing.
-   * @return If no callback is provided a list of check in data objects or null if no data could be found.
-   * Returns always null if a callback was provided, the callbacks methods return the result analogous.
+   * @return If no callback is provided a list of check in data objects or null if no data could be found. Returns always null if a callback was
+   * provided, the callbacks methods return the result analogous.
    */
   public List<Checkin> getAll(Callback<List<Checkin>> callback) {
     Options options = getDefaultOptions();
@@ -98,8 +94,8 @@ public class CheckinService extends ProductService<Checkin> {
   }
 
   /**
-   * Downloading check in pictures sequentially and return just when done.
-   * todo: consider doing it in parallel to speed up, but not sure if rest channel can handle this properly
+   * Downloading check in pictures sequentially and return just when done. todo: consider doing it in parallel to speed up, but not sure if rest
+   * channel can handle this properly
    */
   private void processCheckins(ObjectList<Checkin> checkins) {
     if (checkins != null && checkins.getList() != null) {

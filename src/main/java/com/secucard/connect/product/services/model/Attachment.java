@@ -13,10 +13,10 @@
 package com.secucard.connect.product.services.model;
 
 import com.secucard.connect.product.common.model.MediaResource;
-
 import java.net.MalformedURLException;
 
 public class Attachment extends MediaResource {
+
   private String type;
 
   public Attachment() {
@@ -37,9 +37,6 @@ public class Attachment extends MediaResource {
 
   @Override
   public String toString() {
-    return "Attachment{" +
-        "type='" + type + '\'' +
-        ", url='" + getUrl() + '\'' +
-        '}';
+    return "Attachment{" + "type='" + type + '\'' + ", url='" + getUrl() + '\'' + '}';
   }
 }

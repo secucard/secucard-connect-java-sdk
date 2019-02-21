@@ -15,7 +15,6 @@ package com.secucard.connect.product.loyalty;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.product.loyalty.model.CardGroup;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,39 +23,38 @@ import java.util.Map;
  */
 public class CardGroupsService extends ProductService<CardGroup> {
 
-    public static final ServiceMetaData<CardGroup> META_DATA = new ServiceMetaData<>("loyalty", "cardgroups",
-            CardGroup.class);
+  public static final ServiceMetaData<CardGroup> META_DATA = new ServiceMetaData<>("loyalty", "cardgroups", CardGroup.class);
 
-    @Override
-    public ServiceMetaData<CardGroup> getMetaData() {
-        return META_DATA;
+  @Override
+  public ServiceMetaData<CardGroup> getMetaData() {
+    return META_DATA;
+  }
+
+  /**
+   * Check if a passcode is enabled for this card and transaction type
+   *
+   * @param cardGroupId CRG_XYZ
+   * @param transactionType Type of transaction to check {@link CardGroup}
+   * @param cardNumber Number of the card
+   * @return bool
+   */
+  public Boolean checkPasscodeEnabled(String cardGroupId, String transactionType, String cardNumber, Callback<Boolean> callback) {
+    if (cardGroupId == null || cardGroupId.equals("")) {
+      throw new IllegalArgumentException("Parameter [cardGroupId] can not be empty!");
     }
 
-    /**
-     * Check if a passcode is enabled for this card and transaction type
-     * @param cardGroupId CRG_XYZ
-     * @param transactionType Type of transaction to check {@link CardGroup}
-     * @param cardNumber Number of the card
-     * @return bool
-     */
-    public Boolean checkPasscodeEnabled(String cardGroupId, String transactionType, String cardNumber, Callback<Boolean> callback)
-    {
-        if (cardGroupId == null || cardGroupId.equals("")) {
-            throw new IllegalArgumentException("Parameter [cardGroupId] can not be empty!");
-        }
-
-        if (transactionType == null || transactionType.equals("")) {
-            throw new IllegalArgumentException("Parameter [transactionType] can not be empty!");
-        }
-
-        if (cardNumber == null || cardNumber.equals("")) {
-            throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
-        }
-
-        Map<String, String> obj = new HashMap<>();
-        obj.put("action", transactionType);
-        obj.put("cardnumber", cardNumber);
-
-        return super.executeToBool(cardGroupId, "CheckPasscodeEnabled", null, obj, null, callback);
+    if (transactionType == null || transactionType.equals("")) {
+      throw new IllegalArgumentException("Parameter [transactionType] can not be empty!");
     }
+
+    if (cardNumber == null || cardNumber.equals("")) {
+      throw new IllegalArgumentException("Parameter [cardNumber] can not be empty!");
+    }
+
+    Map<String, String> obj = new HashMap<>();
+    obj.put("action", transactionType);
+    obj.put("cardnumber", cardNumber);
+
+    return super.executeToBool(cardGroupId, "CheckPasscodeEnabled", null, obj, null, callback);
+  }
 }

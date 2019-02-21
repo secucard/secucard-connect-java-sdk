@@ -16,6 +16,7 @@ package com.secucard.connect.product.general.model;
 import java.util.List;
 
 public class MerchantList {
+
   private int count;
 
   private List<String> merchants;
@@ -38,9 +39,6 @@ public class MerchantList {
 
   @Override
   public String toString() {
-    return "MerchantList{" +
-        "count=" + count +
-        ", merchants=" + merchants +
-        '}';
+    return "MerchantList{" + "count=" + count + ", merchants=" + merchants + '}';
   }
 }

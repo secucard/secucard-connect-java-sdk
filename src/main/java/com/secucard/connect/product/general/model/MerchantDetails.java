@@ -14,7 +14,6 @@ package com.secucard.connect.product.general.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.math.BigDecimal;
 import java.util.List;
 

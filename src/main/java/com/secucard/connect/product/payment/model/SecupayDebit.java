@@ -14,6 +14,6 @@ public class SecupayDebit extends Transaction {
 
   @Override
   public String toString() {
-    return "SecupayDebit{" + "container=" + container + "} " + super.toString();
+    return "SecupayDebit{" + "container=" + container + ", " + super.toString() + '}';
   }
 }

@@ -14,10 +14,10 @@ package com.secucard.connect.product.general.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.List;
 
 public class Merchant extends SecuObject {
+
   @JsonProperty
   private String name;
 
@@ -84,6 +84,5 @@ public class Merchant extends SecuObject {
     this.photoMain = photoMain;
   }
 
-  public static class MetaData extends SecuObject {
-  }
+  public static class MetaData extends SecuObject {}
 }

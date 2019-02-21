@@ -18,8 +18,7 @@ import java.util.Map;
  */
 public class SecupayDebitsService extends ProductService<SecupayDebit> {
 
-  public static final ServiceMetaData<SecupayDebit> META_DATA = new ServiceMetaData<>("payment",
-      "secupaydebits", SecupayDebit.class);
+  public static final ServiceMetaData<SecupayDebit> META_DATA = new ServiceMetaData<>("payment", "secupaydebits", SecupayDebit.class);
 
   @Override
   public ServiceMetaData<SecupayDebit> getMetaData() {
@@ -30,15 +29,15 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
    * Cancel an existing transaction.
    *
    * @param id The debit transaction id.
-   * @param contractId The id of the contract that was used to create this transaction. May be null
-   * if the contract is an parent contract (not cloned).
+   * @param contractId The id of the contract that was used to create this transaction. May be null if the contract is an parent contract (not
+   * cloned).
    * @param callback Callback for async processing.
    * @return True if successful, false else.
    */
   public Boolean cancel(final String id, final String contractId, Callback<CancelResponse> callback) {
     Map<String, String> map = new HashMap<>();
     map.put("contract", contractId == null ? "" : contractId);
-    CancelResponse result = execute(id, "cancel", null, map, CancelResponse.class,null, callback);
+    CancelResponse result = execute(id, "cancel", null, map, CancelResponse.class, null, callback);
     return true;
   }
 
@@ -46,8 +45,8 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
    * Cancel an existing transaction.
    *
    * @param id The debit transaction id.
-   * @param contractId The id of the contract that was used to create this transaction. May be null
-   * if the contract is an parent contract (not cloned).
+   * @param contractId The id of the contract that was used to create this transaction. May be null if the contract is an parent contract (not
+   * cloned).
    * @return True if successful, false else.
    */
   public Boolean cancel(final String id, final String contractId) {
@@ -76,8 +75,7 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
 
         @Override
         public boolean accept(Event event) {
-          return Events.TYPE_CHANGED.equals(event.getType()) && getMetaData().getObject()
-              .equals(event.getTarget());
+          return Events.TYPE_CHANGED.equals(event.getType()) && getMetaData().getObject().equals(event.getTarget());
         }
 
         @Override
@@ -92,7 +90,6 @@ public class SecupayDebitsService extends ProductService<SecupayDebit> {
       };
     }
 
-    context.eventDispatcher
-        .registerListener(getMetaData().getObject() + Events.TYPE_CHANGED, listener);
+    context.eventDispatcher.registerListener(getMetaData().getObject() + Events.TYPE_CHANGED, listener);
   }
 }

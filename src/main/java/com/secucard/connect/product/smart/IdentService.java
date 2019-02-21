@@ -21,10 +21,9 @@ import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.smart.model.ComponentInstruction;
 import com.secucard.connect.product.smart.model.Ident;
-import org.json.JSONArray;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
 
 /**
  * Implements the smart/idents operations.

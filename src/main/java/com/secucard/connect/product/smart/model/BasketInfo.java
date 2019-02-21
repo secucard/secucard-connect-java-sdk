@@ -15,6 +15,7 @@ package com.secucard.connect.product.smart.model;
 import java.util.Currency;
 
 public class BasketInfo {
+
   private int sum;
 
   private Currency currency;
@@ -50,9 +51,6 @@ public class BasketInfo {
 
   @Override
   public String toString() {
-    return "BasketInfo{" +
-        "sum=" + sum +
-        ", currency=" + currency +
-        '}';
+    return "BasketInfo{" + "sum=" + sum + ", currency=" + currency + '}';
   }
 }

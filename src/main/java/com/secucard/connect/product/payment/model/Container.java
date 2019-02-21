@@ -95,8 +95,7 @@ public class Container extends SecuObject {
 
   @Override
   public String toString() {
-    return "Container{" + "merchant=" + merchant + ", privateData=" + privateData + ", publicData="
-        + publicData + ", type='" + type + '\'' + ", created=" + created + ", updated=" + updated
-        + '}';
+    return "Container{" + "merchant=" + merchant + ", privateData=" + privateData + ", publicData=" + publicData + ", type='" + type + '\''
+        + ", created=" + created + ", updated=" + updated + ", " + super.toString() + '}';
   }
 }

@@ -15,57 +15,56 @@ package com.secucard.connect.product.services.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Merchant;
-
 import java.util.Date;
 
 public class Contract extends SecuObject {
 
-    @JsonProperty("redirect_url_success")
-    private String redirectUrlSuccess;
+  @JsonProperty("redirect_url_success")
+  private String redirectUrlSuccess;
 
-    @JsonProperty("redirect_url_failed")
-    private String redirectUrlFailed;
+  @JsonProperty("redirect_url_failed")
+  private String redirectUrlFailed;
 
-    @JsonProperty("push_url")
-    private String pushUrl;
+  @JsonProperty("push_url")
+  private String pushUrl;
 
-    private Date created;
+  private Date created;
 
-    private Merchant merchant;
+  private Merchant merchant;
 
-    public String getRedirectUrlSuccess() {
-        return redirectUrlSuccess;
-    }
-    public void setRedirectUrlSuccess(String redirectUrlSuccess) { this.redirectUrlSuccess = redirectUrlSuccess;  }
+  public String getRedirectUrlSuccess() {
+    return redirectUrlSuccess;
+  }
 
-    public String getRedirectUrlFailed() {
-        return redirectUrlFailed;
-    }
-    public void setRedirectUrlFailed(String redirectUrlFailed) { this.redirectUrlFailed = redirectUrlFailed;  }
+  public void setRedirectUrlSuccess(String redirectUrlSuccess) { this.redirectUrlSuccess = redirectUrlSuccess; }
 
-    public String getPushUrl() {
-        return pushUrl;
-    }
-    public void setPushUrl(String pushUrl) { this.pushUrl = pushUrl;  }
+  public String getRedirectUrlFailed() {
+    return redirectUrlFailed;
+  }
 
-    public Date getCreated() {
-        return created;
-    }
-    public void setCreated(Date created) { this.created = created;  }
+  public void setRedirectUrlFailed(String redirectUrlFailed) { this.redirectUrlFailed = redirectUrlFailed; }
 
-    public Merchant getMerchant() {
-        return merchant;
-    }
-    public void setMerchant(Merchant merchant) { this.merchant = merchant;  }
+  public String getPushUrl() {
+    return pushUrl;
+  }
 
-    @Override
-    public String toString() {
-        return "Contract{" +
-                "redirectUrlSuccess=" + redirectUrlSuccess +
-                ", redirectUrlFailed=" + redirectUrlFailed +
-                ", pushUrl=" + pushUrl +
-                ", created=" + created +
-                ", merchant=" + merchant +
-                '}';
-    }
+  public void setPushUrl(String pushUrl) { this.pushUrl = pushUrl; }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public void setCreated(Date created) { this.created = created; }
+
+  public Merchant getMerchant() {
+    return merchant;
+  }
+
+  public void setMerchant(Merchant merchant) { this.merchant = merchant; }
+
+  @Override
+  public String toString() {
+    return "Contract{" + "redirectUrlSuccess=" + redirectUrlSuccess + ", redirectUrlFailed=" + redirectUrlFailed + ", pushUrl=" + pushUrl
+        + ", created=" + created + ", merchant=" + merchant + ", " + super.toString() + '}';
+  }
 }

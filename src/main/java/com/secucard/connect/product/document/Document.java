@@ -13,6 +13,7 @@
 package com.secucard.connect.product.document;
 
 public class Document {
+
   public Document(UploadsService uploads) {
     this.uploads = uploads;
   }

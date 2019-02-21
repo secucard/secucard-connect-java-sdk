@@ -9,8 +9,7 @@ import com.secucard.connect.product.payment.model.Contract;
  */
 public class ContractsService extends ProductService<Contract> {
 
-  public static final ServiceMetaData<Contract> META_DATA = new ServiceMetaData<>("payment",
-      "contracts", Contract.class);
+  public static final ServiceMetaData<Contract> META_DATA = new ServiceMetaData<>("payment", "contracts", Contract.class);
 
   @Override
   public ServiceMetaData<Contract> getMetaData() {
@@ -18,8 +17,7 @@ public class ContractsService extends ProductService<Contract> {
   }
 
   /**
-   * Clones the contract of the current user according to the given parameters and returns the
-   * contract.
+   * Clones the contract of the current user according to the given parameters and returns the contract.
    */
   public Contract cloneMyContract(Contract.CloneParams params, Callback<Contract> callback) {
     return clone("me", params, callback);
@@ -28,8 +26,7 @@ public class ContractsService extends ProductService<Contract> {
   /**
    * Clones a contract with a given id according to the given parameters and returns the contract.
    */
-  public Contract clone(String contractId, Contract.CloneParams params,
-      Callback<Contract> callback) {
+  public Contract clone(String contractId, Contract.CloneParams params, Callback<Contract> callback) {
     return execute(contractId, "clone", null, params, Contract.class, null, callback);
   }
 }

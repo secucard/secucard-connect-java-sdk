@@ -15,19 +15,21 @@ package com.secucard.connect.product.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.secucard.connect.client.ResourceDownloader;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Base class for all URL based media resources like images or pdf documents.
- * Supports caching of the resource denoted by the URL of this instance. That means the content is downloaded and
- * put to the cache on demand. Further access is served by the cache.<br/>
- * Note: This is not a caching by LRU strategy or alike. If enabled the content will be
- * cached for new instances or when the URL of the instance was changed (its eventually the same).
+ * Base class for all URL based media resources like images or pdf documents. Supports caching of the resource denoted by the URL of this instance.
+ * That means the content is downloaded and put to the cache on demand. Further access is served by the cache.<br/> Note: This is not a caching by LRU
+ * strategy or alike. If enabled the content will be cached for new instances or when the URL of the instance was changed (its eventually the same).
  */
-public class MediaResource implements Serializable{
+public class MediaResource implements Serializable {
+
   private String url;
 
   @JsonIgnore
@@ -69,8 +71,7 @@ public class MediaResource implements Serializable{
   }
 
   /**
-   * Returns if this resource was already downloaded and cached.
-   * Note: If this instances URL is changed the flag is reset.
+   * Returns if this resource was already downloaded and cached. Note: If this instances URL is changed the flag is reset.
    */
   public boolean isCached() {
     return isCached;
@@ -91,8 +92,8 @@ public class MediaResource implements Serializable{
   }
 
   /**
-   * Downloading resource and put in cache for later access no matter if this was already done before.
-   * Call {@link #isCached} before to determine if this is the case.
+   * Downloading resource and put in cache for later access no matter if this was already done before. Call {@link #isCached} before to determine if
+   * this is the case.
    */
   public void download() {
     ResourceDownloader downloader = getDownloader();
@@ -103,8 +104,7 @@ public class MediaResource implements Serializable{
   }
 
   /**
-   * Return the contents of this resource as byte array.
-   * See also {@link #getInputStream()}, the same principle applies here.
+   * Return the contents of this resource as byte array. See also {@link #getInputStream()}, the same principle applies here.
    *
    * @return The bytes.
    * @throws java.io.IOException If a error ocurrs during resource access.
@@ -128,10 +128,9 @@ public class MediaResource implements Serializable{
   }
 
   /**
-   * Loads this resource as a stream from its URL.<br/>
-   * Note: If caching is enabled, (check {@link #isCachingEnabled()}, the resource content is also downloaded and cached
-   * (if not already happened before, check {@link #isCached()}) and further invocations deliver from cache.
-   * Set {@link #enableCaching(boolean)} if this behaviour is not wanted.
+   * Loads this resource as a stream from its URL.<br/> Note: If caching is enabled, (check {@link #isCachingEnabled()}, the resource content is also
+   * downloaded and cached (if not already happened before, check {@link #isCached()}) and further invocations deliver from cache. Set {@link
+   * #enableCaching(boolean)} if this behaviour is not wanted.
    *
    * @return The input stream, or null if this resource has no URL.
    */

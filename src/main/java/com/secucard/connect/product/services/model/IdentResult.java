@@ -14,12 +14,12 @@ package com.secucard.connect.product.services.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class IdentResult extends SecuObject {
+
   public static final String STATUS_OK = "ok";
   public static final String STATUS_FAILED = "failed";
   public static final String STATUS_PRELIMINARY_OK = "ok_preliminary";
@@ -79,15 +79,12 @@ public class IdentResult extends SecuObject {
 
   @Override
   public String toString() {
-    return "IdentResult{" +
-        "request=" + request +
-        ", status='" + status + '\'' +
-        ", entities=" + entities +
-        ", created=" + created +
-        "} " + super.toString();
+    return "IdentResult{" + "request=" + request + ", status='" + status + '\'' + ", entities=" + entities + ", created=" + created + ", " + super
+        .toString() + '}';
   }
 
   public static class Entity {
+
     @JsonProperty("identificationprocess")
     private IdentificationProcess identificationProcess;
 

@@ -58,6 +58,8 @@ public abstract class Transaction extends SecuObject {
   @JsonProperty("transaction_status")
   protected String transactionStatus;
 
+  protected boolean demo;
+
   public Customer getCustomer() {
     return customer;
   }
@@ -192,6 +194,14 @@ public abstract class Transaction extends SecuObject {
 
   public void setPaymentAction(String paymentAction) {
     this.paymentAction = paymentAction;
+  }
+
+  public boolean getDemo() {
+    return demo;
+  }
+
+  public void setDemo(boolean demo) {
+    this.demo = demo;
   }
 
 }

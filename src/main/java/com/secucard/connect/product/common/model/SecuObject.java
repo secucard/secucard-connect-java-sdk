@@ -13,7 +13,6 @@
 package com.secucard.connect.product.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serializable;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import java.util.Map;
  * Base class for all product resource models.
  */
 public abstract class SecuObject implements Serializable {
+
   public static final String OBJECT_PROPERTY = "object";
   public static final String OBJECT_FIELD = "OBJECT";
   public static final String ID_PROPERTY = "id";
@@ -55,6 +55,11 @@ public abstract class SecuObject implements Serializable {
 
   public void setMetaData(Map metaData) {
     this.metaData = metaData;
+  }
+
+  @Override
+  public String toString() {
+    return "id='" + getId() + '\'' + ", object='" + getObject() + '\'';
   }
 
 }

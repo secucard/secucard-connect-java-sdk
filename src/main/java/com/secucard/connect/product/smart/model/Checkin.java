@@ -18,12 +18,10 @@ import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Account;
 import com.secucard.connect.product.loyalty.model.Customer;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
-
 import java.util.Date;
 
 /**
- * The Check-In data.
- * The error field may be not null if an error happened during retrieval of the picture object.
+ * The Check-In data. The error field may be not null if an error happened during retrieval of the picture object.
  */
 public class Checkin extends SecuObject {
 
@@ -95,8 +93,7 @@ public class Checkin extends SecuObject {
   }
 
   /**
-   * Returns the customer picture. Picture is not available if null - if the error field is not null this was caused
-   * by an error.
+   * Returns the customer picture. Picture is not available if null - if the error field is not null this was caused by an error.
    */
   public MediaResource getPictureObject() {
     return pictureObject;
@@ -104,10 +101,7 @@ public class Checkin extends SecuObject {
 
   @Override
   public String toString() {
-    return "Checkin{" +
-        "customerName='" + customerName + '\'' +
-        ", pictureUrl='" + picture + '\'' +
-        ", created=" + created +
-        "} " + super.toString();
+    return "Checkin{" + "customerName='" + customerName + '\'' + ", pictureUrl='" + picture + '\'' + ", created=" + created + ", " + super.toString()
+        + '}';
   }
 }

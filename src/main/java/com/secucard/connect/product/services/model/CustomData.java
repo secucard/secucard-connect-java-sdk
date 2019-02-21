@@ -13,6 +13,7 @@
 package com.secucard.connect.product.services.model;
 
 public class CustomData {
+
   private String custom1;
   private String custom2;
   private String custom3;
@@ -61,12 +62,7 @@ public class CustomData {
 
   @Override
   public String toString() {
-    return "CustomData{" +
-        "custom1='" + custom1 + '\'' +
-        ", custom2='" + custom2 + '\'' +
-        ", custom3='" + custom3 + '\'' +
-        ", custom4='" + custom4 + '\'' +
-        ", custom5='" + custom5 + '\'' +
-        '}';
+    return "CustomData{" + "custom1='" + custom1 + '\'' + ", custom2='" + custom2 + '\'' + ", custom3='" + custom3 + '\'' + ", custom4='" + custom4
+        + '\'' + ", custom5='" + custom5 + '\'' + '}';
   }
 }

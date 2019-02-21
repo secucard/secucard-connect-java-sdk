@@ -105,13 +105,7 @@ public class Status {
 
   @Override
   public String toString() {
-    return "Status{" +
-        "status='" + status + '\'' +
-        ", error='" + error + '\'' +
-        ", errorDetails='" + errorDetails + '\'' +
-        ", errorUser='" + errorUser + '\'' +
-        ", code='" + code + '\'' +
-        ", supportId='" + supportId + '\'' +
-        '}';
+    return "Status{" + "status='" + status + '\'' + ", error='" + error + '\'' + ", errorDetails='" + errorDetails + '\'' + ", errorUser='"
+        + errorUser + '\'' + ", code='" + code + '\'' + ", supportId='" + supportId + '\'' + '}';
   }
 }

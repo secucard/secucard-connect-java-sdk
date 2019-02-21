@@ -8,27 +8,27 @@ import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.payment.model.CancelResponse;
-import com.secucard.connect.product.payment.model.SecupayPrepay;
+import com.secucard.connect.product.payment.model.SecupayPayout;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Implements the payment/secupayprepay operations.
+ * Implements the payment/secupaypayout operations.
  */
-public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
+public class SecupayPayoutService extends ProductService<SecupayPayout> {
 
-  public static final ServiceMetaData<SecupayPrepay> META_DATA = new ServiceMetaData<>("payment", "secupayprepays", SecupayPrepay.class);
+  public static final ServiceMetaData<SecupayPayout> META_DATA = new ServiceMetaData<>("payment", "secupaypayout", SecupayPayout.class);
 
   @Override
-  public ServiceMetaData<SecupayPrepay> getMetaData() {
+  public ServiceMetaData<SecupayPayout> getMetaData() {
     return META_DATA;
   }
 
   /**
    * Cancel an existing transaction.
    *
-   * @param id The prepay transaction id.
+   * @param id The payout transaction id.
    * @param contractId The id of the contract that was used to create this transaction. May be null if the contract is an parent contract (not
    * cloned).
    * @param callback Callback for async processing.
@@ -44,7 +44,7 @@ public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
   /**
    * Cancel an existing transaction.
    *
-   * @param id The prepay transaction id.
+   * @param id The payout transaction id.
    * @param contractId The id of the contract that was used to create this transaction. May be null if the contract is an parent contract (not
    * cloned).
    * @return True if successful, false else.
@@ -56,7 +56,7 @@ public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
   /**
    * Cancel an existing transaction.
    *
-   * @param id The prepay transaction id.
+   * @param id The payout transaction id.
    * @return True if successful, false else.
    */
   public Boolean cancel(final String id) {
@@ -64,23 +64,23 @@ public class SecupayPrepaysService extends ProductService<SecupayPrepay> {
   }
 
   /**
-   * Set a callback to get notified when a prepay has changed.
+   * Set a callback to get notified when a payout has changed.
    */
-  public void onSecuPrepayChanged(Callback<SecupayPrepay> callback) {
+  public void onSecuPayoutChanged(Callback<SecupayPayout> callback) {
     AbstractEventListener listener = null;
 
     if (callback != null) {
-      listener = new DelegatingEventHandlerCallback<List<SecupayPrepay>, SecupayPrepay>(callback) {
+      listener = new DelegatingEventHandlerCallback<List<SecupayPayout>, SecupayPayout>(callback) {
         @Override
         public boolean accept(Event event) {
           return Events.TYPE_CHANGED.equals(event.getType()) && getMetaData().getObject().equals(event.getTarget());
         }
 
         @Override
-        protected SecupayPrepay process(Event<List<SecupayPrepay>> event) {
-          List<SecupayPrepay> list = event.getData();
+        protected SecupayPayout process(Event<List<SecupayPayout>> event) {
+          List<SecupayPayout> list = event.getData();
           if (list == null || list.size() == 0) {
-            throw new ClientError("Invalid event data, prepay id not found.");
+            throw new ClientError("Invalid event data, payout id not found.");
           } else {
             return get(list.get(0).getId(), null);
           }

@@ -18,11 +18,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.util.LocaleUtil;
-
 import java.util.Date;
 import java.util.Locale;
 
 public class Contact extends SecuObject {
+
   public static final String OBJECT = "general.contacts";
 
   public static final String GENDER_MALE = "MALE";
@@ -46,7 +46,7 @@ public class Contact extends SecuObject {
   private Locale nationalityLocale = null;
 
   @JsonProperty("dob")
-  @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private Date dateOfBirth;
 
   @JsonProperty("birthplace")
@@ -107,8 +107,7 @@ public class Contact extends SecuObject {
   }
 
   /**
-   * Setting the nationality in ISO 3166 2 letter code.
-   * Case doesn't matter, will be corrected automatically.
+   * Setting the nationality in ISO 3166 2 letter code. Case doesn't matter, will be corrected automatically.
    *
    * @param nationality The country code string.
    */
@@ -235,27 +234,12 @@ public class Contact extends SecuObject {
   }
 
 
-
-
   @Override
   public String toString() {
-    return "Contact{" +
-        ", foreName='" + forename + '\'' +
-        ", companyName='" + companyName + '\'' +
-        ", surName='" + surname + '\'' +
-        ", title='" + title + '\'' +
-        ", salutation='" + salutation + '\'' +
-        ", gender='" + gender + '\'' +
-        ", email='" + email + '\'' +
-        ", dateOfBirth=" + dateOfBirth +
-        ", birthPlace='" + birthPlace + '\'' +
-        ", phone='" + phone + '\'' +
-        ", mobile='" + mobile + '\'' +
-        ", nationality='" + nationality + '\'' +
-        ", nationalityLocale=" + nationalityLocale +
-        ", address=" + address +
-        ", urlWebsite='" + urlWebsite + '\'' +
-        ", picture='" + picture + '\'' +
-        "} " + super.toString();
+    return "Contact{" + ", foreName='" + forename + '\'' + ", companyName='" + companyName + '\'' + ", surName='" + surname + '\'' + ", title='"
+        + title + '\'' + ", salutation='" + salutation + '\'' + ", gender='" + gender + '\'' + ", email='" + email + '\'' + ", dateOfBirth="
+        + dateOfBirth + ", birthPlace='" + birthPlace + '\'' + ", phone='" + phone + '\'' + ", mobile='" + mobile + '\'' + ", nationality='"
+        + nationality + '\'' + ", nationalityLocale=" + nationalityLocale + ", address=" + address + ", urlWebsite='" + urlWebsite + '\''
+        + ", picture='" + picture + '\'' + ", " + super.toString() + '}';
   }
 }

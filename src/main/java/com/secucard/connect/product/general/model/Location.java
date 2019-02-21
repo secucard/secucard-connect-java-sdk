@@ -15,6 +15,7 @@ package com.secucard.connect.product.general.model;
 import java.io.Serializable;
 
 public class Location implements Serializable {
+
   private double lat;
 
   private double lon;

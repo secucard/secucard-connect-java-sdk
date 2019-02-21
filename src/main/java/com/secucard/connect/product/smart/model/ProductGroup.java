@@ -55,10 +55,6 @@ public class ProductGroup {
 
   @Override
   public String toString() {
-    return "ProductGroup{" +
-        "id='" + id + '\'' +
-        ", desc='" + desc + '\'' +
-        ", level='" + level + '\'' +
-        '}';
+    return "ProductGroup{" + "id='" + id + '\'' + ", desc='" + desc + '\'' + ", level='" + level + '\'' + '}';
   }
 }

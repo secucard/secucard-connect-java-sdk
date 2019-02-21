@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.general.model.Location;
 
 public class Address {
+
   @JsonProperty("postal_code")
   private Value postalCode;
 
@@ -39,7 +40,8 @@ public class Address {
   public AddressComponents[] getAddressComponents() {
     return addressComponents;
   }
-  public void setAddressComponents(AddressComponents[] addressComponents) { this.addressComponents = addressComponents;  }
+
+  public void setAddressComponents(AddressComponents[] addressComponents) { this.addressComponents = addressComponents; }
 
   public String getAddressFormatted() {
     return addressFormatted;
@@ -99,15 +101,7 @@ public class Address {
 
   @Override
   public String toString() {
-    return "Address{" +
-        "zipcode=" + postalCode +
-        ", country=" + country +
-        ", city=" + city +
-        ", street=" + street +
-        ", streetNumber=" + streetNumber +
-        ", addressComponents=" + addressComponents +
-        ", addressFormatted=" + addressFormatted +
-        ", geometry=" + geometry +
-        '}';
+    return "Address{" + "zipcode=" + postalCode + ", country=" + country + ", city=" + city + ", street=" + street + ", streetNumber=" + streetNumber
+        + ", addressComponents=" + addressComponents + ", addressFormatted=" + addressFormatted + ", geometry=" + geometry + '}';
   }
 }

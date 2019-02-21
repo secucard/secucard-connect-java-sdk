@@ -59,7 +59,6 @@ public class Data {
 
   @Override
   public String toString() {
-    return "Data{" + "owner='" + owner + '\'' + ", iban='" + iban + '\'' + ", bic='" + bic + '\''
-        + ", bankname='" + bankname + '\'' + '}';
+    return "Data{" + "owner='" + owner + '\'' + ", iban='" + iban + '\'' + ", bic='" + bic + '\'' + ", bankname='" + bankname + '\'' + '}';
   }
 }

@@ -53,10 +53,8 @@ public class CancelDetails implements Serializable {
 
   @Override
   public String toString() {
-    return "newTransId='" + newTransId + "\', " +
-           "remainingAmount='" + remainingAmount + "\', " +
-           "refundWaitingForPayment='" + refundWaitingForPayment + "\', " +
-           "demo='" + demo + "\'";
+    return "newTransId='" + newTransId + "\', " + "remainingAmount='" + remainingAmount + "\', " + "refundWaitingForPayment='"
+        + refundWaitingForPayment + "\', " + "demo='" + demo + "\'";
   }
 
 }

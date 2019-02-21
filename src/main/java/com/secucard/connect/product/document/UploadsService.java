@@ -27,8 +27,7 @@ public class UploadsService extends ProductService<Upload> {
   public static final ServiceMetaData<Upload> META_DATA = new ServiceMetaData<>("document", "uploads", Upload.class);
 
   /**
-   * Upload the given document and returns the new id for the upload.
-   * Note: the uploaded content should be base64 encoded.
+   * Upload the given document and returns the new id for the upload. Note: the uploaded content should be base64 encoded.
    */
   public String upload(Upload content, Callback<String> callback) {
     Converter<Upload, String> conv = new Converter<Upload, String>() {

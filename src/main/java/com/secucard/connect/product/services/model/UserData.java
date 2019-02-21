@@ -15,6 +15,7 @@ package com.secucard.connect.product.services.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserData {
+
   @JsonProperty("dob")
   private Value dateOfBirth;
 
@@ -88,14 +89,7 @@ public class UserData {
 
   @Override
   public String toString() {
-    return "UserData{" +
-        "birthday=" + dateOfBirth +
-        ", firstname=" + forename +
-        ", lastname=" + surname +
-        ", address=" + address +
-        ", birthplace=" + birthplace +
-        ", nationality=" + nationality +
-        ", gender=" + gender +
-        '}';
+    return "UserData{" + "birthday=" + dateOfBirth + ", firstname=" + forename + ", lastname=" + surname + ", address=" + address + ", birthplace="
+        + birthplace + ", nationality=" + nationality + ", gender=" + gender + '}';
   }
 }

@@ -14,15 +14,15 @@ package com.secucard.connect.product.smart.model;
 
 public class ComponentPosition {
 
-    public String position;
+  public String position;
 
-    public String top;
+  public String top;
 
-    public String left;
+  public String left;
 
-    public String right;
+  public String right;
 
-    public String bottom;
+  public String bottom;
 
   @Override
   public String toString() {

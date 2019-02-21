@@ -14,14 +14,13 @@ package com.secucard.connect.product.common.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 /**
- * Generic list for any type T of objects.
- * Provides some additional methods for getting the actual objects or the list count.
+ * Generic list for any type T of objects. Provides some additional methods for getting the actual objects or the list count.
  */
 public class ObjectList<T> {
+
   @JsonProperty("scroll_id")
   protected String scrollId;
 

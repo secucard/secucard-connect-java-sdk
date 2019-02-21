@@ -14,11 +14,15 @@ package com.secucard.connect.product.common.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class QueryParams {
+
   public static final String SORT_ASC = "asc";
   public static final String SORT_DESC = "desc";
 
@@ -124,6 +128,7 @@ public class QueryParams {
   }
 
   public static class GeoQuery {
+
     private String field;
 
     private String distance;

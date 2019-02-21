@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Merchant;
 import com.secucard.connect.product.general.model.Store;
-
 import java.util.Date;
 
 public class MerchantCard extends SecuObject {

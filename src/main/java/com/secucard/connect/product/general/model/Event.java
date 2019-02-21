@@ -17,10 +17,10 @@ import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 import com.secucard.connect.net.util.JsonMapper;
 import com.secucard.connect.net.util.jackson.ObjectIdTypeResolver;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.Date;
 
 public class Event<T> extends SecuObject {
+
   public static final String TYPE_PROPERTY = "type";
   public static final String DATA_PROPERTY = "data";
   public static final String TARGET_PROPERTY = "target";
@@ -90,11 +90,6 @@ public class Event<T> extends SecuObject {
 
   @Override
   public String toString() {
-    return "Event{" +
-        "type='" + type + '\'' +
-        ", target='" + target + '\'' +
-        ", created=" + created +
-        ", data=" + data +
-        '}';
+    return "Event{" + "type='" + type + '\'' + ", target='" + target + '\'' + ", created=" + created + ", data=" + data + '}';
   }
 }

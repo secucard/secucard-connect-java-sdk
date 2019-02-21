@@ -21,6 +21,7 @@ com.secucard.connect.product.payment.ContractsService
 com.secucard.connect.product.payment.CustomersService
 com.secucard.connect.product.payment.SecupayDebitsService
 com.secucard.connect.product.payment.SecupayPrepaysService
+com.secucard.connect.product.payment.SecupayPayoutService
 com.secucard.connect.product.payment.SecupayInvoicesService
 com.secucard.connect.product.payment.SecupayCreditcardsService
 

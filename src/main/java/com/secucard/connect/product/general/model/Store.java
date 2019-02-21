@@ -17,10 +17,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.loyalty.model.Program;
-
 import java.util.List;
 
 public class Store extends SecuObject {
+
   public static final String CHECKIN_STATUS_DECLINED_DISTANCE = "declined_distance";
   public static final String CHECKIN_STATUS_DECLINED_NOTAVAIL = "declined_notavail";
   public static final String CHECKIN_STATUS_AVAILABLE = "available";

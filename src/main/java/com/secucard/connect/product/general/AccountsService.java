@@ -16,8 +16,11 @@ import com.secucard.connect.client.ProductService;
 import com.secucard.connect.event.AbstractEventListener;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.net.Options;
-import com.secucard.connect.product.general.model.*;
-
+import com.secucard.connect.product.general.model.Account;
+import com.secucard.connect.product.general.model.BeaconEnvironment;
+import com.secucard.connect.product.general.model.Event;
+import com.secucard.connect.product.general.model.Location;
+import com.secucard.connect.product.general.model.MerchantList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,7 @@ import java.util.Map;
  */
 
 public class AccountsService extends ProductService<Account> {
+
   public static final String EVENT_TYPE_BEACON_MONITOR = "BeaconMonitor";
   public static final ServiceMetaData<Account> META_DATA = new ServiceMetaData<>("general", "accounts", Account.class);
 
@@ -93,7 +97,7 @@ public class AccountsService extends ProductService<Account> {
   /**
    * Send password reset link. Needs no authentication.
    *
-   * @param email  The email account to send the link to.
+   * @param email The email account to send the link to.
    * @param origin The origin of the request, i.e. the app name.
    * @return The time in seconds the reset link is valid. 0 if not supported.
    * @throws Exception If an error happens, see {@link ProductService} which ones.
@@ -110,9 +114,8 @@ public class AccountsService extends ProductService<Account> {
 
 
   /**
-   * Set a listener when interested to get notified about merchants around a location.
-   * To set a location use {@link #updateLocation(com.secucard.connect.product.general.model.Location)}.
-   * Set to null to remove a listener.
+   * Set a listener when interested to get notified about merchants around a location. To set a location use {@link
+   * #updateLocation(com.secucard.connect.product.general.model.Location)}. Set to null to remove a listener.
    */
   public void onMerchantsChanged(EventListener<MerchantList> listener) {
     context.eventDispatcher.registerListener(MerchantList.class, listener);

@@ -18,11 +18,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.Date;
 import java.util.List;
 
 public class News extends SecuObject {
+
   public static final String STATUS_READ = "read";
   public static final String STATUS_UNREAD = "unread";
 

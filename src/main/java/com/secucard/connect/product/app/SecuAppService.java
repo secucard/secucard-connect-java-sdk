@@ -19,7 +19,6 @@ import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Geometry;
 import com.secucard.connect.product.general.model.Store;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +26,7 @@ import java.util.Map;
  * Implements the operation for the secucard android app.
  */
 public class SecuAppService extends ProductService<SecuObject> {
+
   @Override
   public ServiceMetaData<SecuObject> getMetaData() {
     return new ServiceMetaData<>(context.appId); // get configured app id
@@ -35,13 +35,12 @@ public class SecuAppService extends ProductService<SecuObject> {
   /**
    * Get details for a merchant.
    *
-   * @param storeId    Store ID
+   * @param storeId Store ID
    * @param merchantId Merchant ID or null.
-   * @param geometry   The geo location or null.
+   * @param geometry The geo location or null.
    * @return List with stores.
    */
-  public ObjectList<Store> getMerchantDetails(String storeId, String merchantId, Geometry geometry,
-                                              Callback<ObjectList<Store>> callback) {
+  public ObjectList<Store> getMerchantDetails(String storeId, String merchantId, Geometry geometry, Callback<ObjectList<Store>> callback) {
     Map<String, Object> arg = new HashMap<>();
     arg.put("store", storeId);
     if (merchantId != null) {
@@ -67,7 +66,7 @@ public class SecuAppService extends ProductService<SecuObject> {
    * Add card to account
    *
    * @param cardNumber Cards number.
-   * @param pin        Cards PIN.
+   * @param pin Cards PIN.
    * @return True if card added successfully, else false
    */
   public Boolean addCard(final String cardNumber, String pin, Callback<Boolean> callback) {

@@ -17,6 +17,7 @@ import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Account;
 
 public class Card extends SecuObject {
+
   @JsonProperty("cardnumber")
   private String cardNumber;
 

@@ -13,10 +13,10 @@
 package com.secucard.connect.product.services.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 
 public class IdentificationProcess {
+
   private String status;
 
   @JsonProperty("identificationtime")
@@ -51,10 +51,7 @@ public class IdentificationProcess {
 
   @Override
   public String toString() {
-    return "IdentificationProcess{" +
-        "status='" + status + '\'' +
-        ", identificationTime=" + identificationTime +
-        ", transactionNumber='" + transactionNumber + '\'' +
-        '}';
+    return "IdentificationProcess{" + "status='" + status + '\'' + ", identificationTime=" + identificationTime + ", transactionNumber='"
+        + transactionNumber + '\'' + '}';
   }
 }

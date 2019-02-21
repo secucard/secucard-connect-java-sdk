@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.loyalty.model.Customer;
 import com.secucard.connect.product.loyalty.model.MerchantCard;
-
 import java.util.List;
 
 public class Ident extends SecuObject {
@@ -62,7 +61,7 @@ public class Ident extends SecuObject {
   /**
    * Selects a indent of a given id from a list of idents.
    *
-   * @param id     The ident id.
+   * @param id The ident id.
    * @param idents The idents to query.
    * @return The found ident or null.
    */
@@ -143,15 +142,7 @@ public class Ident extends SecuObject {
 
   @Override
   public String toString() {
-    return "Ident{" +
-        "type='" + type + '\'' +
-        ", name='" + name + '\'' +
-        ", length=" + length +
-        ", prefix='" + prefix + '\'' +
-        ", value='" + value + '\'' +
-        ", customer=" + customer +
-        ", merchantCard=" + merchantCard +
-        ", valid=" + valid +
-        "} " + super.toString();
+    return "Ident{" + "type='" + type + '\'' + ", name='" + name + '\'' + ", length=" + length + ", prefix='" + prefix + '\'' + ", value='" + value
+        + '\'' + ", customer=" + customer + ", merchantCard=" + merchantCard + ", valid=" + valid + ", " + super.toString() + '}';
   }
 }

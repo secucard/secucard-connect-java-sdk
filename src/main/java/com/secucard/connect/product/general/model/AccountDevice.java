@@ -12,7 +12,6 @@
 
 package com.secucard.connect.product.general.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.secucard.connect.product.common.model.SecuObject;
 
 public class AccountDevice extends SecuObject {

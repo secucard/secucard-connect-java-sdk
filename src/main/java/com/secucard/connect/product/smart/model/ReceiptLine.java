@@ -13,7 +13,6 @@
 package com.secucard.connect.product.smart.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,19 +47,14 @@ public class ReceiptLine {
 
   @Override
   public String toString() {
-    return "ReceiptLine{" +
-        "type='" + type + '\'' +
-        ", value='" + value + '\'' +
-        '}';
+    return "ReceiptLine{" + "type='" + type + '\'' + ", value='" + value + '\'' + '}';
   }
 
   /**
    * Enumeration of all possible text decorations.
    */
-  public static enum Decoration {
-    IMPORTANT("important", "Emphasize the text."),
-    ALIGN_LEFT("align_left", "Left align the text."),
-    ALIGN_RIGHT("align_right", "right align the text.");
+  public static enum Decoration {IMPORTANT("important", "Emphasize the text."), ALIGN_LEFT("align_left", "Left align the text."), ALIGN_RIGHT(
+      "align_right", "right align the text.");
 
     private String code;
     private String description;
@@ -91,21 +85,15 @@ public class ReceiptLine {
 
     @Override
     public String toString() {
-      return "Decoration{" +
-          "code='" + code + '\'' +
-          ", description='" + description + '\'' +
-          "} " + super.toString();
-    }
-  }
+      return "Decoration{" + "code='" + code + '\'' + ", description='" + description + '\'' + "} " + super.toString();
+    }}
 
   /**
    * Enumeration of all possible line types.
    */
-  public static enum Type {
-    SEPARATOR("separator", "A horizontal separator like a line. May have caption."),
-    SPACE("space", "Empty line. No text."),
-    TEXT_LINE("textline", "Normal line of text. "),
-    NAME_VALUE("name-value", "A name:value pair, may displayed as 2 columns.");
+  public static enum Type {SEPARATOR("separator", "A horizontal separator like a line. May have caption."), SPACE("space",
+                                                                                                                  "Empty line. No text."), TEXT_LINE(
+      "textline", "Normal line of text. "), NAME_VALUE("name-value", "A name:value pair, may displayed as 2 columns.");
     private String code;
     private String description;
 
@@ -130,14 +118,11 @@ public class ReceiptLine {
 
     @Override
     public String toString() {
-      return "Type{" +
-          "code='" + code + '\'' +
-          ", description='" + description + '\'' +
-          "} " + super.toString();
-    }
-  }
+      return "Type{" + "code='" + code + '\'' + ", description='" + description + '\'' + "} " + super.toString();
+    }}
 
   public static class Value {
+
     private String caption;
     private String text;
     private String name;
@@ -191,13 +176,8 @@ public class ReceiptLine {
 
     @Override
     public String toString() {
-      return "Value{" +
-          "caption='" + caption + '\'' +
-          ", text='" + text + '\'' +
-          ", name='" + name + '\'' +
-          ", value='" + value + '\'' +
-          ", decoration=" + Arrays.toString(decoration) +
-          '}';
+      return "Value{" + "caption='" + caption + '\'' + ", text='" + text + '\'' + ", name='" + name + '\'' + ", value='" + value + '\''
+          + ", decoration=" + Arrays.toString(decoration) + '}';
     }
   }
 }

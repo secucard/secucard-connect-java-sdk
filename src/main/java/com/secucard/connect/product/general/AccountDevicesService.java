@@ -23,8 +23,8 @@ import com.secucard.connect.product.general.model.Event;
  */
 
 public class AccountDevicesService extends ProductService<AccountDevice> {
-  public static final ServiceMetaData<AccountDevice> META_DATA =
-      new ServiceMetaData<>("general", "accountdevices", AccountDevice.class);
+
+  public static final ServiceMetaData<AccountDevice> META_DATA = new ServiceMetaData<>("general", "accountdevices", AccountDevice.class);
 
   @Override
   public ServiceMetaData<AccountDevice> getMetaData() {

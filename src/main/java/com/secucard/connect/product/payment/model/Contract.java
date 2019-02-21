@@ -49,8 +49,8 @@ public class Contract extends SecuObject {
 
   @Override
   public String toString() {
-    return "Contract{" + ", created=" + created + ", updated=" + updated + ", parent=" + parent
-        + ", allowCloning=" + allowCloning + "} " + super.toString();
+    return "Contract{" + ", created=" + created + ", updated=" + updated + ", parent=" + parent + ", allowCloning=" + allowCloning + ", " + super
+        .toString() + '}';
   }
 
 
@@ -102,8 +102,8 @@ public class Contract extends SecuObject {
 
     @Override
     public String toString() {
-      return "CloneData{" + "allowTransactions=" + allowTransactions + ", urlPush='" + pushUrl
-          + '\'' + ", paymentData=" + paymentData + ", project='" + project + '\'' + '}';
+      return "CloneData{" + "allowTransactions=" + allowTransactions + ", urlPush='" + pushUrl + '\'' + ", paymentData=" + paymentData + ", project='"
+          + project + '\'' + '}';
     }
   }
 }

@@ -17,9 +17,8 @@ package com.secucard.connect.product.general;
  */
 public class General {
 
-  public General(AccountDevicesService accountdevices, AccountsService accounts, MerchantsService merchants,
-                 NewsService news, PublicMerchantsService publicmerchants, StoresService stores,
-                 TransactionsService transactions) {
+  public General(AccountDevicesService accountdevices, AccountsService accounts, MerchantsService merchants, NewsService news,
+      PublicMerchantsService publicmerchants, StoresService stores, TransactionsService transactions) {
     this.accountdevices = accountdevices;
     this.accounts = accounts;
     this.merchants = merchants;

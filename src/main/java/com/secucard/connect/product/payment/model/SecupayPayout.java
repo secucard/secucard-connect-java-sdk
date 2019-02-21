@@ -158,7 +158,7 @@ public class SecupayPayout extends SecuObject {
 
   @Override
   public String toString() {
-    return "SecupayPayout{" + ", amount='" + getAmount() + '\'' + ", currency='" + getCurrency() + '\'' + ", currency='" + getCurrency() + '\''
+    return "SecupayPayout{" + "amount='" + getAmount() + '\'' + ", currency='" + getCurrency() + '\'' + ", currency='" + getCurrency() + '\''
         + ", demo='" + getDemo() + '\'' + ", optData='" + getOptData() + '\'' + ", orderId='" + getOrderId() + '\'' + ", purpose='" + getPurpose()
         + '\'' + ", redirectUrl='" + getRedirectUrl() + '\'' + ", status='" + getStatus() + '\'' + ", transactionList='" + Arrays
         .toString(getTransactionList()) + '\'' + ", transactionStatus='" + getTransactionStatus() + '\'' + ", transferAccount='"

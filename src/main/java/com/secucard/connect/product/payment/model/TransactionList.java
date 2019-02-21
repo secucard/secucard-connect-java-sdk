@@ -19,6 +19,14 @@ public class TransactionList {
   @JsonProperty("transaction_hash")
   private String transactionHash;
 
+  @JsonProperty("reference_id")
+  private String referenceId;
+
+  @JsonProperty("transaction_id")
+  private String transactionId;
+
+  @JsonProperty("container_id")
+  private String containerId;
 
   public String getName() {
     return name;
@@ -52,10 +60,35 @@ public class TransactionList {
     this.transactionHash = transactionHash;
   }
 
+  public String getReferenceId() {
+    return referenceId;
+  }
+
+  public void setReferenceId(String referenceId) {
+    this.referenceId = referenceId;
+  }
+
+  public String getTransactionId() {
+    return transactionId;
+  }
+
+  public void setTransactionId(String transactionId) {
+    this.transactionId = transactionId;
+  }
+
+  public String getContainerId() {
+    return containerId;
+  }
+
+  public void setContainerId(String containerId) {
+    this.containerId = containerId;
+  }
+
   @Override
   public String toString() {
     return "TransactionList{" + "name='" + getName() + '\'' + ", total='" + getTotal() + '\'' + ", itemType='" + getItemType() + '\''
-        + ", transactionHash='" + getTransactionHash() + '\'' + '}';
+        + ", transactionHash='" + getTransactionHash() + '\'' + ", referenceId='" + getReferenceId() + '\'' + ", transactionId='" + getTransactionId()
+        + '\'' + ", containerId='" + getContainerId() + '\'' + '}';
   }
 
 }

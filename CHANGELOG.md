@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - Payment.SecupayInvoice: container (because it not supported via API)
 
+
 ## [2.8.0] - 2019-01-30
 
 ### Changed

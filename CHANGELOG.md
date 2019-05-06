@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.10.0] - 2019-05-06
+
+### Added
+- Smart.Model.Transaction: prepaidSales
+
+
 ## [2.9.0] - 2019-02-21
 
 ### Security
@@ -396,3 +402,4 @@ Internal developer release
 [2.7.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.0...v2.7.1
 [2.8.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.1...v2.8.0
 [2.9.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.8.0...v2.9.0
+[2.10.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.9.0...v2.10.0

@@ -15,6 +15,7 @@ package com.secucard.connect.product.general.model;
 import com.secucard.connect.product.common.model.SecuObject;
 
 public class Notification extends SecuObject {
+
   private String text;
 
   public Notification() {
@@ -34,8 +35,6 @@ public class Notification extends SecuObject {
 
   @Override
   public String toString() {
-    return "Notification{" +
-        "text='" + text + '\'' +
-        "} " + super.toString();
+    return "Notification{" + "text='" + text + '\'' + ", " + super.toString() + '}';
   }
 }

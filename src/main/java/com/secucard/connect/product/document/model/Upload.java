@@ -14,7 +14,6 @@ package com.secucard.connect.product.document.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.util.Date;
 
 public class Upload extends SecuObject {

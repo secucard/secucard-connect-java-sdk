@@ -18,11 +18,11 @@ import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Contact;
 import com.secucard.connect.product.general.model.Merchant;
-
 import java.util.Date;
 import java.util.List;
 
-public class  Customer extends SecuObject {
+public class Customer extends SecuObject {
+
   private Merchant merchant;
 
   @JsonProperty("contact")

@@ -17,12 +17,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Contact;
 import com.secucard.connect.product.general.model.Merchant;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 public class IdentRequest extends SecuObject {
+
   public static final String TYPE_PERSON = "person";
   public static final String TYPE_COMPANY = "company";
 
@@ -66,6 +67,7 @@ public class IdentRequest extends SecuObject {
   public String getUseInternalContract() {
     return useInternalContract;
   }
+
   public void setUseInternalContract(String useInternalContract) {
     this.useInternalContract = useInternalContract;
   }
@@ -73,6 +75,7 @@ public class IdentRequest extends SecuObject {
   public Merchant[] getAssignment() {
     return assignment;
   }
+
   public void setAssignment(Merchant[] assignment) {
     this.assignment = assignment;
   }
@@ -154,21 +157,13 @@ public class IdentRequest extends SecuObject {
 
   @Override
   public String toString() {
-    return "IdentRequest{" +
-        "type='" + type + '\'' +
-        ", status='" + status + '\'' +
-        ", owner='" + owner + '\'' +
-        ", contract=" + contract +
-        ", provider=" + provider +
-        ", ownerTransactionId='" + ownerTransactionId + '\'' +
-        ", entities=" + entities +
-        ", created=" + created +
-        ", useInternalContract=" + useInternalContract +
-        ", assignment=" + assignment +
-        "} " + super.toString();
+    return "IdentRequest{" + "type='" + type + '\'' + ", status='" + status + '\'' + ", owner='" + owner + '\'' + ", contract=" + contract
+        + ", provider=" + provider + ", ownerTransactionId='" + ownerTransactionId + '\'' + ", entities=" + entities + ", created=" + created
+        + ", useInternalContract=" + useInternalContract + ", assignment=" + Arrays.toString(assignment) + ", " + super.toString() + '}';
   }
 
   public static class Entity {
+
     @JsonProperty("transaction_id")
     private String transactionId;
 
@@ -270,18 +265,9 @@ public class IdentRequest extends SecuObject {
 
     @Override
     public String toString() {
-      return "Entity{" +
-          "transactionId='" + transactionId + '\'' +
-          ", redirectUrl='" + redirectUrl + '\'' +
-          ", status='" + status + '\'' +
-          ", ownerTransactionId='" + ownerTransactionId + '\'' +
-          ", contact=" + contact +
-          ", custom1='" + custom1 + '\'' +
-          ", custom2='" + custom2 + '\'' +
-          ", custom3='" + custom3 + '\'' +
-          ", custom4='" + custom4 + '\'' +
-          ", custom5='" + custom5 + '\'' +
-          '}';
+      return "Entity{" + "transactionId='" + transactionId + '\'' + ", redirectUrl='" + redirectUrl + '\'' + ", status='" + status + '\''
+          + ", ownerTransactionId='" + ownerTransactionId + '\'' + ", contact=" + contact + ", custom1='" + custom1 + '\'' + ", custom2='" + custom2
+          + '\'' + ", custom3='" + custom3 + '\'' + ", custom4='" + custom4 + '\'' + ", custom5='" + custom5 + '\'' + '}';
     }
   }
 }

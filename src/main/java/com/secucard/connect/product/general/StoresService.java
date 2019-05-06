@@ -15,12 +15,10 @@ package com.secucard.connect.product.general;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ProductService;
 import com.secucard.connect.net.Options;
-import com.secucard.connect.product.common.model.MediaResource;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
 import com.secucard.connect.product.general.model.Store;
 import com.secucard.connect.product.general.model.StoreSetDefault;
-
 import java.util.Arrays;
 import java.util.List;
 

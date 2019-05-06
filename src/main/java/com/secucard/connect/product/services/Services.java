@@ -13,6 +13,7 @@
 package com.secucard.connect.product.services;
 
 public class Services {
+
   public Services(IdentRequestsService identrequests, IdentResultsService identresults) {
     this.identrequests = identrequests;
     this.identresults = identresults;

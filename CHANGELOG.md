@@ -19,6 +19,43 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.10.0] - 2019-05-06
+
+### Added
+- Smart.Model.Transaction: prepaidSales
+
+
+## [2.9.0] - 2019-02-21
+
+### Security
+- dependency update "com.google.guava"
+
+### Added
+- Payment: SecupayPayoutService
+- Payment.Model.Transaction: redirectUrl.urlPush
+- Payment.Model.Transaction: demo
+
+### Changed
+- toString now includes the "id" and the "object" if it extends from SecuObject
+- Move TransferAccount from SecupayPrepay to it's own file
+- code format of the folder "com.secucard.connect.product"
+
+### Removed
+- Payment.SecupayInvoice: container (because it not supported via API)
+
+
+## [2.8.0] - 2019-01-30
+
+### Changed
+- The Callback type of smart.TransactionService.cancel(id, callback) is now smart.model.Transaction
+
+
+## [2.7.1] - 2019-01-22
+
+### Security
+- fasterxml.jackson dependency update
+
+
 ## [2.7.0] - 2018-10-18
 
 ### Security
@@ -44,7 +81,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [2.6.0] - 2018-01-30
 
 ### Security
-- fasterxml dependency update
+- fasterxml.jackson dependency update
 
 ### Removed
 - Android support
@@ -362,3 +399,7 @@ Internal developer release
 [2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0
 [2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0
 [2.7.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.6.0...v2.7.0
+[2.7.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.0...v2.7.1
+[2.8.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.1...v2.8.0
+[2.9.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.8.0...v2.9.0
+[2.10.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.9.0...v2.10.0

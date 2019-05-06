@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.general.model.Merchant;
 import com.secucard.connect.product.general.model.Store;
-
 import java.util.Date;
 
 public class Device extends SecuObject {
@@ -37,9 +36,22 @@ public class Device extends SecuObject {
   private Merchant merchant;
   private String type;
 
+  public Device(String id) {
+    this.id = id;
+  }
+
+  public Device(String id, String type) {
+    this.id = id;
+    this.type = type;
+  }
+
+  public Device() {
+  }
+
   public Date getCreated() {
     return created;
   }
+
   public void setCreated(Date created) {
     this.created = created;
   }
@@ -47,6 +59,7 @@ public class Device extends SecuObject {
   public Boolean getOnline() {
     return online;
   }
+
   public void setOnline(Boolean online) {
     this.online = online;
   }
@@ -54,6 +67,7 @@ public class Device extends SecuObject {
   public int getNumber() {
     return number;
   }
+
   public void setNumber(int number) {
     this.number = number;
   }
@@ -61,6 +75,7 @@ public class Device extends SecuObject {
   public String getVendor() {
     return vendor;
   }
+
   public void setVendor(String vendor) {
     this.vendor = vendor;
   }
@@ -68,6 +83,7 @@ public class Device extends SecuObject {
   public String getVendorUid() {
     return vendorUid;
   }
+
   public void setVendorUid(String vendorUid) {
     this.vendorUid = vendorUid;
   }
@@ -75,6 +91,7 @@ public class Device extends SecuObject {
   public String getUserPin() {
     return userPin;
   }
+
   public void setUserPin(String userPin) {
     this.userPin = userPin;
   }
@@ -82,6 +99,7 @@ public class Device extends SecuObject {
   public String getDescription() {
     return description;
   }
+
   public void setDescription(String description) {
     this.description = description;
   }
@@ -89,6 +107,7 @@ public class Device extends SecuObject {
   public Store getStore() {
     return store;
   }
+
   public void setStore(Store store) {
     this.store = store;
   }
@@ -96,6 +115,7 @@ public class Device extends SecuObject {
   public com.secucard.connect.product.general.model.Device getDevice() {
     return device;
   }
+
   public void setDevice(com.secucard.connect.product.general.model.Device device) {
     this.device = device;
   }
@@ -108,15 +128,6 @@ public class Device extends SecuObject {
     this.merchant = merchant;
   }
 
-  public Device(String id) {
-    this.id = id;
-  }
-
-  public Device(String id, String type) {
-    this.id = id;
-    this.type = type;
-  }
-
   public String getType() {
     return type;
   }
@@ -125,18 +136,9 @@ public class Device extends SecuObject {
     this.type = type;
   }
 
-  public Device() {
-  }
-
   @Override
   public String toString() {
-    return "Device{" +
-            "type='" + type + '\'' +
-            ", vendorUid=" + vendorUid + '\'' +
-            ", vendor=" + vendor + '\'' +
-            ", description=" + description + '\'' +
-            ", store=" + store + '\'' +
-            ", merchant=" + merchant + '\'' +
-    '}';
+    return "Device{" + "type='" + type + '\'' + ", vendorUid=" + vendorUid + '\'' + ", vendor=" + vendor + '\'' + ", description=" + description
+        + '\'' + ", store=" + store + '\'' + ", merchant=" + merchant + '\'' + ", " + super.toString() + '}';
   }
 }

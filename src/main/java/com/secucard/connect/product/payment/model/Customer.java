@@ -64,19 +64,14 @@ public class Customer extends SecuObject {
   public int getMerchantCustomerId() {
     return merchantCustomerId;
   }
+
   public void setMerchantCustomerId(int merchantCustomerId) {
     this.merchantCustomerId = merchantCustomerId;
   }
 
   @Override
   public String toString() {
-    return "Customer{"
-            + "merchant=" + merchant +
-            ", contact=" + contact +
-            ", created=" + created +
-            ", updated=" + updated +
-            ", contract=" + contract +
-            ", merchantCustomerId=" +merchantCustomerId +
-            "} " + super.toString();
+    return "Customer{" + "merchant=" + merchant + ", contact=" + contact + ", created=" + created + ", updated=" + updated + ", contract=" + contract
+        + ", merchantCustomerId=" + merchantCustomerId + ", " + super.toString() + '}';
   }
 }

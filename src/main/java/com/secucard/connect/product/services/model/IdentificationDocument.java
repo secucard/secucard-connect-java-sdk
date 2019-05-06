@@ -15,6 +15,7 @@ package com.secucard.connect.product.services.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IdentificationDocument {
+
   private Value country;
 
   @JsonProperty("dateissued")
@@ -80,13 +81,7 @@ public class IdentificationDocument {
 
   @Override
   public String toString() {
-    return "IdentificationDocument{" +
-        "country=" + country +
-        ", dateIssued=" + dateIssued +
-        ", issuedBy=" + issuedBy +
-        ", number=" + number +
-        ", type=" + type +
-        ", validUntil=" + validUntil +
-        '}';
+    return "IdentificationDocument{" + "country=" + country + ", dateIssued=" + dateIssued + ", issuedBy=" + issuedBy + ", number=" + number
+        + ", type=" + type + ", validUntil=" + validUntil + '}';
   }
 }

@@ -13,6 +13,7 @@
 package com.secucard.connect.product.services.model;
 
 public class Value {
+
   public static final String STATUS_NEW = "NEW";
   public static final String STATUS_MATCH = "MATCH";
 
@@ -54,10 +55,6 @@ public class Value {
 
   @Override
   public String toString() {
-    return "Value{" +
-        "value='" + value + '\'' +
-        ", status='" + status + '\'' +
-        ", original='" + original + '\'' +
-        '}';
+    return "Value{" + "value='" + value + '\'' + ", status='" + status + '\'' + ", original='" + original + '\'' + '}';
   }
 }

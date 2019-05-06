@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Message<T> extends Status {
+
   private String pid;
 
   private String sid;
@@ -92,11 +93,6 @@ public class Message<T> extends Status {
 
   @Override
   public String toString() {
-    return "Message{" +
-        "pid='" + pid + '\'' +
-        ", sid='" + sid + '\'' +
-        ", query=" + query +
-        ", data=" + data +
-        "} " + super.toString();
+    return "Message{" + "pid='" + pid + '\'' + ", sid='" + sid + '\'' + ", query=" + query + ", data=" + data + "} " + super.toString();
   }
 }

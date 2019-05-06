@@ -14,12 +14,12 @@ package com.secucard.connect.product.smart.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Product {
+
   protected int id;
 
   private Integer parent;
@@ -44,13 +44,13 @@ public class Product {
   public Product() {
   }
 
-  public Product(int id, Integer parent, String articleNumber, String ean, String desc, String quantity, int priceOne,
-                 int tax, List<ProductGroup> productGroups) {
+  public Product(int id, Integer parent, String articleNumber, String ean, String desc, String quantity, int priceOne, int tax,
+      List<ProductGroup> productGroups) {
     this(id, parent, articleNumber, ean, desc, new BigDecimal(quantity), priceOne, tax, productGroups);
   }
 
-  public Product(int id, Integer parent, String articleNumber, String ean, String desc, BigDecimal quantity,
-                 int priceOne, int tax, List<ProductGroup> groups) {
+  public Product(int id, Integer parent, String articleNumber, String ean, String desc, BigDecimal quantity, int priceOne, int tax,
+      List<ProductGroup> groups) {
     this.id = id;
     this.parent = parent;
     this.articleNumber = articleNumber;
@@ -161,17 +161,8 @@ public class Product {
 
   @Override
   public String toString() {
-    return "Product{" +
-        "id='" + id + '\'' +
-        ", parent='" + parent + '\'' +
-        ", articleNumber='" + articleNumber + '\'' +
-        ", ean='" + ean + '\'' +
-        ", desc='" + desc + '\'' +
-        ", quantity=" + quantity +
-        ", priceOne=" + priceOne +
-        ", tax=" + tax +
-        ", productGroups=" + groups +
-        ", serialNumber=" + serialNumber +
-        '}';
+    return "Product{" + "id='" + id + '\'' + ", parent='" + parent + '\'' + ", articleNumber='" + articleNumber + '\'' + ", ean='" + ean + '\''
+        + ", desc='" + desc + '\'' + ", quantity=" + quantity + ", priceOne=" + priceOne + ", tax=" + tax + ", productGroups=" + groups
+        + ", serialNumber=" + serialNumber + '}';
   }
 }

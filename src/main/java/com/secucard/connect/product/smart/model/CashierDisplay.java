@@ -59,10 +59,6 @@ public class CashierDisplay {
 
   @Override
   public String toString() {
-    return "CashierDisplay{" +
-        "deviceId='" + deviceId + '\'' +
-        ", action='" + action + '\'' +
-        ", value='" + value + '\'' +
-        '}';
+    return "CashierDisplay{" + "deviceId='" + deviceId + '\'' + ", action='" + action + '\'' + ", value='" + value + '\'' + '}';
   }
 }

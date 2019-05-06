@@ -14,7 +14,6 @@ package com.secucard.connect.product.loyalty.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -52,6 +51,7 @@ public class Program extends SecuObject {
   }
 
   public static class Condition implements Serializable {
+
     public static final String BONUS_TYPE_PERCENT = "percent";
 
     @JsonProperty("start_value")

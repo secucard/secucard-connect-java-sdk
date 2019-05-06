@@ -13,7 +13,6 @@
 package com.secucard.connect.product.smart.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,19 +38,18 @@ public class Basket {
     this.products = products;
   }
 
-  public void addProduct(Product product){
+  public void addProduct(Product product) {
     products.add(product);
   }
 
-  public void addProduct(Text text){
+  public void addProduct(Text text) {
     texts.add(text);
   }
 
   @JsonIgnore
   /**
    * Returns a mixed list of products followed by belonging texts.
-   */
-  public List getProductsWithText() {
+   */ public List getProductsWithText() {
     List merged = new ArrayList<>();
     for (Product product : products) {
       int id = product.getId();
@@ -67,9 +65,6 @@ public class Basket {
 
   @Override
   public String toString() {
-    return "Basket{" +
-        "products=" + products +
-        ", texts=" + texts +
-        '}';
+    return "Basket{" + "products=" + products + ", texts=" + texts + '}';
   }
 }

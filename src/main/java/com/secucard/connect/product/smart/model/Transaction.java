@@ -15,6 +15,8 @@ package com.secucard.connect.product.smart.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.secucard.connect.product.common.model.SecuObject;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -76,54 +78,9 @@ public class Transaction extends SecuObject {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   private String error;
 
-  public List<ReceiptLine> getReceiptLines() {
-    return receiptLines;
-  }
-
-  public void setReceiptLines(List<ReceiptLine> receiptLines) {
-    this.receiptLines = receiptLines;
-  }
-
-  public List<ReceiptLine> getReceiptLinesMerchant() {
-    return receiptLinesMerchant;
-  }
-
-  public void setReceiptLinesMerchant(List<ReceiptLine> receiptLinesMerchant) {
-    this.receiptLinesMerchant = receiptLinesMerchant;
-  }
-
-  public Boolean getReceiptMerchantPrint() {
-    return receiptMerchantPrint;
-  }
-
-  public void setReceiptMerchantPrint(Boolean receiptMerchantPrint) {
-    this.receiptMerchantPrint = receiptMerchantPrint;
-  }
-
-  public String getError() {
-    return error;
-
-  }
-
-  public void setError(String error) {
-    this.error = error;
-  }
-
-  public String getPaymentMethod() {
-    return paymentMethod;
-  }
-
-  public void setPaymentMethod(String paymentMethod) {
-    this.paymentMethod = paymentMethod;
-  }
-
-  public String getReceiptNumber() {
-    return receiptNumber;
-  }
-
-  public void setReceiptNumber(String receiptNumber) {
-    this.receiptNumber = receiptNumber;
-  }
+  @JsonProperty("prepaid_sales")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private List<PrepaidSale> prepaidSales;
 
   public Transaction() {
   }
@@ -134,93 +91,51 @@ public class Transaction extends SecuObject {
     this.idents = idents;
   }
 
-
-  public Date getUpdated() {
-    return updated;
+  public BasketInfo getBasketInfo() { return basketInfo; }
+  public Device getDeviceSource() { return deviceSource; }
+  public Device getTargetDevice() { return targetDevice; }
+  public String getStatus() { return status; }
+  public Date getCreated() { return created; }
+  public Date getUpdated() { return updated; }
+  public List<Ident> getIdents() { return idents; }
+  public Basket getBasket() { return basket; }
+  public String getMerchantRef() { return merchantRef; }
+  public String getTransactionRef() { return transactionRef; }
+  public String getPaymentMethod() { return paymentMethod; }
+  public List<ReceiptLine> getReceiptLines() {return receiptLines; }
+  public String getReceiptNumber() {return receiptNumber; }
+  public List<ReceiptLine> getReceiptLinesMerchant() { return receiptLinesMerchant; }
+  public Boolean getReceiptMerchantPrint() { return receiptMerchantPrint; }
+  public String getError() { return error; }
+  public List<PrepaidSale> getPrepaidSales() {
+    return prepaidSales;
   }
 
-  public void setUpdated(Date updated) {
-    this.updated = updated;
-  }
+  public void setBasketInfo(BasketInfo basketInfo) { this.basketInfo = basketInfo; }
+  public void setDeviceSource(Device deviceSource) { this.deviceSource = deviceSource; }
+  public void setTargetDevice(Device targetDevice) { this.targetDevice = targetDevice; }
+  public void setStatus(String status) { this.status = status; }
+  public void setCreated(Date created) { this.created = created; }
+  public void setUpdated(Date updated) { this.updated = updated; }
+  public void setIdents(List<Ident> idents) { this.idents = idents; }
+  public void setBasket(Basket basket) { this.basket = basket; }
+  public void setMerchantRef(String merchantRef) { this.merchantRef = merchantRef; }
+  public void setTransactionRef(String transactionRef) { this.transactionRef = transactionRef; }
+  public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+  public void setReceiptLines(List<ReceiptLine> receiptLines) { this.receiptLines = receiptLines; }
+  public void setReceiptNumber(String receiptNumber) { this.receiptNumber = receiptNumber; }
+  public void setReceiptLinesMerchant(List<ReceiptLine> receiptLinesMerchant) { this.receiptLinesMerchant = receiptLinesMerchant; }
+  public void setReceiptMerchantPrint(Boolean receiptMerchantPrint) { this.receiptMerchantPrint = receiptMerchantPrint; }
+  public void setError(String error) { this.error = error; }
+  public void setPrepaidSales(List<PrepaidSale> prepaidSales) { this.prepaidSales = prepaidSales; }
 
-  public String getTransactionRef() {
-    return transactionRef;
-  }
-
-  public void setTransactionRef(String transactionRef) {
-    this.transactionRef = transactionRef;
-  }
-
-  public String getMerchantRef() {
-    return merchantRef;
-  }
-
-  public void setMerchantRef(String merchantRef) {
-    this.merchantRef = merchantRef;
-  }
-
-  public BasketInfo getBasketInfo() {
-    return basketInfo;
-  }
-
-  public void setBasketInfo(BasketInfo basketInfo) {
-    this.basketInfo = basketInfo;
-  }
-
-  public Device getDeviceSource() {
-    return deviceSource;
-  }
-
-  public void setDeviceSource(Device deviceSource) {
-    this.deviceSource = deviceSource;
-  }
-
-  public Device getTargetDevice() {
-    return targetDevice;
-  }
-
-  public void setTargetDevice(Device targetDevice) {
-    this.targetDevice = targetDevice;
-  }
-
-  public String getStatus() {
-    return status;
-  }
-
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  public Date getCreated() {
-    return created;
-  }
-
-  public void setCreated(Date created) {
-    this.created = created;
-  }
-
-  public List<Ident> getIdents() {
-    return idents;
-  }
-
-  public void setIdents(List<Ident> idents) {
-    this.idents = idents;
-  }
-
-  public Basket getBasket() {
-    return basket;
-  }
-
-  public void setBasket(Basket basket) {
-    this.basket = basket;
-  }
-
+  public void addPrepaidSale(PrepaidSale prepaidSale) { prepaidSales.add(prepaidSale); }
 
   @Override
   public String toString() {
     return "Transaction{" + "basketInfo=" + basketInfo + ", deviceSource=" + deviceSource + ", targetDevice=" + targetDevice + ", status='" + status
         + '\'' + ", created=" + created + ", updated=" + updated + ", idents=" + idents + ", basket=" + basket + ", merchantRef='" + merchantRef
         + '\'' + ", transactionRef='" + transactionRef + '\'' + ", paymentMethod='" + paymentMethod + '\'' + ", receiptLines=" + receiptLines
-        + ", receiptNumber='" + receiptNumber + '\'' + ", error='" + error + '\'' + ", " + super.toString() + '}';
+        + ", receiptNumber='" + receiptNumber + '\'' + ", error='" + error + '\'' + ", " + super.toString() + ", prepaidSales='" + prepaidSales + "'}";
   }
 }

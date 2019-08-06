@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class Customer extends SecuObject {
 
-  private Merchant merchant;
+  private String merchant;
 
   private Contact contact;
 
@@ -16,24 +16,14 @@ public class Customer extends SecuObject {
 
   private Date updated;
 
-  private String merchantId;
-
   @JsonProperty("merchant_customer_id")
   private int merchantCustomerId;
 
-  public String getMerchantId() {
-    return merchantId;
-  }
-
-  public void setMerchantId(String merchantId) {
-    this.merchantId = merchantId;
-  }
-
-  public Merchant getMerchant() {
+  public String getMerchant() {
     return merchant;
   }
 
-  public void setMerchant(Merchant merchant) {
+  public void setMerchant(String merchant) {
     this.merchant = merchant;
   }
 
@@ -71,7 +61,7 @@ public class Customer extends SecuObject {
 
   @Override
   public String toString() {
-    return "Customer{" + "merchant=" + merchant + ", contact=" + contact + ", created=" + created + ", updated=" + updated + ", merchantId=" + merchantId
+    return "Customer{" + "merchant=" + merchant + ", contact=" + contact + ", created=" + created + ", updated=" + updated
         + ", merchantCustomerId=" + merchantCustomerId + ", " + super.toString() + '}';
   }
 }

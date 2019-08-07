@@ -13,6 +13,7 @@ public class Payment {
   public static Class<SecupayInvoicesService> Secupayinvoices = SecupayInvoicesService.class;
   public static Class<SecupayCreditcardsService> Secupaycreditcards = SecupayCreditcardsService.class;
   public static Class<SecupayPayoutService> Secupaypayout = SecupayPayoutService.class;
+  public static Class<TransactionsService> Transactions = TransactionsService.class;
 
   public ContainersService containers;
   public ContractsService contracts;
@@ -22,10 +23,11 @@ public class Payment {
   public SecupayInvoicesService secupayinvoices;
   public SecupayCreditcardsService secupaycreditcards;
   public SecupayPayoutService secupaypayout;
+  public TransactionsService transactions;
 
   public Payment(ContainersService containers, CustomersService customers, SecupayDebitsService secupaydebits, SecupayPrepaysService secupayprepays,
       ContractsService contracts, SecupayInvoicesService secupayinvoices, SecupayCreditcardsService secupaycreditcards,
-      SecupayPayoutService secupaypayout) {
+      SecupayPayoutService secupaypayout, TransactionsService transactions) {
     this.containers = containers;
     this.customers = customers;
     this.secupaydebits = secupaydebits;
@@ -34,6 +36,7 @@ public class Payment {
     this.secupayinvoices = secupayinvoices;
     this.secupaycreditcards = secupaycreditcards;
     this.secupaypayout = secupaypayout;
+    this.transactions = transactions;
   }
 
 }

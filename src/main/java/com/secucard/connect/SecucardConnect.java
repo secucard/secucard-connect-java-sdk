@@ -54,7 +54,7 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.10.0";
+  public static final String VERSION = "2.11.0";
 
   protected volatile boolean isConnected;
   private Configuration configuration;
@@ -402,7 +402,8 @@ public class SecucardConnect {
         service(Payment.Contracts),
         service(Payment.Secupayinvoices),
         service(Payment.Secupaycreditcards),
-        service(Payment.Secupaypayout)
+        service(Payment.Secupaypayout),
+        service(Payment.Transactions)
     );
 
     loyalty = new Loyalty(

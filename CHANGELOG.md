@@ -19,6 +19,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.9.0] - 2019-08-07
+
+### Security
+- dependency updates
+
+### Added
+- Payment: TransactionsService
+
+
 ## [2.10.0] - 2019-05-06
 
 ### Added
@@ -403,3 +412,4 @@ Internal developer release
 [2.8.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.1...v2.8.0
 [2.9.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.8.0...v2.9.0
 [2.10.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.9.0...v2.10.0
+[2.11.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.10.0...v2.11.0

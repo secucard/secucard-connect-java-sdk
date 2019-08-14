@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class Customer extends SecuObject {
 
-  private String merchant;
+  private Merchant merchant;
 
   private Contact contact;
 
@@ -19,11 +19,11 @@ public class Customer extends SecuObject {
   @JsonProperty("merchant_customer_id")
   private int merchantCustomerId;
 
-  public String getMerchant() {
+  public Merchant getMerchant() {
     return merchant;
   }
 
-  public void setMerchant(String merchant) {
+  public void setMerchant(Merchant merchant) {
     this.merchant = merchant;
   }
 

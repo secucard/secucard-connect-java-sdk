@@ -16,18 +16,8 @@ public class Customer extends SecuObject {
 
   private Date updated;
 
-  private Contract contract;
-
   @JsonProperty("merchant_customer_id")
   private int merchantCustomerId;
-
-  public Contract getContract() {
-    return contract;
-  }
-
-  public void setContract(Contract contract) {
-    this.contract = contract;
-  }
 
   public Merchant getMerchant() {
     return merchant;
@@ -71,7 +61,7 @@ public class Customer extends SecuObject {
 
   @Override
   public String toString() {
-    return "Customer{" + "merchant=" + merchant + ", contact=" + contact + ", created=" + created + ", updated=" + updated + ", contract=" + contract
+    return "Customer{" + "merchant=" + merchant + ", contact=" + contact + ", created=" + created + ", updated=" + updated
         + ", merchantCustomerId=" + merchantCustomerId + ", " + super.toString() + '}';
   }
 }

@@ -141,7 +141,7 @@ public class TokenManager {
       // new authentication is needed but only if allowed
       if ((credentials instanceof AppUserCredentials || credentials instanceof DeviceCredentials)
           && !allowInteractive) {
-        throw new AuthFailedException("Invalid acess token, please authenticate again.");
+        throw new AuthFailedException("Invalid access token, please authenticate again.");
       }
 
       token = authenticate(credentials);

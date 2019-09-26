@@ -274,7 +274,6 @@ public class StompClient {
         }
       }
 
-//      LOG.trace("waiting for receipt: ", receiptId);
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {

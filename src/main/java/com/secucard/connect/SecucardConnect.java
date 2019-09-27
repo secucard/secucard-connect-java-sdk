@@ -4,21 +4,12 @@ import com.secucard.connect.auth.AuthService;
 import com.secucard.connect.auth.CancelCallback;
 import com.secucard.connect.auth.ClientAuthDetails;
 import com.secucard.connect.auth.TokenManager;
+import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
 import com.secucard.connect.auth.model.Token;
-import com.secucard.connect.client.AuthError;
-import com.secucard.connect.client.Callback;
-import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.ClientError;
-import com.secucard.connect.client.DataStorage;
-import com.secucard.connect.client.DiskCache;
-import com.secucard.connect.client.ExceptionHandler;
-import com.secucard.connect.client.NetworkError;
-import com.secucard.connect.client.ProductService;
-import com.secucard.connect.client.ResourceDownloader;
-import com.secucard.connect.client.ServiceFactory;
+import com.secucard.connect.client.*;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
@@ -29,6 +20,7 @@ import com.secucard.connect.net.rest.RestChannel;
 import com.secucard.connect.net.stomp.StompChannel;
 import com.secucard.connect.net.stomp.StompEvents;
 import com.secucard.connect.net.util.JsonMapper;
+import com.secucard.connect.product.common.model.Message;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.document.Document;
 import com.secucard.connect.product.general.General;
@@ -37,6 +29,9 @@ import com.secucard.connect.product.loyalty.Loyalty;
 import com.secucard.connect.product.payment.Payment;
 import com.secucard.connect.product.services.Services;
 import com.secucard.connect.product.smart.Smart;
+import com.secucard.connect.product.smart.model.ReceiptLine;
+import com.secucard.connect.product.smart.model.ReceiptLine.Value;
+import com.secucard.connect.product.smart.model.Transaction;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
@@ -44,7 +39,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
@@ -54,7 +51,7 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.11.0";
+  public static final String VERSION = "2.12.0";
 
   protected volatile boolean isConnected;
   private Configuration configuration;
@@ -300,7 +297,7 @@ public class SecucardConnect {
     Map<String, Channel> channels = new HashMap<>();
     channels.put(Options.CHANNEL_REST, rc);
     if (config.stompEnabled) {
-      StompChannel channel = new StompChannel(stompCfg, ctx);
+      StompChannel channel = new StompChannel(stompCfg, ctx, config.dataStorage);
       channels.put(Options.CHANNEL_STOMP, channel);
     }
     for (Channel channel : channels.values()) {
@@ -341,6 +338,88 @@ public class SecucardConnect {
     sc.wireServiceInstances();
 
     return sc;
+  }
+
+  /**
+   * Method to send offline smart transaction messages (needs settings for "stomp.offline.*")
+   *
+   * @param callback (optional) Callback method for each successfully processed offline message
+   * @param failedMessagesPath (optional) Folder where failed messages should be moved on errors
+   * @return int Number of processed offline messages
+   */
+  public int sendOfflineMessages(Callback<Transaction> callback, String failedMessagesPath) {
+    // Check config
+    if (!this.configuration.enableOfflineMode) {
+      return -1;
+    }
+
+    // Get STOMP channel
+    Channel channel = this.context.channels.get(Options.CHANNEL_STOMP);
+    if (!(channel instanceof StompChannel)) {
+      return -1;
+    }
+    StompChannel stompChannel = ((StompChannel) channel);
+
+    // Load files
+    File[] files = stompChannel.offlineCache.getFiles();
+    if (files == null) {
+      return 0;
+    }
+
+    // Process files
+    int count = 0;
+    for (File file : files) {
+      LOG.info("Try to send offline message: " + file.getName());
+      try {
+        // Load message
+        Object data = stompChannel.offlineCache.get(file.getName());
+
+        if (!(data instanceof OfflineMessage)) {
+          throw new RuntimeException("Offline message has a Wrong format:" + file.getName());
+        }
+
+        // Send message
+        new Execution<Transaction>() {
+          @Override
+          protected Transaction execute() {
+            return stompChannel.doSendMessageNow(
+                    ((OfflineMessage) data).header,
+                    ((OfflineMessage) data).body,
+                    ((OfflineMessage) data).corrId,
+                    ((OfflineMessage) data).destination,
+                    new StompChannel.MessageTypeRef(Transaction.class),
+                    null,
+                    ((OfflineMessage) data).timeoutSec > 0 ? ((OfflineMessage) data).timeoutSec : 30,
+                    0
+            );
+          }
+        }.start(callback);
+
+        // Clean up
+        file.delete();
+        count++;
+      } catch (RuntimeException e) {
+        LOG.info("Could not send offline message: " + file.getName());
+
+        // Move the message to "failed" folder?
+        if (!(e instanceof AuthError) && !(e instanceof NetworkError)
+                && failedMessagesPath != null && failedMessagesPath.length() > 0
+        ) {
+          LOG.warn("Sending offline message failed: " + file.getName());
+
+          // Check folder
+          File failedMessagesDir = new File(failedMessagesPath);
+          if (!failedMessagesDir.exists()) {
+            failedMessagesDir.mkdirs();
+          }
+
+          // Rename
+          file.renameTo(new File(failedMessagesDir.getPath() + "/" + file.getName()));
+        }
+      }
+    }
+
+    return count;
   }
 
   /**
@@ -477,6 +556,7 @@ public class SecucardConnect {
     public final int logLimit;
     public final int logCount;
     public final boolean logIgnoreGlobal;
+    private final boolean enableOfflineMode;
 
     /**
      * Set the property with given name. Can be used to change properties in programmatic way without config file.
@@ -594,6 +674,7 @@ public class SecucardConnect {
       appId = properties.getProperty("appId");
       cacheDir = properties.getProperty("cacheDir");
       host = properties.getProperty("host");
+      enableOfflineMode = Boolean.parseBoolean(properties.getProperty("stomp.offline.enabled"));
       Log.init(this);
     }
 
@@ -613,6 +694,7 @@ public class SecucardConnect {
           ", clientAuthDetails=" + clientAuthDetails +
           ", autCancelCallback=" + autCancelCallback +
           ", host=" + host +
+          ", enableOfflineMode=" + (enableOfflineMode ? 1 : 0) +
           '}';
     }
   }
@@ -623,5 +705,55 @@ public class SecucardConnect {
    */
   public String getToken() {
     return context.tokenManager.getToken(false);
+  }
+
+  /**
+   * Returns ar default receipt for secucard transactions
+   * @param cardNumber the secucard number
+   * @return
+   */
+  public List<ReceiptLine> getDefaultReceipt(String cardNumber) {
+
+    List<ReceiptLine> receipt = new ArrayList<ReceiptLine>();
+    ReceiptLine line;
+    Value value;
+
+    line = new ReceiptLine();
+    line.setType("space");
+    receipt.add(line);
+
+    // Kundenkarte
+    line = new ReceiptLine();
+    line.setType("space");
+    receipt.add(line);
+
+    line = new ReceiptLine();
+    line.setType("separator");
+    value = new Value();
+    value.setCaption("Kundenkarte");
+    line.setValue(value);
+    receipt.add(line);
+
+    line = new ReceiptLine();
+    line.setType("name-value");
+    value = new Value();
+    value.setName("Kartennummer:");
+    value.setValue(cardNumber);
+    line.setValue(value);
+    receipt.add(line);
+
+    // Default text
+    line = new ReceiptLine();
+    line.setType("space");
+    receipt.add(line);
+
+    line = new ReceiptLine();
+    line.setType("textline");
+    value = new Value();
+    value.setText(this.configuration.property("receipt.default.text") + " " + this.configuration.property("receipt.default.link"));
+    line.setValue(value);
+    receipt.add(line);
+
+    return receipt;
   }
 }

@@ -316,7 +316,7 @@ public class StompChannel extends Channel {
 
   public synchronized <T> T doSendMessageNow(Map<String, String> header, String body, String corrId,
                                               String destination, TypeReference returnType, StatusHandler statusHandler,
-                                              int timeoutSec, int defaultReceiptTimeoutSec) {
+                                              Integer timeoutSec, Integer defaultReceiptTimeoutSec) {
     String token = getToken();
     autoConnect(token);
 
@@ -514,8 +514,8 @@ public class StompChannel extends Channel {
     return System.currentTimeMillis() + "-" + id + "-" + str.hashCode();
   }
 
-  private String awaitAnswer(final String id, int timeoutSec, int defaultReceiptTimeoutSec) {
-    if (timeoutSec == 0) {
+  private String awaitAnswer(final String id, Integer timeoutSec, int defaultReceiptTimeoutSec) {
+    if (timeoutSec == null) {
       timeoutSec = configuration.messageTimeoutSec;
     }
     long maxWaitTime = System.currentTimeMillis() + timeoutSec * 1000;

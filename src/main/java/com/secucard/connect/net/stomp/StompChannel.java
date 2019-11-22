@@ -640,7 +640,7 @@ public class StompChannel extends Channel {
         LOG.debug("Checking for open offline messages.");
         Options options = Options.getDefault();
         options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
-        this.sendOfflineMessages(null, null);
+        this.sendOfflineMessages();
       } catch (Throwable t) {
         LOG.info("Sending offline message failed.");
         if (initial) {

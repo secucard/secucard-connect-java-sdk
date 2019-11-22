@@ -4,7 +4,6 @@ import com.secucard.connect.auth.AuthService;
 import com.secucard.connect.auth.CancelCallback;
 import com.secucard.connect.auth.ClientAuthDetails;
 import com.secucard.connect.auth.TokenManager;
-import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
@@ -20,7 +19,6 @@ import com.secucard.connect.net.rest.RestChannel;
 import com.secucard.connect.net.stomp.StompChannel;
 import com.secucard.connect.net.stomp.StompEvents;
 import com.secucard.connect.net.util.JsonMapper;
-import com.secucard.connect.product.common.model.Message;
 import com.secucard.connect.product.common.model.SecuObject;
 import com.secucard.connect.product.document.Document;
 import com.secucard.connect.product.general.General;
@@ -51,7 +49,9 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.12.0";
+  public static final String VERSION = "2.13.0";
+
+  public static final String PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE = "Print default receipt.";
 
   protected volatile boolean isConnected;
   private Configuration configuration;
@@ -297,7 +297,7 @@ public class SecucardConnect {
     Map<String, Channel> channels = new HashMap<>();
     channels.put(Options.CHANNEL_REST, rc);
     if (config.stompEnabled) {
-      StompChannel channel = new StompChannel(stompCfg, ctx, config.dataStorage);
+      StompChannel channel = new StompChannel(stompCfg, ctx);
       channels.put(Options.CHANNEL_STOMP, channel);
     }
     for (Channel channel : channels.values()) {
@@ -338,88 +338,6 @@ public class SecucardConnect {
     sc.wireServiceInstances();
 
     return sc;
-  }
-
-  /**
-   * Method to send offline smart transaction messages (needs settings for "stomp.offline.*")
-   *
-   * @param callback (optional) Callback method for each successfully processed offline message
-   * @param failedMessagesPath (optional) Folder where failed messages should be moved on errors
-   * @return int Number of processed offline messages
-   */
-  public int sendOfflineMessages(Callback<Transaction> callback, String failedMessagesPath) {
-    // Check config
-    if (!this.configuration.enableOfflineMode) {
-      return -1;
-    }
-
-    // Get STOMP channel
-    Channel channel = this.context.channels.get(Options.CHANNEL_STOMP);
-    if (!(channel instanceof StompChannel)) {
-      return -1;
-    }
-    StompChannel stompChannel = ((StompChannel) channel);
-
-    // Load files
-    File[] files = stompChannel.offlineCache.getFiles();
-    if (files == null) {
-      return 0;
-    }
-
-    // Process files
-    int count = 0;
-    for (File file : files) {
-      LOG.info("Try to send offline message: " + file.getName());
-      try {
-        // Load message
-        Object data = stompChannel.offlineCache.get(file.getName());
-
-        if (!(data instanceof OfflineMessage)) {
-          throw new RuntimeException("Offline message has a Wrong format:" + file.getName());
-        }
-
-        // Send message
-        new Execution<Transaction>() {
-          @Override
-          protected Transaction execute() {
-            return stompChannel.doSendMessageNow(
-                    ((OfflineMessage) data).header,
-                    ((OfflineMessage) data).body,
-                    ((OfflineMessage) data).corrId,
-                    ((OfflineMessage) data).destination,
-                    new StompChannel.MessageTypeRef(Transaction.class),
-                    null,
-                    ((OfflineMessage) data).timeoutSec > 0 ? ((OfflineMessage) data).timeoutSec : 30,
-                    0
-            );
-          }
-        }.start(callback);
-
-        // Clean up
-        file.delete();
-        count++;
-      } catch (RuntimeException e) {
-        LOG.info("Could not send offline message: " + file.getName());
-
-        // Move the message to "failed" folder?
-        if (!(e instanceof AuthError) && !(e instanceof NetworkError)
-                && failedMessagesPath != null && failedMessagesPath.length() > 0
-        ) {
-          LOG.warn("Sending offline message failed: " + file.getName());
-
-          // Check folder
-          File failedMessagesDir = new File(failedMessagesPath);
-          if (!failedMessagesDir.exists()) {
-            failedMessagesDir.mkdirs();
-          }
-
-          // Rename
-          file.renameTo(new File(failedMessagesDir.getPath() + "/" + file.getName()));
-        }
-      }
-    }
-
-    return count;
   }
 
   /**
@@ -466,6 +384,7 @@ public class SecucardConnect {
     general = new General(
         service(General.Accountdevices),
         service(General.Accounts),
+        service(General.Apps),
         service(General.Merchants),
         service(General.News),
         service(General.Publicmerchants),
@@ -747,10 +666,20 @@ public class SecucardConnect {
     line.setType("space");
     receipt.add(line);
 
+    String text = this.configuration.property("receipt.default.text");
+    if (text == null || text.length() <= 0) {
+      text = "Für Ihren Einkauf wurde Ihrer Kundenkarte ein Bonus gutgeschrieben. Erfahren Sie Ihr aktuelles Kartenguthaben unter:";
+    }
+
+    String link = this.configuration.property("receipt.default.link");
+    if (link == null || link.length() <= 0) {
+      link = "https://secucard.com/guthabenabfrage-0";
+    }
+
     line = new ReceiptLine();
     line.setType("textline");
     value = new Value();
-    value.setText(this.configuration.property("receipt.default.text") + " " + this.configuration.property("receipt.default.link"));
+    value.setText(text + " " + link);
     line.setValue(value);
     receipt.add(line);
 

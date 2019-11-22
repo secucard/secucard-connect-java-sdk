@@ -19,7 +19,6 @@ import com.secucard.connect.event.DelegatingEventHandlerCallback;
 import com.secucard.connect.event.Events;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.general.model.Event;
-import com.secucard.connect.product.loyalty.model.MerchantCard;
 import com.secucard.connect.product.smart.model.ComponentInstruction;
 import com.secucard.connect.product.smart.model.ComponentPosition;
 import com.secucard.connect.product.smart.model.ComponentSize;

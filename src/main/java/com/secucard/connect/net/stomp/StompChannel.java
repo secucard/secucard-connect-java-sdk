@@ -13,12 +13,20 @@
 package com.secucard.connect.net.stomp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.secucard.connect.SecucardConnect;
 import com.secucard.connect.auth.exception.AuthFailedException;
-import com.secucard.connect.client.*;
+import com.secucard.connect.client.AuthError;
+import com.secucard.connect.client.Callback;
+import com.secucard.connect.client.ClientContext;
+import com.secucard.connect.client.ClientError;
+import com.secucard.connect.client.NetworkError;
+import com.secucard.connect.client.OfflineCache;
+import com.secucard.connect.client.OfflineMessage;
 import com.secucard.connect.net.Channel;
 import com.secucard.connect.net.Options;
 import com.secucard.connect.net.ServerErrorException;
 import com.secucard.connect.net.stomp.client.Frame;
+import com.secucard.connect.net.stomp.client.NoReceiptException;
 import com.secucard.connect.net.stomp.client.StompClient;
 import com.secucard.connect.net.util.jackson.DynamicTypeReference;
 import com.secucard.connect.product.common.model.Message;
@@ -31,34 +39,32 @@ import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
 import com.secucard.connect.util.ThreadSleep;
-import java.nio.charset.StandardCharsets;
-import org.json.JSONObject;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.json.JSONObject;
 
 public class StompChannel extends Channel {
-  private final static Log LOG = new Log(StompChannel.class);
+
+  private static final Log LOG = new Log(StompChannel.class);
   protected static final String HEADER_CORRELATION_ID = "correlation-id";
   protected static final String STATUS_OK = "ok";
+  public static final String PREFIX_STX_OFFLINE = "STX_OFFLINE_";
 
   protected final Map<String, StompMessage> messages = new HashMap<>(20);
   protected final Configuration configuration;
   protected final StompClient stomp;
-  public final OfflineCache offlineCache;
-  protected String connectToken;
-  private volatile boolean isConfirmed;
-  private volatile boolean stopRefresh;
-  private Thread refreshThread;
+  protected final OfflineCache offlineCache;
   private final String id;
-
   private final StatusHandler defaultStatusHandler = new StatusHandler() {
     @Override
     public boolean hasError(Message message) {
@@ -66,34 +72,55 @@ public class StompChannel extends Channel {
     }
   };
 
-  public StompChannel(Configuration cfg, ClientContext context, DataStorage offlineCache) {
+  protected String connectToken;
+  private volatile boolean isConfirmed;
+  private volatile boolean stopRefresh;
+  private volatile boolean stopOfflineMessagesThread;
+  private volatile boolean offlineModeActive = false;
+  private Thread refreshThread;
+  private Thread offlineMessagesThread;
+
+  public StompChannel(Configuration cfg, ClientContext context) {
     super(context);
     this.configuration = cfg;
     this.offlineCache = new OfflineCache(cfg.offlineCacheDir);
-    StompClient.Config stompCfg = new StompClient.Config(cfg.host, cfg.port, cfg.virtualHost,
-        cfg.userId, cfg.password, cfg.heartbeatSec * 1000, cfg.socketTimeoutSec,
-        cfg.messageTimeoutSec, cfg.connectionTimeoutSec);
+    StompClient.Config stompCfg = new StompClient.Config(
+        cfg.host,
+        cfg.port,
+        cfg.virtualHost,
+        cfg.userId,
+        cfg.password,
+        cfg.heartbeatSec * 1000,
+        cfg.socketTimeoutSec,
+        cfg.messageTimeoutSec,
+        cfg.connectionTimeoutSec
+    );
     this.id = Integer.toString(hashCode());
     stomp = new StompClient(this.id, stompCfg, new DefaultEventListner());
   }
 
   /**
-   * Must not be synchronized, because of session refresh in separate thread.
-   * Just used one time when client is opened.
+   * Must not be synchronized, because of session refresh in separate thread. Just used one time when client is opened.
    */
   @Override
   public void open() {
-
     Throwable throwable = startSessionRefresh();
+    if (throwable != null) {
+      throw ExceptionMapper.map(throwable, null);
+    }
+
+    sendLogMessage(this.configuration.toString(), "INFO");
+
+    throwable = createOfflineMessagesThread();
     if (throwable != null) {
       throw ExceptionMapper.map(throwable, null);
     }
   }
 
-
   @Override
   public synchronized void close() {
     stopRefresh = true;
+    stopOfflineMessagesThread = true;
     stomp.disconnect();
     LOG.debug("STOMP channel closed.");
   }
@@ -103,8 +130,7 @@ public class StompChannel extends Channel {
     Destination dest = createDestination(method, params);
     Message message = new Message<>(params.objectId, params.actionArg, params.queryParams, params.data);
 
-    return sendMessage(dest, message, new MessageTypeRef(params.returnType), null, callback,
-        params.options.timeOutSec, params.options.actionId);
+    return sendMessage(dest, message, new MessageTypeRef(params.returnType), null, callback, params.options.timeOutSec, params.options.actionId);
   }
 
   @Override
@@ -116,15 +142,12 @@ public class StompChannel extends Channel {
       @Override
       public boolean hasError(Message message) {
         // treat not found as ok here, no matches for query
-        return !(STATUS_OK.equalsIgnoreCase(message.getStatus())
-            || "ProductNotFoundException".equalsIgnoreCase(message.getError()));
+        return !(STATUS_OK.equalsIgnoreCase(message.getStatus()) || "ProductNotFoundException".equalsIgnoreCase(message.getError()));
       }
     };
 
-    return sendMessage(dest, message, new MessageListTypeRef(params.returnType), statusHandler, callback,
-        params.options.timeOutSec, null);
+    return sendMessage(dest, message, new MessageListTypeRef(params.returnType), statusHandler, callback, params.options.timeOutSec, null);
   }
-
 
   private Destination createDestination(Method method, Params params) {
     Destination dest;
@@ -155,7 +178,6 @@ public class StompChannel extends Channel {
     return dest;
   }
 
-
   /**
    * Provides the token used as login and password for  STOMP connect.
    */
@@ -171,12 +193,11 @@ public class StompChannel extends Channel {
   }
 
   /**
-   * Connect to STOMP Server.
-   * If the connection fails all resources are closed.
+   * Connect to STOMP Server. If the connection fails all resources are closed.
    *
    * @param token The token used as login/password. May be null.
    * @throws IllegalStateException If no connect credentials available.
-   * @throws ClientError           If any  error happens.
+   * @throws ClientError If any  error happens.
    */
   private void connect(String token) {
     connectToken = token;
@@ -209,35 +230,72 @@ public class StompChannel extends Channel {
     String body = this.convertBodyToString(arg);
     String corrId = createCorrelationId(body);
     Map<String, String> header = this.collectHeaders(destinationSpec, body, actionId, corrId);
-    String destination = destinationSpec.toString();
+
+    int defaultReceiptTimeoutSec = 0;
+    if (this.usePrintingDefaultReceipt(destinationSpec, arg)) {
+      defaultReceiptTimeoutSec = configuration.defaultReceiptTimeoutSec;
+    }
+
+    if (offlineModeActive && this.useOfflineMode(destinationSpec, arg)) {
+      return this.saveOfflineMessage(arg, header, body, corrId, destinationSpec, returnType);
+    }
 
     try {
       String token = getToken();
       this.autoConnect(token);
-    } catch (NetworkError error) {
-      if (this.useOfflineMode(destinationSpec, arg)) {
-        LOG.warn("Offline mode is active, queueing current message.");
 
-        // save request
-        OfflineMessage offlineMessage = new OfflineMessage();
-        offlineMessage.corrId = corrId;
-        offlineMessage.body = body;
-        offlineMessage.header =  header;
-        offlineMessage.destination = destination;
-        offlineMessage.returnType = returnType.toString();
-        offlineCache.save(corrId, offlineMessage);
-        return null;
+      return doSendMessageNow(header, body, corrId, destinationSpec.toString(), returnType, statusHandler, timeoutSec, defaultReceiptTimeoutSec);
+    } catch (NetworkError|NoReceiptException error) {
+      if (this.useOfflineMode(destinationSpec, arg)) {
+        offlineModeActive = true;
+        LOG.warn("Offline mode is active, queueing current message.");
+        if (!"general".equals(destinationSpec.object[0]) && !"apps".equals(destinationSpec.object[1])) {
+          this.sendLogMessage("Offline mode is active, queueing current message.", "WARNING");
+        }
+
+        return this.saveOfflineMessage(arg, header, body, corrId, destinationSpec, returnType);
       }
 
       throw error;
     }
+  }
 
-    int defaultReceiptTimeoutSec = 0;
-    if(this.usePrintingDefaultReceipt(destinationSpec, arg)) {
-      defaultReceiptTimeoutSec = configuration.defaultReceiptTimeoutSec;
+  private  <T> T saveOfflineMessage(Message arg, Map<String, String> header, String body, String corrId, Destination destinationSpec, TypeReference returnType) {
+    // save request
+    OfflineMessage offlineMessage = new OfflineMessage();
+    offlineMessage.corrId = corrId;
+    offlineMessage.body = body;
+    offlineMessage.header = header;
+    offlineMessage.destination = destinationSpec.toString();
+    offlineMessage.returnType = returnType.toString();
+    offlineMessage.id = arg.getPid();
+    offlineCache.save(corrId, offlineMessage);
+
+    if ("smart".equals(destinationSpec.object[0]) && "transactions".equals(destinationSpec.object[1])) {
+      if ("exec:".equals(destinationSpec.command) && "start".equals(destinationSpec.action)) {
+        if (ping()) {
+          offlineModeActive = false;
+          open();
+        }
+        throw new MessageTimeoutException(SecucardConnect.PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE);
+      }
+
+      Transaction res;
+      if (arg.getData() instanceof Transaction) {
+        res = (Transaction) arg.getData();
+      } else {
+        res = new Transaction();
+      }
+
+      if (res.getId() == null || res.getId().isEmpty()) {
+        res.setId(PREFIX_STX_OFFLINE + corrId);
+      }
+
+      res.setStatus("offline");
+      return (T) res;
     }
 
-    return doSendMessageNow(header, body, corrId, destination, returnType, statusHandler, timeoutSec, defaultReceiptTimeoutSec);
+    return null;
   }
 
   private boolean useOfflineMode(Destination destinationSpec, Message arg) {
@@ -251,8 +309,10 @@ public class StompChannel extends Channel {
       return false;
     }
 
-    // Endpoint is "smart.transactions"?
-    if (!"smart".equals(destinationSpec.object[0]) || !"transactions".equals(destinationSpec.object[1])) {
+    // Endpoint is "smart.transactions" or general.apps?
+    if ((!"smart".equals(destinationSpec.object[0]) || !"transactions".equals(destinationSpec.object[1])) &&
+        (!"general".equals(destinationSpec.object[0]) || !"apps".equals(destinationSpec.object[1]) || "ping".equals(arg.getSid()))
+    ) {
       return false;
     }
 
@@ -262,14 +322,13 @@ public class StompChannel extends Channel {
     }
 
     // Is it the "exec:start" method AND it's "cash"?
-    if ("exec:".equals(destinationSpec.command) && "start".equals(destinationSpec.action)
-            && !TransactionService.TYPE_CASH.equals(arg.getSid())) {
+    if ("exec:".equals(destinationSpec.command) && "start".equals(destinationSpec.action) && !TransactionService.TYPE_CASH.equals(arg.getSid())) {
       return false;
     }
 
     // Is it not the "exec:Diagnosis", "exec:EndofDay", "exec:cancelTrx"?
-    if ("exec:".equals(destinationSpec.command) &&
-        ("Diagnosis".equals(destinationSpec.action) || "EndofDay".equals(destinationSpec.action) || "cancelTrx".equals(destinationSpec.action))) {
+    if ("exec:".equals(destinationSpec.command) && ("Diagnosis".equals(destinationSpec.action) || "EndofDay".equals(destinationSpec.action)
+        || "cancelTrx".equals(destinationSpec.action))) {
       return false;
     }
 
@@ -304,13 +363,13 @@ public class StompChannel extends Channel {
       return false;
     }
 
-    // Is it the "exec:start" method AND it's "cash"?
-    if ("exec:".equals(destinationSpec.command) && "start".equals(destinationSpec.action)
-            && !TransactionService.TYPE_CASH.equals(arg.getSid())) {
+    // Is it the "exec:start" method?
+    if (!"exec:".equals(destinationSpec.command) || !"start".equals(destinationSpec.action)) {
       return false;
     }
 
-    return true;
+    // it's "cash"?
+    return TransactionService.TYPE_CASH.equals(arg.getSid());
 
   }
 
@@ -321,7 +380,12 @@ public class StompChannel extends Channel {
     autoConnect(token);
 
     header.put("user-id", token);
-    stomp.send(destination, body, header, timeoutSec);
+    try {
+      stomp.send(destination, body, header, timeoutSec);
+    } catch (Throwable e) {
+      sendLogMessage(e.toString(), "ERROR");
+      throw e;
+    }
     String answer = awaitAnswer(corrId, timeoutSec, defaultReceiptTimeoutSec);
     Message<T> msg;
     try {
@@ -359,10 +423,14 @@ public class StompChannel extends Channel {
 
   private Map<String, String> collectHeaders(Destination destinationSpec, String body, String actionId, String corrId) {
     Map<String, String> header = StompClient.createHeader(
-        "reply-to", configuration.replyQueue,
-        "content-type", "application/json",
-        "correlation-id", corrId,
-        "content-length", Integer.toString(body.getBytes(StandardCharsets.UTF_8).length)
+        "reply-to",
+        configuration.replyQueue,
+        "content-type",
+        "application/json",
+        "correlation-id",
+        corrId,
+        "content-length",
+        Integer.toString(body.getBytes(StandardCharsets.UTF_8).length)
     );
 
     // optional "app-id"
@@ -426,22 +494,33 @@ public class StompChannel extends Channel {
   }
 
   /**
-   * Sends a confirmations within an fixed interval that this client is alive.
-   * But is able to skip confirmation if other already confirmed this (setting isConfirmed to true).
-   * Always keeps trying to refresh next time even if an attempt failed.
+   * Sends a confirmations within an fixed interval that this client is alive. But is able to skip confirmation if other already confirmed this
+   * (setting isConfirmed to true). Always keeps trying to refresh next time even if an attempt failed.
    *
    * @param countDownLatch A latch to release if successfully executed.
    */
   private Throwable runSessionRefresh(CountDownLatch countDownLatch) {
     LOG.info("Session refresh loop started.");
+
     boolean initial = true;
     do {
       try {
         LOG.debug("Try session refresh.");
         Options options = Options.getDefault();
         options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
-        request(Method.EXECUTE, new Params(new String[]{"auth", "sessions"}, "me", "refresh", null, null, Result.class,
-            options), null);
+        request(
+            Method.EXECUTE,
+            new Params(
+                new String[]{"auth", "sessions"},
+                "me",
+                "refresh",
+                null,
+                null,
+                Result.class,
+                options
+            ),
+            null
+        );
         isConfirmed = false;
         LOG.info("Session refresh sent.");
       } catch (Throwable t) {
@@ -510,6 +589,173 @@ public class StompChannel extends Channel {
     return null;
   }
 
+  private Throwable createOfflineMessagesThread() {
+    // Check config
+    if (!this.configuration.enableOfflineMode) {
+      return null;
+    }
+
+    // first stop if running and wait until finished.
+    stopOfflineMessagesThread = true;
+    if (offlineMessagesThread != null && offlineMessagesThread.isAlive()) {
+      LOG.debug("Send offline messages thread still running, wait for completion.");
+      try {
+        offlineMessagesThread.join();
+      } catch (InterruptedException e) {
+        // ignore
+      }
+    }
+
+    final AtomicReference<Throwable> reference = new AtomicReference<>(null);
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    stopOfflineMessagesThread = false;
+    offlineMessagesThread = new Thread() {
+      @Override
+      public void run() {
+        reference.set(runOfflineMessagesThread(latch));
+        latch.countDown();
+      }
+    };
+
+    offlineMessagesThread.setDaemon(true);
+    offlineMessagesThread.start();
+
+    // let current thread
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      // ignore
+    }
+
+    // must return null if no error happened
+    return reference.get();
+  }
+
+  private Throwable runOfflineMessagesThread(CountDownLatch countDownLatch) {
+    LOG.info("Send offline messages loop started.");
+    boolean initial = true;
+    do {
+      try {
+        LOG.debug("Checking for open offline messages.");
+        Options options = Options.getDefault();
+        options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+        this.sendOfflineMessages(null, null);
+      } catch (Throwable t) {
+        LOG.info("Sending offline message failed.");
+        if (initial) {
+          // first invocation after connect, let client know something is going wrong
+          return t;
+        }
+        // try next time
+      }
+
+      // releases latch
+      if (initial) {
+        countDownLatch.countDown();
+        initial = false;
+      }
+
+      // sleep until next refresh, reset wait time if anybody confirmed session for us so we can sleep longer
+      new ThreadSleep() {
+        @Override
+        protected boolean cancel() {
+          return stopOfflineMessagesThread;
+        }
+      }.execute(configuration.offlineMessagesLoopSleepSec * 1000, 500, TimeUnit.MILLISECONDS);
+
+    } while (!stopOfflineMessagesThread);
+
+    LOG.info("Session refresh stopped.");
+
+    return null;
+  }
+
+  /**
+   * Method to send offline smart transaction messages (needs settings for "stomp.offline.*")
+   *
+   * @return int Number of processed offline messages
+   */
+  public int sendOfflineMessages() {
+    // Check config
+    if (!this.configuration.enableOfflineMode) {
+      return -1;
+    }
+
+    // Load files
+    File[] files = this.offlineCache.getFiles();
+    if (files == null) {
+      return 0;
+    }
+
+    HashMap<String, String> idMappingTable = new HashMap<>();
+
+    // Process files
+    int count = 0;
+    for (File file : files) {
+      LOG.info("Try to send offline message: " + file.getName());
+      this.sendLogMessage("Try to send offline message: "+ file.getName(), "WARNING");
+      try {
+        // Load message
+        Object data = this.offlineCache.get(file.getName());
+
+        if (!(data instanceof OfflineMessage)) {
+          throw new RuntimeException("Offline message has a Wrong format:" + file.getName());
+        }
+
+        if (((OfflineMessage) data).destination.equals("smart")) {
+          String id = ((OfflineMessage) data).id;
+          String body = ((OfflineMessage) data).body;
+
+          // Replace temporary id
+          if (id.startsWith(PREFIX_STX_OFFLINE) && idMappingTable.get(id) != null) {
+            body = body.replace(id, idMappingTable.get(id));
+            id = idMappingTable.get(id);
+          }
+
+          // Send message
+          Transaction trans = doSendMessageNow(((OfflineMessage) data).header, body, ((OfflineMessage) data).corrId,
+                                      ((OfflineMessage) data).destination, new MessageTypeRef(Transaction.class), null,
+                                      ((OfflineMessage) data).timeoutSec > 0 ? ((OfflineMessage) data).timeoutSec : 30, 0);
+
+          // Store new id for the next requests
+          if (id.startsWith(PREFIX_STX_OFFLINE)) {
+            idMappingTable.put(id, trans.getId());
+          }
+        } else if (((OfflineMessage) data).destination.equals("general")) {
+          // Send message
+          doSendMessageNow(((OfflineMessage) data).header, ((OfflineMessage) data).body, ((OfflineMessage) data).corrId,
+                                      ((OfflineMessage) data).destination, new MessageTypeRef(Result.class), null,
+                                      5, 0);
+        }
+
+        // Clean up
+        file.delete();
+        count++;
+      } catch (RuntimeException e) {
+        LOG.info("Could not send offline message: " + file.getName());
+        this.sendLogMessage("Could not send offline message: "+ file.getName() + " " + e.toString(), "WARNING");
+        break;
+//
+//        // Move the message to "failed" folder?
+//        if (!(e instanceof AuthError) && !(e instanceof NetworkError) && failedMessagesPath != null && failedMessagesPath.length() > 0) {
+//          LOG.warn("Sending offline message failed: " + file.getName());
+//
+//          // Check folder
+//          File failedMessagesDir = new File(failedMessagesPath);
+//          if (!failedMessagesDir.exists()) {
+//            failedMessagesDir.mkdirs();
+//          }
+//
+//          // Rename
+//          file.renameTo(new File(failedMessagesDir.getPath() + "/" + file.getName()));
+//        }
+      }
+    }
+
+    return count;
+  }
+
   private String createCorrelationId(String str) {
     return System.currentTimeMillis() + "-" + id + "-" + str.hashCode();
   }
@@ -533,7 +779,7 @@ public class StompChannel extends Channel {
       }
 
       if (maxReceiptWaitTime > 0 && System.currentTimeMillis() > maxReceiptWaitTime) {
-        throw new MessageTimeoutException("Print default receipt.");
+        throw new MessageTimeoutException(SecucardConnect.PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE);
       }
 
       try {
@@ -656,7 +902,6 @@ public class StompChannel extends Channel {
     }
   }
 
-
   protected class Destination {
     String[] object;
     String command;  // standard api command like defined by constants above
@@ -734,46 +979,75 @@ public class StompChannel extends Channel {
     private final String basicDestination;
     private final boolean enableOfflineMode;
     private final String offlineCacheDir;
+    private final int offlineMessagesLoopSleepSec;
+    private final boolean offlineMessagesDisableThread;
     private final int defaultReceiptTimeoutSec;
 
     public Configuration(Properties properties) {
       this.host = properties.getProperty("stomp.host");
-      this.port = Integer.parseInt(properties.getProperty("stomp.port"));
+      this.port = getIntOption(properties, "stomp.port", 1, 65535, 61614);
       this.password = properties.getProperty("stomp.pwd");
       this.virtualHost = properties.getProperty("stomp.virtualHost");
-      this.heartbeatSec = Integer.parseInt(properties.getProperty("stomp.heartbeatSec"));
+      this.heartbeatSec = getIntOption(properties, "stomp.heartbeatSec", 5, 120, 30);
       this.userId = properties.getProperty("stomp.user");
       this.replyQueue = properties.getProperty("stomp.replyQueue");
-      this.connectionTimeoutSec = Integer.parseInt(properties.getProperty("stomp.connectTimeoutSec"));
-      this.messageTimeoutSec = Integer.parseInt(properties.getProperty("stomp.messageTimeoutSec"));
-      this.maxMessageAgeSec = Integer.parseInt(properties.getProperty("stomp.maxMessageAgeSec"));
-      this.socketTimeoutSec = Integer.parseInt(properties.getProperty("stomp.socketTimeoutSec"));
-      this.enableOfflineMode = Boolean.parseBoolean(properties.getProperty("stomp.offline.enabled"));
-      this.defaultReceiptTimeoutSec = Integer.parseInt(properties.getProperty("receipt.default.timeout"));
-
-      String stompDestination = properties.getProperty("stomp.destination");
-      if (!stompDestination.endsWith("/")) {
-        stompDestination += "/";
-      }
-      this.basicDestination = stompDestination;
-
-      String stompOfflineDir = properties.getProperty("stomp.offline.dir");
-      if (!stompOfflineDir.endsWith("/")) {
-        stompOfflineDir += "/";
-      }
-      this.offlineCacheDir = stompOfflineDir;
+      this.connectionTimeoutSec = getIntOption(properties, "stomp.connectTimeoutSec", 1, 120, 30);
+      this.messageTimeoutSec = getIntOption(properties, "stomp.messageTimeoutSec", 1, 300, 120);
+      this.maxMessageAgeSec = getIntOption(properties, "stomp.maxMessageAgeSec", 1, 600, 360);
+      this.socketTimeoutSec = getIntOption(properties, "stomp.socketTimeoutSec", 1, 120, 30);
+      this.enableOfflineMode = getBoolOption(properties, "stomp.offline.enabled", false);
+      this.offlineMessagesDisableThread = getBoolOption(properties, "stomp.offline.disableThread", false);
+      this.offlineMessagesLoopSleepSec = getIntOption(properties, "stomp.offline.sleepSec", 60, 900, 60);
+      this.defaultReceiptTimeoutSec = getIntOption(properties, "receipt.default.timeout", 1, 120, 30);
+      this.basicDestination = getPathOption(properties, "stomp.destination", "/exchange/connect.api/");
+      this.offlineCacheDir = getPathOption(properties, "stomp.offline.dir", ".scc-offline/");
     }
 
+    private int getIntOption(Properties properties, String configName, int minValue, int maxValue, int defaultValue) {
+      int value = defaultValue;
+      String property = properties.getProperty(configName);
+
+      if (property != null && !property.isEmpty()) {
+        value = Integer.parseInt(property);
+      }
+
+      if (value < minValue || value > maxValue) {
+        value = defaultValue;
+      }
+
+      return value;
+    }
+
+    private boolean getBoolOption(Properties properties, String configName, boolean defaultValue) {
+      String property = properties.getProperty(configName);
+
+      if (property != null && !property.isEmpty()) {
+        return Boolean.parseBoolean(property);
+      }
+
+      return defaultValue;
+    }
+
+    private String getPathOption(Properties properties, String configName, String defaultValue) {
+      String property = properties.getProperty(configName);
+
+      if (property != null && !property.isEmpty()) {
+        if (!property.endsWith("/")) {
+          property += "/";
+        }
+        return property;
+      }
+
+      return defaultValue;
+    }
 
     @Override
     public String toString() {
       return "STOMP Configuration{" +
           "host='" + host + '\'' +
           ", port=" + port +
-          ", password='" + password + '\'' +
           ", virtualHost='" + virtualHost + '\'' +
           ", heartbeatSec=" + heartbeatSec +
-          ", userId='" + userId + '\'' +
           ", replyQueue='" + replyQueue + '\'' +
           ", connectionTimeoutSec=" + connectionTimeoutSec +
           ", messageTimeoutSec=" + messageTimeoutSec +
@@ -782,6 +1056,8 @@ public class StompChannel extends Channel {
           ", basicDestination='" + basicDestination + '\'' +
           ", enableOfflineMode=" + (enableOfflineMode ? 1 : 0) +
           ", offlineCacheDir='" + offlineCacheDir + '\'' +
+          ", offlineMessagesLoopSleepSec=" + offlineMessagesLoopSleepSec +
+          ", offlineMessagesDisableThread=" + (offlineMessagesDisableThread ? 1 : 0) +
           ", defaultReceiptTimeoutSec=" + defaultReceiptTimeoutSec +
           '}';
     }

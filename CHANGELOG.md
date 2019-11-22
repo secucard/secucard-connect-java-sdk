@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.13.0] - 2019-11-22
+
+### Security
+- dependency updates
+
+### Added
+- Smart.Transactions: Background thread for Offline functionality (cache & offline receipt)
+- Remote logging
+
+
 ## [2.12.0] - 2019-09-26
 
 ### Security
@@ -424,3 +434,4 @@ Internal developer release
 [2.10.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.9.0...v2.10.0
 [2.11.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.10.0...v2.11.0
 [2.12.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.11.0...v2.12.0
+[2.13.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.12.0...v2.13.0

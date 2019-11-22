@@ -11,5 +11,6 @@ public class OfflineMessage implements Serializable {
     public Map<String, String> header;
     public String destination;
     public String returnType;
+    public String id;
     public int timeoutSec;
 }

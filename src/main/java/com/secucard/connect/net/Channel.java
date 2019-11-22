@@ -13,11 +13,18 @@
 package com.secucard.connect.net;
 
 
+import com.secucard.connect.SecucardConnect;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.common.model.QueryParams;
+import com.secucard.connect.product.common.model.Result;
+import com.secucard.connect.product.general.model.App;
+import com.secucard.connect.util.Converter;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The base class used to realize any type of server communication.
@@ -154,5 +161,82 @@ public abstract class Channel {
       throw new IllegalArgumentException("Invalid target specification.");
     }
     return parts[0] + separator + parts[1];
+  }
+
+  public boolean sendLogMessage(String message, String level) {
+    if (message == null) {
+      return false;
+    }
+
+    if (level == null) {
+      level = "DEBUG";
+    }
+
+    Map<String, String> log = new HashMap<>();
+    log.put("level", level);
+    log.put("message", message);
+    log.put("timestamp", Instant.now().toString());
+
+    return this.sendLogMessage(log);
+  }
+
+  public boolean sendLogMessage(Map<String, String> log) {
+    if (log == null) {
+      log = new HashMap<>();
+    }
+    log.put("SDK", "secucard-connect-java-sdk");
+    log.put("SDK-VERSION", SecucardConnect.VERSION);
+    log.put("JAVA-VENDOR", System.getProperty("java.vendor"));
+    log.put("JAVA-VERSION", System.getProperty("java.version"));
+
+    Options options = Options.getDefault();
+    options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+
+    try {
+      Result result = this.request(
+          Method.EXECUTE,
+          new Params(
+              new String[]{"general", "apps"},
+              App.APP_ID_SUPPORT,
+              "callBackend",
+              "sendLog",
+              log,
+              Result.class,
+              options
+          ),
+          null
+      );
+
+      Converter<Result, Boolean> converter = Converter.RESULT2BOOL;
+      return converter.convert(result);
+    } catch (Throwable e) {
+      return false;
+    }
+  }
+
+  public boolean ping() {
+    Options options = Options.getDefault();
+    options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+
+    try {
+      Result result = this.request(
+          Method.EXECUTE,
+          new Params(
+              new String[]{"general", "apps"},
+              App.APP_ID_SUPPORT,
+              "callBackend",
+              "ping",
+              null,
+              Result.class,
+              options
+          ),
+          null
+      );
+
+      Converter<Result, Boolean> converter = Converter.RESULT2BOOL;
+      return converter.convert(result);
+    } catch (Throwable e) {
+      return false;
+    }
   }
 }

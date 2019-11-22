@@ -37,7 +37,7 @@ import javax.net.ssl.SSLSocketFactory;
  * Minimal stomp messaging support.
  */
 public class StompClient {
-  private Socket socket;
+  private SSLSocket socket;
   private Thread receiver;
   private final Listener eventListener;
   private BufferedReader reader;
@@ -51,6 +51,9 @@ public class StompClient {
   private final Set<String> receipts = new HashSet<>();
 
   public static final int DEFAULT_SOCKET_TIMEOUT_S = 30;
+  public static final int DEFAULT_CONNECT_TIMEOUT_S = 30;
+  public static final int DEFAULT_MESSAGE_TIMEOUT_S = 30;
+  public static final int DEFAULT_HEARTBEAT_S = 30;
   public static final String CONNECT = "CONNECT";
   public static final String DISCONNECT = "DISCONNECT";
   public static final String DISCONNECTED = "DISCONNECTED"; // not a real stomp frame just for internal usage
@@ -424,19 +427,14 @@ public class StompClient {
 
     closeConnection(true);
 
-    SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(config.host, config.port);
+    socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(config.host, config.port);
     String[] supportedProtocols = {"TLSv1.2"};
-    sslSocket.setEnabledProtocols(supportedProtocols);
-    socket = sslSocket;
-
-    int timeout = config.socketTimeoutSec;
-    if (timeout <= 0) {
-      timeout = DEFAULT_SOCKET_TIMEOUT_S; // we need a timeout, otherwise the receiver thread can block forever
-    }
-    socket.setSoTimeout(timeout * 1000);
+    socket.setEnabledProtocols(supportedProtocols);
+    socket.setSoTimeout(config.socketTimeoutSec * 1000);
 
     if (!socket.isConnected()) {
-      socket.connect(new InetSocketAddress(config.host, config.port));
+      socket.connect(new InetSocketAddress(config.host, config.port), config.connectionTimeoutSec);
+      socket.startHandshake();
     }
 
     reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
@@ -574,19 +572,28 @@ public class StompClient {
      */
     public Config(String host, int port, String virtualHost, String login, String password, int heartbeatMs,
                   boolean useSsl, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
-      this.host = host;
-      this.port = port;
-      this.virtualHost = virtualHost;
-      this.login = login;
-      this.password = password;
-      this.heartbeatMs = heartbeatMs;
-      this.socketTimeoutSec = socketTimeoutSec;
-      this.receiptTimeoutSec = receiptTimeoutSec;
-      this.connectionTimeoutSec = connectionTimeoutSec;
+      this(host, port, virtualHost, login, password, heartbeatMs, socketTimeoutSec, receiptTimeoutSec, connectionTimeoutSec);
     }
 
     public Config(String host, int port, String virtualHost, String login, String password,
         int heartbeatMs, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
+
+      if (heartbeatMs <= 1 || heartbeatMs >= 120) {
+        heartbeatMs = DEFAULT_HEARTBEAT_S;
+      }
+
+      if (socketTimeoutSec <= 1) {
+        socketTimeoutSec = DEFAULT_SOCKET_TIMEOUT_S;
+      }
+
+      if (receiptTimeoutSec <= 1) {
+        receiptTimeoutSec = DEFAULT_MESSAGE_TIMEOUT_S;
+      }
+
+      if (connectionTimeoutSec <= 1) {
+        connectionTimeoutSec = DEFAULT_CONNECT_TIMEOUT_S;
+      }
+
       this.host = host;
       this.port = port;
       this.virtualHost = virtualHost;
@@ -607,8 +614,6 @@ public class StompClient {
           ", host='" + host + '\'' +
           ", port=" + port +
           ", virtualHost='" + virtualHost + '\'' +
-          ", login='" + login + '\'' +
-          ", password='" + password + '\'' +
           ", socketTimeoutSec=" + socketTimeoutSec +
           ", receiptTimeoutSec=" + receiptTimeoutSec +
           ", connectionTimeoutSec=" + connectionTimeoutSec +

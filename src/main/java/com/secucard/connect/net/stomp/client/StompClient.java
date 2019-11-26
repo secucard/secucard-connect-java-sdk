@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -175,6 +177,7 @@ public class StompClient {
     }
     String id = createReceiptId(body);
     headers.put("destination", destination);
+    headers.put("content-length", Integer.toString(body.getBytes(StandardCharsets.UTF_8).length));
     if (config.requestSENDReceipt) {
       headers.put("receipt", id);
     }
@@ -341,9 +344,9 @@ public class StompClient {
       header.put("host", config.virtualHost);
     }
     if (config.heartbeatMs > 0) {
-      header.put("heart-beat", config.heartbeatMs + ",0");
+      header.put("heart-beat", config.heartbeatMs + "," + config.heartbeatMs);
     }
-    header.put("accept-version", "1.2");
+    header.put("accept-version", "1.2"); // STOMP protocol version
     sendFrame(CONNECT, header, null);
   }
 
@@ -431,6 +434,7 @@ public class StompClient {
     String[] supportedProtocols = {"TLSv1.2"};
     socket.setEnabledProtocols(supportedProtocols);
     socket.setSoTimeout(config.socketTimeoutSec * 1000);
+    socket.setKeepAlive(true);
 
     if (!socket.isConnected()) {
       socket.connect(new InetSocketAddress(config.host, config.port), config.connectionTimeoutSec);
@@ -518,7 +522,7 @@ public class StompClient {
   }
 
   private String createReceiptId(String str) {
-    return "rcpt-" + id + "-" + str.hashCode() + "-" + System.currentTimeMillis();
+    return "rcpt-" + UUID.randomUUID().toString();
   }
 
   /**
@@ -578,8 +582,8 @@ public class StompClient {
     public Config(String host, int port, String virtualHost, String login, String password,
         int heartbeatMs, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
 
-      if (heartbeatMs <= 1 || heartbeatMs >= 120) {
-        heartbeatMs = DEFAULT_HEARTBEAT_S;
+      if (heartbeatMs < 1000 || heartbeatMs > 120000) {
+        heartbeatMs = DEFAULT_HEARTBEAT_S * 1000;
       }
 
       if (socketTimeoutSec <= 1) {

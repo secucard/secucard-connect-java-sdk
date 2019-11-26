@@ -48,6 +48,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -241,9 +242,6 @@ public class StompChannel extends Channel {
     }
 
     try {
-      String token = getToken();
-      this.autoConnect(token);
-
       return doSendMessageNow(header, body, corrId, destinationSpec.toString(), returnType, statusHandler, timeoutSec, defaultReceiptTimeoutSec);
     } catch (NetworkError|NoReceiptException error) {
       if (this.useOfflineMode(destinationSpec, arg)) {
@@ -269,7 +267,7 @@ public class StompChannel extends Channel {
     offlineMessage.destination = destinationSpec.toString();
     offlineMessage.returnType = returnType.toString();
     offlineMessage.id = arg.getPid();
-    offlineCache.save(corrId, offlineMessage);
+    offlineCache.save(System.currentTimeMillis() + "-" + id + "-" + corrId, offlineMessage);
 
     if ("smart".equals(destinationSpec.object[0]) && "transactions".equals(destinationSpec.object[1])) {
       if ("exec:".equals(destinationSpec.command) && "start".equals(destinationSpec.action)) {
@@ -700,15 +698,19 @@ public class StompChannel extends Channel {
         Object data = this.offlineCache.get(file.getName());
 
         if (!(data instanceof OfflineMessage)) {
-          throw new RuntimeException("Offline message has a Wrong format:" + file.getName());
+          throw new RuntimeException("Offline message has a wrong format:" + file.getName());
+        }
+        String[] destinationParts = ((OfflineMessage) data).destination.split(":");
+        if (destinationParts.length != 3) {
+          throw new RuntimeException("Offline message has a wrong destination:" + file.getName());
         }
 
-        if (((OfflineMessage) data).destination.equals("smart")) {
+        if (destinationParts[2].startsWith("smart.")) {
           String id = ((OfflineMessage) data).id;
           String body = ((OfflineMessage) data).body;
 
           // Replace temporary id
-          if (id.startsWith(PREFIX_STX_OFFLINE) && idMappingTable.get(id) != null) {
+          if (id != null && id.startsWith(PREFIX_STX_OFFLINE) && idMappingTable.get(id) != null) {
             body = body.replace(id, idMappingTable.get(id));
             id = idMappingTable.get(id);
           }
@@ -716,40 +718,50 @@ public class StompChannel extends Channel {
           // Send message
           Transaction trans = doSendMessageNow(((OfflineMessage) data).header, body, ((OfflineMessage) data).corrId,
                                       ((OfflineMessage) data).destination, new MessageTypeRef(Transaction.class), null,
-                                      ((OfflineMessage) data).timeoutSec > 0 ? ((OfflineMessage) data).timeoutSec : 30, 0);
+                                      30, 0);
 
           // Store new id for the next requests
-          if (id.startsWith(PREFIX_STX_OFFLINE)) {
+          if ((id == null || id.isEmpty()) && trans.getId() != null && !trans.getId().isEmpty()) {
+            idMappingTable.put(PREFIX_STX_OFFLINE + ((OfflineMessage) data).corrId, trans.getId());
+          } else if (id != null && id.startsWith(PREFIX_STX_OFFLINE)) {
             idMappingTable.put(id, trans.getId());
           }
-        } else if (((OfflineMessage) data).destination.equals("general")) {
+        } else if (destinationParts[2].startsWith("general.")) {
           // Send message
           doSendMessageNow(((OfflineMessage) data).header, ((OfflineMessage) data).body, ((OfflineMessage) data).corrId,
                                       ((OfflineMessage) data).destination, new MessageTypeRef(Result.class), null,
                                       5, 0);
+        } else {
+          throw new ClientError("Offline message has an invalid destination: " + file.getName());
         }
 
         // Clean up
         file.delete();
         count++;
       } catch (RuntimeException e) {
-        LOG.info("Could not send offline message: " + file.getName());
-        this.sendLogMessage("Could not send offline message: "+ file.getName() + " " + e.toString(), "WARNING");
-        break;
-//
-//        // Move the message to "failed" folder?
-//        if (!(e instanceof AuthError) && !(e instanceof NetworkError) && failedMessagesPath != null && failedMessagesPath.length() > 0) {
-//          LOG.warn("Sending offline message failed: " + file.getName());
-//
-//          // Check folder
-//          File failedMessagesDir = new File(failedMessagesPath);
-//          if (!failedMessagesDir.exists()) {
-//            failedMessagesDir.mkdirs();
-//          }
-//
-//          // Rename
-//          file.renameTo(new File(failedMessagesDir.getPath() + "/" + file.getName()));
-//        }
+        StringBuilder error = new StringBuilder("Could not send offline message: " + file.getName() + " " + e.toString());
+        if (e.getCause() != null) {
+          error.append(" ").append(e.getCause().toString());
+        }
+
+        LOG.info(error.toString());
+        this.sendLogMessage(error.toString(), "WARNING");
+
+        if (e instanceof NetworkError || e instanceof NoReceiptException || e instanceof MessageTimeoutException || e instanceof AuthError) {
+          break;
+        }
+
+        // Move the message to "failed" folder?
+        LOG.warn("Sending offline message failed: " + file.getName());
+
+        // Check folder
+        File failedMessagesDir = new File(configuration.offlineCacheDir + "failed/");
+        if (!failedMessagesDir.exists()) {
+          failedMessagesDir.mkdirs();
+        }
+
+        // Rename
+        file.renameTo(new File(failedMessagesDir.getPath() + "/" + file.getName()));
       }
     }
 
@@ -757,7 +769,7 @@ public class StompChannel extends Channel {
   }
 
   private String createCorrelationId(String str) {
-    return System.currentTimeMillis() + "-" + id + "-" + str.hashCode();
+    return UUID.randomUUID().toString();
   }
 
   private String awaitAnswer(final String id, Integer timeoutSec, int defaultReceiptTimeoutSec) {

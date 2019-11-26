@@ -28,4 +28,9 @@ public class ServerErrorException extends RuntimeException {
   public ServerErrorException(Status status) {
     this.status = status;
   }
+
+  public ServerErrorException(Status status, Throwable cause) {
+    super(cause);
+    this.status = status;
+  }
 }

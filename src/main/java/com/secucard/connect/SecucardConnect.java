@@ -49,7 +49,7 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.13.0";
+  public static final String VERSION = "2.13.1";
 
   public static final String PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE = "Print default receipt.";
 

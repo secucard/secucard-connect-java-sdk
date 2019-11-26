@@ -360,7 +360,7 @@ public class JaxRsChannel extends RestChannel {
         return new ClientError("Request failed with HTTP error " + response.getStatus(), throwable);
       }
 
-      return new ServerErrorException(status);
+      return new ServerErrorException(status, throwable);
     }
 
 

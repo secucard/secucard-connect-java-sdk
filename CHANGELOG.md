@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.13.1] - 2019-11-26
+
+### Changed
+- Smart.Transactions: smaller improvements
+- Remote logging: smaller improvements
+
+
 ## [2.13.0] - 2019-11-22
 
 ### Security
@@ -435,3 +442,4 @@ Internal developer release
 [2.11.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.10.0...v2.11.0
 [2.12.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.11.0...v2.12.0
 [2.13.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.12.0...v2.13.0
+[2.13.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.0...v2.13.1

@@ -12,7 +12,15 @@
 
 package com.secucard.connect.client;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -150,7 +158,12 @@ public class OfflineCache extends DataStorage {
   }
 
   public synchronized File[] getFiles() {
-    File[] files = directory.listFiles();
+    File[] files = directory.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File pathname) {
+        return pathname.isFile();
+      }
+    });
     if (files != null) {
       Arrays.sort(files);
     }

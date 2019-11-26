@@ -21,15 +21,7 @@ public class AppsService extends ProductService<App> {
   }
 
   public boolean sendLogMessage(Map<String, String> log) {
-    if (log == null) {
-      log = new HashMap<String, String>();
-    }
-    log.put("SDK", "secucard-connect-java-sdk");
-    log.put("SDK-VERSION", SecucardConnect.VERSION);
-    log.put("JAVA-VENDOR", System.getProperty("java.vendor"));
-    log.put("JAVA-VERSION", System.getProperty("java.version"));
-
-    return super.executeToBool(App.APP_ID_SUPPORT, "callBackend", "sendLog", log, new Options(Options.CHANNEL_STOMP), null);
+    return super.context.channels.get(Options.CHANNEL_STOMP).sendLogMessage(log);
   }
 
   public boolean ping(String channel) {
@@ -37,6 +29,6 @@ public class AppsService extends ProductService<App> {
       channel = Options.CHANNEL_REST;
     }
 
-    return super.executeToBool(App.APP_ID_SUPPORT, "callBackend", "ping", null, new Options(channel), null);
+    return super.context.channels.get(channel).ping();
   }
 }

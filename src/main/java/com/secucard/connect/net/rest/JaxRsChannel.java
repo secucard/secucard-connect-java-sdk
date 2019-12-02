@@ -274,6 +274,7 @@ public class JaxRsChannel extends RestChannel {
         Response response = future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
         result = readEntity(response, entityType, ignoredStatus);
       } catch (Throwable e) {
+        LOG.info(e.toString());
         throw translate(e);
       }
     } else {
@@ -285,6 +286,7 @@ public class JaxRsChannel extends RestChannel {
               try {
                 result = readEntity(response, entityType, ignoredStatus);
               } catch (Throwable e) {
+                LOG.info(e.toString());
                 callback.failed(translate(e));
                 return;
               }

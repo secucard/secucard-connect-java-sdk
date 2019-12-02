@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.13.2] - 2019-12-02
+
+### Changed
+- Remote logging: also for exceptions in JaxRsChannel enabled
+- Timeout for session refresh is now configurable via "stomp.sessionRefreshTimoutSec" and the default is not 15 seconds.
+
+
 ## [2.13.1] - 2019-11-26
 
 ### Changed
@@ -443,3 +450,4 @@ Internal developer release
 [2.12.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.11.0...v2.12.0
 [2.13.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.12.0...v2.13.0
 [2.13.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.0...v2.13.1
+[2.13.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.1...v2.13.2

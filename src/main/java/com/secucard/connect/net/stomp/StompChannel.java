@@ -273,7 +273,7 @@ public class StompChannel extends Channel {
       if ("exec:".equals(destinationSpec.command) && "start".equals(destinationSpec.action)) {
         if (ping()) {
           offlineModeActive = false;
-          open();
+          createOfflineMessagesThread();
         }
         throw new MessageTimeoutException(SecucardConnect.PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE);
       }
@@ -505,7 +505,7 @@ public class StompChannel extends Channel {
       try {
         LOG.debug("Try session refresh.");
         Options options = Options.getDefault();
-        options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+        options.timeOutSec = configuration.sessionRefreshTimoutSec;
         request(
             Method.EXECUTE,
             new Params(
@@ -994,6 +994,7 @@ public class StompChannel extends Channel {
     private final int offlineMessagesLoopSleepSec;
     private final boolean offlineMessagesDisableThread;
     private final int defaultReceiptTimeoutSec;
+    private final int sessionRefreshTimoutSec;
 
     public Configuration(Properties properties) {
       this.host = properties.getProperty("stomp.host");
@@ -1013,6 +1014,7 @@ public class StompChannel extends Channel {
       this.defaultReceiptTimeoutSec = getIntOption(properties, "receipt.default.timeout", 1, 120, 30);
       this.basicDestination = getPathOption(properties, "stomp.destination", "/exchange/connect.api/");
       this.offlineCacheDir = getPathOption(properties, "stomp.offline.dir", ".scc-offline/");
+      this.sessionRefreshTimoutSec = getIntOption(properties, "stomp.sessionRefreshTimoutSec", 1, 60, 15);
     }
 
     private int getIntOption(Properties properties, String configName, int minValue, int maxValue, int defaultValue) {
@@ -1071,6 +1073,7 @@ public class StompChannel extends Channel {
           ", offlineMessagesLoopSleepSec=" + offlineMessagesLoopSleepSec +
           ", offlineMessagesDisableThread=" + (offlineMessagesDisableThread ? 1 : 0) +
           ", defaultReceiptTimeoutSec=" + defaultReceiptTimeoutSec +
+          ", sessionRefreshTimoutSec=" + sessionRefreshTimoutSec +
           '}';
     }
   }

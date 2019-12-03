@@ -192,7 +192,21 @@ public class StompClient {
       throw new ClientError(t);
     }
 
-    awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, timeoutSec);
+    try {
+      awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, 15);
+    } catch (NoReceiptException e) {
+      try {
+        sendFrame(SEND, headers, body);
+      } catch (Throwable t) {
+        closeConnection(true);
+        if (t instanceof IOException) {
+          throw new NetworkError(t);
+        }
+        throw new ClientError(t);
+      }
+
+      awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, (timeoutSec - 15));
+    }
   }
 
   public boolean isConnected() {

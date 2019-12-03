@@ -150,6 +150,17 @@ public abstract class Channel {
     public static Params forApp(String appId, String action, Object payload, Class returnType, Options options) {
       return new Params(null, null, appId, action, null, payload, returnType, null, options);
     }
+
+    @Override
+    public String toString() {
+      return "Channel.Params{" +
+          "object='[" + object[0] + "', '" + object[1] + "']" +
+          ", objectId='" + objectId + '\'' +
+          ", action='" + action + '\'' +
+          ", actionArg='" + actionArg + '\'' +
+          ", returnType='" + returnType.toString() + '\'' +
+          '}';
+    }
   }
 
 

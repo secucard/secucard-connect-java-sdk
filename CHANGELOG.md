@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.13.3] - 2019-12-03
+
+### Changed
+- Remote logging: smaller improvements
+- Stomp "awaitReceipt" logic changed
+
+
 ## [2.13.2] - 2019-12-02
 
 ### Changed
@@ -451,3 +458,4 @@ Internal developer release
 [2.13.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.12.0...v2.13.0
 [2.13.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.0...v2.13.1
 [2.13.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.1...v2.13.2
+[2.13.3]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.2...v2.13.3

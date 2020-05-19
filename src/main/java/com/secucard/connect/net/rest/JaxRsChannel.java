@@ -191,7 +191,7 @@ public class JaxRsChannel extends RestChannel {
   public synchronized void open() {
     // rest client should be initialized just one time, client is expensive
     if (restClient == null) {
-      LOG.debug("REST channel initialized.");
+      LOG.debug("REST channel not initialized.");
       initClient();
     }
   }

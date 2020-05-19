@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.13.4] - 2020-05-19
+
+### Added
+- smart.model.PrepaidSale: added `errorDetails`
+- SecucardConnect.open(): added some more debug logs
+
+
 ## [2.13.3] - 2019-12-03
 
 ### Changed
@@ -459,3 +466,4 @@ Internal developer release
 [2.13.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.0...v2.13.1
 [2.13.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.1...v2.13.2
 [2.13.3]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.2...v2.13.3
+[2.13.4]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.3...v2.13.4

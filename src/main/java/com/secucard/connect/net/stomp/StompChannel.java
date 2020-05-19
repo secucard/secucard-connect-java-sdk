@@ -105,6 +105,7 @@ public class StompChannel extends Channel {
    */
   @Override
   public void open() {
+    LOG.debug("Secucard connect client StompChannel.open() called.");
     Throwable throwable = startSessionRefresh();
     if (throwable != null) {
       throw ExceptionMapper.map(throwable, null);
@@ -116,6 +117,7 @@ public class StompChannel extends Channel {
     if (throwable != null) {
       throw ExceptionMapper.map(throwable, null);
     }
+    LOG.debug("Secucard connect client StompChannel opened.");
   }
 
   @Override
@@ -592,6 +594,7 @@ public class StompChannel extends Channel {
     if (!this.configuration.enableOfflineMode) {
       return null;
     }
+    LOG.debug("Secucard connect client StompChannel.createOfflineMessagesThread() called.");
 
     // first stop if running and wait until finished.
     stopOfflineMessagesThread = true;

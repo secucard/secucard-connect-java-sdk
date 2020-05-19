@@ -49,7 +49,7 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.13.3";
+  public static final String VERSION = "2.13.4";
 
   public static final String PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE = "Print default receipt.";
 
@@ -143,6 +143,8 @@ public class SecucardConnect {
     if (isConnected) {
       return;
     }
+
+    LOG.debug("Secucard connect client open() called.");
 
     if (disconnectTimerTask != null) {
       disconnectTimerTask.cancel();

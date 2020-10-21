@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -344,6 +343,7 @@ public class StompClient {
   }
 
   private void sendConnect(String login, String password) throws IOException {
+    LOG.debug("sendConnect called");
     Map<String, String> header = new HashMap<>();
 
     String log = login == null ? config.login : login;
@@ -366,6 +366,7 @@ public class StompClient {
 
 
   private void sendFrame(String command, Map<String, String> header, String body) throws IOException {
+    LOG.debug("Frame try to sent: command=", command);
     StringBuilder frame = new StringBuilder();
     frame.append(command).append("\n");
 
@@ -425,7 +426,28 @@ public class StompClient {
       if (socket.isClosed()) {
         LOG.info("Trying to write on closed socket: ", new String(bytes));
         return;
+      } else if (socket.isInputShutdown()) {
+        LOG.debug("isInputShutdown == false; message: ", new String(bytes));
+      } else if (socket.isOutputShutdown()) {
+        LOG.debug("isOutputShutdown == false; message: ", new String(bytes));
       }
+
+      try {
+        int oldTimeout = socket.getSoTimeout();
+        try {
+          socket.setSoTimeout(1);
+          if (!reader.ready()) {
+            LOG.debug("stream reader is not ready; message: ", new String(bytes));
+          }
+        } finally {
+          socket.setSoTimeout(oldTimeout);
+        }
+      } catch (SocketTimeoutException ignored) {
+        // Read timed out; socket is good.
+      } catch (IOException e) {
+        LOG.debug("Couldn't read; socket is closed; error: ", e, new String(bytes));
+      }
+
       OutputStream out = socket.getOutputStream();
       if (bytes == null) {
         out.write(0);

@@ -82,7 +82,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <fasterxml.jackson.version>2.10.0.pr3</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.11.0</fasterxml.jackson.version>
     </properties>
 
     <dependencies>
@@ -156,7 +156,7 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-jackson</artifactId>
-            <version>2.29</version>
+            <version>3.0.0</version>
         </dependency>
 
         <dependency>

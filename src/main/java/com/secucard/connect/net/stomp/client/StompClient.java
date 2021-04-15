@@ -426,6 +426,16 @@ public class StompClient {
         LOG.debug("socket.isOutputShutdown() was false");
       }
 
+      // ensure that there is some timeout defined
+      try {
+        if (socket.getSoTimeout() == 0) {
+          LOG.info("There was no socket timeout defined, set it to 10s.");
+          socket.setSoTimeout(10000);
+        }
+      } catch (SocketException e) {
+        LOG.debug("Could not ensure a correct socket timeout, error: " + e.getMessage());
+      }
+
       OutputStream out = socket.getOutputStream();
       if (bytes == null) {
         LOG.debug("Writing NULL-Byte to socket...");
@@ -476,16 +486,6 @@ public class StompClient {
     LOG.info("Receiver started.");
 
     while (!stopReceiver) {
-
-      // ensure that there is some timeout defined
-      try {
-        if (socket.getSoTimeout() == 0) {
-          LOG.info("There was no Socket Timeout defined, set it to 30s.");
-          socket.setSoTimeout(30000);
-        }
-      } catch (SocketException ignored) {
-      }
-
       try {
         // socket is supposed to have timeout set!
         // that means reading will block until line is read or timeout,

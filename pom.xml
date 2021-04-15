@@ -80,6 +80,7 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>3.8.1</version>
             <type>maven-plugin</type>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -87,6 +88,7 @@
             <artifactId>maven-source-plugin</artifactId>
             <version>3.2.1</version>
             <type>maven-plugin</type>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -94,6 +96,7 @@
             <artifactId>maven-assembly-plugin</artifactId>
             <version>3.3.0</version>
             <type>maven-plugin</type>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

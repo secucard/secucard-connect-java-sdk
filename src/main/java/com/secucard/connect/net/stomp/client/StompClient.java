@@ -19,8 +19,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -383,13 +383,7 @@ public class StompClient {
 
     frame.append("\000");
 
-    byte[] bytes = null;
-
-    try {
-      bytes = frame.toString().getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      // will not happen
-    }
+    byte[] bytes = frame.toString().getBytes(StandardCharsets.UTF_8);
 
     write(bytes);
 
@@ -427,29 +421,14 @@ public class StompClient {
         LOG.info("Trying to write on closed socket: ", new String(bytes));
         return;
       } else if (socket.isInputShutdown()) {
-        LOG.debug("isInputShutdown == false; message: ", new String(bytes));
+        LOG.debug("socket.isInputShutdown() was false");
       } else if (socket.isOutputShutdown()) {
-        LOG.debug("isOutputShutdown == false; message: ", new String(bytes));
-      }
-
-      try {
-        int oldTimeout = socket.getSoTimeout();
-        try {
-          socket.setSoTimeout(1);
-          if (!reader.ready()) {
-            LOG.debug("stream reader is not ready; message: ", new String(bytes));
-          }
-        } finally {
-          socket.setSoTimeout(oldTimeout);
-        }
-      } catch (SocketTimeoutException ignored) {
-        // Read timed out; socket is good.
-      } catch (IOException e) {
-        LOG.debug("Couldn't read; socket is closed; error: ", e, new String(bytes));
+        LOG.debug("socket.isOutputShutdown() was false");
       }
 
       OutputStream out = socket.getOutputStream();
       if (bytes == null) {
+        LOG.debug("Writing NULL-Byte to socket...");
         out.write(0);
       } else {
         out.write(bytes);
@@ -473,11 +452,12 @@ public class StompClient {
     socket.setKeepAlive(true);
 
     if (!socket.isConnected()) {
+      LOG.info("Socket is not connected yet, starting handshake...");
       socket.connect(new InetSocketAddress(config.host, config.port), config.connectionTimeoutSec);
       socket.startHandshake();
     }
 
-    reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
+    reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 
     stopReceiver = false;
     shutdown = false;
@@ -489,12 +469,23 @@ public class StompClient {
     });
     receiver.start();
     initial = true;
+    LOG.debug("initConnection finished");
   }
 
   private void receive() {
     LOG.info("Receiver started.");
 
     while (!stopReceiver) {
+
+      // ensure that there is some timeout defined
+      try {
+        if (socket.getSoTimeout() == 0) {
+          LOG.info("There was no Socket Timeout defined, set it to 30s.");
+          socket.setSoTimeout(30000);
+        }
+      } catch (SocketException ignored) {
+      }
+
       try {
         // socket is supposed to have timeout set!
         // that means reading will block until line is read or timeout,
@@ -515,6 +506,7 @@ public class StompClient {
         }
       } catch (SocketTimeoutException e) {
         // just regular configured socket timeout, ignore and go on
+        LOG.debug("SocketTimeoutException was thrown: " + e.getMessage());
       } catch (Exception e) {
         LOG.trace("Exception happened: ", e);
         // in most cases this would be an IOException, coming from dropped connection
@@ -540,6 +532,7 @@ public class StompClient {
   private void closeConnection(boolean stopReceiver) {
     connected = false;
     if (stopReceiver && receiver != null && receiver.isAlive()) {
+      LOG.debug("closeConnection: stopping receiver...");
       this.stopReceiver = true;
       try {
         receiver.join();
@@ -549,6 +542,7 @@ public class StompClient {
     }
 
     if (socket != null) {
+      LOG.debug("closeConnection: closing socket...");
       try {
         socket.close();
       } catch (IOException e) {

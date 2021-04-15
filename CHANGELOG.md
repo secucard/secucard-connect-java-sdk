@@ -19,10 +19,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
-## [2.13.5] - 2020-10-21
+## [2.14.0] - 2021-04-15
+
+### Security
+- dependency update
 
 ### Added
-- StompClient: added some more debug logs
+- Ensuring that the stomp socket has some timeout set.
+- StompClient.connect(): added some more debug logs
+
+### Fixed
+- License information in the pom file
 
 ### Removed
 - smart.model.Basket: removed unused parameter `texts`
@@ -476,4 +483,4 @@ Internal developer release
 [2.13.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.1...v2.13.2
 [2.13.3]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.2...v2.13.3
 [2.13.4]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.3...v2.13.4
-[2.13.5]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.4...v2.13.5
+[2.14.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.4...v2.14.0

@@ -61,7 +61,7 @@ To use this projects artifacts with Maven add the following dependency and repos
     <dependency>
       <groupId>com.secucard.connect</groupId>
       <artifactId>secucard-connect-java-sdk</artifactId>
-      <version>2.13.5</version>
+      <version>2.14.0</version>
     </dependency>
     .
     .

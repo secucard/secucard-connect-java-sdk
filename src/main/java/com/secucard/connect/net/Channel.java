@@ -201,7 +201,7 @@ public abstract class Channel {
     log.put("JAVA-VERSION", System.getProperty("java.version"));
 
     Options options = Options.getDefault();
-    options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+    options.timeOutSec = 9; // should timeout sooner as by config to detect connection failure
 
     try {
       Result result = this.request(
@@ -227,7 +227,7 @@ public abstract class Channel {
 
   public boolean ping() {
     Options options = Options.getDefault();
-    options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+    options.timeOutSec = 9; // should timeout sooner as by config to detect connection failure
 
     try {
       Result result = this.request(

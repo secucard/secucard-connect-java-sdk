@@ -471,13 +471,10 @@ public class StompChannel extends Channel {
 
     final CountDownLatch latch = new CountDownLatch(1);
     stopRefresh = false;
-    refreshThread = new Thread() {
-      @Override
-      public void run() {
-        reference.set(runSessionRefresh(latch));
-        latch.countDown();
-      }
-    };
+    refreshThread = new Thread(() -> {
+      reference.set(runSessionRefresh(latch));
+      latch.countDown();
+    });
 
     refreshThread.setDaemon(true);
     refreshThread.start();
@@ -611,13 +608,10 @@ public class StompChannel extends Channel {
 
     final CountDownLatch latch = new CountDownLatch(1);
     stopOfflineMessagesThread = false;
-    offlineMessagesThread = new Thread() {
-      @Override
-      public void run() {
-        reference.set(runOfflineMessagesThread(latch));
-        latch.countDown();
-      }
-    };
+    offlineMessagesThread = new Thread(() -> {
+      reference.set(runOfflineMessagesThread(latch));
+      latch.countDown();
+    });
 
     offlineMessagesThread.setDaemon(true);
     offlineMessagesThread.start();
@@ -640,7 +634,7 @@ public class StompChannel extends Channel {
       try {
         LOG.debug("Checking for open offline messages.");
         Options options = Options.getDefault();
-        options.timeOutSec = 5; // should timeout sooner as by config to detect connection failure
+        options.timeOutSec = 9; // should timeout sooner as by config to detect connection failure
         this.sendOfflineMessages();
       } catch (Throwable t) {
         LOG.info("Sending offline message failed.");

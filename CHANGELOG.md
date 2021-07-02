@@ -19,6 +19,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.15.0] - 2021-07-02
+
+### Changed
+- The timeout was changed for the methods `ping`, `sendLogMessage` and the `OfflineMessagesThread` from 5 to 9,
+  to be more tolerant against dns updates.
+- To solve some possible deadlocks, the StompClient is now using `ReentrantReadWriteLock` instead of `synchronized` to make the socket Thread safe.
+
+
 ## [2.14.0] - 2021-04-15
 
 ### Security
@@ -53,7 +61,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Remote logging: also for exceptions in JaxRsChannel enabled
-- Timeout for session refresh is now configurable via "stomp.sessionRefreshTimoutSec" and the default is not 15 seconds.
+- Timeout for session refresh is now configurable via "stomp.sessionRefreshTimoutSec" and the default is now 15 seconds.
 
 
 ## [2.13.1] - 2019-11-26
@@ -484,3 +492,4 @@ Internal developer release
 [2.13.3]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.2...v2.13.3
 [2.13.4]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.3...v2.13.4
 [2.14.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.4...v2.14.0
+[2.15.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.14.0...v2.15.0

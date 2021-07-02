@@ -23,9 +23,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - The timeout was changed for the methods `ping`, `sendLogMessage` and the `OfflineMessagesThread` from 5 to 9,
-  to be more tolerant against dns updates.
+  to be more tolerant against DNS updates.
 - To solve some possible deadlocks, the StompClient is now using `ReentrantReadWriteLock` instead of `synchronized` to make the socket Thread safe.
-
+- If there was some `IOException` in the StompClient during sending a message (f.e. because of a closed socket),
+  the `initConnection` method is now called automatically and a second attempt will be done.
 
 ## [2.14.0] - 2021-04-15
 

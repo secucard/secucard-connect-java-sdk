@@ -19,7 +19,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.16.0] - 2021-12-13
+[2.16.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.15.0...v2.16.0
+
+### Security
+- Update dependencies to the latest versions.
+
+### Added
+- Using the Apache Maven registry from GitHub.
+
+
 ## [2.15.0] - 2021-07-02
+[2.15.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.14.0...v2.15.0
 
 ### Changed
 - The timeout was changed for the methods `ping`, `sendLogMessage` and the `OfflineMessagesThread` from 5 to 9,
@@ -29,6 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   the `initConnection` method is now called automatically and a second attempt will be done.
 
 ## [2.14.0] - 2021-04-15
+[2.14.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.4...v2.14.0
 
 ### Security
 - dependency update
@@ -45,6 +57,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.13.4] - 2020-05-19
+[2.13.4]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.3...v2.13.4
 
 ### Added
 - smart.model.PrepaidSale: added `errorDetails`
@@ -52,6 +65,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.13.3] - 2019-12-03
+[2.13.3]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.2...v2.13.3
 
 ### Changed
 - Remote logging: smaller improvements
@@ -59,6 +73,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.13.2] - 2019-12-02
+[2.13.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.1...v2.13.2
 
 ### Changed
 - Remote logging: also for exceptions in JaxRsChannel enabled
@@ -66,6 +81,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.13.1] - 2019-11-26
+[2.13.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.0...v2.13.1
 
 ### Changed
 - Smart.Transactions: smaller improvements
@@ -73,6 +89,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.13.0] - 2019-11-22
+[2.13.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.12.0...v2.13.0
 
 ### Security
 - dependency updates
@@ -83,6 +100,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.12.0] - 2019-09-26
+[2.12.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.11.0...v2.12.0
 
 ### Security
 - dependency updates
@@ -93,6 +111,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.11.0] - 2019-08-07
+[2.11.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.10.0...v2.11.0
 
 ### Security
 - dependency updates
@@ -102,12 +121,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.10.0] - 2019-05-06
+[2.10.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.9.0...v2.10.0
 
 ### Added
 - Smart.Model.Transaction: prepaidSales
 
 
 ## [2.9.0] - 2019-02-21
+[2.9.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.8.0...v2.9.0
 
 ### Security
 - dependency update "com.google.guava"
@@ -127,18 +148,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.8.0] - 2019-01-30
+[2.8.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.1...v2.8.0
 
 ### Changed
 - The Callback type of smart.TransactionService.cancel(id, callback) is now smart.model.Transaction
 
 
 ## [2.7.1] - 2019-01-22
+[2.7.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.0...v2.7.1
 
 ### Security
 - fasterxml.jackson dependency update
 
 
 ## [2.7.0] - 2018-10-18
+[2.7.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.6.0...v2.7.0
 
 ### Security
 - dependency update
@@ -161,6 +185,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.6.0] - 2018-01-30
+[2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0
 
 ### Security
 - fasterxml.jackson dependency update
@@ -172,6 +197,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [2.5.0] - 2017-12-18
+[2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0
 
 ### Deprecated
 - Service.IdentRequest: PROVIDER_POSTIDENT use PROVIDER_POST_IDENT instead
@@ -203,12 +229,14 @@ Dependency for Java 9
 
 
 ## [2.4.0] - 2017-07-13
+[2.4.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.3.0...v2.4.0
 
 ### Fixed
 - Smart.Transaction: Cancel payment transaction call
 
 
 ## [2.3.0] - 2017-05-08
+[2.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.2.0...v2.3.0
 
 ### Deprecated
 - Config param "stomp.ssl"
@@ -227,6 +255,7 @@ New Methods:
 
 
 ## [2.2.0] - 2017-04-20
+[2.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.1...v2.2.0
 
 ### Added
 Added missing payment stuff (it's now identical with the .net-sdk and the php-sdk).
@@ -247,6 +276,7 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 
 
 ## [2.1.1] - 2016-06-10
+[2.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.1.1
 
 ### Addded
 - Missing transaction status constants
@@ -257,6 +287,7 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 
 
 ## [2.1.0] - 2016-05-06
+[2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
 
 ### Added
 - DataStorage
@@ -271,6 +302,8 @@ Added missing payment stuff (it's now identical with the .net-sdk and the php-sd
 
 
 ## [2.0.0] - 2016-03-21
+[2.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v1.0.0...v2.0.0
+
 Reworked SDK
 (the list of changes are not complete)
 
@@ -284,6 +317,8 @@ Reworked SDK
 
 
 ## [1.0.0] - 2015-05-15
+[1.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.18...v1.0.0
+
 Reworked SDK
 
 ### Changed
@@ -295,12 +330,14 @@ Reworked SDK
 
 
 ## [0.3.2] - 2016-06-10
+[0.3.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.1...v0.3.2
 
 ### Changed
 Update README
 
 
 ## [0.3.1] - 2016-06-09
+[0.3.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.0...v0.3.1
 
 ### Changed
 - Improve IdentsDemo
@@ -311,6 +348,7 @@ Update README
 
 
 ## [0.3.0] - 2016-03-17
+[0.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.2.0...v0.3.0
 
 ### Changed
 - Rename Person classes in com.secucard.connect.model.services
@@ -322,6 +360,7 @@ appropriate than just a single person field.
 
 
 ## [0.2.0] - 2016-03-10
+[0.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.23...v0.2.0
 
 ### Added
 - Additional properties for smart transactions.
@@ -333,12 +372,14 @@ appropriate than just a single person field.
 
 
 ## [0.1.23] - 2015-07-14
+[0.1.23]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.22...v0.1.23
 
 ### Changed
 - merchant relation removed from payment.contract
 
 
 ## [0.1.22] - 2015-07-08
+[0.1.22]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.21...v0.1.22
 
 ### Added
 - Add build.gradle and AndroidManifest to use library as Android library.
@@ -348,30 +389,35 @@ appropriate than just a single person field.
 
 
 ## [0.1.21] - 2015-06-17
+[0.1.21]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.20...v0.1.21
 
 ### Added
 - payment.contracts clone added
 
 
 ## [0.1.20] - 2015-05-13
+[0.1.20]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.19...v0.1.20
 
 ### Added
 - new bankname field for payment container
 
 
 ## [0.1.19] - 2015-04-23
+[0.1.19]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.18...v0.1.19
 
 ### Added
 - state constants for ident request/response auth. cache clear method for client provided.
 
 
 ## [0.1.18] - 2015-04-15
+[0.1.18]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.17...v0.1.18
 
 ### Changed
 - async/sync event handling in payment services
 
 
 ## [0.1.17] - 2015-04-13
+[0.1.17]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.16...v0.1.17
 
 ### Changed
 - payment identification document model
@@ -380,12 +426,14 @@ appropriate than just a single person field.
 
 
 ## [0.1.16] - 2015-04-02
+[0.1.16]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.15...v0.1.16
 
 ### Changed
 - async/sync event processing, payment model corrections
 
 
 ## [0.1.15] - 2015-04-01
+[0.1.15]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.11...v0.1.15
 
 ### Added
 - token expire time
@@ -404,6 +452,7 @@ appropriate than just a single person field.
 
 
 ## [0.1.11] - 2015-03-11
+[0.1.11]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.10...v0.1.11
 
 ### Changed
 - timeout for volley future
@@ -412,6 +461,7 @@ appropriate than just a single person field.
 
 
 ## [0.1.10] - 2015-03-11
+[0.1.10]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.1...v0.1.10
 
 ### Changed
 - auth canceling added, old smart service removed, additional auth device info passing prepared
@@ -447,50 +497,11 @@ appropriate than just a single person field.
 
 
 ## [0.1.1] - 2015-03-02
+[0.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.0...v0.1.1
 First public release
 
 
 ## [0.1.0] - not released
+[0.1.0]:https://github.com/secucard/secucard-connect-java-sdk/tree/v0.1.0
 Internal developer release
 
-
-
-[0.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.0...v0.1.1
-[0.1.10]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.1...v0.1.10
-[0.1.11]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.10...v0.1.11
-[0.1.15]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.11...v0.1.15
-[0.1.16]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.15...v0.1.16
-[0.1.17]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.16...v0.1.17
-[0.1.18]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.17...v0.1.18
-[0.1.19]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.18...v0.1.19
-[0.1.20]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.19...v0.1.20
-[0.1.21]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.20...v0.1.21
-[0.1.22]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.21...v0.1.22
-[0.1.23]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.22...v0.1.23
-[0.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.23...v0.2.0
-[0.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.2.0...v0.3.0
-[0.3.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.0...v0.3.1
-[0.3.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.3.1...v0.3.2
-[1.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v0.1.18...v1.0.0
-[2.0.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v1.0.0...v2.0.0
-[2.1.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.0.0...v2.1.0
-[2.1.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.0...v2.1.1
-[2.2.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.1.1...v2.2.0
-[2.3.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.2.0...v2.3.0
-[2.4.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.3.0...v2.4.0
-[2.5.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.4.0...v2.5.0
-[2.6.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.5.0...v2.6.0
-[2.7.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.6.0...v2.7.0
-[2.7.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.0...v2.7.1
-[2.8.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.7.1...v2.8.0
-[2.9.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.8.0...v2.9.0
-[2.10.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.9.0...v2.10.0
-[2.11.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.10.0...v2.11.0
-[2.12.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.11.0...v2.12.0
-[2.13.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.12.0...v2.13.0
-[2.13.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.0...v2.13.1
-[2.13.2]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.1...v2.13.2
-[2.13.3]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.2...v2.13.3
-[2.13.4]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.3...v2.13.4
-[2.14.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.13.4...v2.14.0
-[2.15.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.14.0...v2.15.0

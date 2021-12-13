@@ -61,11 +61,12 @@ To use this projects artifacts with Maven add the following dependency and repos
     <dependency>
       <groupId>com.secucard.connect</groupId>
       <artifactId>secucard-connect-java-sdk</artifactId>
-      <version>2.15.0</version>
+      <version>2.16.0</version>
     </dependency>
     .
     .
     .
+    <-- optional since version 2.16.0 -->
     <repository>
         <id>github-secucard</id>
         <url>https://raw.githubusercontent.com/secucard/secucard-connect-java-sdk/mvn-repo</url>

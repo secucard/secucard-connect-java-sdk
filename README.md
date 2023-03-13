@@ -1,5 +1,7 @@
 # secucard connect Java SDK
 
+**DEPRECATED**: If you start with a new project please use this SDK: https://github.com/secuconnect/secuconnect-java-sdk
+
 ## Basic usage:
 
 ```java
@@ -59,11 +61,12 @@ To use this projects artifacts with Maven add the following dependency and repos
     <dependency>
       <groupId>com.secucard.connect</groupId>
       <artifactId>secucard-connect-java-sdk</artifactId>
-      <version>2.1.1</version>
+      <version>2.16.0</version>
     </dependency>
     .
     .
     .
+    <!-- optional since version 2.16.0 -->
     <repository>
         <id>github-secucard</id>
         <url>https://raw.githubusercontent.com/secucard/secucard-connect-java-sdk/mvn-repo</url>

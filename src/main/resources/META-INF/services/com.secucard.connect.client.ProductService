@@ -1,5 +1,6 @@
 com.secucard.connect.product.general.AccountsService
 com.secucard.connect.product.general.AccountDevicesService
+com.secucard.connect.product.general.AppsService
 com.secucard.connect.product.general.MerchantsService
 com.secucard.connect.product.general.NewsService
 com.secucard.connect.product.general.NotificationsService

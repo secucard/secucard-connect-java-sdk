@@ -19,10 +19,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,6 +29,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -37,7 +39,7 @@ import javax.net.ssl.SSLSocketFactory;
  * Minimal stomp messaging support.
  */
 public class StompClient {
-  private Socket socket;
+  private SSLSocket socket;
   private Thread receiver;
   private final Listener eventListener;
   private BufferedReader reader;
@@ -49,8 +51,12 @@ public class StompClient {
   private final String id;
   private final Config config;
   private final Set<String> receipts = new HashSet<>();
+  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
   public static final int DEFAULT_SOCKET_TIMEOUT_S = 30;
+  public static final int DEFAULT_CONNECT_TIMEOUT_S = 30;
+  public static final int DEFAULT_MESSAGE_TIMEOUT_S = 30;
+  public static final int DEFAULT_HEARTBEAT_S = 30;
   public static final String CONNECT = "CONNECT";
   public static final String DISCONNECT = "DISCONNECT";
   public static final String DISCONNECTED = "DISCONNECTED"; // not a real stomp frame just for internal usage
@@ -134,7 +140,7 @@ public class StompClient {
     final String id = config.requestDISCONNECTReceipt ? createReceiptId("disconnect") : null;
     try {
       sendDisconnect(id);
-    } catch (IOException e) {
+    } catch (IOException | InterruptedException e) {
       // ignore an just return
       return;
     }
@@ -172,6 +178,7 @@ public class StompClient {
     }
     String id = createReceiptId(body);
     headers.put("destination", destination);
+    headers.put("content-length", Integer.toString(body.getBytes(StandardCharsets.UTF_8).length));
     if (config.requestSENDReceipt) {
       headers.put("receipt", id);
     }
@@ -186,7 +193,21 @@ public class StompClient {
       throw new ClientError(t);
     }
 
-    awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, timeoutSec);
+    try {
+      awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, 15);
+    } catch (NoReceiptException e) {
+      try {
+        sendFrame(SEND, headers, body);
+      } catch (Throwable t) {
+        closeConnection(true);
+        if (t instanceof IOException) {
+          throw new NetworkError(t);
+        }
+        throw new ClientError(t);
+      }
+
+      awaitReceipt(id, config.disconnectOnSENDReceiptTimeout, (timeoutSec - 15));
+    }
   }
 
   public boolean isConnected() {
@@ -225,7 +246,7 @@ public class StompClient {
 
 
   private void awaitConnect() {
-    final long maxWaitTime = System.currentTimeMillis() + config.connectionTimeoutSec * 1000;
+    final long maxWaitTime = System.currentTimeMillis() + config.connectionTimeoutSec * 1000L;
     while (System.currentTimeMillis() <= maxWaitTime) {
       if (connected || error != null) {
         break;
@@ -274,7 +295,6 @@ public class StompClient {
         }
       }
 
-//      LOG.trace("waiting for receipt: ", receiptId);
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
@@ -320,11 +340,12 @@ public class StompClient {
   }
 
 
-  private void sendDisconnect(String receiptId) throws IOException {
+  private void sendDisconnect(String receiptId) throws IOException, InterruptedException {
     sendFrame(DISCONNECT, receiptId == null ? null : createHeader("receipt", receiptId), null);
   }
 
-  private void sendConnect(String login, String password) throws IOException {
+  private void sendConnect(String login, String password) throws IOException, InterruptedException {
+    LOG.debug("sendConnect called");
     Map<String, String> header = new HashMap<>();
 
     String log = login == null ? config.login : login;
@@ -339,14 +360,15 @@ public class StompClient {
       header.put("host", config.virtualHost);
     }
     if (config.heartbeatMs > 0) {
-      header.put("heart-beat", config.heartbeatMs + ",0");
+      header.put("heart-beat", config.heartbeatMs + "," + config.heartbeatMs);
     }
-    header.put("accept-version", "1.2");
+    header.put("accept-version", "1.2"); // STOMP protocol version
     sendFrame(CONNECT, header, null);
   }
 
 
-  private void sendFrame(String command, Map<String, String> header, String body) throws IOException {
+  private void sendFrame(String command, Map<String, String> header, String body) throws IOException, InterruptedException {
+    LOG.debug("Frame try to sent: command=", command);
     StringBuilder frame = new StringBuilder();
     frame.append(command).append("\n");
 
@@ -363,15 +385,15 @@ public class StompClient {
 
     frame.append("\000");
 
-    byte[] bytes = null;
+    byte[] bytes = frame.toString().getBytes(StandardCharsets.UTF_8);
 
     try {
-      bytes = frame.toString().getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      // will not happen
+      write(bytes);
+    } catch (IOException e) {
+      // try again with a new connection
+      initConnection();
+      write(bytes);
     }
-
-    write(bytes);
 
     LOG.debug("Frame sent: command=", command, ", header=", header, ", body=", body);
   }
@@ -401,19 +423,25 @@ public class StompClient {
     }
   }
 
-  private void write(byte[] bytes) throws IOException {
-    synchronized (socket) {
-      if (socket.isClosed()) {
-        LOG.info("Trying to write on closed socket: ", new String(bytes));
-        return;
-      }
+  private void write(byte[] bytes) throws IOException, InterruptedException {
+    LOG.trace("write() -> lock.writeLock().tryLock()");
+    if (!lock.writeLock().tryLock(30, TimeUnit.SECONDS))
+    {
+      throw new InterruptedException("Could not write to socket within 30 seconds (it's locked by another thread).");
+    }
+
+    try {
       OutputStream out = socket.getOutputStream();
       if (bytes == null) {
+        LOG.debug("Writing NULL-Byte to socket...");
         out.write(0);
       } else {
         out.write(bytes);
       }
       out.flush();
+    } finally {
+      LOG.trace("write() -> lock.writeLock().unlock()");
+      lock.writeLock().unlock();
     }
   }
 
@@ -425,33 +453,34 @@ public class StompClient {
 
     closeConnection(true);
 
-    SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(config.host, config.port);
-    String[] supportedProtocols = {"TLSv1.2"};
-    sslSocket.setEnabledProtocols(supportedProtocols);
-    socket = sslSocket;
+    LOG.trace("initConnection() -> lock.writeLock().lock()");
+    lock.writeLock().lock();
+    try {
+      socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(config.host, config.port);
+      String[] supportedProtocols = {"TLSv1.2"};
+      socket.setEnabledProtocols(supportedProtocols);
+      socket.setSoTimeout(config.socketTimeoutSec * 1000);
+      socket.setKeepAlive(true);
 
-    int timeout = config.socketTimeoutSec;
-    if (timeout <= 0) {
-      timeout = DEFAULT_SOCKET_TIMEOUT_S; // we need a timeout, otherwise the receiver thread can block forever
-    }
-    socket.setSoTimeout(timeout * 1000);
-
-    if (!socket.isConnected()) {
-      socket.connect(new InetSocketAddress(config.host, config.port));
-    }
-
-    reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
-
-    stopReceiver = false;
-    shutdown = false;
-    receiver = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        receive();
+      if (!socket.isConnected()) {
+        LOG.info("Socket is not connected yet, starting handshake...");
+        socket.connect(new InetSocketAddress(config.host, config.port), config.connectionTimeoutSec);
+        socket.startHandshake();
       }
-    });
-    receiver.start();
-    initial = true;
+
+      reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+
+      stopReceiver = false;
+      shutdown = false;
+      receiver = new Thread(this::receive);
+      receiver.start();
+      initial = true;
+      LOG.debug("initConnection finished");
+    }
+    finally {
+      LOG.trace("initConnection() -> lock.writeLock().unlock()");
+      lock.writeLock().unlock();
+    }
   }
 
   private void receive() {
@@ -478,6 +507,7 @@ public class StompClient {
         }
       } catch (SocketTimeoutException e) {
         // just regular configured socket timeout, ignore and go on
+        LOG.trace("receive() got no message yet: " + e.getMessage());
       } catch (Exception e) {
         LOG.trace("Exception happened: ", e);
         // in most cases this would be an IOException, coming from dropped connection
@@ -503,6 +533,7 @@ public class StompClient {
   private void closeConnection(boolean stopReceiver) {
     connected = false;
     if (stopReceiver && receiver != null && receiver.isAlive()) {
+      LOG.debug("closeConnection: stopping receiver...");
       this.stopReceiver = true;
       try {
         receiver.join();
@@ -512,6 +543,7 @@ public class StompClient {
     }
 
     if (socket != null) {
+      LOG.debug("closeConnection: closing socket...");
       try {
         socket.close();
       } catch (IOException e) {
@@ -521,7 +553,7 @@ public class StompClient {
   }
 
   private String createReceiptId(String str) {
-    return "rcpt-" + id + "-" + str.hashCode() + "-" + System.currentTimeMillis();
+    return "rcpt-" + UUID.randomUUID().toString();
   }
 
   /**
@@ -575,19 +607,28 @@ public class StompClient {
      */
     public Config(String host, int port, String virtualHost, String login, String password, int heartbeatMs,
                   boolean useSsl, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
-      this.host = host;
-      this.port = port;
-      this.virtualHost = virtualHost;
-      this.login = login;
-      this.password = password;
-      this.heartbeatMs = heartbeatMs;
-      this.socketTimeoutSec = socketTimeoutSec;
-      this.receiptTimeoutSec = receiptTimeoutSec;
-      this.connectionTimeoutSec = connectionTimeoutSec;
+      this(host, port, virtualHost, login, password, heartbeatMs, socketTimeoutSec, receiptTimeoutSec, connectionTimeoutSec);
     }
 
     public Config(String host, int port, String virtualHost, String login, String password,
         int heartbeatMs, int socketTimeoutSec, int receiptTimeoutSec, int connectionTimeoutSec) {
+
+      if (heartbeatMs < 1000 || heartbeatMs > 120000) {
+        heartbeatMs = DEFAULT_HEARTBEAT_S * 1000;
+      }
+
+      if (socketTimeoutSec <= 1) {
+        socketTimeoutSec = DEFAULT_SOCKET_TIMEOUT_S;
+      }
+
+      if (receiptTimeoutSec <= 1) {
+        receiptTimeoutSec = DEFAULT_MESSAGE_TIMEOUT_S;
+      }
+
+      if (connectionTimeoutSec <= 1) {
+        connectionTimeoutSec = DEFAULT_CONNECT_TIMEOUT_S;
+      }
+
       this.host = host;
       this.port = port;
       this.virtualHost = virtualHost;
@@ -608,8 +649,6 @@ public class StompClient {
           ", host='" + host + '\'' +
           ", port=" + port +
           ", virtualHost='" + virtualHost + '\'' +
-          ", login='" + login + '\'' +
-          ", password='" + password + '\'' +
           ", socketTimeoutSec=" + socketTimeoutSec +
           ", receiptTimeoutSec=" + receiptTimeoutSec +
           ", connectionTimeoutSec=" + connectionTimeoutSec +

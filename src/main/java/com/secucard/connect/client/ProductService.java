@@ -375,6 +375,7 @@ public abstract class ProductService<T extends SecuObject> {
         handleException(e);
       }
     } else {
+      Options finalOptions = options;
       channel.request(method, p, new Callback<R>() {
         public void completed(R result) {
           if (pre != null) {
@@ -384,6 +385,7 @@ public abstract class ProductService<T extends SecuObject> {
         }
 
         public void failed(Throwable cause) {
+          logException(method, p, cause, finalOptions.channel);
           Exception ex = ExceptionMapper.map(cause, null);
           if (context.exceptionHandler == null) {
             callback.failed(ex);
@@ -417,6 +419,7 @@ public abstract class ProductService<T extends SecuObject> {
         handleException(e);
       }
     } else {
+      Options finalOptions = options;
       channel.requestList(method, p, new Callback<ObjectList<R>>() {
         public void completed(ObjectList<R> result) {
           if (processor != null) {
@@ -426,6 +429,7 @@ public abstract class ProductService<T extends SecuObject> {
         }
 
         public void failed(Throwable cause) {
+          logException(method, p, cause, finalOptions.channel);
           Exception ex = ExceptionMapper.map(cause, null);
           if (context.exceptionHandler == null) {
             callback.failed(ex);
@@ -437,6 +441,15 @@ public abstract class ProductService<T extends SecuObject> {
 
     }
     return null;
+  }
+
+  private void logException(Channel.Method method, Channel.Params p, Throwable cause, String channel) {
+    Options options2 = getDefaultOptions();
+    options2.channel = Options.CHANNEL_STOMP;
+    if (channel == null) {
+      channel = context.defaultChannel;
+    }
+    channel(options2).sendLogMessage(method + ":" + p.toString() + " via "  + channel + " with error: " + cause.toString(), "WARNING");
   }
 
   /**

@@ -8,17 +8,7 @@ import com.secucard.connect.auth.model.AnonymousCredentials;
 import com.secucard.connect.auth.model.ClientCredentials;
 import com.secucard.connect.auth.model.OAuthCredentials;
 import com.secucard.connect.auth.model.Token;
-import com.secucard.connect.client.AuthError;
-import com.secucard.connect.client.Callback;
-import com.secucard.connect.client.ClientContext;
-import com.secucard.connect.client.ClientError;
-import com.secucard.connect.client.DataStorage;
-import com.secucard.connect.client.DiskCache;
-import com.secucard.connect.client.ExceptionHandler;
-import com.secucard.connect.client.NetworkError;
-import com.secucard.connect.client.ProductService;
-import com.secucard.connect.client.ResourceDownloader;
-import com.secucard.connect.client.ServiceFactory;
+import com.secucard.connect.client.*;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.event.Events;
@@ -37,6 +27,9 @@ import com.secucard.connect.product.loyalty.Loyalty;
 import com.secucard.connect.product.payment.Payment;
 import com.secucard.connect.product.services.Services;
 import com.secucard.connect.product.smart.Smart;
+import com.secucard.connect.product.smart.model.ReceiptLine;
+import com.secucard.connect.product.smart.model.ReceiptLine.Value;
+import com.secucard.connect.product.smart.model.Transaction;
 import com.secucard.connect.util.ExceptionMapper;
 import com.secucard.connect.util.Execution;
 import com.secucard.connect.util.Log;
@@ -44,7 +37,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
@@ -54,7 +49,9 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.10.0";
+  public static final String VERSION = "2.16.0";
+
+  public static final String PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE = "Print default receipt.";
 
   protected volatile boolean isConnected;
   private Configuration configuration;
@@ -146,6 +143,8 @@ public class SecucardConnect {
     if (isConnected) {
       return;
     }
+
+    LOG.debug("Secucard connect client open() called.");
 
     if (disconnectTimerTask != null) {
       disconnectTimerTask.cancel();
@@ -387,6 +386,7 @@ public class SecucardConnect {
     general = new General(
         service(General.Accountdevices),
         service(General.Accounts),
+        service(General.Apps),
         service(General.Merchants),
         service(General.News),
         service(General.Publicmerchants),
@@ -402,7 +402,8 @@ public class SecucardConnect {
         service(Payment.Contracts),
         service(Payment.Secupayinvoices),
         service(Payment.Secupaycreditcards),
-        service(Payment.Secupaypayout)
+        service(Payment.Secupaypayout),
+        service(Payment.Transactions)
     );
 
     loyalty = new Loyalty(
@@ -476,6 +477,7 @@ public class SecucardConnect {
     public final int logLimit;
     public final int logCount;
     public final boolean logIgnoreGlobal;
+    private final boolean enableOfflineMode;
 
     /**
      * Set the property with given name. Can be used to change properties in programmatic way without config file.
@@ -593,6 +595,7 @@ public class SecucardConnect {
       appId = properties.getProperty("appId");
       cacheDir = properties.getProperty("cacheDir");
       host = properties.getProperty("host");
+      enableOfflineMode = Boolean.parseBoolean(properties.getProperty("stomp.offline.enabled"));
       Log.init(this);
     }
 
@@ -612,6 +615,7 @@ public class SecucardConnect {
           ", clientAuthDetails=" + clientAuthDetails +
           ", autCancelCallback=" + autCancelCallback +
           ", host=" + host +
+          ", enableOfflineMode=" + (enableOfflineMode ? 1 : 0) +
           '}';
     }
   }
@@ -622,5 +626,65 @@ public class SecucardConnect {
    */
   public String getToken() {
     return context.tokenManager.getToken(false);
+  }
+
+  /**
+   * Returns ar default receipt for secucard transactions
+   * @param cardNumber the secucard number
+   * @return
+   */
+  public List<ReceiptLine> getDefaultReceipt(String cardNumber) {
+
+    List<ReceiptLine> receipt = new ArrayList<ReceiptLine>();
+    ReceiptLine line;
+    Value value;
+
+    line = new ReceiptLine();
+    line.setType("space");
+    receipt.add(line);
+
+    // Kundenkarte
+    line = new ReceiptLine();
+    line.setType("space");
+    receipt.add(line);
+
+    line = new ReceiptLine();
+    line.setType("separator");
+    value = new Value();
+    value.setCaption("Kundenkarte");
+    line.setValue(value);
+    receipt.add(line);
+
+    line = new ReceiptLine();
+    line.setType("name-value");
+    value = new Value();
+    value.setName("Kartennummer:");
+    value.setValue(cardNumber);
+    line.setValue(value);
+    receipt.add(line);
+
+    // Default text
+    line = new ReceiptLine();
+    line.setType("space");
+    receipt.add(line);
+
+    String text = this.configuration.property("receipt.default.text");
+    if (text == null || text.length() <= 0) {
+      text = "Für Ihren Einkauf wurde Ihrer Kundenkarte ein Bonus gutgeschrieben. Erfahren Sie Ihr aktuelles Kartenguthaben unter:";
+    }
+
+    String link = this.configuration.property("receipt.default.link");
+    if (link == null || link.length() <= 0) {
+      link = "https://secucard.com/guthabenabfrage-0";
+    }
+
+    line = new ReceiptLine();
+    line.setType("textline");
+    value = new Value();
+    value.setText(text + " " + link);
+    line.setValue(value);
+    receipt.add(line);
+
+    return receipt;
   }
 }

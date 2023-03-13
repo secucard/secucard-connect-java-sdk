@@ -1,5 +1,6 @@
 com.secucard.connect.product.general.AccountsService
 com.secucard.connect.product.general.AccountDevicesService
+com.secucard.connect.product.general.AppsService
 com.secucard.connect.product.general.MerchantsService
 com.secucard.connect.product.general.NewsService
 com.secucard.connect.product.general.NotificationsService
@@ -24,6 +25,7 @@ com.secucard.connect.product.payment.SecupayPrepaysService
 com.secucard.connect.product.payment.SecupayPayoutService
 com.secucard.connect.product.payment.SecupayInvoicesService
 com.secucard.connect.product.payment.SecupayCreditcardsService
+com.secucard.connect.product.payment.TransactionsService
 
 com.secucard.connect.product.services.IdentRequestsService
 com.secucard.connect.product.services.IdentResultsService

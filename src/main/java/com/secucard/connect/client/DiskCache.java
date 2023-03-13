@@ -133,7 +133,15 @@ public class DiskCache extends DataStorage {
       }
       InputStream stream = getStream(id);
       if (stream != null) {
-        return new ObjectInputStream(stream).readObject();
+        try {
+          return new ObjectInputStream(stream).readObject();
+        } finally {
+          try {
+            stream.close();
+          } catch (IOException e) {
+            // ignore
+          }
+        }
       }
     } catch (IOException | ClassNotFoundException e) {
       throw new DataStorageException("Error reading object \"" + id + "\" from disk.", e);

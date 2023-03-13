@@ -191,7 +191,7 @@ public class JaxRsChannel extends RestChannel {
   public synchronized void open() {
     // rest client should be initialized just one time, client is expensive
     if (restClient == null) {
-      LOG.debug("REST channel initialized.");
+      LOG.debug("REST channel not initialized.");
       initClient();
     }
   }
@@ -274,6 +274,7 @@ public class JaxRsChannel extends RestChannel {
         Response response = future.get(configuration.responseTimeoutSec, TimeUnit.SECONDS);
         result = readEntity(response, entityType, ignoredStatus);
       } catch (Throwable e) {
+        LOG.info(e.toString());
         throw translate(e);
       }
     } else {
@@ -285,6 +286,7 @@ public class JaxRsChannel extends RestChannel {
               try {
                 result = readEntity(response, entityType, ignoredStatus);
               } catch (Throwable e) {
+                LOG.info(e.toString());
                 callback.failed(translate(e));
                 return;
               }
@@ -360,7 +362,7 @@ public class JaxRsChannel extends RestChannel {
         return new ClientError("Request failed with HTTP error " + response.getStatus(), throwable);
       }
 
-      return new ServerErrorException(status);
+      return new ServerErrorException(status, throwable);
     }
 
 

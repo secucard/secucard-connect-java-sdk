@@ -17,6 +17,7 @@ import com.secucard.connect.auth.exception.AuthDeniedException;
 import com.secucard.connect.auth.exception.AuthFailedException;
 import com.secucard.connect.auth.exception.AuthTimeoutException;
 import com.secucard.connect.auth.model.*;
+import com.secucard.connect.client.NetworkError;
 import com.secucard.connect.event.EventDispatcher;
 import com.secucard.connect.event.EventListener;
 import com.secucard.connect.util.Log;
@@ -117,6 +118,9 @@ public class TokenManager {
           refresh(token, clientAuthDetails.getClientCredentials());
           setCurrentToken(token);
         } catch (Throwable t) {
+          if (t instanceof NetworkError) {
+            throw t;
+          }
           LOG.debug("Token refresh failed, try obtain new.", t);
           authenticate = true;
         }
@@ -141,7 +145,7 @@ public class TokenManager {
       // new authentication is needed but only if allowed
       if ((credentials instanceof AppUserCredentials || credentials instanceof DeviceCredentials)
           && !allowInteractive) {
-        throw new AuthFailedException("Invalid acess token, please authenticate again.");
+        throw new AuthFailedException("Invalid access token, please authenticate again.");
       }
 
       token = authenticate(credentials);

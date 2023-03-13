@@ -20,8 +20,11 @@ import com.secucard.connect.event.Events;
 import com.secucard.connect.product.common.model.ObjectList;
 import com.secucard.connect.product.general.model.Event;
 import com.secucard.connect.product.smart.model.ComponentInstruction;
+import com.secucard.connect.product.smart.model.ComponentPosition;
+import com.secucard.connect.product.smart.model.ComponentSize;
 import com.secucard.connect.product.smart.model.Ident;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
 
@@ -53,6 +56,41 @@ public class IdentService extends ProductService<Ident> {
    */
   public Ident readIdent(String id, Callback<Ident> callback) {
     return super.execute(id, "read", null, null, Ident.class, null, callback);
+  }
+
+  /**
+   * Trigger "display secucard details" event for displaying the placeholder
+   * @param cardNumber number of the secucard (starting with 9276...)
+   * @param host Host (f.e. "connect.secucard.com")
+   * @param size ComponentSize
+   * @param position ComponentPosition
+   */
+  public void displayIdentPlaceholder(String cardNumber, String host, ComponentSize size, ComponentPosition position) {
+    if (cardNumber.length() == 0 || host.length() == 0) {
+      return;
+    }
+
+    Event<ComponentInstruction> event = new Event<ComponentInstruction>();
+    event.setType("changed");
+    event.setTarget("smart.idents");
+    event.setCreated(new Date());
+
+    ComponentInstruction data = new ComponentInstruction();
+    data.url = "https://" + host + "/Ident/identLink/" + cardNumber + "/placeholder";
+    data.target = ComponentInstruction.COMPONENT_TARGET_IDENT_LINK;
+    data.action = ComponentInstruction.COMPONENT_ACTION_OPEN;
+    if (size == null) {
+      size = new ComponentSize();
+    }
+    data.size = size;
+    if (position == null) {
+      position = new ComponentPosition();
+    }
+    data.position = position;
+    event.setData(data);
+    super.context.eventDispatcher.dispatch(event, true);
+
+    context.eventDispatcher.dispatch(new Events.ConnectionStateChanged(true), false);
   }
 
   /**

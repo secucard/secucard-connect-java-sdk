@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.17.0] - 2023-03-13
+[2.17.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.16.0...v2.17.0
+
+### Security
+- Update dependencies to the latest versions.
+
+
 ## [2.16.0] - 2021-12-13
 [2.16.0]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.15.0...v2.16.0
 

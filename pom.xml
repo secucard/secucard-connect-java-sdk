@@ -89,7 +89,7 @@
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.11.0</version>
+            <version>3.13.0</version>
             <type>maven-plugin</type>
             <scope>provided</scope>
         </dependency>

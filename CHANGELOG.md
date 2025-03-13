@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 
 
+## [2.15.1] - 2025-03-17
+[2.15.1]:https://github.com/secucard/secucard-connect-java-sdk/compare/v2.15.0...v2.15.1
+
+### Added
+- New method `SecucardConnect.refreshTokenNow` to force refreshing access token
+
+### Changed
+- Fixed typo in config param `stomp.sessionRefreshTimoutSec` (the old name will still work, but please use `stomp.sessionRefreshTimeoutSec` instead)
+- Remote logging: smaller improvements
+- API calls: smaller improvements for STOMP connections
+
+
 ## [2.15.0] - 2021-07-02
 
 ### Changed

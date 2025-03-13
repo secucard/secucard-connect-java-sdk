@@ -157,6 +157,28 @@ public class TokenManager {
     return token.getAccessToken();
   }
 
+  /**
+   * Try to get a new token, by using the refresh token.
+   * Should be called if this error occurs:
+   * "APIError{code='0', message='Invalid token', userMessage='ungültiger Token', supportId='...', serverError='ProductUnauthorizedException'}"
+   * @return The new access token string or null if action was not possible/successful.
+   */
+  public String refreshTokenNow() {
+    Token token = getCurrent();
+    if (token != null && token.getRefreshToken() != null) {
+      try {
+        refresh(token, clientAuthDetails.getClientCredentials());
+        setCurrentToken(token);
+        LOG.debug("Token refresh was successful.");
+        return token.getAccessToken();
+      } catch (Throwable t) {
+        LOG.debug("Token refresh failed.", t);
+      }
+    }
+
+    return null;
+  }
+
   private synchronized void setCurrentToken(Token token) {
     if (clientAuthDetails != null) {
       clientAuthDetails.onTokenChanged(token);

@@ -241,8 +241,8 @@ public abstract class RestChannel extends Channel {
 
     public Configuration(Properties properties) {
       this.baseUrl = properties.getProperty("rest.url");
-      this.responseTimeoutSec = Integer.parseInt(properties.getProperty("rest.responseTimeoutSec"));
-      this.connectTimeoutSec = Integer.parseInt(properties.getProperty("rest.connectTimeoutSec"));
+      this.responseTimeoutSec = getIntOption(properties, "rest.responseTimeoutSec", 10, 300, 30);
+      this.connectTimeoutSec = getIntOption(properties, "rest.connectTimeoutSec", 1, 120, 30);
     }
 
 

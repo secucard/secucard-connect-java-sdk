@@ -49,7 +49,7 @@ import java.util.TimerTask;
  * The entry point to the secucard API, provides resources for product operations.
  */
 public class SecucardConnect {
-  public static final String VERSION = "2.15.0";
+  public static final String VERSION = "2.15.1";
 
   public static final String PRINT_OFFLINE_RECEIPT_ERROR_MESSAGE = "Print default receipt.";
 
@@ -626,6 +626,16 @@ public class SecucardConnect {
    */
   public String getToken() {
     return context.tokenManager.getToken(false);
+  }
+
+  /**
+   * Try to get a new token, by using the refresh token.
+   * Should be called if this error occurs:
+   * "APIError{code='0', message='Invalid token', userMessage='ungültiger Token', supportId='...', serverError='ProductUnauthorizedException'}"
+   * @return String
+   */
+  public String refreshTokenNow() {
+    return context.tokenManager.refreshTokenNow();
   }
 
   /**

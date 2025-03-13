@@ -445,7 +445,7 @@ public abstract class ProductService<T extends SecuObject> {
 
   private void logException(Channel.Method method, Channel.Params p, Throwable cause, String channel) {
     Options options2 = getDefaultOptions();
-    options2.channel = Options.CHANNEL_STOMP;
+    options2.channel = Options.CHANNEL_REST;
     if (channel == null) {
       channel = context.defaultChannel;
     }

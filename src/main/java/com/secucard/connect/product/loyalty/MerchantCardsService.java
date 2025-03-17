@@ -31,11 +31,6 @@ public class MerchantCardsService extends ProductService<MerchantCard> {
     return META_DATA;
   }
 
-  @Override
-  public Options getDefaultOptions() {
-    return new Options(Options.CHANNEL_STOMP);
-  }
-
   /**
    * Check the given CSC
    *

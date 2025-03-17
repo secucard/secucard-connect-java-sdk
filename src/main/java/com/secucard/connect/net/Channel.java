@@ -25,6 +25,7 @@ import com.secucard.connect.util.Converter;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * The base class used to realize any type of server communication.
@@ -201,7 +202,7 @@ public abstract class Channel {
     log.put("JAVA-VERSION", System.getProperty("java.version"));
 
     Options options = Options.getDefault();
-    options.timeOutSec = 9; // should timeout sooner as by config to detect connection failure
+    options.timeOutSec = 9; // should time out sooner as by config to detect connection failure
 
     try {
       Result result = this.request(
@@ -227,7 +228,7 @@ public abstract class Channel {
 
   public boolean ping() {
     Options options = Options.getDefault();
-    options.timeOutSec = 9; // should timeout sooner as by config to detect connection failure
+    options.timeOutSec = 9; // should time out sooner as by config to detect connection failure
 
     try {
       Result result = this.request(
@@ -249,5 +250,30 @@ public abstract class Channel {
     } catch (Throwable e) {
       return false;
     }
+  }
+
+  protected static int getIntOption(Properties properties, String configName, int minValue, int maxValue, int defaultValue) {
+    int value = defaultValue;
+    String property = properties.getProperty(configName);
+
+    if (property != null && !property.isEmpty()) {
+      value = Integer.parseInt(property);
+    }
+
+    if (value < minValue || value > maxValue) {
+      value = defaultValue;
+    }
+
+    return value;
+  }
+
+  protected static boolean getBoolOption(Properties properties, String configName, boolean defaultValue) {
+    String property = properties.getProperty(configName);
+
+    if (property != null && !property.isEmpty()) {
+      return Boolean.parseBoolean(property);
+    }
+
+    return defaultValue;
   }
 }

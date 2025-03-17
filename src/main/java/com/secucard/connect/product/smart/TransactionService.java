@@ -52,15 +52,19 @@ public class TransactionService extends ProductService<Transaction> {
    * @return The result data.
    */
   public Transaction start(String transactionId, String type, Callback<Transaction> callback) {
-    if (transactionId == null || transactionId.equals("")) {
+    if (transactionId == null || transactionId.isEmpty()) {
       throw new IllegalArgumentException("Parameter [transactionId] can not be empty!");
     }
 
-    if (type == null || type.equals("")) {
+    if (type == null || type.isEmpty()) {
       throw new IllegalArgumentException("Parameter [type] can not be empty!");
     }
 
-    return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+    if (type.equals(TYPE_ZVT)) {
+      return super.execute(transactionId, "start", type, null, Transaction.class, new Options(Options.CHANNEL_STOMP), callback);
+    }
+
+    return super.execute(transactionId, "start", type, null, Transaction.class, null, callback);
   }
 
   /**

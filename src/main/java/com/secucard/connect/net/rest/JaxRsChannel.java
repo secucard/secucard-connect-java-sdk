@@ -96,14 +96,9 @@ public class JaxRsChannel extends RestChannel {
       }
     }
 
-
-    /* not necessary anymore, not sure...
-    Integer[] ignoredStatus = null;
-
-    if (params.queryParams != null) {
-      // let 404 be valid for object queries
-      ignoredStatus = new Integer[]{Response.Status.NOT_FOUND.getStatusCode()};
-    }*/
+  if (params.options.timeOutSec != null && params.options.timeOutSec > 0) {
+    invocation.property(ClientProperties.READ_TIMEOUT, params.options.timeOutSec * 1000);
+  }
 
     return getResponse(invocation, ref, callback);
   }

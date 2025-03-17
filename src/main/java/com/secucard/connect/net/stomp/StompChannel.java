@@ -14,7 +14,6 @@ package com.secucard.connect.net.stomp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.secucard.connect.SecucardConnect;
-import com.secucard.connect.auth.exception.AuthFailedException;
 import com.secucard.connect.client.AuthError;
 import com.secucard.connect.client.Callback;
 import com.secucard.connect.client.ClientContext;
@@ -44,7 +43,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -111,7 +109,11 @@ public class StompChannel extends Channel {
       throw ExceptionMapper.map(throwable, null);
     }
 
-    sendLogMessage(this.configuration.toString(), "INFO");
+    if (configuration.enableOfflineMode) {
+      sendLogMessage(this.configuration.toString(), "INFO");
+    } else {
+      super.context.channels.get(Options.CHANNEL_REST).sendLogMessage(this.configuration.toString(), "INFO");
+    }
 
     throwable = createOfflineMessagesThread();
     if (throwable != null) {
@@ -504,7 +506,7 @@ public class StompChannel extends Channel {
       try {
         LOG.debug("Try session refresh.");
         Options options = Options.getDefault();
-        options.timeOutSec = configuration.sessionRefreshTimoutSec;
+        options.timeOutSec = configuration.sessionRefreshTimeoutSec;
         request(
             Method.EXECUTE,
             new Params(
@@ -773,11 +775,13 @@ public class StompChannel extends Channel {
     if (timeoutSec == null) {
       timeoutSec = configuration.messageTimeoutSec;
     }
+
     long maxWaitTime = System.currentTimeMillis() + timeoutSec * 1000;
     long maxReceiptWaitTime = 0;
     if (defaultReceiptTimeoutSec > 0) {
       maxReceiptWaitTime = System.currentTimeMillis() + defaultReceiptTimeoutSec * 1000;
     }
+
     String msg = null;
     while (System.currentTimeMillis() <= maxWaitTime) {
       synchronized (messages) {
@@ -991,7 +995,7 @@ public class StompChannel extends Channel {
     private final int offlineMessagesLoopSleepSec;
     private final boolean offlineMessagesDisableThread;
     private final int defaultReceiptTimeoutSec;
-    private final int sessionRefreshTimoutSec;
+    private final int sessionRefreshTimeoutSec;
 
     public Configuration(Properties properties) {
       this.host = properties.getProperty("stomp.host");
@@ -1002,41 +1006,22 @@ public class StompChannel extends Channel {
       this.userId = properties.getProperty("stomp.user");
       this.replyQueue = properties.getProperty("stomp.replyQueue");
       this.connectionTimeoutSec = getIntOption(properties, "stomp.connectTimeoutSec", 1, 120, 30);
-      this.messageTimeoutSec = getIntOption(properties, "stomp.messageTimeoutSec", 1, 300, 120);
+      this.messageTimeoutSec = getIntOption(properties, "stomp.messageTimeoutSec", 10, 300, 120);
       this.maxMessageAgeSec = getIntOption(properties, "stomp.maxMessageAgeSec", 1, 600, 360);
-      this.socketTimeoutSec = getIntOption(properties, "stomp.socketTimeoutSec", 1, 120, 30);
+      this.socketTimeoutSec = getIntOption(properties, "stomp.socketTimeoutSec", 10, 120, 30);
       this.enableOfflineMode = getBoolOption(properties, "stomp.offline.enabled", false);
       this.offlineMessagesDisableThread = getBoolOption(properties, "stomp.offline.disableThread", false);
       this.offlineMessagesLoopSleepSec = getIntOption(properties, "stomp.offline.sleepSec", 60, 900, 60);
       this.defaultReceiptTimeoutSec = getIntOption(properties, "receipt.default.timeout", 1, 120, 30);
       this.basicDestination = getPathOption(properties, "stomp.destination", "/exchange/connect.api/");
       this.offlineCacheDir = getPathOption(properties, "stomp.offline.dir", ".scc-offline/");
-      this.sessionRefreshTimoutSec = getIntOption(properties, "stomp.sessionRefreshTimoutSec", 1, 60, 15);
-    }
-
-    private int getIntOption(Properties properties, String configName, int minValue, int maxValue, int defaultValue) {
-      int value = defaultValue;
-      String property = properties.getProperty(configName);
-
-      if (property != null && !property.isEmpty()) {
-        value = Integer.parseInt(property);
-      }
-
-      if (value < minValue || value > maxValue) {
-        value = defaultValue;
-      }
-
-      return value;
-    }
-
-    private boolean getBoolOption(Properties properties, String configName, boolean defaultValue) {
-      String property = properties.getProperty(configName);
-
-      if (property != null && !property.isEmpty()) {
-        return Boolean.parseBoolean(property);
-      }
-
-      return defaultValue;
+      this.sessionRefreshTimeoutSec = getIntOption(
+        properties,
+        "stomp.sessionRefreshTimeoutSec",
+        1,
+        60,
+        getIntOption(properties, "stomp.sessionRefreshTimoutSec", 1, 60, 15) // fallback for typo in a past release
+      );
     }
 
     private String getPathOption(Properties properties, String configName, String defaultValue) {
@@ -1070,7 +1055,7 @@ public class StompChannel extends Channel {
           ", offlineMessagesLoopSleepSec=" + offlineMessagesLoopSleepSec +
           ", offlineMessagesDisableThread=" + (offlineMessagesDisableThread ? 1 : 0) +
           ", defaultReceiptTimeoutSec=" + defaultReceiptTimeoutSec +
-          ", sessionRefreshTimoutSec=" + sessionRefreshTimoutSec +
+          ", sessionRefreshTimeoutSec=" + sessionRefreshTimeoutSec +
           '}';
     }
   }

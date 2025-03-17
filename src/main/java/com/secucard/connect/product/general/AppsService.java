@@ -21,7 +21,7 @@ public class AppsService extends ProductService<App> {
   }
 
   public boolean sendLogMessage(Map<String, String> log) {
-    return super.context.channels.get(Options.CHANNEL_STOMP).sendLogMessage(log);
+    return super.context.channels.get(Options.CHANNEL_REST).sendLogMessage(log);
   }
 
   public boolean ping(String channel) {

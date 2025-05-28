@@ -161,7 +161,7 @@
             <!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>1.10.1</version>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.core/jersey-client -->
